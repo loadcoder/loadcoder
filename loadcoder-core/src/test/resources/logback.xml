@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="resultappender" class="ch.qos.logback.core.FileAppender">
+		<file>result.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="resultappender-shared"
+		class="com.loadcoder.logback.SharedDirFileAppenderLogback">
+		<file>result.log</file>
+		<append>true</append>
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="INFOFILE" class="ch.qos.logback.core.FileAppender">
+		<file>info.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="CONSOLEAPPENDER" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>
+				%m%n
+			</Pattern>
+		</layout>
+	</appender>
+
+	<logger name="com.loadcoder.log.Logs" level="debug" additivity="false">
+		<appender-ref ref="resultappender-shared" />
+	</logger>
+
+	<logger name="resultlogger-shared" level="debug" additivity="false">
+		<appender-ref ref="resultappender-shared" />
+	</logger>
+	
+	<logger name="infoFileLogger" level="debug" additivity="false">
+		<appender-ref ref="INFOFILE" />
+	</logger>
+
+
+	<root level="debug">
+		<appender-ref ref="INFOFILE" />
+		<appender-ref ref="CONSOLEAPPENDER" />
+	</root>
+
+</configuration>

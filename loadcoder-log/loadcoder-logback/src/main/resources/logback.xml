@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="resultappender"
+		class="com.loadcoder.logback.SharedDirFileAppenderLogback">
+		<file>result-logback.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="infoappender"
+		class="com.loadcoder.logback.SharedDirFileAppenderLogback">
+		<file>info-logback.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="com.loadcoder.log.Logs" level="debug" additivity="false">
+		<appender-ref ref="resultappender" />
+	</logger>
+
+	<root level="debug">
+		<appender-ref ref="CONSOLEAPPENDER" />
+		<appender-ref ref="infoappender" />
+	</root>
+
+</configuration>

@@ -1,0 +1,48 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * 
+ * This file is part of Loadcoder.
+ * 
+ * Loadcoder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Loadcoder is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
+package com.loadcoder.load.measure;
+
+import java.util.HashSet;
+
+import org.testng.annotations.Test;
+
+import com.loadcoder.load.testng.TestNGBase;
+
+public class TransactionExecutionResultTest extends TestNGBase{
+
+	/**
+	 * TODO: not sure what was the purpose of this test..
+	 */
+	@Test
+	public void testHashEfficiency(){
+		
+		long ts1 = System.currentTimeMillis();
+		HashSet<TransactionExecutionResult> l= new HashSet<TransactionExecutionResult>();
+
+		TransactionExecutionResult fifth =null;
+		for(int i=0; i<10;i++){
+			TransactionExecutionResult transactionExecutionResult = new TransactionExecutionResult("foo", ts1 +i*1000 , 50, true, "");
+			if(i==5)
+				fifth = transactionExecutionResult;
+			l.add(transactionExecutionResult);
+		}
+		
+		l.contains(fifth);
+	}
+}

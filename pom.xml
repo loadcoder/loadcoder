@@ -1,15 +1,166 @@
-	<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-		<modelVersion>4.0.0</modelVersion>
-		<groupId>com.loadcoder</groupId>
-		<artifactId>loadcoder-base</artifactId>
-		<name>LoadCoder</name>
-		<version>1.0.0-SNAPSHOT</version>
-		<packaging>pom</packaging>
-		<url>http://loadcoder.com</url>
-		
-		<scm>
-			<url>https://github.com/loadcoder/loadcoder.git</url>
-		</scm>
-	
-	</project>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.loadcoder</groupId>
+	<artifactId>loadcoder-base</artifactId>
+	<name>LoadCoder Parent</name>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<url>http://loadcoder.com</url>
+
+	<modules>
+		<module>loadcoder-utilities</module>
+		<module>loadcoder-testutilities</module>
+		<module>loadcoder-core</module>
+		<module>loadcoder-test</module>
+		<module>loadcoder-chart</module>
+		<module>loadcoder-log</module>
+
+	</modules>
+
+	<properties>
+		<testng>full</testng>
+		<sonar.jacoco.reportPath>${basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
+		<logback.version>1.0.1</logback.version>
+		<slf4j.version>1.6.4</slf4j.version>
+		<testng.version>6.1.1</testng.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-testutilities</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-logback</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-chart</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-utilities</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-logutils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>${testng.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.sonarsource.java/sonar-jacoco-listeners -->
+		<dependency>
+			<groupId>org.sonarsource.java</groupId>
+			<artifactId>sonar-jacoco-listeners</artifactId>
+			<version>3.8</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<configuration>
+					<destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+					<dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+
+					<excludes>
+						<exclude>**/*Test.java</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.4.0.905</version>
+			</plugin>
+
+		</plugins>
+
+	</build>
+
+	<scm>
+		<connection>scm:git:git://github.com/loadcoder/loadcoder.git</connection>
+		<url>https://github.com/loadcoder/loadcoder</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>Stefan Vahlgren</name>
+			<email>stefan.vahlgren@loadcoder.com</email>
+			<organization>Loadcoder</organization>
+			<organizationUrl>http://loadcoder.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+</project>
