@@ -31,10 +31,10 @@ public class ContinueDesisions {
 		return s2;
 	}
 
-    public static final ContinueDecision duration(long executionTime) {
+    public static final ContinueDecision duration(long executionTimeMillis) {
         ContinueDecision s2 = (startTime, b) -> {
                 long now = System.currentTimeMillis();
-                long endTime = (startTime + executionTime);
+                long endTime = (startTime + executionTimeMillis);
                 long diff = now - endTime;
                 if (diff < 0)
                         return true;

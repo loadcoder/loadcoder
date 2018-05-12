@@ -72,7 +72,8 @@ public class TransactionExecutionResult {
 
 		@Override
 		public String toString(TransactionExecutionResult transactionExecutionResult) {
-			String asString = String.format("<t name=\"%s\" ts=\"%s\" rt=\"%s\" status=\"%s\" />",
+			String msg = transactionExecutionResult.getMessage() == null ? "" : String.format("message=\"%s\"", transactionExecutionResult.getMessage());
+			String asString = String.format("<t name=\"%s\" ts=\"%s\" rt=\"%s\" status=\"%s\" "+msg+" />",
 					transactionExecutionResult.getName(), transactionExecutionResult.getTs(),
 					transactionExecutionResult.getRt(), transactionExecutionResult.isStatus());
 

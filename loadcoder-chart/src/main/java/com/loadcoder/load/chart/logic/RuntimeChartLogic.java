@@ -323,8 +323,8 @@ public class RuntimeChartLogic extends ChartLogic {
 	 * 
 	 */
 	protected static final ConcatenationDefinition[] concatenationDefinitions= new ConcatenationDefinition[]{
-		new ConcatenationDefinition(20 * SECOND, 4), //4
-		new ConcatenationDefinition(5 * MINUTE, 4), //16
+		new ConcatenationDefinition(2 * MINUTE, 4), //4
+		new ConcatenationDefinition(10 * MINUTE, 4), //16
 		new ConcatenationDefinition(40 * MINUTE, 4), // 64
 		new ConcatenationDefinition(5 * HOUR, 4), //512
 		new ConcatenationDefinition(2 * DAY, 4), //2048

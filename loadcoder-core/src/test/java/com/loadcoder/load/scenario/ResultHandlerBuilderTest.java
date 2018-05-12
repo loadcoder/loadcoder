@@ -22,29 +22,28 @@ import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
 
 import junit.framework.Assert;
 
-public class ResultHandlerVoidBuilderTest extends TestNGBase{
+public class ResultHandlerBuilderTest extends TestNGBase{
 
 	@Test
 	public void create() {
-		
+
 		LoadScenario ls = new LoadScenario() {
 			
 			@Override
 			public void loadScenario() {
 			}
 		};
-		
+
 		new LoadBuilder(ls).build();
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", ()->{LoadUtility.sleep(100);}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a)->{ a.changeTransactionName("t2");  }).perform();
+		ResultHandlerBuilder<String> resultHandlerBuilder = new ResultHandlerBuilder<String>("t1", ()->{LoadUtility.sleep(100); return "";}, ls, rl);
+		resultHandlerBuilder.handleResult((a)->{ a.changeTransactionName("t2");  }).perform();
 
 		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
@@ -65,8 +64,8 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase{
 
 		new LoadBuilder(ls).build();
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", ()->{}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a)->{ a.changeTransactionName("t2");   throw new RuntimeException("unexpected exception");}).perform();
+		ResultHandlerBuilder<String> resultHandlerBuilder = new ResultHandlerBuilder<String>("t1", ()->{return "";}, ls, rl);
+		resultHandlerBuilder.handleResult((a)->{ a.changeTransactionName("t2");   throw new RuntimeException("unexpected exception");}).perform();
 
 		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);

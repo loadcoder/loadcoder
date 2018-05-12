@@ -41,7 +41,7 @@ public class ThreadRunner implements Runnable{
 			try {
 				ls.loadScenario();
 			} catch (RuntimeException rte) {
-				log.debug("LoadScenario threw exception {}. Test thread will continue!", rte);
+				log.info("LoadScenario threw exception {}. Test thread will continue!", rte);
 				continue;
 			}
 		}

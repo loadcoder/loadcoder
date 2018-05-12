@@ -82,7 +82,8 @@ public class Summary {
 
 	public static ResultSummarizer duration(){
 		return (a)->{
-			return String.format("Duation: %s", a.getDuration());
+
+			return String.format("Duration: %s milliseconds", a.getDuration());
 		};
 	}
 	
@@ -316,7 +317,7 @@ public class Summary {
 		return max;
 	}
 
-	interface ValueCalculator{
+	public interface ValueCalculator{
 		String calculateValue(List<TransactionExecutionResult> resultList);
 	}
 }

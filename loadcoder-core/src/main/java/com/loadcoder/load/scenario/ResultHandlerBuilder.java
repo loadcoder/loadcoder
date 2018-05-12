@@ -81,15 +81,23 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 			resultModel.setStatus(false);
 			
 		}finally{
-			
-			if(resultHandler != null){
-				resultHandler.handle(resultModel);
-			}
-			
 			resultModel.setResponseTime(rt);
-			String name = resultModel.getTransacionName();
-			boolean status = resultModel.getStatus();
-			String message = resultModel.getMessage();
+			String name;
+			boolean status;
+			String message;
+			try {
+				if(resultHandler != null){
+					resultHandler.handle(resultModel);
+				}
+				name = resultModel.getTransacionName();
+				status = resultModel.getStatus();
+				message = resultModel.getMessage();
+			}catch(Exception e) {
+				name = this.transactionName;
+				status = false;
+				message = e.getClass().getSimpleName() + " when performing handleResult";
+				resultModel.reportTransaction(true);
+			}
 			
 			if(resultModel.reportTransaction()){
 				TransactionExecutionResult result = 

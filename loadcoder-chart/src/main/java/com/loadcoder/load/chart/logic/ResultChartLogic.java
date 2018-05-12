@@ -116,8 +116,6 @@ public class ResultChartLogic extends ChartLogic {
 		
 		defaultIndex = 4;
 		sampleLengthToUse = calculateSampleLengthWith(defaultIndex);
-		log.info("sampleLengthToUse:{}", sampleLengthToUse);
-
 				
 		calculateDefaultIndex(sampleLengthToUse, minorTickLength);
 
