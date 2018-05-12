@@ -399,14 +399,14 @@ public class FullTest extends TestNGBase{
 
 	}
 
-	@Test
+	@Test(groups = "manual")
 	public void readResultForResultChartTest() {
 		Result r = new Result(new File("src/test/resources/testresults/2min.log"));
 		Chart c = new ResultChart(r);
 		c.waitUntilClosed();
 	}
 	
-	@Test
+	@Test(groups = "manual")
 	public void readResult8HBeforeGMTForResultChartTest() {
 		Result r = new Result(new File("src/test/resources/testresults/result_8H_before_GMT.log"));
 		Chart c = new ResultChart(r);

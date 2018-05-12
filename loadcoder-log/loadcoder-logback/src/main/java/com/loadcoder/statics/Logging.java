@@ -35,7 +35,7 @@ public class Logging {
 	
 	/**
 	 * This method will be called from the test to set the result dir
-	 * @param sharedDirForLogs
+	 * @param sharedDirForLogsPath
 	 */
 	public static void setResultDirectory(String sharedDirForLogsPath){
 		setResultDestination(new File(sharedDirForLogsPath));
@@ -61,8 +61,6 @@ public class Logging {
 	}
 	
 	/**
-	 * @param rootDirPathForAllLogs
-	 * @param nameOfTheTest
 	 * @return File to directory with a nicely formatted name
 	 * Nifty method in order to get a File with a path to a new directory with nicely formatted name
 	 */
