@@ -20,13 +20,14 @@ package com.loadcoder.load.anotherthirtpartypackage;
 
 import static com.loadcoder.statics.ContinueDesisions.*;
 import static com.loadcoder.statics.Logging.*;
-import static com.loadcoder.statics.Milliseconds.*;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -34,12 +35,10 @@ import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.intensity.PerTimeUnit;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.measure.TransactionExecutionResult;
-import com.loadcoder.load.result.SummaryUtils;
-import com.loadcoder.load.scenario.FinishedScenario;
+import com.loadcoder.load.scenario.FinishedLoad;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.scenario.StartedLoad;
@@ -47,9 +46,14 @@ import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.sut.DomainDto;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.log.Logs;
+import com.loadcoder.statics.SummaryUtils;
 
+import static com.loadcoder.statics.Time.*;
 public class FullTest extends TestNGBase{
 
+	Logger log = LoggerFactory.getLogger(FullTest.class);
+	
 	@Test(groups = "manual")
 	public void create(Method method){
 
@@ -94,7 +98,7 @@ public class FullTest extends TestNGBase{
 			}
 		};
 
-		Load l = new LoadBuilder(s).intensity(1, PerTimeUnit.SECOND, ThrottleMode.PER_THREAD).build();
+		Load l = new LoadBuilder(s).throttle(1, PerSecond, ThrottleMode.PER_THREAD).build();
 		l.runLoad().andWait();
 		
 	}
@@ -153,7 +157,7 @@ public class FullTest extends TestNGBase{
 			}
 		};
 
-		Load l = new LoadBuilder(s).intensity(1, PerTimeUnit.SECOND, ThrottleMode.PER_THREAD).build();
+		Load l = new LoadBuilder(s).throttle(1, PerSecond, ThrottleMode.PER_THREAD).build();
 		l.runLoad().andWait();
 	}
 	
@@ -173,6 +177,44 @@ public class FullTest extends TestNGBase{
 		
 	}
 	
+	
+	@Test(groups = "manual")
+	public void benchmarkOnlyLog(Method method){
+		
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+		
+		Logger logsLog = LoggerFactory.getLogger(Logs.class);
+		long start = System.currentTimeMillis();
+		while(System.currentTimeMillis() < start + 20_000) {
+			logsLog.info("<t name=\"fast\" ts=\"1527536832574\" rt=\"0\" status=\"true\"/>");
+		}
+	}
+	
+	@Test(groups = "manual")
+	public void highestPossibleLoad(Method method){
+		
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+		
+		LoadScenario ls = new LoadScenario() {
+			SUT sut = new SUT();
+			@Override
+			public void loadScenario() {
+				load("fast", ()->{}).perform();
+			}
+		};
+		
+		RuntimeChart chart = new RuntimeChart(); 
+		FinishedLoad finised = new LoadBuilder(ls)
+				.continueCriteria(duration(20 * SECOND))
+				.amountOfThreads(1)
+				.resultUser(chart)
+				.build().runLoad().andWait();
+		
+		SummaryUtils.printSimpleSummary(finised.getReportedResultFromResultFile(), method.getName());
+		
+		chart.waitUntilClosed();
+	}
+	
 	@Test(groups = "manual")
 	public void testRuntimeChart2(Method method){
 		RuntimeChart chart = new RuntimeChart();
@@ -186,7 +228,7 @@ public class FullTest extends TestNGBase{
 		
 		new LoadBuilder(ls)
 				.continueCriteria(duration(300_000))
-				.intensity(23, PerTimeUnit.MINUTE, ThrottleMode.SHARED)
+				.throttle(23, PerMinute, ThrottleMode.SHARED)
 				.resultUser(chart)
 				.build().runLoad().andWait();
 		chart.waitUntilClosed();
@@ -205,7 +247,7 @@ public class FullTest extends TestNGBase{
 		};
 		
 		new LoadBuilder(ls)
-				.intensity(20, PerTimeUnit.MINUTE, ThrottleMode.SHARED)
+				.throttle(20, PerMinute, ThrottleMode.SHARED)
 				.continueCriteria(duration(300_000))
 				.resultUser(chart)
 				.build().runLoad().andWait();
@@ -253,7 +295,7 @@ public class FullTest extends TestNGBase{
 		};
 		
 		Load l = new LoadBuilder(ls)
-				.intensity(2, PerTimeUnit.SECOND, ThrottleMode.SHARED)
+				.throttle(2, PerMinute, ThrottleMode.SHARED)
 				.continueCriteria(duration(60_000))
 				.resultUser(new RuntimeChart())
 				.build();
@@ -304,65 +346,14 @@ public class FullTest extends TestNGBase{
 		
 		StartedLoad started = l.runLoad();
 	
-		FinishedScenario finished = started.andWait();
+		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile();
 		ResultChart resultChart = new ResultChart(result);
 		
+		
+		
 		SummaryUtils.printSimpleSummary(result, "simleTest");
 		runtimeChart.waitUntilClosed();
-	}
-	
-	@Test(groups = "manual")
-	public void sendInPreHistoricResultsIntoRuntimeChart_NPE(Method method){
-
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-		LoadScenario s = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				
-				SUT sut = new SUT();
-				load("t1", ()->{sut.methodThatTakesBetweenTheseResponseTimes(100, 120); return "";})
-				.handleResult((a)->{
-				})
-				.perform();
-			}
-		};
-		Load l = new LoadBuilder(s)
-				.continueCriteria(duration(500_000))
-				.resultUser(new RuntimeChart())
-				.build();
-
-		add(l.getTransactionExecutionResultBuffer().getBuffer(), 50000_000, 1);
-		
-		StartedLoad started = l.runLoad();
-		started.andWait();
-		
-	}
-	
-	@Test(groups = "manual")
-	public void sendInPreHistoricResultsIntoRuntimeChart(Method method){
-
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-		LoadScenario s = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				SUT sut = new SUT();
-				load("t1", ()->{sut.methodThatTakesBetweenTheseResponseTimes(100, 120); return "";})
-				.handleResult((a)->{
-				})
-				.perform();
-			}
-		};
-		Load l = new LoadBuilder(s)
-				.continueCriteria(duration(300_000))
-				.resultUser(new RuntimeChart())
-				.build();
-
-		add(l.getTransactionExecutionResultBuffer().getBuffer(), 20000_000, 2);		
-		
-		StartedLoad started = l.runLoad();
-		started.andWait();
-		
 	}
 	
 	@Test(groups = "manual")
@@ -412,22 +403,8 @@ public class FullTest extends TestNGBase{
 		Chart c = new ResultChart(r);
 		c.waitUntilClosed();
 	}
-	public void add(List<TransactionExecutionResult> buffer, long timeBackInHistory, int amountOfTransactions){
-		long start = System.currentTimeMillis();
-		long end = start - timeBackInHistory;
-		long iterator = start;
-		double cosCounter = 0;
-		for(; iterator > end; iterator = iterator - 500){
-			cosCounter = cosCounter + 0.03;
-			
-			for(int i=0; i<amountOfTransactions; i++){
-			TransactionExecutionResult result = 
-					new TransactionExecutionResult("prehistoric" +i, iterator, (long)(100+ i*100 + 20*Math.cos(cosCounter* (i+1))), true, "");
-			buffer.add(result);
-			}
 	
-		}
-	}
+
 	
 	
 }

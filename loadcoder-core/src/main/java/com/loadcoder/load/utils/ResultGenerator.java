@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 
 import com.loadcoder.load.measure.ResultFormatter;
 import com.loadcoder.load.measure.TransactionExecutionResult;
-import com.loadcoder.log.Logs;
 import com.loadcoder.log.ResultLogger;
 
 public class ResultGenerator {

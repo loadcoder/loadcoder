@@ -73,7 +73,7 @@ public class ResultChartTest extends TestNGBase{
 	}
 
 	private void printArray(Integer[] ints){
-		System.out.println(Arrays.asList(ints));
+		log.info(Arrays.asList(ints).toString());
 	}
 	
 	private String intArrayAsString(Integer[] ints){

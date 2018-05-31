@@ -44,15 +44,40 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 		this.trans = trans;
 	}
 	
+	/**
+	 * By using this method, the result of the transaction (received in the ResultModel instance) can be used to take
+	 * transaction related actions. For example, if the transaction threw an Exception, the ResultHandler can be
+	 * used to set the status of the transaction to false
+	 * {@code
+	 * (resultModel)->{
+	 * 	if(resultModel.getException() != null)
+	 * 		resultModel.setStatus(false);
+	 * }
+	 * }
+	 * 
+	 * @param resultHandler
+	 * is the implementation of the functional interface ResultHandler
+	 * @return the builder instance
+	 */
 	public ResultHandlerBuilder <R> handleResult(ResultHandler<R> resultHandler){
 		this.resultHandler = resultHandler;
 		return this;
 	}
-
+	
+	/**
+	 * Performs the transaction you just stated
+	 * @return the return object from the transaction
+	 */
 	public R perform(){
 		return performAndGetModel().getResponse();
 	}
 	
+	
+	/**
+	 * Performs the transaction you just stated
+	 * @return
+	 * the result model of the transaction
+	 */
 	public ResultModel<R> performAndGetModel(){
 		if(limiter != null){
 			limiter.acquire();

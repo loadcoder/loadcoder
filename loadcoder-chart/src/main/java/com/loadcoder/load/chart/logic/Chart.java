@@ -61,32 +61,28 @@ public abstract class Chart {
 		chartFrame.getPlot().setDrawingSupplier(newSup);
 	}
 	
+	/**
+	 * Wait here until the chart is closed
+	 */
 	public void waitUntilClosed() {
 		chartFrame.waitUntilClosed();
 	}
 
-	public Chart use(DataSetUser dataSetUser) {
+	protected Chart use(DataSetUser dataSetUser) {
 		chartFrame.use(dataSetUser);
 		return this;
 	}
 	
-	public XYSeriesCollectionExtention getSeriesCollection(){
+	protected XYSeriesCollectionExtention getSeriesCollection(){
 		return chartFrame.getSeriesCollection();
 	}
 	
-	public XYPlotExtension getPlot(){
+	protected XYPlotExtension getPlot(){
 		return chartFrame.getPlot();
 	}
 	
-	public XYLineAndShapeRendererExtention getRenderer(){
+	protected XYLineAndShapeRendererExtention getRenderer(){
 		return chartFrame.getRenderer();
 	}
 
-	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset, XYLineAndShapeRendererExtention renderer) {
-		NumberAxis yAxis = new NumberAxis(yAxisLabel);
-		NumberAxis xAxis = new NumberAxis(xAxisLabel);
-		xAxis.setAutoRangeIncludesZero(false);
-		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
-		return plot;
-	}
 }

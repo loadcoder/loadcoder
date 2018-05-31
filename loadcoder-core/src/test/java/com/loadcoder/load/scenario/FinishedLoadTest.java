@@ -31,7 +31,7 @@ import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.log.Logs;
 
-public class FinishedScenarioTest {
+public class FinishedLoadTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -45,7 +45,7 @@ public class FinishedScenarioTest {
 			}
 		};
 		
-		FinishedScenario s = new LoadBuilder(ls).build().runLoad().andWait();
+		FinishedLoad s = new LoadBuilder(ls).build().runLoad().andWait();
 		
 		Result r = s.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Assert.assertEquals(r.getNoOfTransactions(), 1);

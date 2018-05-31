@@ -18,15 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.result;
 
-import static com.loadcoder.load.result.Summary.avg;
-import static com.loadcoder.load.result.Summary.max;
-import static com.loadcoder.load.result.Summary.percentile;
-import static com.loadcoder.load.result.Summary.transactionNames;
-import static com.loadcoder.load.result.Summary.amountOfFails;
-import static com.loadcoder.load.result.Summary.amountOfTransactions;
-import static com.loadcoder.load.result.Summary.fails;
-import static com.loadcoder.load.result.Summary.throughput;
-import static com.loadcoder.load.result.Summary.transactions;
+import static com.loadcoder.statics.SummaryUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

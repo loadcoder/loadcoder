@@ -57,6 +57,9 @@ public class Summary {
 		return res;
 	}
 	
+	/**
+	 * 
+	 */
 	public interface ResultSummarizer extends ResultAction{
 		String summarize(Result result);
 	}
@@ -70,33 +73,6 @@ public class Summary {
 		int sec = (int)durationMillis / 1000;
 		sec = sec == 0 ? 1 : sec;
 		return sec;
-	}
-	
-	public static ResultSummarizer throughput(){
-		return (a)->{
-			int seconds = calculateDurationOfTest(a.getDuration());
-			double throughput = a.getNoOfTransactions() / seconds;
-			return String.format("Throughput: %sTPS", throughput);
-		};
-	}
-
-	public static ResultSummarizer duration(){
-		return (a)->{
-
-			return String.format("Duration: %s milliseconds", a.getDuration());
-		};
-	}
-	
-	public static ResultSummarizer amountOfTransactions(){
-		return (a)->{
-			return String.format("Amount of transactions: %s", a.getNoOfTransactions());
-		};
-	}
-	
-	public static ResultSummarizer amountOfFails(){
-		return (a)->{
-			return String.format("Amount of fails: %s", a.getNoOfFails());
-		};
 	}
 	
 	public final class SummaryWithResultActions{
@@ -199,7 +175,6 @@ public class Summary {
 							line += paddedValue;
 						}
 
-//						log.info(line);
 						res = res + line + "\n";
 					}
 
@@ -249,72 +224,6 @@ public class Summary {
 
 	public SummaryWithResultActions firstDo(ResultUser resultUser){
 		return new SummaryWithResultActions().thenDo(resultUser);
-	}
-
-	public static ValueCalculator avg(){
-		ValueCalculator max = (rr)->{
-			long totalSum = 0;
-			for(TransactionExecutionResult transactionExecutionResult : rr){
-				totalSum += transactionExecutionResult.getRt();
-			}
-			long avgValue = totalSum / rr.size();
-
-			return "" + avgValue;
-		};
-		return max;
-	}
-
-	public static ValueCalculator percentile(int percentile){
-		ValueCalculator max = (rr)->{
-
-			List<Long> allResponseTimes = new ArrayList<Long>();
-			for(TransactionExecutionResult r : rr){
-				allResponseTimes.add(r.getRt());
-			}
-			allResponseTimes.sort((a,b)->{return (int)(a-b); });
-			int percentileIndex = (int)(allResponseTimes.size() * (0.01 * percentile));
-			Long responseTimePercentile = allResponseTimes.get(percentileIndex);
-			return "" + responseTimePercentile;
-		};
-		return max;
-	}
-
-	public static ValueCalculator max(){
-		ValueCalculator max = (rr)->{
-			long maxValue = 0;
-			for(TransactionExecutionResult transactionExecutionResult : rr){
-				if(transactionExecutionResult.getRt() > maxValue)
-					maxValue = transactionExecutionResult.getRt();
-			}
-			return "" +maxValue;
-		};
-		return max;
-	}
-
-	public static ValueCalculator transactions(){
-		ValueCalculator max = (rr)->{
-			return "" +rr.size();
-		};
-		return max;
-	}
-	public static ValueCalculator fails(){
-		ValueCalculator max = (rr)->{
-			long noOfFails = 0;
-			for(TransactionExecutionResult transactionExecutionResult : rr){
-				if(transactionExecutionResult.isStatus() == false)
-					noOfFails++;
-			}
-			return "" +noOfFails;
-		};
-		return max;
-	}
-
-	public static ValueCalculator transactionNames(){
-		ValueCalculator max = (rr)->{
-			String name = rr.get(0).getName();
-			return name;
-		};
-		return max;
 	}
 
 	public interface ValueCalculator{

@@ -1,0 +1,8 @@
+#eclipse project
+.project
+.classpath
+.settings
+
+#maven
+target
+test-output

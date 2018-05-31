@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.testng.TestNGBase;
+import static com.loadcoder.statics.Time.*;
 
 public class ThrottlerTest extends TestNGBase{
 	
@@ -34,7 +35,7 @@ public class ThrottlerTest extends TestNGBase{
 
 		List<Thread> threads = new ArrayList<Thread>();
 		threads.add(Thread.currentThread());
-		new Throttler(new Intensity(1, PerTimeUnit.SECOND, ThrottleMode.SHARED), threads);
+		new Throttler(new Intensity(1, PerSecond, ThrottleMode.SHARED), threads);
 	}
 	
 	@Test(groups = "timeconsuming")

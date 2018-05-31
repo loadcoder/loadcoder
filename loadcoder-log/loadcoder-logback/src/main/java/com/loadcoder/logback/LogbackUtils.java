@@ -28,6 +28,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 public class LogbackUtils {
 
 	/*
+	 * USE WITH CAUTION
 	 * It not a good idea to create an appender programmatically for the resultlogger.
 	 * When the result logger is instantiated, it will pick up the appenders from the logback.xml,
 	 * if no specific logger are defined the root logger will be picked up which results in that

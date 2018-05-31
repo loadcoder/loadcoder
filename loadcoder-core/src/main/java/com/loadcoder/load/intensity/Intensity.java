@@ -18,12 +18,15 @@
  ******************************************************************************/
 package com.loadcoder.load.intensity;
 
+import com.loadcoder.statics.PerTimeUnit;
+import com.loadcoder.statics.TimeUnit;
+
 public class Intensity{
 	int amount;
-	PerTimeUnit perTimeUnit;
+	TimeUnit perTimeUnit;
 	ThrottleMode throttleMode;
 
-	public Intensity(int amount, PerTimeUnit perTimeUnit, ThrottleMode throttleMode){
+	public Intensity(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode){
 		this.amount = amount;
 		this.perTimeUnit = perTimeUnit;
 		this.throttleMode = throttleMode;
@@ -32,7 +35,7 @@ public class Intensity{
 	public long getAmount() {
 		return amount;
 	}
-	public PerTimeUnit getPerTimeUnit() {
+	public TimeUnit getPerTimeUnit() {
 		return perTimeUnit;
 	}
 	public ThrottleMode getThrottleMode() {

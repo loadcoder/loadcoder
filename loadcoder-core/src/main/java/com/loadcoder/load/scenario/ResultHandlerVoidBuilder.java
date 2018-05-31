@@ -24,7 +24,6 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
-import com.loadcoder.log.Logs;
 import com.loadcoder.log.ResultLogger;
 
 public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
@@ -45,15 +44,39 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 		this.trans = trans;
 	}
 	
+	
+	/**
+	 * By using this method, the result of the transaction (received in the ResultModelVoid instance) can be used to take
+	 * transaction related actions. For example, if the transaction threw an Exception, the ResultHandlerVoid can be
+	 * used to set the status of the transaction to false
+	 * {@code
+	 * (resultModelVoid)->{
+	 * 	if(resultModelVoid.getException() != null)
+	 * 		resultModelVoid.setStatus(false);
+	 * }
+	 * }
+	 * 
+	 * @param resultHandler
+	 * is the implementation of the functional interface ResultHandlerVoid 
+	 * @return the builder instance
+	 */
 	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler){
 		this.resultHandler = resultHandler;
 		return this;
 	}
 
+	/**
+	 * Performs the transaction you just stated
+	 */
 	public void perform(){
 		performAndGetModel();
 	}
 	
+	/**
+	 * Performs the transaction you just stated
+	 * @return
+	 * the result model of the transaction
+	 */
 	public ResultModelVoid performAndGetModel(){
 		if(limiter != null){
 			limiter.acquire();

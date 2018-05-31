@@ -18,11 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
-public class Milliseconds {
+public enum TimeUnit {
 
-	public static final long SECOND = 1_000;
-	public static final long MINUTE = 60 * SECOND;
-	public static final long HOUR = 60 * MINUTE;
-	public static final long DAY = 24 * HOUR;
-
+	SECOND, MINUTE, HOUR
 }

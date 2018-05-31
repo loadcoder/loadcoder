@@ -29,7 +29,7 @@ import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.scenario.FinishedScenario;
+import com.loadcoder.load.scenario.FinishedLoad;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
@@ -47,7 +47,7 @@ public class SeriesColorTest extends TestNGBase {
 				.build();
 		StartedLoad started = l.runLoad();
 
-		FinishedScenario finished = started.andWait();
+		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();
@@ -61,7 +61,7 @@ public class SeriesColorTest extends TestNGBase {
 				.build();
 		StartedLoad started = l.runLoad();
 
-		FinishedScenario finished = started.andWait();
+		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();

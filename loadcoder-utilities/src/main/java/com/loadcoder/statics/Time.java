@@ -16,26 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.result;
+package com.loadcoder.statics;
 
-import static com.loadcoder.load.result.Summary.*;
 
-import com.loadcoder.load.measure.Result;
+public class Time { 
+	
+	/**
+	 * One second in milliseconds
+	 */
+	public static final long SECOND = 1_000; 
+	
+	/**
+	 * One minute in milliseconds
+	 */
+	public static final long MINUTE = 60 * SECOND;
+	
+	
+	/**
+	 * One hour in milliseconds
+	 */
+	public static final long HOUR = 60 * MINUTE;
+	
+	
+	/**
+	 * One day in milliseconds
+	 */
+	public static final long DAY = 24 * HOUR;
 
-public class SummaryUtils {
-
-	public static void printSimpleSummary(Result result, String resultName) {
-		
-		Summary resultSummarizer = new Summary(result);
-		resultSummarizer
-		.log((a)->{return String.format("Summary for %s", resultName);})
-		.log(duration())
-		.table()
-		.column("Transaction", transactionNames())
-		.column("MAX", max())
-		.column("AVG", avg())
-		.column("80%", percentile(80))
-		.column("90%", percentile(90))
-		.print();
-	}
+	public static TimeUnit PerSecond = TimeUnit.SECOND;
+	public static TimeUnit PerMinute = TimeUnit.MINUTE;
+	public static TimeUnit PerHour = TimeUnit.MINUTE;
 }
