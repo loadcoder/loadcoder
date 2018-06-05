@@ -42,7 +42,7 @@ public class LogbackUtils {
         ple.setPattern("%m%n");
         ple.setContext(lc);
         ple.start();
-        
+
 		SharedDirFileAppenderLogback fileAppender = new SharedDirFileAppenderLogback();
         fileAppender.setFile(resultFile.getAbsolutePath());
         fileAppender.setEncoder(ple);

@@ -31,48 +31,85 @@ import com.loadcoder.logback.LogbackUtils;
 
 public class Logging {
 
-	private static final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
-	
+	private static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
+
+	/**
+	 * Change the date and time format of the directory that the method
+	 * {@code getNewLogDir} creates
+	 * 
+	 * @param dateTimeFormatter
+	 */
+	public static void setDateTimeFormatter(DateTimeFormatter dateTimeFormatter) {
+		format = dateTimeFormatter;
+	}
+
 	/**
 	 * This method will be called from the test to set the result dir
+	 * 
 	 * @param sharedDirForLogsPath
 	 */
-	public static void setResultDirectory(String sharedDirForLogsPath){
+	public static void setResultDirectory(String sharedDirForLogsPath) {
 		setResultDestination(new File(sharedDirForLogsPath));
 	}
-	
+
 	/**
-	 * This method will be called from the test to set the result dir
+	 * set the resultDir for your tests logs. For example
+	 * {@code setResultDestination(new File("logs/mytest/"));}
+	 * <p>
+	 * 
+	 * Also have a look at method {@code getNewLogDir} that helps out to create a
+	 * unique dir for the new execution.
+	 * <p>
+	 * {@code setResultDestination(getNewLogDir("logs", "mytest"));}
+	 * 
 	 * @param sharedDirForLogs
 	 */
-	public static void setResultDestination(File sharedDirForLogs){
+	public static void setResultDestination(File sharedDirForLogs) {
 		Logger initiateLogging = LoggerFactory.getLogger(LogbackUtils.class);
 		initiateLogging.info("New Result destination:{}", sharedDirForLogs.getAbsolutePath());
-		try{
+		try {
 			Logs.changeToSharedDir(sharedDirForLogs);
-		}catch(IOException ioe){
-			throw new RuntimeException(String.format(
-					"Could not use the file %s in dir as a result destination", sharedDirForLogs), ioe);
+		} catch (IOException ioe) {
+			throw new RuntimeException(
+					String.format("Could not use the file %s in dir as a result destination", sharedDirForLogs), ioe);
 		}
 	}
-	
-	public static File getNewLogDir(String rootDirPathForAllLogs, String nameOfTheTest){
+
+	/**
+	 * Helper method to get a unique directory for logs
+	 * 
+	 * @param rootDirPathForAllLogs
+	 *            is the base directory for all your logs
+	 * 
+	 * @param nameOfTheTest
+	 *            is the name of the directory where you want to store logs from all
+	 *            executions for a particular test, which will be located inside {@code rootDirPathForAllLogs}
+	 * 
+	 * @return a File that will have a path according to following pattern:
+	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
+	 */
+	public static File getNewLogDir(String rootDirPathForAllLogs, String nameOfTheTest) {
 		return getNewLogDir(rootDirPathForAllLogs + "/" + nameOfTheTest);
 	}
-	
+
 	/**
-	 * @return File to directory with a nicely formatted name
-	 * Nifty method in order to get a File with a path to a new directory with nicely formatted name
+	 * Helper method to get a unique directory for logs
+	 * 
+	 * @param dirForAllLogs
+	 *            is the directory for all your logs
+	 * 
+	 * @return a File that will have a path according to following pattern:
+	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
 	 */
-	public static File getNewLogDir(String rootDirPathForAllLogs){
-		LocalDateTime timePoint = LocalDateTime.now();     
+	public static File getNewLogDir(String dirForAllLogs) {
+		LocalDateTime timePoint = LocalDateTime.now();
 		String dateTime = timePoint.format(format);
-				
-		File logDir = new File(rootDirPathForAllLogs  + "/" + dateTime);
+
+		File logDir = new File(dirForAllLogs + "/" + dateTime);
 
 		int uniqueIterator = 2;
-		while(logDir.exists()){
-			logDir = new File(rootDirPathForAllLogs + "/" + dateTime + "_" +uniqueIterator);
+		while (logDir.exists()) {
+			logDir = new File(dirForAllLogs + "/" + dateTime + "_" + uniqueIterator);
 			uniqueIterator++;
 		}
 		return logDir;

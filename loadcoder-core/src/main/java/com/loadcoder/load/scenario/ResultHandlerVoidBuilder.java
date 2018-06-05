@@ -124,7 +124,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 			
 			if(resultModel.reportTransaction()){
 				TransactionExecutionResult result = 
-						new TransactionExecutionResult(name, start, rt, status, message);
+						new TransactionExecutionResult(name, start, rt, status, message, Thread.currentThread().getName());
 				
 				synchronized (transactionExecutionResultBuffer) {
 					transactionExecutionResultBuffer.getBuffer().add(result);

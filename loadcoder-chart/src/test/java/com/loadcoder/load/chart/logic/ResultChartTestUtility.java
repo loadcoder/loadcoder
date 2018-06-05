@@ -46,7 +46,7 @@ public class ResultChartTestUtility {
 	
 			long start = 1000;
 			for(int i =0; i<amount; i++){
-				TransactionExecutionResult  trans = new TransactionExecutionResult("a" + j, start + i*timeBetweenTransactions, j*10 + y.y(i), true, null);
+				TransactionExecutionResult  trans = new TransactionExecutionResult("a" + j, start + i*timeBetweenTransactions, j*10 + y.y(i), true, null, Thread.currentThread().getName());
 				ttanses.add(trans);
 			}
 		}

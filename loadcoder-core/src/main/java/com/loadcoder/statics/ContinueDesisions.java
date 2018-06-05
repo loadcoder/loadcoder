@@ -22,17 +22,30 @@ import com.loadcoder.load.scenario.Load.ContinueDecision;
 
 public class ContinueDesisions {
 
+	/**
+	 * Decision of whether to continue the test or not in regards to how many iterations of the LoadScenario that have been made so far.
+	 * If the amount of made iterations is higher than the provided amountOfIterations, the test will stop.
+	 * @param amountOfIterations it the target total amount of
+	 * @return ContinueDecision
+	 */
 	public static final ContinueDecision iterations(int amountOfIterations) {
-		ContinueDecision s2 = (startTime, b) -> {
-			if (b < amountOfIterations)
+		ContinueDecision s2 = (startTime, madeIterations) -> {
+			if (madeIterations < amountOfIterations)
 				return true;
 			return false;
 		};
 		return s2;
 	}
 
+	/**
+	 * Decision of whether to continue the test or not in regards to how long the test been running so far.
+	 * If the execution of the test becomes longer than the provided executionTimeMillis, the test will stop.
+	 * 
+	 * @param executionTimeMillis is the target duration for the test in milliseconds
+	 * @return ContinueDecision
+	 */
     public static final ContinueDecision duration(long executionTimeMillis) {
-        ContinueDecision s2 = (startTime, b) -> {
+        ContinueDecision s2 = (startTime, madeIterations) -> {
                 long now = System.currentTimeMillis();
                 long endTime = (startTime + executionTimeMillis);
                 long diff = now - endTime;

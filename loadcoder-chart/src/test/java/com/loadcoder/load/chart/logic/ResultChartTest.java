@@ -19,7 +19,6 @@
 package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.logic.ResultChartTestUtility.getTranses;
-import static com.loadcoder.statics.Milliseconds.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -36,7 +34,6 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.data.DataSet;
-import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;

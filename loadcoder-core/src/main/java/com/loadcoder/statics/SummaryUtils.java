@@ -31,6 +31,12 @@ import com.loadcoder.load.result.Summary.ValueCalculator;
 
 public class SummaryUtils {
 
+
+	/**
+	 * Logging a simple summary of the provided result
+	 * @param result for the test to be summarized
+	 * @param resultName
+	 */
 	public static void printSimpleSummary(Result result, String resultName) {
 
 		Summary resultSummarizer = new Summary(result);
@@ -49,6 +55,10 @@ public class SummaryUtils {
 		.print();
 	}
 
+	/**
+	 * The average throughput
+	 * @return ResultSummarizer
+	 */
 	public static ResultSummarizer throughput(){
 		return (a)->{
 			int seconds = calculateDurationOfTest(a.getDuration());
@@ -57,6 +67,10 @@ public class SummaryUtils {
 		};
 	}
 
+	/**
+	 * The duration
+	 * @return ResultSummarizer
+	 */
 	public static ResultSummarizer duration(){
 		return (a)->{
 
@@ -64,18 +78,30 @@ public class SummaryUtils {
 		};
 	}
 
+	/**
+	 * The total amount of transactions
+	 * @return ResultSummarizer
+	 */
 	public static ResultSummarizer amountOfTransactions(){
 		return (a)->{
 			return String.format("Amount of transactions: %s", a.getNoOfTransactions());
 		};
 	}
 
+	/**
+	 * The total amount of fails
+	 * @return ResultSummarizer
+	 */
 	public static ResultSummarizer amountOfFails(){
 		return (a)->{
 			return String.format("Amount of fails: %s", a.getNoOfFails());
 		};
 	}
 	
+	/**
+	 * ValueCalculator that calculates the average responsetime for a particular transaction
+	 * @return ValueCalculator
+	 */
 	public static ValueCalculator avg(){
 		ValueCalculator max = (rr)->{
 			long totalSum = 0;
@@ -89,6 +115,12 @@ public class SummaryUtils {
 		return max;
 	}
 
+
+	/**
+	 * ValueCalculator that calculates the given responsetime percentile for a particular transaction
+	 * @param percentile
+	 * @return
+	 */
 	public static ValueCalculator percentile(int percentile){
 		ValueCalculator max = (rr)->{
 
@@ -104,6 +136,10 @@ public class SummaryUtils {
 		return max;
 	}
 
+	/**
+	 * ValueCalculator that calculates the maximum responsetime for a particular transaction
+	 * @return ValueCalculator
+	 */
 	public static ValueCalculator max(){
 		ValueCalculator max = (rr)->{
 			long maxValue = 0;
@@ -116,6 +152,10 @@ public class SummaryUtils {
 		return max;
 	}
 
+	/**
+	 * ValueCalculator that calculates the amount of transactions done for a particular transaction
+	 * @return ValueCalculator
+	 */
 	public static ValueCalculator transactions(){
 		ValueCalculator max = (rr)->{
 			return "" +rr.size();
@@ -123,6 +163,10 @@ public class SummaryUtils {
 		return max;
 	}
 	
+	/**
+	 * ValueCalculator that calculates the amount of fails for a particular transaction
+	 * @return ValueCalculator
+	 */
 	public static ValueCalculator fails(){
 		ValueCalculator max = (rr)->{
 			long noOfFails = 0;
@@ -135,8 +179,15 @@ public class SummaryUtils {
 		return max;
 	}
 
+	/**
+	 * ValueCalculator that returns the name of the transaction
+	 * @return ValueCalculator
+	 */
 	public static ValueCalculator transactionNames(){
 		ValueCalculator max = (rr)->{
+			if(rr.size() == 0) {
+				return "empty";
+			}
 			String name = rr.get(0).getName();
 			return name;
 		};

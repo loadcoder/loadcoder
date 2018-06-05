@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
-import static com.loadcoder.statics.Milliseconds.*;
+import static com.loadcoder.statics.Time.*;
 
 import java.awt.Color;
 import java.awt.Paint;

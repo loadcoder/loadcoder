@@ -18,9 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.ContinueDesisions.*;
 import static com.loadcoder.statics.Logging.*;
-import static com.loadcoder.statics.Milliseconds.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

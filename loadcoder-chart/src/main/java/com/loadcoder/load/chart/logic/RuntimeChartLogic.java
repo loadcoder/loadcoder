@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Milliseconds.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +48,7 @@ import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.StartedLoad;
+import static com.loadcoder.statics.Time.*;
 
 public class RuntimeChartLogic extends ChartLogic {
 

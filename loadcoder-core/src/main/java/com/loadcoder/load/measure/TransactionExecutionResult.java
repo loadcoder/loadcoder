@@ -37,6 +37,7 @@ public class TransactionExecutionResult {
 	final long rt;
 	final boolean status;
 	final String message;
+	final String threadId;
 	
 	public boolean equals(Object obj) {
 		return super.equals(obj);
@@ -62,18 +63,27 @@ public class TransactionExecutionResult {
 			String status = getValueOfParameter(string, "status");
 			String rt = getValueOfParameter(string, "rt");
 			String message = null;
+			String threadId = null;
+
+			try{
+				threadId = getValueOfParameter(string, "thread");
+			}catch(RuntimeException rte){
+				//message is optional. OK with silent rte
+			}
+
 			try{
 				message = getValueOfParameter(string, "message");
 			}catch(RuntimeException rte){
 				//message is optional. OK with silent rte
 			}
-			return new TransactionExecutionResult(name, new Long(ts), new Long(rt), new Boolean(status), message);
+			return new TransactionExecutionResult(name, new Long(ts), new Long(rt), new Boolean(status), message, threadId);
 		}
 
 		@Override
 		public String toString(TransactionExecutionResult transactionExecutionResult) {
-			String msg = transactionExecutionResult.getMessage() == null ? "" : String.format("message=\"%s\"", transactionExecutionResult.getMessage());
-			String asString = String.format("<t name=\"%s\" ts=\"%s\" rt=\"%s\" status=\"%s\" "+msg+" />",
+			String msg = transactionExecutionResult.getMessage() == null ? "" : String.format("message=\"%s\"", transactionExecutionResult.getMessage()) + " ";
+			String thread = transactionExecutionResult.getThread() == null ? "" : String.format("thread=\"%s\"", transactionExecutionResult.getThread()) + " ";
+			String asString = String.format("<t name=\"%s\" ts=\"%s\" rt=\"%s\" status=\"%s\" " + msg + thread + "/>",
 					transactionExecutionResult.getName(), transactionExecutionResult.getTs(),
 					transactionExecutionResult.getRt(), transactionExecutionResult.isStatus());
 
@@ -97,7 +107,7 @@ public class TransactionExecutionResult {
 					TransactionExecutionResult result = toTransactionExecutionResult(line);
 
 					List<TransactionExecutionResult> s = dataSetMap.get(result.getName());
-					
+
 					if (s == null) {
 						s = new ArrayList<TransactionExecutionResult>();
 						dataSetMap.put(result.getName(), s);
@@ -113,12 +123,17 @@ public class TransactionExecutionResult {
 	};
 
 	public TransactionExecutionResult(String name, long ts, long rt, boolean status, String message) {
+		this(name, ts, rt, status, message, Thread.currentThread().getName());
+	}
+
+	public TransactionExecutionResult(String name, long ts, long rt, boolean status, String message, String threadId) {
 
 		this.name = name;
 		this.ts = ts;
 		this.rt = rt;
 		this.status = status;
 		this.message = message;
+		this.threadId = threadId;
 	}
 
 
@@ -140,6 +155,10 @@ public class TransactionExecutionResult {
 
 	public String getMessage(){
 		return message;
+	}
+
+	public String getThread(){
+		return threadId;
 	}
 
 	public static List<List<TransactionExecutionResult>> mergeList(
