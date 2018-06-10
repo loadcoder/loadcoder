@@ -22,9 +22,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.TransactionExecutionResult;
 
 import junit.framework.Assert;
 

@@ -16,8 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.statics;
+package com.loadcoder.result;
 
-public enum PerTimeUnit {
-	SECOND, MINUTE, HOUR, FREAKSHOW;
+import java.io.File;
+
+@FunctionalInterface
+public interface DirProvider{
+	File getFile();
 }

@@ -4,7 +4,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +12,12 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.log.Logs;
+import com.loadcoder.result.Logs;
 
 import junit.framework.Assert;
 
 
-public class LoggingTest extends TestNGBase{
+public class LogbackLoggingTest extends TestNGBase{
 
 	Logger resultLog = LoggerFactory.getLogger(Logs.class);
 	Logger infoLog = LoggerFactory.getLogger(this.getClass());

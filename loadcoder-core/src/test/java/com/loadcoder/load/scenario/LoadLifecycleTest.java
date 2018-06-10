@@ -29,7 +29,6 @@ import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.statics.PerTimeUnit;
 
 public class LoadLifecycleTest extends TestNGBase{
 

@@ -46,8 +46,9 @@ import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.StartedLoad;
+import com.loadcoder.result.TransactionExecutionResult;
+
 import static com.loadcoder.statics.Time.*;
 
 public class RuntimeChartLogic extends ChartLogic {

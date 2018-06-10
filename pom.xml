@@ -65,7 +65,7 @@
 
 			<dependency>
 				<groupId>com.loadcoder</groupId>
-				<artifactId>loadcoder-logutils</artifactId>
+				<artifactId>loadcoder-result</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

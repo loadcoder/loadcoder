@@ -21,10 +21,10 @@ package com.loadcoder.logback;
 import java.io.File;
 import java.io.IOException;
 
-import ch.qos.logback.core.FileAppender;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.SharedDirFileAppender;
 
-import com.loadcoder.log.Logs;
-import com.loadcoder.log.SharedDirFileAppender;
+import ch.qos.logback.core.FileAppender;
 
 
 public class SharedDirFileAppenderLogback extends FileAppender implements SharedDirFileAppender{

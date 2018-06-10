@@ -18,28 +18,20 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.LoadAlreadyStarted;
-import static com.loadcoder.load.exceptions.ExceptionMessages.PreviousLoadStillRunning;
-import static com.loadcoder.load.exceptions.ExceptionMessages.ScenarioConnectedToOtherLoad;
+import static com.loadcoder.load.exceptions.ExceptionMessages.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
-//import com.loadcoder.load.Scenario;
-//import com.loadcoder.load.Scenario.ContinueToExecute;
-//import com.loadcoder.load.Scenario.ExceptionUser;
-//import com.loadcoder.load.Scenario.Executable;
-//import com.loadcoder.load.Scenario.ExecutableMeasure;
 import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.intensity.Throttler;
-//import com.loadcoder.load.measure.Result.ResultDestination;
-import com.loadcoder.load.measure.ResultFormatter;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
-import com.loadcoder.statics.PerTimeUnit;
+import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.statics.Formatter;
 import com.loadcoder.statics.TimeUnit;
 
 public class Load {
@@ -174,7 +166,7 @@ public class Load {
 		this.rampup = rampup;
 		this.preExecution = preExecution;
 		this.postExecution = postExecution;
-		this.resultFormatter = resultFormatter == null ? TransactionExecutionResult.resultStringFormatterDefault : resultFormatter;
+		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
 		this.user = user;
 		
 		List<Thread> temporaryThreadList = new ArrayList<Thread>();
@@ -305,9 +297,9 @@ public class Load {
 
 		public class Rampup{
 			long amount;
-			PerTimeUnit timeUnit;
+			TimeUnit timeUnit;
 			
-			Rampup(long amount, PerTimeUnit timeUnit){
+			Rampup(long amount, TimeUnit timeUnit){
 				this.amount = amount;
 				this.timeUnit = timeUnit;
 			}

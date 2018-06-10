@@ -20,7 +20,7 @@ package com.loadcoder.load.scenario;
 
 import java.util.List;
 
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.TransactionExecutionResult;
 
 @FunctionalInterface
 public interface RuntimeDataUser {

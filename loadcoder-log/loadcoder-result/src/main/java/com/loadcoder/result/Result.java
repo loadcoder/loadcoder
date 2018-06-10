@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.measure;
+package com.loadcoder.result;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import com.loadcoder.statics.Formatter;
 
 public class Result {
 
@@ -72,7 +74,7 @@ public class Result {
 	}
 
 	public Result(File fileToGenerateResultFrom){
-		this(fileToGenerateResultFrom, TransactionExecutionResult.resultStringFormatterDefault);
+		this(fileToGenerateResultFrom, Formatter.SIMPLE_RESULT_FORMATTER);
 	}
 	public Result(File fileToGenerateResultFrom, ResultFormatter resultFormatter){
 		

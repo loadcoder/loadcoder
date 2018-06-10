@@ -40,7 +40,7 @@ import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.utilities.ChartUtils;
-import com.loadcoder.load.measure.Result;
+import com.loadcoder.result.Result;
 
 public class ResultChart extends Chart{
 	

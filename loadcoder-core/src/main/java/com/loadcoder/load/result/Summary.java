@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.result.Summary.SummaryWithResultActions.Table.SummaryWithTable;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class Summary {
 

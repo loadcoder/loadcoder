@@ -23,6 +23,7 @@ import java.util.HashSet;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class TransactionExecutionResultTest extends TestNGBase{
 

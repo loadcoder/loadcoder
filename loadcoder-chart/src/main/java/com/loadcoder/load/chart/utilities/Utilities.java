@@ -25,7 +25,7 @@ import javax.swing.JTextArea;
 
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.Point;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class Utilities {
 

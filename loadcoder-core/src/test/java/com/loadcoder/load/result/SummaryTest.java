@@ -28,10 +28,10 @@ import junit.framework.Assert;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.result.Summary.SummaryWithResultActions.Table.SummaryWithTable;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryTest extends TestNGBase{
 

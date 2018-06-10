@@ -39,8 +39,8 @@ import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.sampling.SampleGroup;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeChartLogicTest extends TestNGBase{
 

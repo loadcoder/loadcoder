@@ -20,8 +20,8 @@ package com.loadcoder.load;
 
 import java.util.List;
 
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class TestUtils {
 

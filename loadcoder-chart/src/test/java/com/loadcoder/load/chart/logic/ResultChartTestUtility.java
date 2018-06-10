@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.loadcoder.load.chart.logic.ResultChartTest.YGiver;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartTestUtility {
 

@@ -39,8 +39,8 @@ import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.sampling.Sample;
-import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
 
 
 public class ResultChartTest extends TestNGBase{

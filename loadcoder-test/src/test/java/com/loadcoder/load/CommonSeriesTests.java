@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 import static com.loadcoder.logback.LogbackUtils.*;
 import java.lang.reflect.Method;
 

@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeResultUpdaterRunnerTest {
 

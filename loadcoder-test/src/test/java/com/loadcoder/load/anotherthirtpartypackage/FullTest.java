@@ -19,7 +19,7 @@
 package com.loadcoder.load.anotherthirtpartypackage;
 
 import static com.loadcoder.statics.ContinueDesisions.*;
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -36,8 +36,6 @@ import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.intensity.ThrottleMode;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.FinishedLoad;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadScenario;
@@ -46,7 +44,8 @@ import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.sut.DomainDto;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.log.Logs;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
 import com.loadcoder.statics.SummaryUtils;
 
 import static com.loadcoder.statics.Time.*;

@@ -18,7 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.intensity;
 
-import com.loadcoder.statics.PerTimeUnit;
 import com.loadcoder.statics.TimeUnit;
 
 public class Intensity{

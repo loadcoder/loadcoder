@@ -18,8 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.utils;
 
-import static com.loadcoder.statics.Logging.getNewLogDir;
-import static com.loadcoder.statics.Logging.setResultDestination;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.Time.*;
 
 import java.io.File;

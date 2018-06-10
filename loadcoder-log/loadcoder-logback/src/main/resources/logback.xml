@@ -19,7 +19,7 @@
 		</encoder>
 	</appender>
 	
-	<logger name="com.loadcoder.log.Logs" level="debug" additivity="false">
+	<logger name="com.loadcoder.result.Logs" level="debug" additivity="false">
 		<appender-ref ref="resultappender" />
 	</logger>
 

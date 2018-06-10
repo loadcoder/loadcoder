@@ -30,9 +30,9 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.log.ResultLogger;
+import com.loadcoder.result.ResultLogger;
 
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 
 public class SharedDirFileAppenderLogbackTest extends TestNGBase{
 	public static Logger resultLogger = LoggerFactory.getLogger(SharedDirFileAppenderLogbackTest.class);

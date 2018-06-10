@@ -26,10 +26,9 @@ import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.loadcoder.log.Logs;
-import com.loadcoder.logback.LogbackUtils;
+import com.loadcoder.result.Logs;
 
-public class Logging {
+public class LogbackLogging {
 
 	private static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
 
@@ -61,11 +60,17 @@ public class Logging {
 	 * unique dir for the new execution.
 	 * <p>
 	 * {@code setResultDestination(getNewLogDir("logs", "mytest"));}
+	 * <p>
+	 * 
+	 * Note that in order for this method to work properly, an implementation of
+	 * SharedDirFileAppender must be used and created through the used logging
+	 * framework. A logback implementation is provided in loadcoder-logback module. 
+	 * 
 	 * 
 	 * @param sharedDirForLogs
 	 */
 	public static void setResultDestination(File sharedDirForLogs) {
-		Logger initiateLogging = LoggerFactory.getLogger(LogbackUtils.class);
+		Logger initiateLogging = LoggerFactory.getLogger(LogbackLogging.class);
 		initiateLogging.info("New Result destination:{}", sharedDirForLogs.getAbsolutePath());
 		try {
 			Logs.changeToSharedDir(sharedDirForLogs);
@@ -114,4 +119,5 @@ public class Logging {
 		}
 		return logDir;
 	}
+	
 }

@@ -23,14 +23,13 @@ import static com.loadcoder.load.result.Summary.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.result.Summary;
 import com.loadcoder.load.result.Summary.ResultSummarizer;
 import com.loadcoder.load.result.Summary.ValueCalculator;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryUtils {
-
 
 	/**
 	 * Logging a simple summary of the provided result

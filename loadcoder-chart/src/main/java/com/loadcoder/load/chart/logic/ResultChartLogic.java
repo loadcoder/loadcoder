@@ -46,8 +46,8 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartLogic extends ChartLogic {
 

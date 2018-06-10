@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.load.measure.Result;
+import com.loadcoder.result.Result;
 
 public class StartedLoad {
 

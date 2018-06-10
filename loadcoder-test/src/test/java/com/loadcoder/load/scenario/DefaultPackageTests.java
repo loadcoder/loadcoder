@@ -19,8 +19,8 @@
 package com.loadcoder.load.scenario;
 
 import static com.loadcoder.statics.ContinueDesisions.duration;
-import static com.loadcoder.statics.Logging.getNewLogDir;
-import static com.loadcoder.statics.Logging.setResultDestination;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
 import java.lang.reflect.Method;
 

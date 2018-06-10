@@ -32,8 +32,8 @@ import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.logic.ResultChartLogic;
 import com.loadcoder.load.chart.logic.RuntimeChartLogic;
-import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
 
 public class ResultChartLogicTest extends TestNGBase{
 

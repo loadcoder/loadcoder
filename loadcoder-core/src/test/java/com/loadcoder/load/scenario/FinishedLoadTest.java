@@ -18,16 +18,16 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
-import com.loadcoder.log.Logs;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
 
 public class FinishedLoadTest {
 

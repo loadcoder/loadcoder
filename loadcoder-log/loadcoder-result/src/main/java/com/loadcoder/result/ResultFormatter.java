@@ -16,12 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.log;
+package com.loadcoder.result;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-@FunctionalInterface
-public interface SharedDirFileAppender{
-	public void changeToDir(File newDir) throws IOException;
+public abstract class ResultFormatter{
+	
+	public abstract String toString(TransactionExecutionResult TransactionExecutionResult);
+	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
+	
+	public Result toResultList(File file) throws IOException{
+		List<List<TransactionExecutionResult>> resultLists = toResultLists(file);
+		
+		Result r = new Result(resultLists);
+
+		return r;
+	}
+	
 }

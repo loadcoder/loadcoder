@@ -21,10 +21,10 @@ package com.loadcoder.load.scenario;
 import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandler;
-import com.loadcoder.log.ResultLogger;
+import com.loadcoder.result.ResultLogger;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 
@@ -114,7 +114,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 				if(resultHandler != null){
 					resultHandler.handle(resultModel);
 				}
-				name = resultModel.getTransacionName();
+				name = resultModel.getTransactionName();
 				status = resultModel.getStatus();
 				message = resultModel.getMessage();
 			}catch(Exception e) {
