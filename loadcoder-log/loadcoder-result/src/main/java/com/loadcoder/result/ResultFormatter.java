@@ -16,13 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.statics;
+package com.loadcoder.result;
 
-public class Milliseconds {
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
-	public static final long SECOND = 1_000;
-	public static final long MINUTE = 60 * SECOND;
-	public static final long HOUR = 60 * MINUTE;
-	public static final long DAY = 24 * HOUR;
+public abstract class ResultFormatter{
+	
+	public abstract String toString(TransactionExecutionResult TransactionExecutionResult);
+	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
+	
+	public Result toResultList(File file) throws IOException{
+		List<List<TransactionExecutionResult>> resultLists = toResultLists(file);
+		
+		Result r = new Result(resultLists);
+
+		return r;
+	}
 	
 }

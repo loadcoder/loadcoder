@@ -19,8 +19,8 @@
 package com.loadcoder.load.scenario;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.loadcoder.load.measure.ResultFormatter;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
+import com.loadcoder.result.ResultFormatter;
 
 public class ResultHandlerBuilderBase {
 

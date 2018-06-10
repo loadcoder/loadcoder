@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeResultUpdaterRunner implements Runnable{
 	

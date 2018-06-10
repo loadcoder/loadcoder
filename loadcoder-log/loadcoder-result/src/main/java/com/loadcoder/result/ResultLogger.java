@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.log;
+package com.loadcoder.result;
 
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@FunctionalInterface
-public interface DirProvider{
-	File getFile();
+public final class ResultLogger {
+	public static final Logger resultLogger = LoggerFactory.getLogger(Logs.class);
 }

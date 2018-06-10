@@ -18,7 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
+import java.util.List;
+
 import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class TestUtils {
 
@@ -31,4 +34,21 @@ public class TestUtils {
 			.perform();
 		}
 	};
+	
+	public static void add(List<TransactionExecutionResult> buffer, long timeBackInHistory, int amountOfTransactions){
+		long start = System.currentTimeMillis();
+		long end = start - timeBackInHistory;
+		long iterator = start;
+		double cosCounter = 0;
+		for(; iterator > end; iterator = iterator - 500){
+			cosCounter = cosCounter + 0.03;
+			
+			for(int i=0; i<amountOfTransactions; i++){
+			TransactionExecutionResult result = 
+					new TransactionExecutionResult("prehistoric" +i, iterator, (long)(100+ i*100 + 20*Math.cos(cosCounter* (i+1))), true, "");
+			buffer.add(result);
+			}
+	
+		}
+	}
 }

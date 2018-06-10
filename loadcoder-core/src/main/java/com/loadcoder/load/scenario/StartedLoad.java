@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.load.measure.Result;
+import com.loadcoder.result.Result;
 
 public class StartedLoad {
 
@@ -37,26 +37,20 @@ public class StartedLoad {
 		l.getLoadStateThread().start();
 	}
 
-	public static Result getResult(StartedLoad startedScenario){
-		return startedScenario.getRuntimeResult();
-	}
-	
 	protected Result getRuntimeResult() throws NoResultOrFormatterException{
 		Result r = new Result(l.getRuntimeResultList());
 		return r;
 	}		
 	
-	public boolean isScenarioTerminated(){
+	protected boolean isScenarioTerminated(){
 		return l.getLoadStateThread().getState() == State.TERMINATED;
 	}
 	
-	public boolean isScenarioRunning(){
-		
-		State state = l.getLoadStateThread().getState();
-		return ! (state == State.TERMINATED || state == State.NEW);
-	}
-	
-	public FinishedScenario andWait(){
+	/**
+	 * Wait here until the load finishes
+	 * @return FinishedLoad instance of the finished load
+	 */
+	public FinishedLoad andWait(){
 		long start = System.currentTimeMillis();
 		try{
 			l.getLoadStateThread().join();
@@ -68,7 +62,7 @@ public class StartedLoad {
 			l.getRuntimeResultUpdaterThread().interrupt();
 		}
 		log.debug("Load executed {} ms", (System.currentTimeMillis() - start));
-		return new FinishedScenario(l);
+		return new FinishedLoad(l);
 	}
 	
 }

@@ -19,8 +19,7 @@
 package com.loadcoder.load;
 
 import static com.loadcoder.statics.ContinueDesisions.*;
-import static com.loadcoder.statics.Milliseconds.*;
-
+import static com.loadcoder.statics.Time.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.intensity.PerTimeUnit;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadScenario;
@@ -171,7 +169,7 @@ public class LoadTest extends TestNGBase{
 		};
 		
 		Load l = new LoadBuilder(ls)
-				.intensity(1, PerTimeUnit.SECOND, ThrottleMode.PER_THREAD)
+				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
 				.continueCriteria(iterations(iterationsPerThread))
 				.build();
 		
@@ -212,7 +210,7 @@ public class LoadTest extends TestNGBase{
 
 		Load l = new LoadBuilder(ls)
 				.continueCriteria(iterations(threads * iterationsPerThread))
-				.intensity(1, PerTimeUnit.SECOND, ThrottleMode.PER_THREAD)
+				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
 				.amountOfThreads(threads)
 				.build();
 

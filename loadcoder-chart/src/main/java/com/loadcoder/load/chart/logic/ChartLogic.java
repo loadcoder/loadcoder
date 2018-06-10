@@ -20,7 +20,7 @@ package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.common.YCalculator.avg;
 import static com.loadcoder.load.chart.common.YCalculator.max;
-import static com.loadcoder.statics.Milliseconds.HOUR;
+import static com.loadcoder.statics.Time.*;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -57,8 +57,8 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ColorUtils;
 import com.loadcoder.load.chart.utilities.SampleStatics;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public abstract class ChartLogic {
 

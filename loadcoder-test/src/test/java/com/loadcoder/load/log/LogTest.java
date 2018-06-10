@@ -31,8 +31,8 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.log.Logs;
-import com.loadcoder.log.ResultLogger;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.ResultLogger;
 
 public class LogTest extends TestNGBase{
 	 /* 

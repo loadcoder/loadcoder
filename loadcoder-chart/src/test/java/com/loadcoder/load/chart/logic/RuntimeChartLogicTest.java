@@ -32,14 +32,15 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.sampling.SampleGroup;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeChartLogicTest extends TestNGBase{
 
@@ -65,7 +66,7 @@ public class RuntimeChartLogicTest extends TestNGBase{
 		collection = new XYSeriesCollectionExtention();
 		renderer = new LoadcoderRenderer(true, false, collection);
 		map = new HashMap<Comparable, Boolean>();
-		plot = Chart.createXYPlotExtension("y", "x", collection, renderer);
+		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
 		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), null, false);
 	}
 

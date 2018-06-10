@@ -28,11 +28,10 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.ResultFormatter;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.testng.TestNGBase;
-
+import com.loadcoder.result.Result;
+import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.statics.Formatter;
 
 public class ChartTest extends TestNGBase{
 
@@ -44,7 +43,7 @@ public class ChartTest extends TestNGBase{
 	public void doSimpleChart() throws IOException{
 		File f = new File("src/test/resources/testresults/small_result.log");
 		
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
 		
 		ResultChart c = new ResultChart(result);
@@ -64,7 +63,7 @@ public class ChartTest extends TestNGBase{
 	@Test(groups = "manual")
 	public void lotsOfTransactionTypes() throws IOException{
 		File f = new File("src/test/resources/testresults/a_lot_of_transactiontypes.log");
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
 		
 		Chart c = new ResultChart(result);
@@ -78,7 +77,7 @@ public class ChartTest extends TestNGBase{
 	@Test(groups = "manual")
 	public void testNegative() throws IOException{
 		File f = new File("src/test/resources/testresults/negative_timevalue.log");
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
 		
 		ResultChart c = new ResultChart(result);
@@ -94,7 +93,7 @@ public class ChartTest extends TestNGBase{
 	public void unordered_results() throws IOException{
 		File f = new File("src/test/resources/testresults/unordered_timevalue.log");
 
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
 		
 		Chart c = new ResultChart(result);
@@ -105,7 +104,7 @@ public class ChartTest extends TestNGBase{
 	public void temp() throws IOException{
 		File f = new File("../loadcoder-test/target/testDynamicChart/2017-01-30_195731/result.log");
 
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
 		
 		Chart c = new ResultChart(result);

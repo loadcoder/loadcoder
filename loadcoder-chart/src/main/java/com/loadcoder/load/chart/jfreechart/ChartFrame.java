@@ -48,6 +48,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItem;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.LegendItemEntity;
 import org.jfree.chart.entity.PlotEntity;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
@@ -57,6 +58,7 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.urls.StandardXYURLGenerator;
 import org.jfree.chart.util.ParamChecks;
 import org.jfree.data.xy.XYDataItem;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 import org.slf4j.Logger;
@@ -122,11 +124,19 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
+	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset, XYLineAndShapeRendererExtention renderer) {
+		NumberAxis yAxis = new NumberAxis(yAxisLabel);
+		NumberAxis xAxis = new NumberAxis(xAxisLabel);
+		xAxis.setAutoRangeIncludesZero(false);
+		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
+		return plot;
+	}
+	
 	public ChartFrame(boolean linesVisible, boolean shapesVisible) {
 		super("");
 		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection);
 
-		plot = Chart.createXYPlotExtension("X", "Y", seriesCollection, renderer);
+		plot = createXYPlotExtension("X", "Y", seriesCollection, renderer);
 		plot.setRenderer(renderer);
 		plot.getDomainAxis().setAutoRange(true);
 		plot.getRangeAxis().setAutoRange(true);
@@ -192,11 +202,9 @@ public class ChartFrame extends ApplicationFrame {
 
 	JMenuBar createMenu(){
 		JMenuBar menuBar = new JMenuBar(); // Window menu bar
-		JMenu menu = new JMenu("Menu");
 
-		JMenu help = new JMenu("Help");
-		JLabel label = new JLabel("About");
-		label.addMouseListener(new MouseListener() {
+		JLabel about = new JLabel("About");
+		about.addMouseListener(new MouseListener() {
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {}
@@ -215,9 +223,7 @@ public class ChartFrame extends ApplicationFrame {
 				AboutPopup.showAboutPopup(chartFrame);
 			}
 		});
-		help.add(label);
-		menuBar.add(menu);
-		menuBar.add(help);
+		menuBar.add(about);
 
 		return menuBar;
 	}

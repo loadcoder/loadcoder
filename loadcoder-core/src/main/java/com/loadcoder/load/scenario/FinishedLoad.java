@@ -25,18 +25,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.log.Logs;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
 
-public class FinishedScenario{
+public class FinishedLoad{
 	Load s;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	public final static String RESULTFILE_DEFAULT = "result.log";
-	FinishedScenario(Load s){
+	FinishedLoad(Load s){
 		this.s = s;
 	}
 
+	/**
+	 * @return a new Result instance from the finished load
+	 * @throws NoResultOrFormatterException
+	 */
 	public Result getReportedResultFromResultFile() throws NoResultOrFormatterException{
 		File f = Logs.getResultFileInLogDir();
 		return getReportedResultFromResultFile(f);

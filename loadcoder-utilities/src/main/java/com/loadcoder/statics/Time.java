@@ -16,12 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.log;
+package com.loadcoder.statics;
 
-import java.io.File;
-import java.io.IOException;
 
-@FunctionalInterface
-public interface SharedDirFileAppender{
-	public void changeToDir(File newDir) throws IOException;
+public class Time { 
+	
+	/**
+	 * One second in milliseconds
+	 */
+	public static final long SECOND = 1_000; 
+	
+	/**
+	 * One minute in milliseconds
+	 */
+	public static final long MINUTE = 60 * SECOND;
+	
+	
+	/**
+	 * One hour in milliseconds
+	 */
+	public static final long HOUR = 60 * MINUTE;
+	
+	
+	/**
+	 * One day in milliseconds
+	 */
+	public static final long DAY = 24 * HOUR;
+
+	public static TimeUnit PerSecond = TimeUnit.SECOND;
+	public static TimeUnit PerMinute = TimeUnit.MINUTE;
+	public static TimeUnit PerHour = TimeUnit.MINUTE;
 }

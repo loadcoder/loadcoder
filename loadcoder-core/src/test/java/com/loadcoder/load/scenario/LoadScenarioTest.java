@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class LoadScenarioTest extends TestNGBase{
 

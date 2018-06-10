@@ -19,29 +19,23 @@
 package com.loadcoder.load.scenario;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.intensity.PerTimeUnit;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
+import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
+import com.loadcoder.statics.TimeUnit;
 
 public abstract class LoadScenario{
 	
-	final List<Thread> threads = new ArrayList<Thread>();
+	private final List<Thread> threads = new ArrayList<Thread>();
 
 	public abstract void loadScenario();
 	
-	List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
-	
-	Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-	
-	Load l;	
+	private Load l;	
 	
 	protected void setLoad(Load l){
 		this.l = l;
@@ -51,10 +45,18 @@ public abstract class LoadScenario{
 		return l;
 	}
 	
-	public void pre(){
+	public synchronized void pre(){
+		Executable pre = l.getPreExecution();
+		if(pre!= null) {
+			pre.execute();
+		}
 	}	
 	
-	public void post(){
+	public synchronized void post(){
+		Executable post = l.getPostExecution();
+		if(post!= null) {
+			post.execute();
+		}
 	}	
 	
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer(){
@@ -65,7 +67,15 @@ public abstract class LoadScenario{
 		return l.getAmountOfThreads();
 	}
 	
-	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> t){
+	/**
+	 * @param defaultName 
+	 * is the name of the transaction you are about to state. 
+	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
+	 * @param transaction
+	 * is the transaction, done with implementing functional interface Transaction
+	 * @return
+	 */
+	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction){
 		RateLimiter limiterToBeUsed = null;
 		
 		if(l.getThrottler() != null){
@@ -75,14 +85,23 @@ public abstract class LoadScenario{
 		ResultHandlerBuilder<T> resultHandlerBuilder = 
 				new ResultHandlerBuilder<T>(
 						defaultName,
-						t,
+						transaction,
 						this,
 						limiterToBeUsed);
 
 		return resultHandlerBuilder;
 	} 
 
-	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid t){
+	
+	/**
+	 * @param defaultName 
+	 * is the name of the transaction you are about to state. 
+	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
+	 * @param transaction
+	 * is the transaction, done with implementing functional interface TransactionVoid
+	 * @return
+	 */
+	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction){
 		RateLimiter limiterToBeUsed = null;
 		
 		if(l.getThrottler() != null){
@@ -92,7 +111,7 @@ public abstract class LoadScenario{
 		ResultHandlerVoidBuilder resultHandlerBuilder = 
 				new ResultHandlerVoidBuilder(
 						defaultName,
-						t,
+						transaction,
 						this,
 						limiterToBeUsed);
 
@@ -103,7 +122,7 @@ public abstract class LoadScenario{
 		return getAmountPerSecond(i.getAmount(), i.getPerTimeUnit());
 	}
 
-	public static long getMillis(long amount, PerTimeUnit unit){
+	public static long getMillis(long amount, TimeUnit unit){
 		long secondsForOneUnit = getTimeMultiplyer(unit);
 		long amountInMillis = amount * secondsForOneUnit * 1000;
 		return amountInMillis;
@@ -114,19 +133,19 @@ public abstract class LoadScenario{
 	 * divider = 60
 	 * amountPerSecond = 1 /60
 	 */
-	public static double getAmountPerSecond(long amount, PerTimeUnit unit){
+	public static double getAmountPerSecond(long amount, TimeUnit unit){
 		long divider = getTimeMultiplyer(unit);
 		double amountPerSecond = ((double)amount) / divider;
 		return amountPerSecond; 
 	}
 	
-	private static long getTimeMultiplyer(PerTimeUnit unit){
+	private static long getTimeMultiplyer(TimeUnit unit){
 		long multiplyer = 0;
-		if(unit == PerTimeUnit.SECOND){
+		if(unit == TimeUnit.SECOND){
 			multiplyer = 1;
-		}else if(unit == PerTimeUnit.MINUTE){
+		}else if(unit == TimeUnit.MINUTE){
 			multiplyer = 60;
-		}else if(unit == PerTimeUnit.HOUR){
+		}else if(unit == TimeUnit.HOUR){
 			multiplyer = 60 * 60;
 		}
 		return multiplyer;

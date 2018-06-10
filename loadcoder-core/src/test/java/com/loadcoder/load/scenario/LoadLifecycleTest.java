@@ -21,12 +21,11 @@ package com.loadcoder.load.scenario;
 import junit.framework.Assert;
 
 import static com.loadcoder.statics.ContinueDesisions.*;
-
+import static com.loadcoder.statics.Time.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
-import com.loadcoder.load.intensity.PerTimeUnit;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
@@ -44,7 +43,7 @@ public class LoadLifecycleTest extends TestNGBase{
 		
 		Load l = new LoadBuilder(ls)
 				.continueCriteria(iterations(100))
-				.intensity(3, PerTimeUnit.SECOND, ThrottleMode.SHARED)
+				.throttle(3, PerSecond, ThrottleMode.SHARED)
 				.build();
 
 		l.runLoad();
@@ -62,12 +61,12 @@ public class LoadLifecycleTest extends TestNGBase{
 		
 		Load l = new LoadBuilder(ls)
 				.continueCriteria(iterations(100))
-				.intensity(3, PerTimeUnit.SECOND, ThrottleMode.SHARED)
+				.throttle(3, PerSecond, ThrottleMode.SHARED)
 				.build();
 		
 		new LoadBuilder(ls)
 				.continueCriteria(iterations(100))
-				.intensity(3, PerTimeUnit.SECOND, ThrottleMode.SHARED)
+				.throttle(3, PerSecond, ThrottleMode.SHARED)
 				.build();
 		
 		l.runLoad();

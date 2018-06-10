@@ -18,28 +18,21 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.LoadAlreadyStarted;
-import static com.loadcoder.load.exceptions.ExceptionMessages.PreviousLoadStillRunning;
-import static com.loadcoder.load.exceptions.ExceptionMessages.ScenarioConnectedToOtherLoad;
+import static com.loadcoder.load.exceptions.ExceptionMessages.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
-//import com.loadcoder.load.Scenario;
-//import com.loadcoder.load.Scenario.ContinueToExecute;
-//import com.loadcoder.load.Scenario.ExceptionUser;
-//import com.loadcoder.load.Scenario.Executable;
-//import com.loadcoder.load.Scenario.ExecutableMeasure;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.intensity.PerTimeUnit;
 import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.intensity.Throttler;
-//import com.loadcoder.load.measure.Result.ResultDestination;
-import com.loadcoder.load.measure.ResultFormatter;
-import com.loadcoder.load.measure.TransactionExecutionResult;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
+import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.statics.Formatter;
+import com.loadcoder.statics.TimeUnit;
 
 public class Load {
 
@@ -69,6 +62,17 @@ public class Load {
 	
 	protected long timesExecuted = 0;
 
+	protected Executable getPreExecution() {
+		return preExecution;
+	}
+	
+	protected Executable getPostExecution() {
+		return postExecution;
+	}
+
+	private Executable preExecution;
+	private Executable postExecution;
+	
 	ContinueDecision defaultContinueToExecute = (a, b)->{
 		if(b > 0)
 			return false;
@@ -80,11 +84,11 @@ public class Load {
 	private StartedLoad getStartedLoad() {
 		return startedLoad;
 	}
-	public Throttler getThrottler() {
+	protected Throttler getThrottler() {
 		return throttler;
 	}
 
-	public TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
+	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
 		return transactionExecutionResultBuffer;
 	}
 
@@ -121,7 +125,7 @@ public class Load {
 		return runtimeResultList;
 	}
 	
-	public long getStartTime(){
+	protected long getStartTime(){
 		return startTime;
 	}
 	protected ContinueDecision getContinueToExecute(){
@@ -150,6 +154,8 @@ public class Load {
 				ContinueDecision continueToExecute,
 				int amountOfthreads,
 				long rampup,
+				Executable preExecution,
+				Executable postExecution,
 				Intensity intensity,
 				ResultFormatter resultFormatter,
 				RuntimeDataUser user
@@ -158,7 +164,9 @@ public class Load {
 		this.continueToExecute = continueToExecute == null ? defaultContinueToExecute : continueToExecute ;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
-		this.resultFormatter = resultFormatter == null ? TransactionExecutionResult.resultStringFormatterDefault : resultFormatter;
+		this.preExecution = preExecution;
+		this.postExecution = postExecution;
+		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
 		this.user = user;
 		
 		List<Thread> temporaryThreadList = new ArrayList<Thread>();
@@ -192,6 +200,12 @@ public class Load {
 			this.ls = ls;
 		}
 		
+		
+		/**
+		 * Build the Load from the LoadBuilders load definition
+		 * 
+		 * @return a Load instance 
+		 */
 		public Load build(){
 			Load previousLoad = ls.getLoad();
 			if(previousLoad != null) {
@@ -211,6 +225,8 @@ public class Load {
 					continueToExecute,
 					amountOfthreads,
 					rampupMillis,
+					preExecution,
+					postExecution,
 					intensity, 
 					resultFormatter,
 					user
@@ -228,6 +244,13 @@ public class Load {
 			return amountOfthreads;
 		}
 
+		
+		/**
+		 * state the amount of threads for the load test
+		 * 
+		 * @param amountOfthreads is the target amount of threads that should be started and run the load
+		 * @return the builder instance
+		 */
 		public LoadBuilder amountOfThreads(int amountOfthreads) {
 			this.amountOfthreads = amountOfthreads;
 			return this;
@@ -274,20 +297,53 @@ public class Load {
 
 		public class Rampup{
 			long amount;
-			PerTimeUnit timeUnit;
+			TimeUnit timeUnit;
 			
-			Rampup(long amount, PerTimeUnit timeUnit){
+			Rampup(long amount, TimeUnit timeUnit){
 				this.amount = amount;
 				this.timeUnit = timeUnit;
 			}
 		}
 		
+		/**
+		 * rampup is process of increasing the running amount of thread from 1 to
+		 * the stated amount of threads for the load test over rampupMillis milliseconds.
+		 * 
+		 * Note that the rampup functionality only ramps up threads, not the intensity.
+		 * 
+		 * @param rampupMillis is the duration of the rampup in milliseconds
+		 * @return the builder instance
+		 */
 		public LoadBuilder rampup(long rampupMillis) {
 			this.rampupMillis = rampupMillis;
 			return this;
 		}
 
-		public LoadBuilder intensity(int amount, PerTimeUnit perTimeUnit, ThrottleMode throttleMode) {
+		/**
+ 
+		 * 
+		 * @param rampupMillis is the duration of the rampup in milliseconds
+		 * @return the builder instance
+		 */
+		
+		
+		/**
+		 * The throughput can be throttled by using this method.
+		 * So if the throttle is set to 5 PerSecond with SHARED ThrottleMode
+		 * The total throughput wont't be over 5 TPS
+		 * 
+		 * @param amount of stated PerTimeUnit will be the throttle limit 
+		 * @param perTimeUnit is the unit of which to throttle limit is defined by
+		 * @param throttleMode states whether the limit should be shared (SHARED) among
+		 * the threads, or if the there should be a separate throttle per thread (PER_THREAD)
+		 * The difference between these two is that if SHARED is used, the total throughput won't
+		 * be higher than the defined limit, no matter the amount of threads.
+		 * If PER_THREAD is used, the separate thread can't produce a higher throughput than the limit,
+		 * but the total througput for all threads together will theoretically be limit * amountOfThreads
+		 * 
+		 * @return the builder instance
+		 */
+		public LoadBuilder throttle(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
 			this.intensity = new Intensity(amount, perTimeUnit, throttleMode);
 			return this;
 		}
@@ -309,6 +365,12 @@ public class Load {
 		return rampUpSleepTime;
 	}
 	
+	/**
+	 * Start the load
+	 * 
+	 * @return
+	 * a StartedLoad instance
+	 */
 	public synchronized StartedLoad runLoad() {
 		if (startedLoad != null) {
 			throw new InvalidLoadStateException(LoadAlreadyStarted.toString());
@@ -336,7 +398,7 @@ public class Load {
 		return loadStateThread;
 	}
 
-	public Thread getRuntimeResultUpdaterThread(){
+	protected Thread getRuntimeResultUpdaterThread(){
 		return runtimeResultUpdaterThread;
 	}
 }

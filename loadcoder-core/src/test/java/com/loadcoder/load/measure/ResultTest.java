@@ -24,6 +24,8 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 import junit.framework.Assert;
 

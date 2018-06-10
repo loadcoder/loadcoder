@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
-import static com.loadcoder.statics.Milliseconds.*;
+import static com.loadcoder.statics.Time.*;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -46,8 +46,8 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.measure.TransactionExecutionResult;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartLogic extends ChartLogic {
 

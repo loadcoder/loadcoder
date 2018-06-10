@@ -27,6 +27,11 @@ public class ResultModelBase {
 	private Exception e;
 	private String message;
 	
+	/**
+	 * Set a message for the transaction
+	 * @param message is a {@code String} message that can be logged
+	 * as a part of the transaction in the result log
+	 */
 	public void setMessage(String message){
 		this.message = message;
 	}
@@ -35,6 +40,11 @@ public class ResultModelBase {
 		return message;
 	}
 	
+	/**
+	 * Change the name of the transaction to {@code newTransactionName}
+	 * @param newTransactionName is the new transaction name
+	 * Default value is the name set in the load method
+	 */
 	public void changeTransactionName(String newTransactionName){
 		this.transactionName = newTransactionName;
 	}
@@ -47,14 +57,29 @@ public class ResultModelBase {
 		return status;
 	}
 	
+	/**
+	 * If the transaction throws an Exception, that Exception will be returned here
+	 * @return the potentially thrown Exception.
+	 * Returns null if no exception was thrown
+	 */
 	public Exception getException(){
 		return e;
 	}
 	
-	protected String getTransacionName(){
+	
+	/**
+	 * @return the name of the transaction
+	 */
+	protected String getTransactionName(){
 		return transactionName;
 	}
 	
+	
+	/**
+	 * Set the status for the transaction
+	 * @param status is the status that should be set for the transaction.
+	 * Default is true
+	 */
 	public void setStatus(boolean status){
 		this.status = status;
 	}
@@ -63,10 +88,27 @@ public class ResultModelBase {
 		this.rt = rt;
 	}
 	
+	
+	/**
+	 * Get the response time of the transaction
+	 * @return the response time in milliseconds
+	 */
 	public long getResponseTime(){
 		return rt;
 	}
 	
+	
+	/**
+	 * Set whether the transaction should be reported of not.
+	 * Being reported, this means that the transaction will both be logged
+	 * and that it will be a part of the list of transactions that will
+	 * be handled by the potential resultUser (for example RuntimeChart)
+	 * 
+	 * @param reportTransaction If true, the transaction will be reported.
+	 * If false, the transaction will not be reported.
+	 * Default value is true
+	 * 
+	 */
 	public void reportTransaction(boolean reportTransaction){
 		this.reportTransaction = reportTransaction;
 	}

@@ -19,7 +19,6 @@
 package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.logic.ResultChartTestUtility.getTranses;
-import static com.loadcoder.statics.Milliseconds.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -36,14 +34,13 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.data.DataSet;
-import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.sampling.Sample;
-import com.loadcoder.load.measure.Result;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
 
 
 public class ResultChartTest extends TestNGBase{
@@ -73,7 +70,7 @@ public class ResultChartTest extends TestNGBase{
 	}
 
 	private void printArray(Integer[] ints){
-		System.out.println(Arrays.asList(ints));
+		log.info(Arrays.asList(ints).toString());
 	}
 	
 	private String intArrayAsString(Integer[] ints){

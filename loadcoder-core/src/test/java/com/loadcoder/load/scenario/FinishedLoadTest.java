@@ -16,23 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.measure;
+package com.loadcoder.load.scenario;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import static com.loadcoder.statics.LogbackLogging.*;
 
-public abstract class ResultFormatter{
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.loadcoder.load.scenario.Load.LoadBuilder;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
+
+public class FinishedLoadTest {
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	public abstract String toString(TransactionExecutionResult TransactionExecutionResult);
-	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
-	
-	public Result toResultList(File file) throws IOException{
-		List<List<TransactionExecutionResult>> resultLists = toResultLists(file);
+	@Test
+	public void getReportWhenUsingSharedDirAppenderTest() {
 		
-		Result r = new Result(resultLists);
-
-		return r;
+		setResultDestination(getNewLogDir("target/" + this.getClass().getSimpleName()));
+		LoadScenario ls = new LoadScenario() {
+			public void loadScenario() {
+				load("t1", ()->{}).perform();
+			}
+		};
+		
+		FinishedLoad s = new LoadBuilder(ls).build().runLoad().andWait();
+		
+		Result r = s.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
+		Assert.assertEquals(r.getNoOfTransactions(), 1);
 	}
-	
 }

@@ -16,20 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.intensity;
+package com.loadcoder.result;
 
-import java.util.concurrent.TimeUnit;
+import java.io.File;
 
-public enum PerTimeUnit {
-	SECOND(TimeUnit.SECONDS), MINUTE(TimeUnit.MINUTES), HOUR(TimeUnit.HOURS);
-
-	private TimeUnit timeUnit;
-
-	private PerTimeUnit(TimeUnit timeUnit){
-		this.timeUnit = timeUnit;
-	}
-
-	public TimeUnit getTimeUnit(){
-		return timeUnit;
-	}
+@FunctionalInterface
+public interface DirProvider{
+	File getFile();
 }

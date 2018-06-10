@@ -29,8 +29,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.log.Logs;
-import com.loadcoder.log.ResultLogger;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.ResultLogger;
 
 public class Slf4jTest {
 

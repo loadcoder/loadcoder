@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
-import static com.loadcoder.statics.Logging.*;
+import static com.loadcoder.statics.LogbackLogging.*;
 
 import java.lang.reflect.Method;
 
@@ -28,13 +28,13 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.measure.Result;
-import com.loadcoder.load.scenario.FinishedScenario;
+import com.loadcoder.load.scenario.FinishedLoad;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.log.Logs;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
 
 public class SeriesColorTest extends TestNGBase {
 
@@ -47,7 +47,7 @@ public class SeriesColorTest extends TestNGBase {
 				.build();
 		StartedLoad started = l.runLoad();
 
-		FinishedScenario finished = started.andWait();
+		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();
@@ -61,7 +61,7 @@ public class SeriesColorTest extends TestNGBase {
 				.build();
 		StartedLoad started = l.runLoad();
 
-		FinishedScenario finished = started.andWait();
+		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();

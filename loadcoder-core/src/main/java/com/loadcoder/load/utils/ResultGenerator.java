@@ -22,10 +22,10 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 
-import com.loadcoder.load.measure.ResultFormatter;
-import com.loadcoder.load.measure.TransactionExecutionResult;
-import com.loadcoder.log.Logs;
-import com.loadcoder.log.ResultLogger;
+import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.ResultLogger;
+import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.statics.Formatter;
 
 public class ResultGenerator {
 
@@ -39,7 +39,7 @@ public class ResultGenerator {
 	
 	public static void generateResult(long duration, int amountOfTypes){
 		
-		ResultFormatter formatter = TransactionExecutionResult.resultStringFormatterDefault;
+		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		
 		long start = System.currentTimeMillis();
 		long timeBetweenTransactionsWitinTypeStart = 100;
