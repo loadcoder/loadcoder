@@ -6,9 +6,11 @@
 	<groupId>com.loadcoder</groupId>
 	<artifactId>loadcoder-base</artifactId>
 	<name>LoadCoder Parent</name>
-	<version>${project.version}</version>
+	<version>1.0.0-beta2</version>
 	<packaging>pom</packaging>
 	<url>http://loadcoder.com</url>
+
+	<description>Loadcoder is a loadtesting tool written and used in Java</description>
 
 	<modules>
 		<module>loadcoder-utilities</module>
@@ -21,7 +23,6 @@
 	</modules>
 
 	<properties>
-		<project.version>1.0.0-SNAPSHOT</project.version>
 		<testng>full</testng>
 		<sonar.jacoco.reportPath>${basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
 		<logback.version>1.0.1</logback.version>
@@ -35,6 +36,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-all</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.loadcoder</groupId>
 				<artifactId>loadcoder-core</artifactId>
@@ -209,10 +217,16 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-		</plugins>
 
+		</plugins>
 	</build>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License (GPL), version 3.0</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+		</license>
+	</licenses>
 
 	<scm>
 		<connection>scm:git:git://github.com/loadcoder/loadcoder.git</connection>

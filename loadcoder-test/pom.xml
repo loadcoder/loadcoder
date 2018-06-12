@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.loadcoder</groupId>
@@ -10,7 +11,7 @@
 	<parent>
 		<groupId>com.loadcoder</groupId>
 		<artifactId>loadcoder-base</artifactId>
-		<version>${project.version}</version>
+		<version>1.0.0-beta2</version>
 	</parent>
 
 	<properties>
@@ -29,12 +30,11 @@
 			<artifactId>loadcoder-chart</artifactId>
 		</dependency>
 
-			<dependency>
-				<groupId>com.loadcoder</groupId>
-				<artifactId>loadcoder-testutilities</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-testutilities</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
