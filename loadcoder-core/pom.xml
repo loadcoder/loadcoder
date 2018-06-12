@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.loadcoder</groupId>
 		<artifactId>loadcoder-base</artifactId>
-		<version>${project.version}</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
