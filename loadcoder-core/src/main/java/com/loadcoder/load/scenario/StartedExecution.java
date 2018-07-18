@@ -18,34 +18,39 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.LoadUtility.sleep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ScenarioRunner implements Runnable{
-	
-	Load load;
-	public ScenarioRunner(Load l){
-		this.load = l;
+public class StartedExecution {
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
+
+	Execution execution;
+
+	protected StartedExecution(Execution exeuction) {
+		this.execution = exeuction;
 	}
-	public void run(){
 
-		long rampUpSleepTime = calculateRampUpSleepTime(load.getRampup(), load.getAmountOfThreads());
-		
-		for (int i = 0; i < load.getAmountOfThreads(); i++) {
+	/**
+	 * Wait here until all the loads finishes
+	 * 
+	 * @return FinishedLoad instance of the finished load
+	 */
+	public FinishedExecution andWait() {
+		long start = System.currentTimeMillis();
 
-			Thread thread = load.getThreads().get(i);
-			thread.start();
-
-			// dont sleep after last thread has been started
-			if (i + 1 != load.getAmountOfThreads()) {
-				sleep(rampUpSleepTime);
+		for (Load load : execution.getLoads()) {
+			try {
+				load.getLoadStateThread().join();
+			} catch (InterruptedException ie) {
+				log.error("Unexpected InterruptedException caught", ie);
 			}
 		}
-	}
-	
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
-		long rampUpSleepTime = 0;
-		if (amountOfThreads > 1)
-			rampUpSleepTime = rampup / (amountOfThreads - 1);
-		return rampUpSleepTime;
+
+		if (execution.getRuntimeResultUpdaterThread() != null) {
+			execution.getRuntimeResultUpdaterThread().interrupt();
+		}
+		log.debug("Load executed {} ms", (System.currentTimeMillis() - start));
+		return new FinishedExecution(execution);
 	}
 }

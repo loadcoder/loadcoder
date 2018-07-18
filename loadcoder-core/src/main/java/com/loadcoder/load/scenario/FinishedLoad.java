@@ -18,53 +18,15 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.result.Logs;
-import com.loadcoder.result.Result;
-
-public class FinishedLoad{
+public class FinishedLoad {
 	Load s;
-	
+
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	public final static String RESULTFILE_DEFAULT = "result.log";
-	FinishedLoad(Load s){
+
+	FinishedLoad(Load s) {
 		this.s = s;
 	}
-
-	/**
-	 * @return a new Result instance from the finished load
-	 * @throws NoResultOrFormatterException
-	 */
-	public Result getReportedResultFromResultFile() throws NoResultOrFormatterException{
-		File f = Logs.getResultFileInLogDir();
-		return getReportedResultFromResultFile(f);
-	}
-	
-	public Result getReportedResultFromResultFile(File resultFile)
-			throws NoResultOrFormatterException {
-		if (s.getResultFormatter() != null) {
-			try {
-				long startTime = System.currentTimeMillis();
-				Result result = s.getResultFormatter().toResultList(resultFile);
-				long executionTime = System.currentTimeMillis() - startTime;
-				log.debug(String.format("Time taken to generate result: %s ms",
-						executionTime));
-
-				return result;
-			} catch (IOException ioe) {
-				throw new RuntimeException("Could not read the resultFile "
-						+ resultFile, ioe);
-			}
-		}
-		throw new NoResultOrFormatterException("The report can not be produced"
-				+ " since the ResultFormatter or/and ResultDestination "
-				+ "seems to be missning in the scenario");
-	}
-
 }

@@ -33,12 +33,12 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.testng.TestNGBase;
 
-public class SampleGroupTest extends TestNGBase{
+public class SampleGroupTest extends TestNGBase {
 
 	XYSeriesExtension series = new XYSeriesExtension("foo", true, false, Color.RED);
-	
+
 	@Test
-	public void test0(){
+	public void test0() {
 		long sampleLength = 1000;
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(0, series.getKey(), 1000);
@@ -48,12 +48,12 @@ public class SampleGroupTest extends TestNGBase{
 		Assert.assertEquals(999, s.getLastTs());
 		Assert.assertEquals(s, s2);
 	}
-	
+
 	@Test
-	public void testMinusSampleLength(){
+	public void testMinusSampleLength() {
 		long sampleLength = 1000;
 		long tsToTest = -1000;
-		
+
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
 		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
@@ -62,12 +62,12 @@ public class SampleGroupTest extends TestNGBase{
 		Assert.assertEquals(-1, s.getLastTs());
 		Assert.assertEquals(s, s2);
 	}
-	
+
 	@Test
-	public void testPlusSampleLength(){
+	public void testPlusSampleLength() {
 		long sampleLength = 1000;
 		long tsToTest = 1000;
-		
+
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
 		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
@@ -76,13 +76,13 @@ public class SampleGroupTest extends TestNGBase{
 		Assert.assertEquals(1999, s.getLastTs());
 		Assert.assertEquals(s, s2);
 	}
-	
+
 	@Test
-	public void testRest1(){
+	public void testRest1() {
 
 		long sampleLength = 1000;
 		long tsToTest = -999;
-		
+
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
 		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
@@ -93,11 +93,11 @@ public class SampleGroupTest extends TestNGBase{
 	}
 
 	@Test
-	public void test2SamplesBelow0AndWithRest(){
-		
+	public void test2SamplesBelow0AndWithRest() {
+
 		long sampleLength = 1000;
 		long tsToTest = -1500;
-		
+
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
 		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
@@ -106,12 +106,12 @@ public class SampleGroupTest extends TestNGBase{
 		Assert.assertEquals(-1001, s.getLastTs());
 		Assert.assertEquals(s, s2);
 	}
-	
+
 	@Test
-	public void test2SamplesOver0AndWithRest(){
+	public void test2SamplesOver0AndWithRest() {
 		long sampleLength = 1000;
 		long tsToTest = 1500;
-		
+
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
 		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
 		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
@@ -121,26 +121,26 @@ public class SampleGroupTest extends TestNGBase{
 		Assert.assertEquals(s, s2);
 	}
 
-	
 	@Test
-	public void testConcaternation(){
+	public void testConcaternation() {
 		XYSeriesExtension serie = new XYSeriesExtension("foo", true, false, Color.RED);
-		
+
 		SampleGroup group = new SampleGroup(1000, serie, false);
 		Sample a = group.getAndCreateSample(0, "foo", 1000);
 		a.addPoint(new Point(1, 10, true));
 
 		Sample b = group.getAndCreateSample(1000, "foo", 1000);
 		b.addPoint(new Point(1001, 0, true));
-		
-		ChartUtils.itemSeriesAdderForSamples.add(serie, a);
-		ChartUtils.itemSeriesAdderForSamples.add(serie, b);
+
+		ChartUtils.samples(a, serie);
+		ChartUtils.samples(b, serie);
 
 		Range oldRange = new Range(0, Long.MAX_VALUE, 1000);
 		Range newRange = new Range(Long.MIN_VALUE, -1, 2000);
-		
-		SampleConcaternator sampleConcaternator = new SampleConcaternator(oldRange, newRange,
-				2, (c)->{return true;});
+
+		SampleConcaternator sampleConcaternator = new SampleConcaternator(oldRange, newRange, 2, (c) -> {
+			return true;
+		});
 
 		Sample aBeforeConcat = group.getExistingSample(0, 1000);
 		Sample bBeforeConcat = group.getExistingSample(999, 1000);

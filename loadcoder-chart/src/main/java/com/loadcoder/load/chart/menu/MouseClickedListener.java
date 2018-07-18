@@ -16,36 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario;
+package com.loadcoder.load.chart.menu;
 
-import static com.loadcoder.load.LoadUtility.sleep;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-public class ScenarioRunner implements Runnable{
+public abstract class MouseClickedListener implements MouseListener {
+	@Override
+	public void mouseReleased(MouseEvent e) {}
 	
-	Load load;
-	public ScenarioRunner(Load l){
-		this.load = l;
-	}
-	public void run(){
-
-		long rampUpSleepTime = calculateRampUpSleepTime(load.getRampup(), load.getAmountOfThreads());
-		
-		for (int i = 0; i < load.getAmountOfThreads(); i++) {
-
-			Thread thread = load.getThreads().get(i);
-			thread.start();
-
-			// dont sleep after last thread has been started
-			if (i + 1 != load.getAmountOfThreads()) {
-				sleep(rampUpSleepTime);
-			}
-		}
-	}
+	@Override
+	public void mousePressed(MouseEvent e) {}
 	
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
-		long rampUpSleepTime = 0;
-		if (amountOfThreads > 1)
-			rampUpSleepTime = rampup / (amountOfThreads - 1);
-		return rampUpSleepTime;
-	}
+	@Override
+	public void mouseExited(MouseEvent e) {}
+	
+	@Override
+	public void mouseEntered(MouseEvent e) {}
 }

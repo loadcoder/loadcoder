@@ -18,11 +18,30 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import java.util.List;
+import java.util.Arrays;
 
-import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.result.ResultFormatter;
 
-@FunctionalInterface
-public interface RuntimeDataUser {
-	void useData(List<List<TransactionExecutionResult>> listOfListOfList);
+public class ExecutionBuilder {
+	ResultFormatter resultFormatter;
+	RuntimeResultUser user;
+	final Load[] loads;
+
+	public ExecutionBuilder runtimeResultUser(RuntimeResultUser user) {
+		this.user = user;
+		return this;
+	}
+
+	public ExecutionBuilder resultFormatter(ResultFormatter resultFormatter) {
+		this.resultFormatter = resultFormatter;
+		return this;
+	}
+
+	public ExecutionBuilder(Load... loads) {
+		this.loads = loads;
+	}
+
+	public Execution build() {
+		return new Execution(resultFormatter, user, Arrays.asList(loads));
+	}
 }

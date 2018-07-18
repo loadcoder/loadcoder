@@ -29,14 +29,14 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeResultUpdaterRunner implements Runnable{
 	
-	Load load;
-	RuntimeDataUser runtimeDataUser;
-	boolean quit = false;
+	Execution execution;
+	
+	RuntimeResultUser runtimeDataUser;
 	
 	Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
 	
-	public RuntimeResultUpdaterRunner(Load l, RuntimeDataUser runtimeDataUser){
-		this.load = l;
+	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser){
+		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}
 	
@@ -61,13 +61,20 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 				Thread.sleep(3_000);
 			} catch (InterruptedException ie) {
 			}
-
-			State scenarioStateManagerState = load.getLoadStateThread().getState();
-			if (scenarioStateManagerState == State.TERMINATED) {
-				quit = true;
+			
+			boolean oneLoadStillNotTerminated = false;
+			
+			for(Load load : execution.getLoads()) {
+				State scenarioStateManagerState = load.getLoadStateThread().getState();
+				if (scenarioStateManagerState != State.TERMINATED) {
+					oneLoadStillNotTerminated = true;
+					break;
+				}
 			}
+			
 			swapOutDataAndCallUser(map);
-			if (quit) {
+			
+			if (! oneLoadStillNotTerminated) {
 				break;
 			}
 		}
@@ -77,14 +84,14 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 		List<TransactionExecutionResult> switchDestination;
 
 		//swap the bucket. The running load threads will after this add results to the new list
-		synchronized (load.getTransactionExecutionResultBuffer()) {
-			switchDestination = load.getTransactionExecutionResultBuffer().getBuffer();
-			load.getTransactionExecutionResultBuffer().setBuffer(new ArrayList<TransactionExecutionResult>());
+		synchronized (execution.getTransactionExecutionResultBuffer()) {
+			switchDestination = execution.getTransactionExecutionResultBuffer().getBuffer();
+			execution.getTransactionExecutionResultBuffer().setBuffer(new ArrayList<TransactionExecutionResult>());
 		}
 
 		//add all the swaped out results to the runtimeResultList
-		synchronized (load.getRuntimeResultList()) {
-			List<List<TransactionExecutionResult>> runtimeResultList = load.getRuntimeResultList();
+		synchronized (execution.getRuntimeResultList()) {
+			List<List<TransactionExecutionResult>> runtimeResultList = execution.getRuntimeResultList();
 			for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
 				String name = transactionExecutionResult.getName();
 				List<TransactionExecutionResult> listToAddTo = map.get(name);
@@ -97,8 +104,8 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 			}
 		}
 
-		runtimeDataUser.useData(load.getRuntimeResultList());
-		load.getRuntimeResultList().clear();
+		runtimeDataUser.useData(execution.getRuntimeResultList());
+		execution.getRuntimeResultList().clear();
 		map.clear();
 	}
 

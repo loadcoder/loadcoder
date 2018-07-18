@@ -18,34 +18,11 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.LoadUtility.sleep;
+import java.util.List;
 
-public class ScenarioRunner implements Runnable{
-	
-	Load load;
-	public ScenarioRunner(Load l){
-		this.load = l;
-	}
-	public void run(){
+import com.loadcoder.result.TransactionExecutionResult;
 
-		long rampUpSleepTime = calculateRampUpSleepTime(load.getRampup(), load.getAmountOfThreads());
-		
-		for (int i = 0; i < load.getAmountOfThreads(); i++) {
-
-			Thread thread = load.getThreads().get(i);
-			thread.start();
-
-			// dont sleep after last thread has been started
-			if (i + 1 != load.getAmountOfThreads()) {
-				sleep(rampUpSleepTime);
-			}
-		}
-	}
-	
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
-		long rampUpSleepTime = 0;
-		if (amountOfThreads > 1)
-			rampUpSleepTime = rampup / (amountOfThreads - 1);
-		return rampUpSleepTime;
-	}
+@FunctionalInterface
+public interface RuntimeResultUser {
+	void useData(List<List<TransactionExecutionResult>> listOfListOfList);
 }

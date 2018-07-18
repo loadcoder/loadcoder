@@ -45,9 +45,8 @@ public class LoadStateRunner implements Runnable {
 					try {
 						t.join();
 					} catch (InterruptedException ie) {
-						throw new Error("detts ska inte handa");
+						throw new Error("this should never happen");
 					}
-
 					continue whileloop;
 				}
 			}
