@@ -23,18 +23,8 @@ import java.util.List;
 public class DataSet {
 
 	String name;
-	
-	boolean enabled = true;
-	
-	List<Point> points;
-	
-	public boolean isEnabled() {
-		return enabled;
-	}
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+	List<Point> points;
 
 	public String getName() {
 		return name;
@@ -44,7 +34,7 @@ public class DataSet {
 		return points;
 	}
 
-	public DataSet(String name, List<Point> point){
+	public DataSet(String name, List<Point> point) {
 		this.name = name;
 		this.points = point;
 	}

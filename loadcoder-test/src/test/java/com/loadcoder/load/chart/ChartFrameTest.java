@@ -56,7 +56,11 @@ public class ChartFrameTest {
 		series.add(item);
 		
 		frame.getSeriesCollection().fireChange();
-		
+
+		LoadUtility.sleep(5_000);
+		series.setColorInTheChart(Color.BLUE);
+		frame.getSeriesCollection().fireChange();
+
 		LoadUtility.sleep(600_000);
 	}
 }

@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.log;
 
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -31,7 +33,6 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.result.Logs;
 import com.loadcoder.result.ResultLogger;
 
 public class LogTest extends TestNGBase{
@@ -47,7 +48,7 @@ public class LogTest extends TestNGBase{
 	public void testLogging(Method method) throws IOException{
 		
 		File resultDir = new File(rootResultDir + "/" + method.getName() + "/" + System.currentTimeMillis());
-		Logs.changeToSharedDir(resultDir);
+		setResultDestination(resultDir);
 		String infoMsg = "foo";
 		String resultMsg = "bar";
 		resultLog.info(resultMsg);
@@ -67,8 +68,8 @@ public class LogTest extends TestNGBase{
 	@Test
 	public void testLoggingWithSUT(Method method) throws IOException{
 		File resultDir = new File(rootResultDir + "/" + method.getName() + "/" + System.currentTimeMillis());
-		Logs.changeToSharedDir(resultDir);
-		
+		setResultDestination(resultDir);
+			
 		String infoMsg = "foo";
 		String resultMsg = "bar";
 		resultLog.info(resultMsg);

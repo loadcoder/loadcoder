@@ -20,7 +20,7 @@ package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.common.YCalculator.avg;
 import static com.loadcoder.load.chart.common.YCalculator.max;
-import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.Time.HOUR;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -46,7 +46,6 @@ import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
-import com.loadcoder.load.chart.jfreechart.ItemSeriesAdder;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
@@ -54,6 +53,7 @@ import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleGroup;
+import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.ColorUtils;
 import com.loadcoder.load.chart.utilities.SampleStatics;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
@@ -63,48 +63,54 @@ import com.loadcoder.result.TransactionExecutionResult;
 public abstract class ChartLogic {
 
 	List<XYSeriesExtension> commonSeries = new ArrayList<XYSeriesExtension>();
-	
+
 	Map<Comparable, XYSeriesExtension> seriesCommonMap = new HashMap<Comparable, XYSeriesExtension>();
-	
+
 	CommonSeries[] commonsToBeUsed = CommonSeries.values();
-	
+
 	protected Long earliestX;
-	
+
 	protected long highestX = 0;
 
 	protected long sampleLengthToUse;
 
 	final boolean locked;
-	
+
 	FilteredData filteredData;
 
 	List<DataSetUserType> removalFiltersInUse = new ArrayList<DataSetUserType>();
 
 	protected final XYSeriesCollectionExtention seriesCollection;
-	
+
 	protected final XYPlotExtension plot;
-	
+
 	protected final XYLineAndShapeRendererExtention renderer;
-	
+
 	protected final Map<Comparable, Boolean> seriesVisible;
-	
+
 	protected List<YCalculator> yCalculators = new ArrayList<YCalculator>();
 
 	public YCalculator yCalculatorToUse = avg;
 
 	List<Color> existingColors = new ArrayList<Color>();
-	
+
+	/**
+	 * customizedColors is not yet supported
+	 */
+	@Deprecated
 	Map<Comparable, Color> customizedColors;
-	
+
 	protected List<Comparable> seriesKeys = new ArrayList<Comparable>();
-	
+
 	protected Map<Comparable, LegendItem> legends = new HashMap<Comparable, LegendItem>();
 
 	protected List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
 
 	protected List<Range> ranges = new ArrayList<Range>();
-	
+
 	protected boolean shallUpdate = true;
+
+	public final List<Color> blacklistColors = new ArrayList<Color>();
 
 	protected abstract void getDataAndUpdate(HashSet<Long> hashesGettingUpdated, boolean updateSamples);
 
@@ -113,32 +119,40 @@ public abstract class ChartLogic {
 
 	protected abstract void doUpdate();
 
+	public List<Color> getExistingColors() {
+		return existingColors;
+	}
+
+	public XYPlotExtension getPlot() {
+		return plot;
+	}
+
 	protected long getXDiff() {
-		if(earliestX == null)
+		if (earliestX == null)
 			return 0;
 		long xDiff = highestX - earliestX;
 		return xDiff;
 	}
-	
-	//only used for test
-    protected Range lookupCorrectRange(long ts) {
-        for (Range range : ranges) {
-                if (range.isTimestampInThisRange(ts))
-                        return range;
-        }
-        throw new RuntimeException("No range was found for timestamp " + ts);
-    }
-    
-	public void doSafeUpdate(){
+
+	// only used for test
+	protected Range lookupCorrectRange(long ts) {
+		for (Range range : ranges) {
+			if (range.isTimestampInThisRange(ts))
+				return range;
+		}
+		throw new RuntimeException("No range was found for timestamp " + ts);
+	}
+
+	public void doSafeUpdate() {
 		synchronized (plot) {
 			doUpdate();
 			long xDiff = getXDiff();
-			if(xDiff > 23 * HOUR) {
+			if (xDiff > 23 * HOUR) {
 				plot.changeToMonthAndDayDateAxisFormat();
 			}
 		}
 	}
-	
+
 	public List<DataSetUserType> getRemovalFiltersInUse() {
 		return removalFiltersInUse;
 	}
@@ -171,10 +185,10 @@ public abstract class ChartLogic {
 		this.yCalculators = yCalculators;
 	}
 
-	void addToSeriesKeys(FilteredData filteredData, List<Comparable> seriesKeys){
-		for(DataSet dataSet : filteredData.getDataSets()){
+	void addToSeriesKeys(FilteredData filteredData, List<Comparable> seriesKeys) {
+		for (DataSet dataSet : filteredData.getDataSets()) {
 			String s = dataSet.getName();
-			if(!seriesKeys.contains(s))
+			if (!seriesKeys.contains(s))
 				seriesKeys.add(s);
 		}
 	}
@@ -189,13 +203,16 @@ public abstract class ChartLogic {
 
 		yCalculators.add(avg);
 		yCalculators.add(max);
-		
+
+		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
+			blacklistColors.add(blackListed);
+		});
 		populateColorArray();
 	}
 
-	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart, long earliest,
-			long latest, List<Range> ranges, long currentSampleLength, 
-			Set<Long> sampleTimestamps, Map<Long, Sample> aboutToBeUpdated) {
+	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart,
+			long earliest, long latest, List<Range> ranges, long currentSampleLength, Set<Long> sampleTimestamps,
+			Map<Long, Sample> aboutToBeUpdated) {
 
 		// check backwards
 		long iterator = sampleStart;
@@ -205,10 +222,10 @@ public abstract class ChartLogic {
 			long firstTsInPrevious = SampleGroup.calculateFirstTs(lastTsInPrevious, sampleLength);
 
 			boolean exists = false;
-			if(sampleTimestamps.contains(firstTsInPrevious) || aboutToBeUpdated.containsKey(firstTsInPrevious)){
+			if (sampleTimestamps.contains(firstTsInPrevious) || aboutToBeUpdated.containsKey(firstTsInPrevious)) {
 				exists = true;
 			}
-			
+
 			if (exists) {
 				break;
 			} else {
@@ -224,10 +241,10 @@ public abstract class ChartLogic {
 			long sampleLength = Range.findSampleLength(iterator, ranges);
 			long firstTsInNext = iterator + sampleLength;
 			boolean exists = false;
-			if(sampleTimestamps.contains(firstTsInNext) || aboutToBeUpdated.containsKey(firstTsInNext)){
+			if (sampleTimestamps.contains(firstTsInNext) || aboutToBeUpdated.containsKey(firstTsInNext)) {
 				exists = true;
 			}
-			
+
 			if (exists) {
 				break;
 			} else {
@@ -250,15 +267,20 @@ public abstract class ChartLogic {
 			seriesCommonMap.put(common.getName(), xySeries);
 			commonSeriesCalculators.add(new CommonSeriesCalculator(xySeries, common.getCommonYCalculator()));
 			commonSeries.add(xySeries);
-		} );
+		});
 	}
-		
+
 	public void addSeries(XYSeriesExtension serie) {
-		seriesCollection.addSeries(serie); //TODO. bug this fires render
+		seriesCollection.addSeries(serie); // TODO. bug this fires render
 		int indexOfSeries = seriesCollection.indexOf(serie);
 		LegendItem legend = legends.get(serie.getKey());
 		if (legend == null) {
 			legend = plot.getRenderer().getLegendItem(0, indexOfSeries);
+
+			legend.setFillPaint(serie.getColorInTheChart());
+			legend.setShapeVisible(true);
+			legend.setLineVisible(false);
+
 			legends.put(serie.getKey(), legend);
 			plot.getLegendItems().add(legend);
 		} else {
@@ -272,16 +294,17 @@ public abstract class ChartLogic {
 	}
 
 	/*
-	 * iterate through all timestamp that are the first one in one of the
-	 * updated samples. The series that are affected by the transaction series
-	 * are going to be upated below
+	 * iterate through all timestamp that are the first one in one of the updated
+	 * samples. The series that are affected by the transaction series are going to
+	 * be upated below
 	 */
-	void updateCommonsWithSamples(HashSet<Long> hashesGettingUpdated, Map<Comparable, SampleGroup> sampleGroups, Map<Comparable, CommonSampleGroup> samplesCommonMap, 		List<CommonSampleGroup> sampleGroupCommonList) {
+	void updateCommonsWithSamples(HashSet<Long> hashesGettingUpdated, Map<Comparable, SampleGroup> sampleGroups,
+			Map<Comparable, CommonSampleGroup> samplesCommonMap, List<CommonSampleGroup> sampleGroupCommonList) {
 
 		/*
-		 * iterate through all timestamp that are the first one in one of the
-		 * updated samples. The series that are affected by the transaction
-		 * series are going to be upated below
+		 * iterate through all timestamp that are the first one in one of the updated
+		 * samples. The series that are affected by the transaction series are going to
+		 * be upated below
 		 */
 		for (Long l : hashesGettingUpdated) {
 			for (CommonSeriesCalculator calc : commonSeriesCalculators) {
@@ -307,7 +330,7 @@ public abstract class ChartLogic {
 				if (cs.getFirst() == null) {
 					cs.initDataItems();
 					series.add(cs.getFirst(), false);
-					if(SampleStatics.USE_TWO_SAMPLE_POINTS) {
+					if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
 						series.add(cs.getLast(), false);
 					}
 				} else {
@@ -319,6 +342,7 @@ public abstract class ChartLogic {
 
 	Paint getSeriesColor(Comparable dataSetName) {
 		LegendItem legend = legends.get(dataSetName);
+
 		Paint seriesColor = null;
 		if (legend == null) {
 			seriesColor = getNewColor(dataSetName);
@@ -335,7 +359,7 @@ public abstract class ChartLogic {
 			Paint seriesColor = getSeriesColor(dataSetName);
 
 			XYSeriesExtension seriesName = seriesMap.get(dataSetName);
-			if(seriesName == null) {
+			if (seriesName == null) {
 				XYSeriesExtension serie = new XYSeriesExtension(dataSetName, true, false, seriesColor);
 				seriesMap.put(dataSetName, serie);
 			}
@@ -354,6 +378,7 @@ public abstract class ChartLogic {
 		}
 
 		serie.setVisible(visible);
+		serie.getLegend().setShapeVisible(visible);
 		renderer.setSeriesLinesVisible(indexOfSeries, visible);
 		// is sample mode, the shapes shall always be invisible.
 		renderer.setSeriesShapesVisible(indexOfSeries, false);
@@ -370,17 +395,18 @@ public abstract class ChartLogic {
 	}
 
 	void createSamplesGroups(Map<Comparable, XYSeriesExtension> seriesMap, Map<Comparable, SampleGroup> sampleGroups) {
-		for(Comparable key : seriesKeys){
+		for (Comparable key : seriesKeys) {
 			XYSeriesExtension serie = seriesMap.get(key);
 			SampleGroup sampleGroup = sampleGroups.get(key);
-			if(sampleGroup == null){
+			if (sampleGroup == null) {
 				sampleGroup = new SampleGroup(sampleLengthToUse, serie, locked);
 				sampleGroups.put(key, sampleGroup);
 			}
 		}
 	}
 
-	void createSamplesAndAddPoints(Comparable dataSetName, XYSeriesExtension serie, DataSet dataSet, SampleGroup sampleGroup, Set<Long> sampleTimestamps) {
+	void createSamplesAndAddPoints(Comparable dataSetName, XYSeriesExtension serie, DataSet dataSet,
+			SampleGroup sampleGroup, Set<Long> sampleTimestamps) {
 		for (Point point : dataSet.getPoints()) {
 			long x = point.getX();
 
@@ -396,17 +422,15 @@ public abstract class ChartLogic {
 				} else {
 
 					/*
-					 * if there are more than one range, and a new
-					 * earliestTimestamp is added we must pick up the last added
-					 * range here.
+					 * if there are more than one range, and a new earliestTimestamp is added we
+					 * must pick up the last added range here.
 					 */
 					Range r = ranges.get(ranges.size() - 1);
 					long sampleLengthOfTheLastAddedRange = r.getSampleLength();
 
 					/*
-					 * the last added range will get a new start equal to the
-					 * firstTs for the Sample of this Point that has the
-					 * earliest timestamp
+					 * the last added range will get a new start equal to the firstTs for the Sample
+					 * of this Point that has the earliest timestamp
 					 */
 					Sample s = sampleGroup.getAndCreateSample(x, dataSetName, sampleLengthOfTheLastAddedRange);
 					r.setStart(s.getFirstTs());
@@ -418,16 +442,16 @@ public abstract class ChartLogic {
 
 			// here the Sample for the point is either fetched of created
 			Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, rangeToUse.getSampleLength());
-			
-			if(! sampleTimestamps.contains(s.getFirstTs())){
+
+			if (!sampleTimestamps.contains(s.getFirstTs())) {
 				sampleTimestamps.add(s.getFirstTs());
 			}
-			
+
 			s.addPoint(point);
 			if (!point.isStatus()) {
 				s.increaseFails();
 			}
-			
+
 			// This sample needs to be recalculated and redrawn!
 			if (!sampleGroup.getSamplesUnupdated().containsKey(s.getFirstTs())) {
 				sampleGroup.getSamplesUnupdated().put(s.getFirstTs(), s);
@@ -471,67 +495,84 @@ public abstract class ChartLogic {
 		return null;
 	}
 
-	void populateColorArray(){
-		if(customizedColors!= null){
+	void populateColorArray() {
+		if (customizedColors != null) {
 			Iterator<Entry<Comparable, Color>> i = customizedColors.entrySet().iterator();
-			while(i.hasNext()){
+			while (i.hasNext()) {
 				Entry<Comparable, Color> e = i.next();
 				existingColors.add(e.getValue());
 			}
 		}
-		for(CommonSeries commonSerie : commonsToBeUsed){
+		for (CommonSeries commonSerie : commonsToBeUsed) {
 			Color c = commonSerie.getColor();
 			existingColors.add(c);
 		}
 	}
-	
+
 	public synchronized Color getNewColor(Comparable seriesKey) {
 
-		if(customizedColors != null){
+		if (customizedColors != null) {
 			Color color = customizedColors.get(seriesKey);
 			return color;
 		}
-		Color newColor = ColorUtils.getNewContrastfulColor(existingColors);
+		Color newColor = ColorUtils.getNewContrastfulColor(existingColors, blacklistColors);
 		existingColors.add(newColor);
 		return newColor;
 	}
 
-	void forceRerender() {
+	public void forceRerender() {
 		seriesCollection.fireChange();
 	}
 
-	void updateSeriesWithSamples(ItemSeriesAdder itemSeriesAdder, Set<Long> hashesGettingUpdated,
-	List<DataSet> dataSets, Map<Comparable, SampleGroup> sampleGroups, Set<Long> sampleTimestamps) {
+	void updateSeriesWithSamples(Set<Long> hashesGettingUpdated, List<DataSet> dataSets,
+			Map<Comparable, SampleGroup> sampleGroups, Set<Long> sampleTimestamps, boolean dottedMode) {
+
+		if (dottedMode) {
+			for (DataSet set : dataSets) {
+				SampleGroup group = sampleGroups.get(set.getName());
+				XYSeriesExtension series = group.getSeries();
+				ChartUtils.populateSeriesWithPoints(set.getPoints(), series);
+			}
+		}
+
 		/*
-		 * The new data has now been arranged into correct Samples. Time to
-		 * calculate each of the affected Samples and update the points.
+		 * The new data has now been arranged into correct Samples. Time to calculate
+		 * each of the affected Samples and update the points.
 		 */
-		for(Comparable key : seriesKeys){
-			
+		for (Comparable key : seriesKeys) {
+
 			SampleGroup group = sampleGroups.get(key);
 			XYSeriesExtension series = group.getSeries();
 
 			Set<Long> aboutToBeUpdatedKeys = group.getSamplesUnupdated().keySet();
-			for(Long unupdatedSampleKey : aboutToBeUpdatedKeys) {
+			for (Long unupdatedSampleKey : aboutToBeUpdatedKeys) {
 				Sample sample = group.getSamplesUnupdated().get(unupdatedSampleKey);
 				sample.calculateY(yCalculatorToUse);
 				double y = sample.getY();
-				
-				// y will be -1 if there are no data in the sample. No items to add to the series
-				if (y != -1) {
-					itemSeriesAdder.add(series, sample);
+
+				if (dottedMode == false) {
+					// y will be -1 if there are no data in the sample. No items to add to the
+					// series
+					if (y != -1) {
+						// itemSeriesAdder.add(series, sample);
+						ChartUtils.samples(sample, series);
+					}
+
 				}
+
 				long l = sample.getFirstTs();
 
-				if (!hashesGettingUpdated.contains(l))
+				if (!hashesGettingUpdated.contains(l)) {
 					hashesGettingUpdated.add(l);
+				}
 
 				long[] minmaxPoints = filteredData.getMinmaxPoints();
 
 				long earliest = minmaxPoints[0];
 				long latest = minmaxPoints[1];
 
-				addSurroundingTimestampsAsUpdates(hashesGettingUpdated, l, earliest, latest, ranges, sample.getLength(),sampleTimestamps, group.getSamplesUnupdated());
+				addSurroundingTimestampsAsUpdates(hashesGettingUpdated, l, earliest, latest, ranges, sample.getLength(),
+						sampleTimestamps, group.getSamplesUnupdated());
 			}
 			group.getSamplesUnupdated().clear();
 		}

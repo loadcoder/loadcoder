@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class XYPlotExtension extends XYPlot {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	XYDataset dataset;
 
 	private final SimpleDateFormat monthDayDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
@@ -47,39 +47,40 @@ public class XYPlotExtension extends XYPlot {
 		this.dataset = dataset;
 	}
 
-	
 	public long getXRange() {
 		ValueAxis xAxis = getDomainAxisForDataset(0);
 		double diff = xAxis.getUpperBound() - xAxis.getLowerBound();
-		return (long)diff;
+		return (long) diff;
 	}
-	
-	public void changeToMonthAndDayDateAxisFormat(){
-		((DateAxis)getDomainAxis()).setDateFormatOverride(monthDayDateFormat);
+
+	public void changeToMonthAndDayDateAxisFormat() {
+		((DateAxis) getDomainAxis()).setDateFormatOverride(monthDayDateFormat);
 	}
-	
+
 	@Override
 	public boolean render(Graphics2D g2, Rectangle2D dataArea, int index, PlotRenderingInfo info,
 			CrosshairState crosshairState) {
+
+		boolean result = false;
 		synchronized (this) {
 			long start = System.currentTimeMillis();
-			boolean result = super.render(g2, dataArea, index, info, crosshairState);
-			logger.trace("Render time: {} ms", System.currentTimeMillis() -start);
-			return result;
+			result = super.render(g2, dataArea, index, info, crosshairState);
+			logger.info("Render time: {} ms", System.currentTimeMillis() - start);
 		}
+		return result;
+
 	}
 
 	/*
-	 *  This is invoked when zooming out in the chart using right button mouse click
+	 * This is invoked when zooming out in the chart using right button mouse click
 	 */
 	@Override
-    public void zoomDomainAxes(double factor, PlotRenderingInfo info,
-                               Point2D source) {
+	public void zoomDomainAxes(double factor, PlotRenderingInfo info, Point2D source) {
 		synchronized (this) {
 			super.zoomDomainAxes(factor, info, source);
 		}
-    }
-    
+	}
+
 	XYItemRenderer renderer = getRenderer(0);
 	LegendItemCollection legends = new LegendItemCollection();
 
@@ -87,9 +88,9 @@ public class XYPlotExtension extends XYPlot {
 		return legends;
 	}
 
-	/* 
-	 * Overriding this method since the legends dissapears if clicking
-	 * on them making them in order to make the series invisible.
+	/*
+	 * Overriding this method since the legends dissapears if clicking on them
+	 * making them in order to make the series invisible.
 	 */
 	public LegendItemCollection getLegendItems() {
 		return getLegends();

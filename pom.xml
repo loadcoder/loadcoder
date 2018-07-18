@@ -27,7 +27,7 @@
 		<slf4j.version>1.6.4</slf4j.version>
 		<testng.version>6.1.1</testng.version>
 		<mockito.version>1.9.5</mockito.version>
-		<chart-extensions.version>1.0.19</chart-extensions.version>
+		<chart-extensions.version>1.0.19-SNAPSHOT</chart-extensions.version>
 		<guava.version>19.0</guava.version>
 
 	</properties>

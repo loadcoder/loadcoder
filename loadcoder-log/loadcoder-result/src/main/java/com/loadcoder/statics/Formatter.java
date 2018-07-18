@@ -84,7 +84,10 @@ public class Formatter {
 			List<List<TransactionExecutionResult>> dataSets = new ArrayList<List<TransactionExecutionResult>>();
 			Map<String, List<TransactionExecutionResult>> dataSetMap = new HashMap<String, List<TransactionExecutionResult>>();
 			int lineNumber = 0;
+			log.debug("reading file {}" ,file);
 			List<String> fileAsLineList = LoadUtility.readFile(file);
+			log.debug("file sucessfully read!");
+			
 			for (String line : fileAsLineList) {
 				
 				//skip empty lines

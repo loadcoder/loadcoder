@@ -18,9 +18,9 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.ContinueDesisions.duration;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+import static com.loadcoder.statics.StopDesisions.duration;
 
 import java.lang.reflect.Method;
 
@@ -28,66 +28,55 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtils;
 import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.StartedLoad;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 
-public class DefaultPackageTests extends TestNGBase{
+public class DefaultPackageTests extends TestNGBase {
 
-	
 	@Test(groups = "manual")
-	public void sendInPreHistoricResultsIntoRuntimeChart_NPE(Method method){
+	public void sendInPreHistoricResultsIntoRuntimeChart_NPE(Method method) {
 
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
-				
+
 				SUT sut = new SUT();
-				load("t1", ()->{sut.methodThatTakesBetweenTheseResponseTimes(100, 120); return "";})
-				.handleResult((a)->{
-				})
-				.perform();
+				load("t1", () -> {
+					sut.methodThatTakesBetweenTheseResponseTimes(100, 120);
+					return "";
+				}).handleResult((a) -> {
+				}).perform();
 			}
 		};
-		Load l = new LoadBuilder(s)
-				.continueCriteria(duration(500_000))
-				.resultUser(new RuntimeChart())
-				.build();
+		Load l = new LoadBuilder(s).stopDecision(duration(500_000)).build();
 
-		TestUtils.add(l.getTransactionExecutionResultBuffer().getBuffer(), 50000_000, 1);
-		
-		StartedLoad started = l.runLoad();
-		started.andWait();
-		
+		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
+		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBuffer(), 500_000, 1);
+
+		execution.execute().andWait();
 	}
-	
+
 	@Test(groups = "manual")
-	public void sendInPreHistoricResultsIntoRuntimeChart(Method method){
+	public void sendInPreHistoricResultsIntoRuntimeChart(Method method) {
 
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
 				SUT sut = new SUT();
-				load("t1", ()->{sut.methodThatTakesBetweenTheseResponseTimes(100, 120); return "";})
-				.handleResult((a)->{
-				})
-				.perform();
+				load("t1", () -> {
+					sut.methodThatTakesBetweenTheseResponseTimes(100, 120);
+					return "";
+				}).handleResult((a) -> {
+				}).perform();
 			}
 		};
-		Load l = new LoadBuilder(s)
-				.continueCriteria(duration(300_000))
-				.resultUser(new RuntimeChart())
-				.build();
+		Load l = new LoadBuilder(s).stopDecision(duration(300_000)).build();
+		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
 
-		TestUtils.add(l.getTransactionExecutionResultBuffer().getBuffer(), 20000_000, 2);		
-		
-		StartedLoad started = l.runLoad();
-		started.andWait();
-		
+		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBuffer(), 20000_000, 2);
+
+		execution.execute().andWait();
 	}
 }

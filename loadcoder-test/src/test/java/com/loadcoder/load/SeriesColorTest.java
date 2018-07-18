@@ -18,7 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
-import static com.loadcoder.statics.LogbackLogging.*;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
 import java.lang.reflect.Method;
 
@@ -27,11 +28,10 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
-import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.scenario.FinishedLoad;
+import com.loadcoder.load.scenario.ExecutionBuilder;
+import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.StartedLoad;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
+import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
@@ -42,12 +42,9 @@ public class SeriesColorTest extends TestNGBase {
 	public void testManyTransactionTypes(Method method) {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
-		Load l = new LoadBuilder(TestUtils.s)
-				.resultUser(new RuntimeChart(new CommonSeries[] {}))
-				.build();
-		StartedLoad started = l.runLoad();
+		Load l = new LoadBuilder(TestUtils.s).build();
+		FinishedExecution finished = new ExecutionBuilder(l).build().execute().andWait();
 
-		FinishedLoad finished = started.andWait();
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();
@@ -57,11 +54,10 @@ public class SeriesColorTest extends TestNGBase {
 	public void customizedColorsTest(Method method) {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
-		Load l = new LoadBuilder(TestUtils.s)
-				.build();
-		StartedLoad started = l.runLoad();
+		Load l = new LoadBuilder(TestUtils.s).build();
 
-		FinishedLoad finished = started.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).build().execute().andWait();
+
 		Result result = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Chart c2 = new ResultChart(new CommonSeries[] {}, result);
 		c2.waitUntilClosed();

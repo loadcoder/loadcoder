@@ -17,7 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
-import static com.loadcoder.statics.Time.*;
+
+import static com.loadcoder.statics.Time.DAY;
+import static com.loadcoder.statics.Time.HOUR;
+import static com.loadcoder.statics.Time.MINUTE;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -36,14 +39,12 @@ import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
-import com.loadcoder.load.chart.jfreechart.ItemSeriesAdder;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.sampling.SampleGroup;
-import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.Result;
@@ -51,8 +52,8 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartLogic extends ChartLogic {
 
-	static Logger log = LoggerFactory.getLogger(ResultChartLogic.class);
-	
+	static Logger logger = LoggerFactory.getLogger(ResultChartLogic.class);
+
 	private static final boolean allowDuplicateXValues_forDottedSeries = true;
 
 	Result[] results;
@@ -67,17 +68,15 @@ public class ResultChartLogic extends ChartLogic {
 
 	Map<Comparable, XYSeriesExtension> series;
 
-	//slider
+	// slider
 	final int minorTickLength;
 	int defaultIndex;
 	int sliderCompensation;
-	
-	protected static final int[][] sampleLengtSteps = {{10, 1}, {10, 2}, {30, 5}, {100, 10}, {1000, 100}, {10000, 1000}, {100000, 10000}};
 
 	public List<DataSetUserType> getRemovalFilters() {
 		return removalFilters;
 	}
-	
+
 	public void setDottedSeries(Map<Comparable, XYSeriesExtension> dottedSeries) {
 		this.dottedSeries = dottedSeries;
 	}
@@ -86,20 +85,11 @@ public class ResultChartLogic extends ChartLogic {
 		return dottedSeries;
 	}
 
-	public ResultChartLogic(
-			XYSeriesCollectionExtention seriesCollection,
-			XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer,
-			Map<Comparable, Boolean> seriesVisible,
-			boolean defaultDottedMode,
-			CommonSeries[] commonSeries,
-			Map<Comparable, Color> customizedColors,
-			boolean locked,
-			Result... results
-			) {
+	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
+			XYLineAndShapeRendererExtention renderer, Map<Comparable, Boolean> seriesVisible, boolean defaultDottedMode,
+			CommonSeries[] commonSeries, Map<Comparable, Color> customizedColors, boolean locked, Result... results) {
 		super(seriesCollection, plot, renderer, seriesVisible, locked);
 
-		this.customizedColors = customizedColors;
 		this.dottedMode = defaultDottedMode;
 		this.results = results;
 		commonsToBeUsed = commonSeries;
@@ -111,52 +101,56 @@ public class ResultChartLogic extends ChartLogic {
 		filteredData = generateDataSets(originalFromFile);
 
 		long tickSize = calculateSliderTickSize(filteredData);
-		minorTickLength = (int)tickSize;
+		minorTickLength = (int) tickSize;
 		calculateSliderValueCompensation(minorTickLength);
-		
+
 		defaultIndex = 4;
 		sampleLengthToUse = calculateSampleLengthWith(defaultIndex);
-				
-		calculateDefaultIndex(sampleLengthToUse, minorTickLength);
 
+		calculateDefaultIndex(sampleLengthToUse, minorTickLength);
 
 		doSafeUpdate();
 	}
-	
-	public long calculateSampleLengthWith(int indexOfSlider){
+
+	public long calculateSampleLengthWith(int indexOfSlider) {
 		long newSampleLength = 1000;
-		if(indexOfSlider != 0){
+		if (indexOfSlider != 0) {
 			long valueOfSlider = indexOfSlider * getMinorTickLength() + getsliderCompensation();
 			newSampleLength = valueOfSlider * 1000;
 		}
 		return newSampleLength;
 	}
-	public int getDefaultSliderIndex(){
+
+	public int getDefaultSliderIndex() {
 		return defaultIndex;
 	}
-	
-	public int getsliderCompensation(){
+
+	public int getsliderCompensation() {
 		return sliderCompensation;
 	}
-	
-	void calculateSliderValueCompensation(int minorTickPacing){
+
+	void calculateSliderValueCompensation(int minorTickPacing) {
 		int sliderCompensation = 0;
-		if(minorTickPacing ==1)
-			sliderCompensation =1;
-		
+		if (minorTickPacing == 1)
+			sliderCompensation = 1;
+
 		this.sliderCompensation = sliderCompensation;
 	}
-	
-	public int getMinorTickLength(){
+
+	public int getMinorTickLength() {
 		return minorTickLength;
 	}
-	protected void doUpdate(){
+
+	protected void doUpdate() {
 		createHashesAndUpdate(true);
 	}
-	
+
 	public void createHashesAndUpdate(boolean updateSamples) {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
+		long start = System.currentTimeMillis();
 		getDataAndUpdate(hashesGettingUpdated, updateSamples);
+		long diff = System.currentTimeMillis() - start;
+		logger.info("update time: {}", diff);
 		forceRerender();
 	}
 
@@ -179,12 +173,22 @@ public class ResultChartLogic extends ChartLogic {
 		}
 	}
 
-    private void sleep(){
-    	try{
-    		Thread.sleep(150);
-    	}catch(Exception e){}
-    }
-    
+	private void sleep() {
+		try {
+			Thread.sleep(150);
+		} catch (Exception e) {
+		}
+	}
+
+	void setCorrectColorsForDottedSerieses(Map<Comparable, XYSeriesExtension> dottedSerieses) {
+		dottedSerieses.entrySet().stream().forEach((entry) -> {
+			XYSeriesExtension dottedSeries = entry.getValue();
+			Comparable dataSetName = dottedSeries.getKey();
+			Paint seriesColor = getSeriesColor(dataSetName);
+			dottedSeries.setColorInTheChart(seriesColor);
+		});
+	}
+
 	@Override
 	protected void update(List<List<TransactionExecutionResult>> listOfListOfList, HashSet<Long> hashesGettingUpdated,
 			boolean updateSamples) {
@@ -199,12 +203,12 @@ public class ResultChartLogic extends ChartLogic {
 		}
 
 		addToSeriesKeys(filteredData, seriesKeys);
-		
+
 		HashSet<Long> sampleTimestamps = new HashSet<Long>();
-		
+
 		Map<Comparable, CommonSampleGroup> samplesCommonMap = new HashMap<Comparable, CommonSampleGroup>();
 		List<CommonSampleGroup> sampleGroupCommonList = new ArrayList<CommonSampleGroup>();
-		
+
 		Map<Comparable, XYSeriesExtension> seriesMap = new HashMap<Comparable, XYSeriesExtension>();
 		if (dottedMode) {
 			if (dottedSeries == null) {
@@ -224,16 +228,14 @@ public class ResultChartLogic extends ChartLogic {
 
 		createCommons();
 		addAllCommonSeriesToTheChart();
-		
+
 		for (XYSeriesExtension commonSerie : commonSeries) {
 			adjustVisibilityOfSeries(commonSerie);
 		}
 
 		addPoints(filteredData.getDataSets(), sampleGroups, sampleTimestamps);
-		ItemSeriesAdder itemSeriesAdderToUse = ChartUtils.itemSeriesAdderForSamples;
 
 		if (dottedMode) {
-			itemSeriesAdderToUse = ChartUtils.itemSeriesAdderForDots;
 
 			if (dottedSeries == null) {
 				createDottedSeries(filteredData.getDataSets());
@@ -244,13 +246,14 @@ public class ResultChartLogic extends ChartLogic {
 
 		}
 
-		updateSeriesWithSamples(itemSeriesAdderToUse, hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps);
+		updateSeriesWithSamples(hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps,
+				dottedMode);
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 	}
 
 	/**
-	 * takes the list of resultlists and generates a list of DataSets from it
-	 * along with some metadata such as min and max timestamp.
+	 * takes the list of resultlists and generates a list of DataSets from it along
+	 * with some metadata such as min and max timestamp.
 	 */
 	protected FilteredData generateDataSets(List<List<TransactionExecutionResult>> src) {
 
@@ -305,7 +308,7 @@ public class ResultChartLogic extends ChartLogic {
 				dataSet.getPoints().sort((b, c) -> {
 					long diff = c.getY() - b.getY();
 					return (int) diff;
-				} );
+				});
 
 				// 10% highest of 1000: remove 100 of the highest points
 				double factor = (double) percentilToRemove / 100; // 0.1
@@ -325,38 +328,31 @@ public class ResultChartLogic extends ChartLogic {
 		double factor = 1 + Math.log(1 + amountOfThreads * 0.1);
 		return factor;
 	}
-	
-	public static int calculateDefaultIndex(long sampleLengthToUse, int minorTickLength){
+
+	public static int calculateDefaultIndex(long sampleLengthToUse, int minorTickLength) {
 		int initalSlideValue = (int) (sampleLengthToUse / 1000);
 		int defaultIndex = initalSlideValue / minorTickLength;
 		return defaultIndex;
 	}
 
-	
-	static long[][] ticks = new long[][] {
-		{10 *MINUTE, 1}, 
-		{30 *MINUTE, 2}, 
-		{2 * HOUR, 5}, 
-		{4 * HOUR, 10}, 
-		{10 * HOUR, 30},
-		{1 * DAY, 60},
-		{10 * DAY, 600},
-		{Long.MAX_VALUE, 3600}};
-	
+	static long[][] ticks = new long[][] { { 10 * MINUTE, 1 }, { 30 * MINUTE, 2 }, { 2 * HOUR, 5 }, { 4 * HOUR, 10 },
+			{ 10 * HOUR, 30 }, { 1 * DAY, 60 }, { 10 * DAY, 600 }, { Long.MAX_VALUE, 3600 } };
+
 	public static long calculateSliderTickSize(FilteredData filteredData) {
 		long[] minmax = filteredData.getMinmax();
 		long diff = minmax[1] - minmax[0];
-		
-		for(long[] tick : ticks){
-			if(diff < tick[0]){
+
+		for (long[] tick : ticks) {
+			if (diff < tick[0]) {
 				return tick[1];
 			}
 		}
-		
-		log.error("Internal error in class {} when calculating tick size for samplelength slider", ResultChartLogic.class);
+
+		logger.error("Internal error in class {} when calculating tick size for samplelength slider",
+				ResultChartLogic.class);
 		return 3600;
 	}
-	
+
 	public static long calculateSampleLengthDefault(FilteredData filteredData) {
 		long[] minmax = filteredData.getMinmax();
 		int amoutOfTransactionTypes = filteredData.getDataSets().size();
@@ -376,10 +372,10 @@ public class ResultChartLogic extends ChartLogic {
 		long diffPerSample = diff / targetAmountOfSamplesForOneSeries;
 
 		/*
-		 * the more serieses there are, the longer the sampleLength needs to be.
-		 * There are a logaritmic relation betwwen the amount of serieses and the sampleLength
-		 * which means that increasing from 1 to 2 serieses will affect the sampleLength more
-		 * than it will be affected if increasing from 10 to 11 serieses
+		 * the more serieses there are, the longer the sampleLength needs to be. There
+		 * are a logaritmic relation between the amount of serieses and the sampleLength
+		 * which means that increasing from 1 to 2 serieses will affect the sampleLength
+		 * more than it will be affected if increasing from 10 to 11 serieses
 		 */
 		double amountOfSeriesesFactor = amountOfSeriesesFactor(amountOfTransactionTypes);
 		long diffPerSampleForAllSeries = (long) (diffPerSample * amountOfSeriesesFactor);
@@ -389,7 +385,7 @@ public class ResultChartLogic extends ChartLogic {
 
 		if (sampleLengthInMillis < 1000)
 			sampleLengthInMillis = 1000;
-		
+
 		return sampleLengthInMillis;
 
 	}

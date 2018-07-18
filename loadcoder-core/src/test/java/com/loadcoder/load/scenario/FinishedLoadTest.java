@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 
@@ -43,9 +42,10 @@ public class FinishedLoadTest {
 			}
 		};
 		
-		FinishedLoad s = new LoadBuilder(ls).build().runLoad().andWait();
+		Load s = new LoadBuilder(ls).build();
+		FinishedExecution finished = new ExecutionBuilder(s).build().execute().andWait();
 		
-		Result r = s.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
+		Result r = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
 		Assert.assertEquals(r.getNoOfTransactions(), 1);
 	}
 }

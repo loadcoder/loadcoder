@@ -32,6 +32,8 @@ import javax.swing.JTextArea;
 
 public class AboutPopup extends JDialog implements ActionListener {
 	
+	private static final long serialVersionUID = 1L;
+
 	private static final String LOADCODER_COPYRIGHT_NOTICE = 
 	"Loadcoder. A loadtesting tool for javacoders\n"
 	+ "Copyright (C) 2018 Stefan Vahlgren at Loadcoder\n"

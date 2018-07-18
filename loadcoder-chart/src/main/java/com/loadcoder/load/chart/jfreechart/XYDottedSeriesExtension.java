@@ -21,6 +21,9 @@ package com.loadcoder.load.chart.jfreechart;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 public class XYDottedSeriesExtension extends XYSeriesExtension {
@@ -28,9 +31,9 @@ public class XYDottedSeriesExtension extends XYSeriesExtension {
 	private static final long serialVersionUID = 1L;
 
 	private boolean visible = true;
-	
+
 	private boolean dotted = true;
-	
+
 	public static final Shape DOTTEDSHAPE = setupShape();
 
 	public boolean isDotted() {
@@ -53,13 +56,13 @@ public class XYDottedSeriesExtension extends XYSeriesExtension {
 		return data;
 	}
 
-	private static GeneralPath setupShape() {
+	private static Shape setupShape() {
 		float f = 2.7F;
 		GeneralPath p0 = new GeneralPath();
 		p0.moveTo(0, 0);
 		p0.lineTo(0, -f);
 		p0.closePath();
-		
+
 		return p0;
 	}
 

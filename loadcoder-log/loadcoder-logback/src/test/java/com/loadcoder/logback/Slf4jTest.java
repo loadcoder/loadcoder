@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.logback;
 
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -29,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.result.Logs;
 import com.loadcoder.result.ResultLogger;
 
 public class Slf4jTest {
@@ -41,9 +42,8 @@ public class Slf4jTest {
 	@Test
 	public void testLogging(Method method) throws IOException{
 		
-		Logger log = LoggerFactory.getLogger(this.getClass());
 		File resultDir = new File("target/" + method.getName() + "/" + System.currentTimeMillis());
-		Logs.changeToSharedDir(resultDir);
+		setResultDestination(resultDir);
 		String infoMsg = "foo";
 		String resultMsg = "bar";
 		resultLog.info(resultMsg);

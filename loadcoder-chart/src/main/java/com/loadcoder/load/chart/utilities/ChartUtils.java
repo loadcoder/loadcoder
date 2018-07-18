@@ -18,14 +18,19 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.utilities;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.loadcoder.load.chart.data.Point;
-import com.loadcoder.load.chart.jfreechart.ItemSeriesAdder;
+import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
+import com.loadcoder.load.chart.sampling.Sample;
 
 public class ChartUtils {
-
-	public final static ItemSeriesAdder itemSeriesAdderForSamples = (series, sample) -> {
+	
+	public static void samples(Sample sample, XYSeriesExtension series) {
 		if (sample.getFirst() == null) {
 
 			// create the points
@@ -35,18 +40,67 @@ public class ChartUtils {
 		}else{
 			sample.updateDataItems();
 		}
-	};
+	}
 
-	public static final ItemSeriesAdder itemSeriesAdderForDots = (series, sample) -> {
-		List<Point> points = sample.getPoints();
-		for (Point point : points) {
-			if (!point.isEnabled())
-				continue;
-			long x = point.getX();
-			long y = point.getY();
-			series.add(x, y, false);
+	public static void populateSeriesWithPoints(List<Point> points, XYSeriesExtension series) {
+		Map<Long, List<Point>> responseTimePointsMap = new HashMap<Long, List<Point>>();
+		for(int i =0; i<points.size(); i++) {
+			Point point = points.get(i);
+			List<Point> pointsForResponseTime = responseTimePointsMap.get(point.getY());
+			if(pointsForResponseTime == null) {
+				pointsForResponseTime = new ArrayList<Point>();
+				responseTimePointsMap.put(point.getY(), pointsForResponseTime);
+			}
+			pointsForResponseTime.add(point);
 		}
-	};
+		int step = calculateStepping( 0.5);
+
+		//all responsetimes ordered by the size of the responsetime group
+		List<Long> responeTimeGroup = responseTimePointsMap.entrySet().stream().map((a)->{return a.getKey();}).collect(Collectors.toList());
+		responeTimeGroup.sort((a, b)->{int diff = responseTimePointsMap.get(a).size() - responseTimePointsMap.get(b).size(); return diff;});
+		
+		int rest =0;
+		for(Long rts : responeTimeGroup) {
+			List<Point> p = responseTimePointsMap.get(rts);
+			int pSize = p.size();
+			
+			int start = rest;
+			if(start > pSize) {
+				rest = rest - pSize;
+				start = 0;
+			}
+			
+			for(int i=start; i< pSize; i = i + step) {
+				Point point = p.get(i);
+				if (!point.isEnabled())
+					continue;
+				long x = point.getX();
+				long y = point.getY();
+				series.add(x, y, false);
+				
+				start =0;
+				
+				if(i + step > pSize) {
+					rest = i + step - p.size();
+					continue;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * calculates and returns the amount of points to skip.
+	 * factorToKeep: 0.1 gives 10, which means that 10 points will be skipped when one is added
+	 * @param factorToKeep shall be a value between 0 and 1.
+	 * @return an integer equal to the amount of points to skip in order to have 
+	 * the desired factor of points to keep
+	 */
+	protected static int calculateStepping(double factorToKeep){
+		double step = 1 / factorToKeep;
+		if(step < 1)
+			step =1;
+		return (int)step;
+	}
 
 	public static int calculateSampleLengthSliderMax(long initialSampleLength) {
 		int result = 0;

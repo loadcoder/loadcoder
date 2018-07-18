@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.loadcoder.result.Logs;
 
-public class LogbackLogging {
+public class LogbackLogging extends Logs {
 
 	private static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
 
@@ -64,7 +64,7 @@ public class LogbackLogging {
 	 * 
 	 * Note that in order for this method to work properly, an implementation of
 	 * SharedDirFileAppender must be used and created through the used logging
-	 * framework. A logback implementation is provided in loadcoder-logback module. 
+	 * framework. A logback implementation is provided in loadcoder-logback module.
 	 * 
 	 * 
 	 * @param sharedDirForLogs
@@ -88,7 +88,8 @@ public class LogbackLogging {
 	 * 
 	 * @param nameOfTheTest
 	 *            is the name of the directory where you want to store logs from all
-	 *            executions for a particular test, which will be located inside {@code rootDirPathForAllLogs}
+	 *            executions for a particular test, which will be located inside
+	 *            {@code rootDirPathForAllLogs}
 	 * 
 	 * @return a File that will have a path according to following pattern:
 	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
@@ -119,5 +120,5 @@ public class LogbackLogging {
 		}
 		return logDir;
 	}
-	
+
 }

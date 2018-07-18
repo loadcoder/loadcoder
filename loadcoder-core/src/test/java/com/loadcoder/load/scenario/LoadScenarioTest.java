@@ -31,115 +31,120 @@ import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class LoadScenarioTest extends TestNGBase{
+public class LoadScenarioTest extends TestNGBase {
 
 	String rootDirPathForAllLogs = "target";
 
 	@Test
-	public void testDefault(Method method){
+	public void testDefault(Method method) {
 		long startOfTest = System.currentTimeMillis();
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
-				load("t1", ()->{return "";})
-				.handleResult((a)->{
-				})
-				.perform();
+				load("t1", () -> {
+					return "";
+				}).handleResult((a) -> {
+				}).perform();
 			}
 		};
 
 		Load l = mockLoad(s);
-		Assert.assertEquals(l.getTransactionExecutionResultBuffer().getBuffer().size(), 1);
-		TransactionExecutionResult res = l.getTransactionExecutionResultBuffer().getBuffer().get(0);
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 1);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
 		Assert.assertEquals(res.isStatus(), true);
 		Assert.assertNull(res.getMessage());
 		Assert.assertEquals(res.getName(), "t1");
 		Assert.assertTrue((res.getTs() < startOfTest + 5_000) && (res.getTs() > startOfTest - 5_000));
 	}
-	
+
 	@Test
-	public void create(Method method){
+	public void create(Method method) {
 
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
-				load("t1", ()->{return new ArrayList<String>();})
-				.handleResult((a)->{
-					//getters
+				load("t1", () -> {
+					return new ArrayList<String>();
+				}).handleResult((a) -> {
+					// getters
 					a.getException();
 					a.getResponseTime();
 					a.getResponse();
-					
-					//setters
+
+					// setters
 					a.changeTransactionName("newTransactionName");
 					a.setStatus(false);
 					a.reportTransaction(true);
 					a.setMessage("message for the report");
-				})
-				.perform();
+				}).perform();
 			}
 		};
 
 		Load l = mockLoad(s);
-		TransactionExecutionResult res = l.getTransactionExecutionResultBuffer().getBuffer().get(0);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
+
 		Assert.assertEquals(res.getName(), "newTransactionName");
 		Assert.assertEquals(res.isStatus(), false);
 		Assert.assertEquals(res.getMessage(), "message for the report");
 	}
 
 	@Test
-	public void testThrowException(Method method){
+	public void testThrowException(Method method) {
 
 		RuntimeException toBeThrown = new RuntimeException("unexpected exception");
-		
+
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
-				ResultModel<Object> result = load("t1", ()->{throw toBeThrown;})
-				.handleResult((a)->{
+				ResultModel<Object> result = load("t1", () -> {
+					throw toBeThrown;
+				}).handleResult((a) -> {
 					a.getException();
 					a.setMessage(a.getException().getClass().getSimpleName());
-				})
-				.performAndGetModel();
-				
-				//just to hint that the thrown exception will be available here.
+				}).performAndGetModel();
+
+				// just to hint that the thrown exception will be available here.
 				result.getException();
 			}
 		};
 
 		Load l = mockLoad(s);
-		s.loadScenario(); //run scenario one more time
-		Assert.assertEquals(l.getTransactionExecutionResultBuffer().getBuffer().size(), 2);
-		TransactionExecutionResult res = l.getTransactionExecutionResultBuffer().getBuffer().get(0);
+		s.loadScenario(); // run scenario one more time
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 2);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
+
 		Assert.assertEquals(res.getMessage(), toBeThrown.getClass().getSimpleName());
 		Assert.assertEquals(res.isStatus(), false);
 	}
 
 	@Test
-	public void testNoReport(Method method){
+	public void testNoReport(Method method) {
 		RuntimeException toBeThrown = new RuntimeException("unexpected exception");
 		LoadScenario s = new LoadScenario() {
 			@Override
 			public void loadScenario() {
-				load("t1", ()->{throw toBeThrown;})
-				.handleResult((a)->{
+				load("t1", () -> {
+					throw toBeThrown;
+				}).handleResult((a) -> {
 					a.reportTransaction(false);
-				})
-				.perform();
+				}).perform();
 			}
 		};
 
 		Load l = mockLoad(s);
-		Assert.assertEquals(l.getTransactionExecutionResultBuffer().getBuffer().size(), 0);
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 0);
 	}
-	
+
 	private Load mockLoad(LoadScenario s) {
 		TransactionExecutionResultBuffer buff = new TransactionExecutionResultBuffer();
 		Load l = mock(Load.class);
+		Execution e = mock(Execution.class);
 		s.setLoad(l);
-		when(l.getTransactionExecutionResultBuffer()).thenReturn(buff);
+
+		when(l.getExecution()).thenReturn(e);
+		when(e.getTransactionExecutionResultBuffer()).thenReturn(buff);
 		s.loadScenario();
 		return l;
 	}
-	
+
 }

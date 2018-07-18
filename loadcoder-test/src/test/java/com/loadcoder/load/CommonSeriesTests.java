@@ -18,16 +18,17 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
-import static com.loadcoder.statics.LogbackLogging.*;
-import static com.loadcoder.logback.LogbackUtils.*;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+
 import java.lang.reflect.Method;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.StartedLoad;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
+import com.loadcoder.load.scenario.LoadBuilder;
+import com.loadcoder.load.testng.TestNGBase;
 
 public class CommonSeriesTests extends TestNGBase {
 
@@ -35,7 +36,6 @@ public class CommonSeriesTests extends TestNGBase {
 	public void testManyTransactionTypes(Method method) {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 		Load l = new LoadBuilder(TestUtils.s).build();
-		StartedLoad started = l.runLoad();
-		started.andWait();
+		new ExecutionBuilder(l).build().execute().andWait();
 	}
 }

@@ -21,7 +21,6 @@ package com.loadcoder.load;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.testng.Assert;
@@ -44,10 +43,6 @@ public class TestUtility {
 	
 	public static synchronized void addValueToList(List<Object> list, Object value){
 		list.add(value);
-	}
-	
-	public static synchronized void putNewObjectToMap(Map map, Object key){
-		map.put(key, new Object());
 	}
 	
 	public static int random(int min, int max){
