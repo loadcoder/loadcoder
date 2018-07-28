@@ -128,5 +128,4 @@ public abstract class Chart {
 	protected XYLineAndShapeRendererExtention getRenderer(){
 		return chartFrame.getRenderer();
 	}
-
 }

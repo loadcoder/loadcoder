@@ -94,6 +94,7 @@ public abstract class ChartLogic {
 
 	List<Color> existingColors = new ArrayList<Color>();
 
+	public final static int TARGET_AMOUNT_OF_POINTS_DEFAULT = 20_000;
 	/**
 	 * customizedColors is not yet supported
 	 */
@@ -528,10 +529,15 @@ public abstract class ChartLogic {
 			Map<Comparable, SampleGroup> sampleGroups, Set<Long> sampleTimestamps, boolean dottedMode) {
 
 		if (dottedMode) {
+			int totalAmountOfPoints = 0;
+			for (DataSet set : dataSets) {
+				totalAmountOfPoints = totalAmountOfPoints + set.getPoints().size();
+			}
+			double keepFactor = ChartUtils.calculateKeepFactor(totalAmountOfPoints, TARGET_AMOUNT_OF_POINTS_DEFAULT);
 			for (DataSet set : dataSets) {
 				SampleGroup group = sampleGroups.get(set.getName());
 				XYSeriesExtension series = group.getSeries();
-				ChartUtils.populateSeriesWithPoints(set.getPoints(), series);
+				ChartUtils.populateSeriesWithPoints(set.getPoints(), series, keepFactor);
 			}
 		}
 
@@ -555,7 +561,7 @@ public abstract class ChartLogic {
 					// series
 					if (y != -1) {
 						// itemSeriesAdder.add(series, sample);
-						ChartUtils.samples(sample, series);
+						ChartUtils.populateSeriesWithSamples(sample, series);
 					}
 
 				}

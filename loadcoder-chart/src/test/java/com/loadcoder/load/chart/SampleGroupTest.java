@@ -132,8 +132,8 @@ public class SampleGroupTest extends TestNGBase {
 		Sample b = group.getAndCreateSample(1000, "foo", 1000);
 		b.addPoint(new Point(1001, 0, true));
 
-		ChartUtils.samples(a, serie);
-		ChartUtils.samples(b, serie);
+		ChartUtils.populateSeriesWithSamples(a, serie);
+		ChartUtils.populateSeriesWithSamples(b, serie);
 
 		Range oldRange = new Range(0, Long.MAX_VALUE, 1000);
 		Range newRange = new Range(Long.MIN_VALUE, -1, 2000);
