@@ -135,10 +135,6 @@ public class ChartFrame extends ApplicationFrame {
 		return plot;
 	}
 
-	public static void main(String[] args) {
-		Image image = Toolkit.getDefaultToolkit().getImage(ChartFrame.class.getResource("/polarbear.png"));
-	}
-
 	public ChartFrame(boolean linesVisible, boolean shapesVisible) {
 		super("");
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/polarbear.png"));

@@ -45,6 +45,7 @@ import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.sampling.SampleGroup;
+import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.Result;
@@ -68,10 +69,26 @@ public class ResultChartLogic extends ChartLogic {
 
 	Map<Comparable, XYSeriesExtension> series;
 
+	private double keepFactorChosen = -1;
+
+	public double getKeepFactorChosen() {
+		return keepFactorChosen;
+	}
+
+	double keepFactorDefault = -1;
+
+	public double getKeepFactorDefault() {
+		return keepFactorDefault;
+	}
+
 	// slider
 	final int minorTickLength;
 	int defaultIndex;
 	int sliderCompensation;
+
+	public void setKeepFactorChosen(double keepFactorChosen) {
+		this.keepFactorChosen = keepFactorChosen;
+	}
 
 	public List<DataSetUserType> getRemovalFilters() {
 		return removalFilters;
@@ -99,6 +116,15 @@ public class ResultChartLogic extends ChartLogic {
 		originalFromFile = TransactionExecutionResult.mergeList(originalFromFile);
 
 		filteredData = generateDataSets(originalFromFile);
+
+		int totalAmountOfPoints = 0;
+		if (keepFactorDefault == -1) {
+			for (DataSet set : filteredData.getDataSets()) {
+				totalAmountOfPoints = totalAmountOfPoints + set.getPoints().size();
+			}
+
+			keepFactorDefault = ChartUtils.calculateKeepFactor(totalAmountOfPoints, TARGET_AMOUNT_OF_POINTS_DEFAULT);
+		}
 
 		long tickSize = calculateSliderTickSize(filteredData);
 		minorTickLength = (int) tickSize;
@@ -143,6 +169,15 @@ public class ResultChartLogic extends ChartLogic {
 
 	protected void doUpdate() {
 		createHashesAndUpdate(true);
+	}
+
+	public void recreateDottedSeries() {
+		setFilteredData(null);
+		setDottedSeries(null);
+		clearChart();
+		createCommons();
+		addAllCommonSeriesToTheChart();
+		createHashesAndUpdate(false);
 	}
 
 	public void createHashesAndUpdate(boolean updateSamples) {
@@ -244,6 +279,22 @@ public class ResultChartLogic extends ChartLogic {
 				populateChartWithSavedDottedSeries();
 			}
 
+		}
+
+		double keepFactor;
+		if (dottedMode) {
+
+			if (keepFactorChosen == -1) {
+				keepFactor = keepFactorDefault;
+			} else {
+				keepFactor = keepFactorChosen;
+			}
+
+			for (DataSet set : filteredData.getDataSets()) {
+				SampleGroup group = sampleGroups.get(set.getName());
+				XYSeriesExtension series = group.getSeries();
+				ChartUtils.populateSeriesWithPoints(set.getPoints(), series, keepFactor);
+			}
 		}
 
 		updateSeriesWithSamples(hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps,
@@ -426,7 +477,7 @@ public class ResultChartLogic extends ChartLogic {
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 			Paint seriesColor = getSeriesColor(dataSetName);
-			XYSeriesExtension serie = new XYDottedSeriesExtension(dataSetName, true,
+			XYSeriesExtension serie = new XYDottedSeriesExtension(dataSetName, false,
 					allowDuplicateXValues_forDottedSeries, seriesColor);
 			result.put(dataSetName, serie);
 		}

@@ -55,7 +55,6 @@ public class ChartUtils {
 			}
 			pointsForResponseTime.add(point);
 		}
-		int step = calculateStepping(keepFactor);
 
 		// all responsetimes ordered by the size of the responsetime group
 		List<Long> responeTimeGroup = responseTimePointsMap.entrySet().stream().map((a) -> {
@@ -66,30 +65,49 @@ public class ChartUtils {
 			return diff;
 		});
 
-		int rest = 0;
+		/*
+		 * the for loop below can potentially be faster. if many point are to be
+		 * processed, and the keepFactor is reached early, we could possibly iterate
+		 * more than one step at a time, which will automatically skip points. This
+		 * should only be done if target keepFactor is low
+		 */
+		int added = 0;
+		int processed = 0;
 		for (Long rts : responeTimeGroup) {
 			List<Point> p = responseTimePointsMap.get(rts);
 			int pSize = p.size();
 
-			int start = rest;
-			if (start > pSize) {
-				rest = rest - pSize;
-				start = 0;
-			}
-
-			for (int i = start; i < pSize; i = i + step) {
+			for (int i = 0; i < pSize; i++) {
+				processed++;
 				Point point = p.get(i);
 				if (!point.isEnabled())
 					continue;
-				long x = point.getX();
-				long y = point.getY();
-				series.add(x, y, false);
-
-				start = 0;
-
-				if (i + step > pSize) {
-					rest = i + step - p.size();
+				if (pSize == 1) {
+					long x = point.getX();
+					long y = point.getY();
+					series.add(x, y, false);
+					added++;
 					continue;
+				}
+
+				double factorIfAdded = (double) (added + 1) / processed;
+				double factorIfNotAdded = (double) (added) / processed;
+
+				double distanceIfAdded = keepFactor - factorIfAdded;
+				double distanceIfNotAdded = keepFactor - factorIfNotAdded;
+
+				if (distanceIfAdded < 0) {
+					distanceIfAdded = distanceIfAdded * -1;
+				}
+				if (distanceIfNotAdded < 0) {
+					distanceIfNotAdded = distanceIfNotAdded * -1;
+				}
+
+				if (distanceIfAdded < distanceIfNotAdded) {
+					long x = point.getX();
+					long y = point.getY();
+					series.add(x, y, false);
+					added++;
 				}
 			}
 		}

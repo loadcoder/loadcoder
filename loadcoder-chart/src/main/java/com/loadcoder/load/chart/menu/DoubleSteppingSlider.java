@@ -22,25 +22,32 @@ import java.awt.Dimension;
 
 import javax.swing.JSlider;
 
-public class SteppingSlider extends JSlider
-{
+public class DoubleSteppingSlider extends JSlider {
 	private static final long serialVersionUID = 1L;
 
-	private Integer[] values = null;
-    
-	public Integer[] getValues() {
+	private Double[] values = null;
+
+	public Double[] getValues() {
 		return values;
 	}
 
-    public SteppingSlider(Integer[] values, int defaultIndex)
-    {
-		super(0, values.length-1, defaultIndex);
+	public static int getIndexOf(Double[] values, Double value) {
+		for (int i = 0; i < values.length; i++) {
+			if ((long) (values[i] * 1_000_000) == (long) (value * 1_000_000)) {
+				return i;
+			}
+		}
+		throw new RuntimeException(
+				"An internal error occured in Loadcoder when fetching index of the slider for points reduction.");
+	}
+
+	public DoubleSteppingSlider(Double[] values, int defaultIndex) {
+		super(0, values.length - 1, defaultIndex);
 		this.values = values;
 		setPaintTicks(true);
 		setPaintLabels(true);
-        setSnapToTicks(true);
-        setMajorTickSpacing(1);
-        setPreferredSize(new Dimension(400, 40));
-    }
-
+		setSnapToTicks(true);
+		setMajorTickSpacing(1);
+		setPreferredSize(new Dimension(400, 40));
+	}
 }

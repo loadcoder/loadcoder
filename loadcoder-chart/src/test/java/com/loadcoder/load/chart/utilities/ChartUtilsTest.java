@@ -4,14 +4,19 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
+import com.loadcoder.load.testng.TestNGBase;
 
 import junit.framework.Assert;
 
-public class ChartUtilsTest {
+public class ChartUtilsTest extends TestNGBase {
+
+	Logger log = LoggerFactory.getLogger(ChartUtilsTest.class);
 
 	@Test
 	public void calculateSteppingTest() {
@@ -51,15 +56,18 @@ public class ChartUtilsTest {
 
 	@Test
 	public void populateSeriesWithPointsTest() {
+		List<Point> points;
+		XYSeriesExtension series;
+		List items;
 
 		/*
 		 * this part tests that the correct amount is added, when the amount of poinst
 		 * are dividable by the stepping size (0.1 gives 10 in steppingSize)
 		 */
-		List<Point> points = oneGroup(1_000_000);
-		XYSeriesExtension series = new XYSeriesExtension("a", true, true, Color.BLACK);
+		points = oneGroup(1_000_000);
+		series = new XYSeriesExtension("a", true, true, Color.BLACK);
 		ChartUtils.populateSeriesWithPoints(points, series, 0.1);
-		List items = series.getItems();
+		items = series.getItems();
 		Assert.assertEquals((double) points.size() / 10, (double) items.size());
 
 		/*
@@ -89,6 +97,15 @@ public class ChartUtilsTest {
 		items = series.getItems();
 		assertWithFaultTolerance(points.size() / 10, items.size(), 0.01);
 
+		points = getPyramidPoints(2000);
+		series = new XYSeriesExtension("a", false, true, Color.BLACK);
+		long start = System.currentTimeMillis();
+		ChartUtils.populateSeriesWithPoints(points, series, 0.3);
+		long diff = System.currentTimeMillis() - start;
+		log.info("amount:{} took {} ms", points.size(), diff);
+		items = series.getItems();
+		assertWithFaultTolerance((int) (points.size() * 0.3), items.size(), 0.5);
+
 	}
 
 	private void assertWithFaultTolerance(int expected, int actual, double faultToleranceFactor) {
@@ -96,6 +113,7 @@ public class ChartUtilsTest {
 		double max = expected + expected * faultToleranceFactor;
 		double min = expected - expected * faultToleranceFactor;
 
+		log.info("difference for points reduction: " + (actual - expected));
 		Assert.assertTrue(max > actual);
 		Assert.assertTrue(min < actual);
 
