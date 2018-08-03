@@ -22,9 +22,9 @@ import static com.loadcoder.load.exceptions.ExceptionMessages.PreviousLoadStillR
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
 public class LoadBuilder {
@@ -35,7 +35,6 @@ public class LoadBuilder {
 	private Executable preExecution;
 	private Executable postExecution;
 	private Intensity intensity;
-	private ResultFormatter resultFormatter;
 
 	public LoadBuilder (LoadScenario ls){
 		this.ls = ls;
@@ -72,10 +71,6 @@ public class LoadBuilder {
 		
 		ls.setLoad(l);
 		return l;
-	}
-
-	protected ResultFormatter getResultFormatter() {
-		return resultFormatter;
 	}
 
 	protected int getAmountOfthreads() {
@@ -182,8 +177,4 @@ public class LoadBuilder {
 		return this;
 	}
 
-	public LoadBuilder reportResultAs(ResultFormatter resultFormatter) {
-		this.resultFormatter = resultFormatter;
-		return this;
-	}
 }

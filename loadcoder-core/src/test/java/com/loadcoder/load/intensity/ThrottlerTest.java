@@ -26,6 +26,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.statics.ThrottleMode;
+
 import static com.loadcoder.statics.Time.*;
 
 public class ThrottlerTest extends TestNGBase{

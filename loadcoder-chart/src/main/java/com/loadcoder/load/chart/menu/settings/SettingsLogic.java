@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JRadioButtonMenuItem;
+
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ChartLogic;
@@ -19,6 +21,8 @@ public class SettingsLogic {
 	private Map<XYSeriesExtension, Color> selections = new HashMap<XYSeriesExtension, Color>();
 
 	private double keepFactorSelection = -1;
+
+	JRadioButtonMenuItem points;
 
 	public double getKeepFactorSelection() {
 		return keepFactorSelection;
@@ -73,6 +77,8 @@ public class SettingsLogic {
 
 					resultChartLogic.setKeepFactorChosen(keepFactorSelection);
 					resultChartLogic.recreateDottedSeries();
+					String keepFactorAsProcentString = keepFactorToProcentString(keepFactorSelection);
+					resultChartLogic.getPointsRadioButton().setText(String.format("Points (%s)", keepFactorAsProcentString));
 					renderAtEnd = false; // TODO: very ugly. improve this
 				}
 			}
@@ -83,6 +89,14 @@ public class SettingsLogic {
 		}
 	}
 
+	public static String keepFactorToProcentString(double value) {
+		long multiRounding = Math.round(value * 10000);
+		double rounded = (double) multiRounding / 100;
+		if(rounded >= 1)
+			return "" + ((long)rounded) + "%";
+		return "" + (rounded) + "%";
+
+	}
 	public void changeSeriesColorSelection(Color chosenColor) {
 		selections.put(chosenSeries, chosenColor);
 	}

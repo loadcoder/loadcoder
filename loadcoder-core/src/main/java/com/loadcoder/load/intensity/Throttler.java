@@ -25,6 +25,7 @@ import java.util.Map;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.statics.ThrottleMode;
 
 public class Throttler {
 

@@ -112,14 +112,10 @@ public class SettingsWindow extends JDialog {
 		if (chartLogic instanceof ResultChartLogic) {
 			ResultChartLogic resultChartLogic = (ResultChartLogic) chartLogic;
 
-			if (resultChartLogic.getKeepFactorChosen() != -1) {
-				keepFactor = resultChartLogic.getKeepFactorChosen();
-			} else {
-				keepFactor = resultChartLogic.getKeepFactorDefault();
-			}
+			keepFactor = resultChartLogic.getCurrentKeepFactor();
 			startIndex = DoubleSteppingSlider.getIndexOf(doubles, keepFactor);
 
-			textField.setText(keepFactorToProcentString(keepFactor));
+			textField.setText(SettingsLogic.keepFactorToProcentString(keepFactor));
 		}
 		DoubleSteppingSlider pointsKeepFactorSlider = new DoubleSteppingSlider(doubles, startIndex);
 		pointsKeepFactorSlider.setLabelTable(labelTable);
@@ -131,7 +127,7 @@ public class SettingsWindow extends JDialog {
 				int index = source.getValue();
 				double value = source.getValues()[index];
 
-				String valueAsProcent = keepFactorToProcentString(value);
+				String valueAsProcent = SettingsLogic.keepFactorToProcentString(value);
 				textField.setText(valueAsProcent);
 
 				settingsLogic.setKeepFactorSelection(value);
@@ -156,13 +152,6 @@ public class SettingsWindow extends JDialog {
 		pack();
 		setVisible(true);
 
-	}
-
-	String keepFactorToProcentString(double value) {
-		long multiRounding = Math.round(value * 10000);
-		double rounded = (double) multiRounding / 100;
-		String valueAsProcent = "" + (rounded) + "%";
-		return valueAsProcent;
 	}
 
 	void addBottomButtons(JPanel parent) {

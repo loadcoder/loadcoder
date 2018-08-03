@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
@@ -46,6 +45,7 @@ import com.loadcoder.load.scenario.StopDecision;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.StopDesisions;
+import com.loadcoder.statics.ThrottleMode;
 
 public class LoadTest extends TestNGBase{
 

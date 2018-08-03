@@ -39,6 +39,7 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.menu.SteppingSlider;
+import com.loadcoder.load.chart.menu.settings.SettingsLogic;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.result.Result;
 
@@ -133,17 +134,22 @@ public class ResultChart extends Chart {
 		JMenu sampling = new JMenu("Sampling");
 
 		JMenu graphType = new JMenu("Graph type");
+		double keepFactor = logic.getCurrentKeepFactor();
+		String pointsRadioButtonText = "Points";
+		if (keepFactor != 1.0) {
+			pointsRadioButtonText = String.format("Points (%s)", SettingsLogic.keepFactorToProcentString(keepFactor));
+		}
+		logic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
 
-		JRadioButtonMenuItem points = new JRadioButtonMenuItem("Points", defaultPointsMode);
 		JRadioButtonMenuItem lines = new JRadioButtonMenuItem("Samples", !defaultPointsMode);
 		ButtonGroup graphTypeGroup = new ButtonGroup();
-		graphTypeGroup.add(points);
+		graphTypeGroup.add(logic.getPointsRadioButton());
 		graphTypeGroup.add(lines);
-		graphType.add(points);
+		graphType.add(logic.getPointsRadioButton());
 		graphType.add(lines);
 		resultMenu.add(graphType);
 
-		points.addActionListener((a) -> {
+		logic.getPointsRadioButton().addActionListener((a) -> {
 			ajustDottedMode(true);
 		});
 		lines.addActionListener((a) -> {

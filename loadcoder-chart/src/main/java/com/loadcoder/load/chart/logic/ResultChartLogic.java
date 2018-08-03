@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JRadioButtonMenuItem;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,23 @@ public class ResultChartLogic extends ChartLogic {
 	Map<Comparable, XYSeriesExtension> series;
 
 	private double keepFactorChosen = -1;
+
+	JRadioButtonMenuItem pointsRadioButton;
+
+	public double getCurrentKeepFactor() {
+		if (getKeepFactorChosen() != -1) {
+			return getKeepFactorChosen();
+		} else {
+			return getKeepFactorDefault();
+		}
+	}
+	public JRadioButtonMenuItem getPointsRadioButton() {
+		return pointsRadioButton;
+	}
+
+	public void setPointsRadioButton(JRadioButtonMenuItem pointsRadioButton) {
+		this.pointsRadioButton = pointsRadioButton;
+	}
 
 	public double getKeepFactorChosen() {
 		return keepFactorChosen;
