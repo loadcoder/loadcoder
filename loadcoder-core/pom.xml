@@ -1,11 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>loadcoder-core</artifactId>
 	<packaging>jar</packaging>
 	<name>LoadCoder Core</name>
 	<url>http://loadcoder.com</url>
+
+	<description>This project contains the core features in Loadcoder</description>
 
 	<parent>
 		<groupId>com.loadcoder</groupId>
@@ -18,7 +21,7 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
@@ -42,7 +45,7 @@
 			<artifactId>logback-classic</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-utilities</artifactId>
@@ -51,20 +54,20 @@
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-result</artifactId>
-		</dependency>		
-		
+		</dependency>
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
 			<scope>test</scope>
-		</dependency>	
-		
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -21,10 +21,10 @@ package com.loadcoder.load.anotherthirtpartypackage;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.StopDesisions.duration;
-import static com.loadcoder.statics.Time.PerMinute;
-import static com.loadcoder.statics.Time.PerSecond;
+import static com.loadcoder.statics.Time.PER_MINUTE;
+import static com.loadcoder.statics.Time.PER_SECOND;
 import static com.loadcoder.statics.Time.SECOND;
-
+import static com.loadcoder.statics.ThrottleMode.*;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,7 +39,6 @@ import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
@@ -80,9 +79,6 @@ public class FullTest extends TestNGBase {
 					a.setStatus(false);
 					a.reportTransaction(true);
 					a.setMessage("message for the report");
-					if (1 == 1) {
-					}
-
 				}).perform();
 
 				load("t1", () -> {
@@ -100,7 +96,7 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(s).throttle(1, PerSecond, ThrottleMode.PER_THREAD).build();
+		Load l = new LoadBuilder(s).throttle(1, PER_SECOND, PER_THREAD).build();
 		new ExecutionBuilder(l).build().execute().andWait();
 
 	}
@@ -157,7 +153,7 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(s).throttle(1, PerSecond, ThrottleMode.PER_THREAD).build();
+		Load l = new LoadBuilder(s).throttle(1, PER_SECOND, PER_THREAD).build();
 		new ExecutionBuilder(l).build().execute().andWait();
 	}
 
@@ -241,10 +237,10 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).throttle(10, PerSecond, ThrottleMode.SHARED)
+		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).throttle(10, PER_SECOND, SHARED)
 				.build();
 
-		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PerSecond, ThrottleMode.SHARED)
+		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED)
 				.build();
 
 		FinishedExecution finished = new ExecutionBuilder(l, l2).runtimeResultUser(chart).build().execute().andWait();
@@ -266,7 +262,7 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PerMinute, ThrottleMode.SHARED)
+		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED)
 				.build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
@@ -289,7 +285,7 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).throttle(20, PerMinute, ThrottleMode.SHARED).stopDecision(duration(300_000))
+		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000))
 				.build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
@@ -340,7 +336,7 @@ public class FullTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).throttle(2, PerMinute, ThrottleMode.SHARED).stopDecision(duration(60_000)).build();
+		Load l = new LoadBuilder(ls).throttle(2, PER_MINUTE, SHARED).stopDecision(duration(60_000)).build();
 
 		new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute().andWait();
 

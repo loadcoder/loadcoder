@@ -22,7 +22,7 @@ import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.StopDesisions.duration;
 import static com.loadcoder.statics.StopDesisions.iterations;
-import static com.loadcoder.statics.Time.PerSecond;
+import static com.loadcoder.statics.Time.PER_SECOND;
 import static com.loadcoder.statics.Time.SECOND;
 
 import java.lang.reflect.Method;
@@ -210,7 +210,7 @@ public class LoadTest extends TestNGBase{
 		};
 		
 		Load l = new LoadBuilder(ls)
-				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
+				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD)
 				.stopDecision(iterations(iterationsPerThread))
 				.build();
 		
@@ -251,7 +251,7 @@ public class LoadTest extends TestNGBase{
 
 		Load l = new LoadBuilder(ls)
 				.stopDecision(iterations(threads * iterationsPerThread))
-				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
+				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD)
 				.amountOfThreads(threads)
 				.build();
 

@@ -88,15 +88,6 @@ public class ResultChart extends Chart {
 		return logic;
 	}
 
-	protected void recreateDottedPoints() {
-		logic.setFilteredData(null);
-		logic.setDottedSeries(null);
-		logic.clearChart();
-		logic.createCommons();
-		logic.addAllCommonSeriesToTheChart();
-		logic.createHashesAndUpdate(false);
-	}
-
 	private void toggleRemoveFilterCheckBox(DataSetUserType dataSetUserType, boolean selected) {
 		logic.setFilteredData(null);
 		logic.setDottedSeries(null);

@@ -6,6 +6,8 @@
 	<name>LoadCoder Chart</name>
 	<url>http://loadcoder.com</url>
 
+	<description>This project contains the chart feature of Loadcoder</description>
+
 	<parent>
 		<groupId>com.loadcoder</groupId>
 		<artifactId>loadcoder-base</artifactId>

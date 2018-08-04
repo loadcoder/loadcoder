@@ -37,7 +37,7 @@ public class ThrottlerTest extends TestNGBase{
 
 		List<Thread> threads = new ArrayList<Thread>();
 		threads.add(Thread.currentThread());
-		new Throttler(new Intensity(1, PerSecond, ThrottleMode.SHARED), threads);
+		new Throttler(new Intensity(1, PER_SECOND, ThrottleMode.SHARED), threads);
 	}
 	
 	@Test(groups = "timeconsuming")

@@ -31,19 +31,17 @@ public class Time {
 	 */
 	public static final long MINUTE = 60 * SECOND;
 	
-	
 	/**
 	 * One hour in milliseconds
 	 */
 	public static final long HOUR = 60 * MINUTE;
-	
 	
 	/**
 	 * One day in milliseconds
 	 */
 	public static final long DAY = 24 * HOUR;
 
-	public static TimeUnit PerSecond = TimeUnit.SECOND;
-	public static TimeUnit PerMinute = TimeUnit.MINUTE;
-	public static TimeUnit PerHour = TimeUnit.MINUTE;
+	public static TimeUnit PER_SECOND = TimeUnit.SECOND;
+	public static TimeUnit PER_MINUTE = TimeUnit.MINUTE;
+	public static TimeUnit PER_HOUR = TimeUnit.HOUR;
 }

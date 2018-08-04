@@ -1,11 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>loadcoder-logback</artifactId>
 	<packaging>jar</packaging>
 	<name>LoadCoder Logback</name>
 	<url>http://loadcoder.com</url>
+
+	<description>This project contains the logback supported features in Loadcoder</description>
 
 	<parent>
 		<groupId>com.loadcoder</groupId>
@@ -45,7 +48,7 @@
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-result</artifactId>
-		</dependency>	
+		</dependency>
 
 		<dependency>
 			<groupId>com.loadcoder</groupId>

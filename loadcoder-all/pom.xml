@@ -1,10 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>loadcoder-all</artifactId>
 	<packaging>jar</packaging>
 	<name>LoadCoder All</name>
 	<url>http://loadcoder.org</url>
+
+	<description>This project functions as a container for all the submodules that is needed in order to get all the available functionality</description>
 
 	<parent>
 		<groupId>com.loadcoder</groupId>
@@ -17,7 +20,7 @@
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-chart</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>

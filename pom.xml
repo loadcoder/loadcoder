@@ -10,6 +10,8 @@
 	<packaging>pom</packaging>
 	<url>http://loadcoder.com</url>
 
+	<description>This is the base maven project for Loadcoder. Its purpose is mainly to keep the project together and to manage the dependencies and versions</description>
+
 	<modules>
 		<module>loadcoder-utilities</module>
 		<module>loadcoder-testutilities</module>
