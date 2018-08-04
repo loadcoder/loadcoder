@@ -65,7 +65,7 @@ public class XYPlotExtension extends XYPlot {
 		synchronized (this) {
 			long start = System.currentTimeMillis();
 			result = super.render(g2, dataArea, index, info, crosshairState);
-			logger.info("Render time: {} ms", System.currentTimeMillis() - start);
+			logger.debug("Render time: {} ms", System.currentTimeMillis() - start);
 		}
 		return result;
 

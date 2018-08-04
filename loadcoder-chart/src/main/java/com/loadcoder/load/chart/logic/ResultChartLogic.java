@@ -204,7 +204,7 @@ public class ResultChartLogic extends ChartLogic {
 		long start = System.currentTimeMillis();
 		getDataAndUpdate(hashesGettingUpdated, updateSamples);
 		long diff = System.currentTimeMillis() - start;
-		logger.info("update time: {}", diff);
+		logger.debug("update time: {}", diff);
 		forceRerender();
 	}
 
@@ -215,7 +215,6 @@ public class ResultChartLogic extends ChartLogic {
 	public void addSerieseToChart(Map<Comparable, XYSeriesExtension> seriesMap) {
 		for (Comparable key : seriesKeys) {
 			XYSeriesExtension series = seriesMap.get(key);
-			sleep();
 			addSeries(series);
 		}
 	}
