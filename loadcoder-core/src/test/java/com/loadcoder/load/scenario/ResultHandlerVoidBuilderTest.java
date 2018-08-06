@@ -22,28 +22,33 @@ import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
 import junit.framework.Assert;
 
-public class ResultHandlerVoidBuilderTest extends TestNGBase{
+public class ResultHandlerVoidBuilderTest extends TestNGBase {
 
 	@Test
 	public void create() {
-		
+
 		LoadScenario ls = new LoadScenario() {
-			
+
 			@Override
 			public void loadScenario() {
 			}
 		};
-		
-		new LoadBuilder(ls).build();
+
+		Load l = new LoadBuilder(ls).build();
+		new ExecutionBuilder(l).build();
+
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", ()->{LoadUtility.sleep(100);}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a)->{ a.changeTransactionName("t2");  }).perform();
+		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", () -> {
+			LoadUtility.sleep(100);
+		}, ls, rl);
+		resultHandlerVoidBuilder.handleResult((a) -> {
+			a.changeTransactionName("t2");
+		}).perform();
 
 		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
@@ -51,7 +56,7 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase{
 		Assert.assertEquals(true, result.isStatus());
 		Assert.assertTrue(result.getRt() >= 100);
 	}
-	
+
 	@Test
 	public void handeResultThrowsException() {
 
@@ -62,10 +67,16 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase{
 			}
 		};
 
-		new LoadBuilder(ls).build();
+		Load l = new LoadBuilder(ls).build();
+		new ExecutionBuilder(l).build();
+
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", ()->{}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a)->{ a.changeTransactionName("t2");   throw new RuntimeException("unexpected exception");}).perform();
+		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", () -> {
+		}, ls, rl);
+		resultHandlerVoidBuilder.handleResult((a) -> {
+			a.changeTransactionName("t2");
+			throw new RuntimeException("unexpected exception");
+		}).perform();
 
 		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);

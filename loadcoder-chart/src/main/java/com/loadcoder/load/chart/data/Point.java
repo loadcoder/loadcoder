@@ -21,34 +21,34 @@ package com.loadcoder.load.chart.data;
 public class Point {
 
 	long x;
-	
+
 	long y;
-	
+
 	boolean status;
-	
+
 	boolean enabled = true;
-	
-	public String toString(){
-		return String.format("x:%s, y:%s)", x, y);
+
+	public String toString() {
+		return String.format("(x:%s, y:%s)", x, y);
 	}
-	
+
 	public boolean isEnabled() {
 		return enabled;
 	}
-	
+
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-	
+
 	public boolean isStatus() {
 		return status;
 	}
-	
+
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
 
-	public Point(long x, long y, boolean status){
+	public Point(long x, long y, boolean status) {
 		this.x = x;
 		this.y = y;
 		this.status = status;
@@ -57,15 +57,15 @@ public class Point {
 	public long getX() {
 		return x;
 	}
-	
+
 	public void setX(long x) {
 		this.x = x;
 	}
-	
+
 	public long getY() {
 		return y;
 	}
-	
+
 	public void setY(long y) {
 		this.y = y;
 	}

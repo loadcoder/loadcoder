@@ -20,23 +20,22 @@ package com.loadcoder.load.utils;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.Time.MINUTE;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
 
+import junit.framework.Assert;
 
 public class ResultGeneratorTest {
 
 	@Test
-	public void testToGenerateResult(Method method){
+	public void testToGenerateResult(Method method) {
 		File resultDir = getNewLogDir("target", method.getName());
 		setResultDestination(resultDir);
 		ResultGenerator.generateResult(1 * MINUTE, 2);

@@ -39,57 +39,55 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.menu.SteppingSlider;
+import com.loadcoder.load.chart.menu.settings.SettingsLogic;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.result.Result;
 
-public class ResultChart extends Chart{
-	
-	private static final boolean defaultDottedMode = false;
+public class ResultChart extends Chart {
+
+	private static final boolean defaultPointsMode = false;
 
 	final ResultChartLogic logic;
-	
+
 	Result[] results;
-	
+
 	final CommonSeries[] commonSeries;
-	
-	public ResultChart(Map<Comparable, Color> customizedColors, CommonSeries[] commonSeries, Result ... results){
+
+	public ResultChart(Map<Comparable, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
 		super(true, false);
-		logic = new ResultChartLogic(
-				chartFrame.getSeriesCollection(),
-				chartFrame.getPlot(),
-				chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(),
-				defaultDottedMode,
-				commonSeries,
-				customizedColors,
-				false,
-				results
-				);
-		
-		
+		logic = new ResultChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
+				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, false, results);
+
 		long sampleLengthToUse = logic.getSampleLengthToUse();
-		int minorTickPacing = logic.getMinorTickLength();
 		int defaultIndex = logic.getDefaultSliderIndex();
-		addResultMenu(sampleLengthToUse, defaultIndex);
+
+		JMenu resultMenu = addResultMenu(sampleLengthToUse, defaultIndex);
+		JMenu settingsMenu = createSettingsMenu(logic);
+		JMenu aboutMenu = createAboutMenu();
+
+		chartFrame.getMenu().add(resultMenu);
+		chartFrame.getMenu().add(settingsMenu);
+		chartFrame.getMenu().add(aboutMenu);
+
 		chartFrame.setVisible(true);
-		
+
 		this.results = results;
 		this.commonSeries = commonSeries;
 	}
-	
-	public ResultChart(CommonSeries[] commonSeries, Result ... results){
+
+	public ResultChart(CommonSeries[] commonSeries, Result... results) {
 		this(null, commonSeries, results);
 	}
 
-	public ResultChart(Result ... results){
+	public ResultChart(Result... results) {
 		this(CommonSeries.values(), results);
 		this.results = results;
 	}
-	
-	protected ChartLogic getLogic(){
+
+	protected ChartLogic getLogic() {
 		return logic;
 	}
-	
+
 	private void toggleRemoveFilterCheckBox(DataSetUserType dataSetUserType, boolean selected) {
 		logic.setFilteredData(null);
 		logic.setDottedSeries(null);
@@ -103,8 +101,8 @@ public class ResultChart extends Chart{
 		}
 		logic.createHashesAndUpdate(false);
 	}
-	
-	private void addResultMenu(long initialSampleLength, int defaultIndex) {
+
+	private JMenu addResultMenu(long initialSampleLength, int defaultIndex) {
 
 		JMenu resultMenu = new JMenu("Result");
 
@@ -127,26 +125,30 @@ public class ResultChart extends Chart{
 		JMenu sampling = new JMenu("Sampling");
 
 		JMenu graphType = new JMenu("Graph type");
+		double keepFactor = logic.getCurrentKeepFactor();
+		String pointsRadioButtonText = "Points";
+		if (keepFactor != 1.0) {
+			pointsRadioButtonText = String.format("Points (%s)", SettingsLogic.keepFactorToProcentString(keepFactor));
+		}
+		logic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
 
-		JRadioButtonMenuItem dots = new JRadioButtonMenuItem("Dots", defaultDottedMode);
-		JRadioButtonMenuItem lines = new JRadioButtonMenuItem("Samples", !defaultDottedMode);
+		JRadioButtonMenuItem lines = new JRadioButtonMenuItem("Samples", !defaultPointsMode);
 		ButtonGroup graphTypeGroup = new ButtonGroup();
-		graphTypeGroup.add(dots);
+		graphTypeGroup.add(logic.getPointsRadioButton());
 		graphTypeGroup.add(lines);
-		graphType.add(dots);
+		graphType.add(logic.getPointsRadioButton());
 		graphType.add(lines);
 		resultMenu.add(graphType);
 
-		dots.addActionListener((a) -> {
+		logic.getPointsRadioButton().addActionListener((a) -> {
 			ajustDottedMode(true);
-		} );
+		});
 		lines.addActionListener((a) -> {
 			ajustDottedMode(false);
-		} );
+		});
 		JMenu sampleMethod = new JMenu("Sample method");
 
 		JMenu sampleLengthMenu = new JMenu("Sample length");
-		
 
 		SteppingSlider slider = createSlider(initialSampleLength, logic.getMinorTickLength(), defaultIndex);
 		slider.addChangeListener((e) -> {
@@ -158,7 +160,7 @@ public class ResultChart extends Chart{
 				chartSliderAjustment(newSampleLength);
 			}
 
-		} );
+		});
 
 		sampleLengthMenu.add(slider);
 		sampling.add(sampleMethod);
@@ -179,43 +181,42 @@ public class ResultChart extends Chart{
 				logic.addAllCommonSeriesToTheChart();
 				logic.yCalculatorToUse = calc;
 				logic.createHashesAndUpdate(false);
-			} );
+			});
 		}
-
-		chartFrame.getMenu().add(resultMenu);
+		return resultMenu;
 	}
 
-	protected static SteppingSlider createSlider(long initialSampleLength, int minorTickPacing, int defaultIndex){
-		
+	protected static SteppingSlider createSlider(long initialSampleLength, int minorTickPacing, int defaultIndex) {
+
 		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
 		labelTable.put(1, new JLabel("1"));
 
 		int max = ChartUtils.calculateSampleLengthSliderMax(initialSampleLength);
-		max = ((int)initialSampleLength / 1000) + minorTickPacing * 4;
+		max = ((int) initialSampleLength / 1000) + minorTickPacing * 4;
 		List<Integer> valuesList = new ArrayList<Integer>();
 		valuesList.add(1);
-		for(int i = minorTickPacing; i <= max; i = i +minorTickPacing){
-			if(! valuesList.contains(i))
-				valuesList.add(i);	
+		for (int i = minorTickPacing; i <= max; i = i + minorTickPacing) {
+			if (!valuesList.contains(i))
+				valuesList.add(i);
 		}
-		
-		for(int i =0; i< valuesList.size(); i++){
+
+		for (int i = 0; i < valuesList.size(); i++) {
 			labelTable.put(i, new JLabel("" + valuesList.get(i)));
 		}
-		
+
 		Integer[] values = valuesList.toArray(new Integer[valuesList.size()]);
 
-		SteppingSlider slider = new SteppingSlider(values, max, minorTickPacing, defaultIndex);
+		SteppingSlider slider = new SteppingSlider(values, defaultIndex);
 		slider.setLabelTable(labelTable);
 
 		return slider;
 	}
-	
-	void ajustDottedMode(boolean dottedMode){
+
+	void ajustDottedMode(boolean dottedMode) {
 		logic.useDottedModeValue(dottedMode);
 	}
-	
-	void chartSliderAjustment(long newSampleLength){
+
+	void chartSliderAjustment(long newSampleLength) {
 		long sampleLengthToUse = newSampleLength;
 		logic.setSampleLengthToUse(sampleLengthToUse);
 		logic.createHashesAndUpdate(true);

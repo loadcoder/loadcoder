@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.chart.jfreechart;
+package com.loadcoder.load.scenario;
 
-import com.loadcoder.load.chart.sampling.Sample;
+import java.util.List;
+
+import com.loadcoder.result.TransactionExecutionResult;
 
 @FunctionalInterface
-public interface ItemSeriesAdder {
-	void add(XYSeriesExtension series, Sample sample);
+public interface RuntimeResultUser {
+	void useData(List<List<TransactionExecutionResult>> listOfListOfList);
 }

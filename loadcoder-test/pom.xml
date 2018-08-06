@@ -1,11 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.loadcoder</groupId>
 	<artifactId>loadcoder-test</artifactId>
 	<packaging>jar</packaging>
 	<name>LoadCoder Test</name>
 	<url>http://loadcoder.com</url>
+
+	<description>This project contains tests that are supposed to be used manually during development as a place where experimentation can be done</description>
 
 	<parent>
 		<groupId>com.loadcoder</groupId>
@@ -29,16 +31,17 @@
 			<artifactId>loadcoder-chart</artifactId>
 		</dependency>
 
-			<dependency>
-				<groupId>com.loadcoder</groupId>
-				<artifactId>loadcoder-testutilities</artifactId>
-			</dependency>
-			
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-testutilities</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

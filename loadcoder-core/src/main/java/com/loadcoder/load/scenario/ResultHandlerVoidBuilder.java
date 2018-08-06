@@ -39,7 +39,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 			TransactionVoid trans, 
 			LoadScenario ls,
 			RateLimiter limiter){
-		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getResultFormatter(), limiter);
+		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(), limiter);
 		this.transactionName = defaultName;
 		this.trans = trans;
 	}

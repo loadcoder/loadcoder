@@ -16,13 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario;
+package com.loadcoder.load.chart.menu;
 
-import java.util.List;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-import com.loadcoder.result.TransactionExecutionResult;
-
-@FunctionalInterface
-public interface RuntimeDataUser {
-	void useData(List<List<TransactionExecutionResult>> listOfListOfList);
+public abstract class MouseClickedListener implements MouseListener {
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+	
+	@Override
+	public void mousePressed(MouseEvent e) {}
+	
+	@Override
+	public void mouseExited(MouseEvent e) {}
+	
+	@Override
+	public void mouseEntered(MouseEvent e) {}
 }

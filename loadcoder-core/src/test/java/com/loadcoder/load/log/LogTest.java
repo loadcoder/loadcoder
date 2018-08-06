@@ -18,41 +18,51 @@
  ******************************************************************************/
 package com.loadcoder.load.log;
 
-import java.io.File;
-import java.util.List;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
-import junit.framework.Assert;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.List;
 
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
+import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
+import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
+import com.loadcoder.load.testng.TestNGBase;
 
-public class LogTest {
+import junit.framework.Assert;
+
+public class LogTest extends TestNGBase {
 
 	@Test
-	public void test() {
+	public void test(Method method) {
 
-		List<String> rows = TestUtility.readFile(new File("result.log"));
+		File f = getNewLogDir(rootResultDir, method.getName());
+		setResultDestination(f);
+		File resultFile = new File(f, "result.log");
+
+		List<String> rows = TestUtility.readFile(resultFile);
 		int sizeBeforeTest = rows.size();
-		
-		String uniqueTransactionId = this.getClass().getName()+System.currentTimeMillis();
+
+		String uniqueTransactionId = this.getClass().getName() + System.currentTimeMillis();
 		LoadScenario ls = new LoadScenario() {
-			
+
 			@Override
 			public void loadScenario() {
-				load(uniqueTransactionId, ()->{/*some fancy transaction*/}).perform();
+				load(uniqueTransactionId, () -> {
+					/* some fancy transaction */}).perform();
 			}
 		};
-		
+
 		Load l = new LoadBuilder(ls).build();
-		l.runLoad().andWait();
-		
-		List<String> rowsAfterTest = TestUtility.readFile(new File("result.log"));
+		new ExecutionBuilder(l).build().execute().andWait();
+		List<String> rowsAfterTest = TestUtility.readFile(resultFile);
 		Assert.assertEquals(sizeBeforeTest + 1, rowsAfterTest.size());
-		Assert.assertTrue(rowsAfterTest.get(rowsAfterTest.size() -1).contains(uniqueTransactionId));
+		Assert.assertTrue(rowsAfterTest.get(rowsAfterTest.size() - 1).contains(uniqueTransactionId));
 
 	}
 }

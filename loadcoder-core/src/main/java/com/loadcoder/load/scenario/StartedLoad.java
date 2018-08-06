@@ -23,47 +23,19 @@ import java.lang.Thread.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.result.Result;
-
 public class StartedLoad {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	
+
 	Load l;
 
-	public StartedLoad(Load l){
+	public StartedLoad(Load l) {
 		this.l = l;
 		l.getLoadStateThread().start();
 	}
 
-	protected Result getRuntimeResult() throws NoResultOrFormatterException{
-		Result r = new Result(l.getRuntimeResultList());
-		return r;
-	}		
-	
-	protected boolean isScenarioTerminated(){
+	protected boolean isScenarioTerminated() {
 		return l.getLoadStateThread().getState() == State.TERMINATED;
 	}
-	
-	/**
-	 * Wait here until the load finishes
-	 * @return FinishedLoad instance of the finished load
-	 */
-	public FinishedLoad andWait(){
-		long start = System.currentTimeMillis();
-		try{
-			l.getLoadStateThread().join();
-		}catch(InterruptedException ie){
-			log.error("Unexpected InterruptedException caught", ie);
-		}
-		
-		if(l.getRuntimeResultUpdaterThread() != null) {
-			l.getRuntimeResultUpdaterThread().interrupt();
-		}
-		log.debug("Load executed {} ms", (System.currentTimeMillis() - start));
-		return new FinishedLoad(l);
-	}
-	
-}
 
+}

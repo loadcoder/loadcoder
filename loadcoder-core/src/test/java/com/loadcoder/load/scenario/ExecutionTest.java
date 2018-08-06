@@ -18,82 +18,80 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import junit.framework.Assert;
+import static com.loadcoder.statics.StopDesisions.iterations;
 
-import static com.loadcoder.statics.ContinueDesisions.*;
-import static com.loadcoder.statics.Time.*;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
-import com.loadcoder.load.intensity.ThrottleMode;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
 import com.loadcoder.load.testng.TestNGBase;
 
-public class LoadLifecycleTest extends TestNGBase{
+public class ExecutionTest extends TestNGBase{
 
-	@Test(expectedExceptions=InvalidLoadStateException.class)
-	public void startTheSameLoadTwice() {
-		
+	@Test(expectedExceptions=InvalidLoadStateException.class, expectedExceptionsMessageRegExp="E001.*")
+	public void testToStartAlreadyStartedExecution() {
+
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
-				load("t1", ()->{LoadUtility.sleep(100);}).perform();
+				load("quick", ()-> {});
 			}
 		};
+		Load l = new LoadBuilder(ls).stopDecision(iterations(1)).build();
+		Execution e = new ExecutionBuilder(l).build();
+		e.execute().andWait();
 		
-		Load l = new LoadBuilder(ls)
-				.continueCriteria(iterations(100))
-				.throttle(3, PerSecond, ThrottleMode.SHARED)
-				.build();
-
-		l.runLoad();
-		l.runLoad();
+		/*
+		 * should throw exception since it shall not be possible to execute 
+		 * the same execution more than once
+		 */
+		e.execute();
 	}
 	
+	
+	/**
+	 * Tests that a InvalidLoadStateException is thrown when executing a load created before another load
+	 * was created with the same LoadScenario.
+	 */
 	@Test(expectedExceptions=InvalidLoadStateException.class, expectedExceptionsMessageRegExp="E002.*")
-	public void startALoadDifferentFromTheLastBeingBuiltTestForThatScenario() {
-		
+	public void startAgain() {
+
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
-				load("t1", ()->{LoadUtility.sleep(100);}).perform();
+				load("slow", ()-> LoadUtility.sleep(200));
 			}
 		};
-		
-		Load l = new LoadBuilder(ls)
-				.continueCriteria(iterations(100))
-				.throttle(3, PerSecond, ThrottleMode.SHARED)
-				.build();
-		
-		new LoadBuilder(ls)
-				.continueCriteria(iterations(100))
-				.throttle(3, PerSecond, ThrottleMode.SHARED)
-				.build();
-		
-		l.runLoad();
+		Load l = new LoadBuilder(ls).stopDecision(iterations(5)).build();
+		new LoadBuilder(ls).stopDecision(iterations(5)).build();
+
+		Execution e = new ExecutionBuilder(l).build();
+		e.execute();
 	}
+	
+	
 
 	@Test
 	public void buildNewLoadBeforePreviousLoadFinished() {
 		
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
-				LoadUtility.sleep(1000);
+				LoadUtility.sleep(500);
 			}
 		};
 		
-		Load l = new LoadBuilder(ls).continueCriteria(iterations(1)).build();
-
-		l.runLoad();
+		Load l = new LoadBuilder(ls).stopDecision(iterations(1)).build();
+		new ExecutionBuilder(l).build().execute();
 		
 		try {
-			new LoadBuilder(ls).continueCriteria(iterations(1)).build();
+			new LoadBuilder(ls).stopDecision(iterations(1)).build();
 
 			Assert.fail("expected an InvalidLoadStateException here");
-		}catch(InvalidLoadStateException ilse) {}	
+		}catch(InvalidLoadStateException ilse) {
+			Assert.assertTrue(ilse.getMessage().contains("E003"));
+		}	
 		
-		LoadUtility.sleep(2000);
-		new LoadBuilder(ls).continueCriteria(iterations(1)).build();
+		LoadUtility.sleep(1000);
+		new LoadBuilder(ls).stopDecision(iterations(1)).build();
 
 	}
-
 }

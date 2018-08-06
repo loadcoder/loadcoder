@@ -30,8 +30,6 @@ public class ScenarioRunner implements Runnable{
 
 		long rampUpSleepTime = calculateRampUpSleepTime(load.getRampup(), load.getAmountOfThreads());
 		
-		load.start();
-		
 		for (int i = 0; i < load.getAmountOfThreads(); i++) {
 
 			Thread thread = load.getThreads().get(i);

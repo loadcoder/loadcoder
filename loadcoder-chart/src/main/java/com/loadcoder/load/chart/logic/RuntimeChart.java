@@ -20,15 +20,17 @@ package com.loadcoder.load.chart.logic;
 
 import java.util.List;
 
+import javax.swing.JMenu;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.chart.common.CommonSeries;
-import com.loadcoder.load.scenario.RuntimeDataUser;
+import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChart extends Chart implements RuntimeDataUser{
+public class RuntimeChart extends Chart implements RuntimeResultUser{
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -54,6 +56,13 @@ public class RuntimeChart extends Chart implements RuntimeDataUser{
 				startedScenarios,
 				true
 				);
+		
+		JMenu settingsMenu = createSettingsMenu(logic);
+		JMenu aboutMenu = createAboutMenu();
+		
+		chartFrame.getMenu().add(settingsMenu);
+		chartFrame.getMenu().add(aboutMenu);
+		
 		chartFrame.setVisible(true);
 	}
 	
@@ -65,7 +74,7 @@ public class RuntimeChart extends Chart implements RuntimeDataUser{
 		logic.doSafeUpdate();
 		long diff = System.currentTimeMillis() - start;
 		logger.debug("update time: {}", diff);
-		logger.trace("Total Points in chart: {}", chartFrame.getTotalSize());
+		logger.debug("Total Points in chart: {}", chartFrame.getTotalSize());
 		chartFrame.getChart().setNotify(true);
 	}
 	

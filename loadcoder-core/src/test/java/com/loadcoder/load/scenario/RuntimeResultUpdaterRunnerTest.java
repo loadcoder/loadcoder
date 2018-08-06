@@ -34,14 +34,16 @@ public class RuntimeResultUpdaterRunnerTest {
 
 	@Test
 	public void runtimeResultUpdaterRunnerTest() {
-		Load l = Mockito.mock(Load.class);
+		Execution e = Mockito.mock(Execution.class);
+
 		TransactionExecutionResultBuffer buffer = new TransactionExecutionResultBuffer();
 		buffer.getBuffer().add(new TransactionExecutionResult("a1", System.currentTimeMillis(), 10, true, null));
-		when(l.getTransactionExecutionResultBuffer()).thenReturn(buffer);
-		RuntimeDataUser user = Mockito.mock(RuntimeDataUser.class);
-		RuntimeResultUpdaterRunner runtimeResultUpdaterRunner = new RuntimeResultUpdaterRunner(l, user);
+
+		when(e.getTransactionExecutionResultBuffer()).thenReturn(buffer);
+		RuntimeResultUser user = Mockito.mock(RuntimeResultUser.class);
+		RuntimeResultUpdaterRunner runtimeResultUpdaterRunner = new RuntimeResultUpdaterRunner(e, user);
 		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
 		runtimeResultUpdaterRunner.swapOutDataAndCallUser(map);
-		
+
 	}
 }

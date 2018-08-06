@@ -16,22 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.intensity;
+package com.loadcoder.load.scenario;
 
-public enum ThrottleMode {
-	
-	
-	/**
-	 * If using PER_THREAD, the intensity will be per thread.
-	 * So if using PER_THREAD with 10 / SECOND and with two threads running,
-	 * the total load will be 20 / SECOND
-	 */
-	PER_THREAD, 
+import java.util.Arrays;
 
-	/**
-	 * If using SHARED, the intensity will be shared among all threads.
-	 * So if using SHARED with 10 / SECOND and with two threads running,
-	 * the total load will be 10 / SECOND
-	 */
-	SHARED
+import com.loadcoder.result.ResultFormatter;
+
+public class ExecutionBuilder {
+	ResultFormatter resultFormatter;
+	RuntimeResultUser user;
+	final Load[] loads;
+
+	public ExecutionBuilder runtimeResultUser(RuntimeResultUser user) {
+		this.user = user;
+		return this;
+	}
+
+	public ExecutionBuilder resultFormatter(ResultFormatter resultFormatter) {
+		this.resultFormatter = resultFormatter;
+		return this;
+	}
+
+	public ExecutionBuilder(Load... loads) {
+		this.loads = loads;
+	}
+
+	public Execution build() {
+		return new Execution(resultFormatter, user, Arrays.asList(loads));
+	}
 }

@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.intensity;
 
+import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
 public class Intensity{

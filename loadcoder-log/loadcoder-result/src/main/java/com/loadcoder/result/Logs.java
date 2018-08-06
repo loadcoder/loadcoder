@@ -28,37 +28,39 @@ public class Logs {
 	public static final List<SharedDirFileAppender> sharedDirFileAppenders = new ArrayList<SharedDirFileAppender>();
 
 	private static File logDir = new File(".");
-	
-	private static DirProvider defaultProvider = ()->{return new File("");};  
 
-	private static DirProvider sharedDirProvider = ()->{return getLogDir();};  
-	
+	private static DirProvider defaultProvider = () -> {
+		return new File("");
+	};
+
+	private static DirProvider sharedDirProvider = () -> {
+		return getLogDir();
+	};
+
 	private static DirProvider dirProvider = defaultProvider;
-	
+
 	public static List<SharedDirFileAppender> getshared() {
 		return sharedDirFileAppenders;
 	}
 
-	public static File getLogDir(){
+	public static File getLogDir() {
 		return logDir;
 	}
-	
-	public static File getFile(){
+
+	public static File getFile() {
 		return dirProvider.getFile();
 	}
-	
+
 	public static File getResultFileInLogDir() {
-
-		File resultFile = new File(logDir + "/" + "result.log");
-
+		File resultFile = new File(logDir, "result.log");
 		return resultFile;
 	}
-	
-	public static void changeToSharedDir(File newDir ) throws IOException{
+
+	protected static void changeToSharedDir(File newDir) throws IOException {
 		logDir = newDir;
 		dirProvider = sharedDirProvider;
-		synchronized(Logs.sharedDirFileAppenders) {
-			for(SharedDirFileAppender sharedDirFileAppender :Logs.sharedDirFileAppenders){
+		synchronized (Logs.sharedDirFileAppenders) {
+			for (SharedDirFileAppender sharedDirFileAppender : Logs.sharedDirFileAppenders) {
 				sharedDirFileAppender.changeToDir(newDir);
 			}
 		}

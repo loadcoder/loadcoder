@@ -18,8 +18,13 @@
  ******************************************************************************/
 package com.loadcoder.load;
 
-import static com.loadcoder.statics.ContinueDesisions.*;
-import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+import static com.loadcoder.statics.StopDesisions.duration;
+import static com.loadcoder.statics.StopDesisions.iterations;
+import static com.loadcoder.statics.Time.PER_SECOND;
+import static com.loadcoder.statics.Time.SECOND;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +34,18 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.intensity.ThrottleMode;
+import com.loadcoder.load.scenario.Execution;
+import com.loadcoder.load.scenario.ExecutionBuilder;
+import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
+import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.StartedLoad;
-import com.loadcoder.load.scenario.Load.ContinueDecision;
-import com.loadcoder.load.scenario.Load.LoadBuilder;
+import com.loadcoder.load.scenario.StartedExecution;
+import com.loadcoder.load.scenario.StopDecision;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
+import com.loadcoder.statics.StopDesisions;
+import com.loadcoder.statics.ThrottleMode;
 
 public class LoadTest extends TestNGBase{
 
@@ -52,22 +62,47 @@ public class LoadTest extends TestNGBase{
 			}
 		};
 		
-		Load l = new LoadBuilder(ls)
-				.build();
-		l.runLoad().andWait();
+		Load l = new LoadBuilder(ls).build();
+
+		new ExecutionBuilder(l).build().execute().andWait();
+	}
+	
+	@Test
+	public void twoLoads(Method m){
+		
+		setResultDestination(getNewLogDir(rootResultDir, m.getName()));
+		LoadScenario ls = new LoadScenario() {
+			public void loadScenario() {
+				load("t1", () -> {return "";}).perform();
+			}
+		};
+
+		LoadScenario ls2 = new LoadScenario() {
+			public void loadScenario() {
+				load("t2", () -> {LoadUtility.sleep(100);}).perform();
+			}
+		};
+		
+		Load l = new LoadBuilder(ls).build();
+		Load l2 = new LoadBuilder(ls2).stopDecision(StopDesisions.iterations(3)).build();
+
+		FinishedExecution finishedExecution = new ExecutionBuilder(l, l2).build().execute().andWait();
+		Result result = finishedExecution.getReportedResultFromResultFile();
+		
+		Assert.assertEquals(result.getNoOfTransactions(), 4);
 	}
 	
 	@Test(groups = "timeconsuming")
 	public void testDuration(){
-		long duration = 3 * 1000;
+		long duration = 1 * 1000;
 		long startTime = System.currentTimeMillis();
-		ContinueDecision continueToExecute = duration(duration);
+		StopDecision continueToExecute = duration(duration);
 		
-		Assert.assertTrue(continueToExecute.continueToExecute(startTime, 0));
-		LoadUtility.sleep(2000);
-		Assert.assertTrue(continueToExecute.continueToExecute(startTime, 0));
-		LoadUtility.sleep(1500);
-		Assert.assertFalse(continueToExecute.continueToExecute(startTime, 0));
+		Assert.assertFalse(continueToExecute.stopLoad(startTime, 0));
+		LoadUtility.sleep(500);
+		Assert.assertFalse(continueToExecute.stopLoad(startTime, 0));
+		LoadUtility.sleep(1000);
+		Assert.assertTrue(continueToExecute.stopLoad(startTime, 0));
 		
 		LoadScenario ls = new LoadScenario() {
 			
@@ -77,14 +112,16 @@ public class LoadTest extends TestNGBase{
 			}
 		};
 
-		Load l = new LoadBuilder(ls).continueCriteria(duration(duration)).build();
+		Load l = new LoadBuilder(ls).stopDecision(duration(duration)).build();
+		Execution e = new ExecutionBuilder(l).build();
+		
 		long start = System.currentTimeMillis();
-		l.runLoad().andWait();
+		e.execute().andWait();
 		long end = System.currentTimeMillis();
 		long diff = end - start;
-		long faultMargin = 1000;
+		long faultMargin = 500;
 
-		String message = "Duration was " + duration + ". Diff was " +diff + " ms";
+		String message = String.format("Duration was %s ms. Diff was %s ms", duration, diff);
 		Assert.assertTrue(diff > duration - faultMargin, message);
 		Assert.assertTrue(diff < duration + faultMargin, message);
 	}
@@ -111,10 +148,10 @@ public class LoadTest extends TestNGBase{
 
 		Load l = new LoadBuilder(ls)
 				.amountOfThreads(10)
-				.continueCriteria(iterations(1000))
+				.stopDecision(iterations(1000))
 				.build();
 		
-		l.runLoad().andWait();
+		new ExecutionBuilder(l).build().execute().andWait();
 		Assert.assertEquals(list.size(), 10);
 		Assert.assertEquals(o.size(), 1000);
 		
@@ -128,7 +165,7 @@ public class LoadTest extends TestNGBase{
 			
 			@Override
 			public void loadScenario() {
-				LoadUtility.sleep(100);
+
 				synchronized (list) {
 					if(!list.contains(Thread.currentThread())){
 						list.add(Thread.currentThread());
@@ -139,20 +176,24 @@ public class LoadTest extends TestNGBase{
 		};
 
 		Load l = new LoadBuilder(ls)
-				.continueCriteria(duration(12_000))
-				.rampup(10 * SECOND)
+				.stopDecision(duration(7 * SECOND))
+				.rampup(6 * SECOND)
 				.amountOfThreads(3)
 				.build();
 		
-		StartedLoad started = l.runLoad();
-		LoadUtility.sleep(1000);
+		StartedExecution started = new ExecutionBuilder(l).build().execute();
+		
+		LoadUtility.sleep(500);
 		Assert.assertEquals(list.size(), 1);
-		LoadUtility.sleep(5000); // 6sec past
+		LoadUtility.sleep(2000); // 2.5sec past
+		Assert.assertEquals(list.size(), 1);
+		LoadUtility.sleep(1000); //3.5sec past
 		Assert.assertEquals(list.size(), 2);
-		LoadUtility.sleep(3000); //9sec past
+		LoadUtility.sleep(2000); //5.5sec past
 		Assert.assertEquals(list.size(), 2);
-		LoadUtility.sleep(2000); //11sec past
+		LoadUtility.sleep(1000); //6.5sec past
 		Assert.assertEquals(list.size(), 3);
+
 		started.andWait();
 	}
 	
@@ -169,13 +210,13 @@ public class LoadTest extends TestNGBase{
 		};
 		
 		Load l = new LoadBuilder(ls)
-				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
-				.continueCriteria(iterations(iterationsPerThread))
+				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD)
+				.stopDecision(iterations(iterationsPerThread))
 				.build();
 		
-		
+		Execution e = new ExecutionBuilder(l).build();
 		long start = System.currentTimeMillis();
-		l.runLoad().andWait();
+		e.execute().andWait();
 		long end = System.currentTimeMillis();
 		
 		//set to a high value since it's affected by the asyncronous wait in Scenarion andWait
@@ -209,13 +250,14 @@ public class LoadTest extends TestNGBase{
 		};
 
 		Load l = new LoadBuilder(ls)
-				.continueCriteria(iterations(threads * iterationsPerThread))
-				.throttle(1, PerSecond, ThrottleMode.PER_THREAD)
+				.stopDecision(iterations(threads * iterationsPerThread))
+				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD)
 				.amountOfThreads(threads)
 				.build();
 
+		Execution e = new ExecutionBuilder(l).build();
 		long start = System.currentTimeMillis();
-		l.runLoad().andWait();
+		e.execute().andWait();
 		long end = System.currentTimeMillis();
 		long diff = end - start;
 

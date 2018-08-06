@@ -32,7 +32,7 @@ public class SteppingSlider extends JSlider
 		return values;
 	}
 
-    public SteppingSlider(Integer[] values, int max, int minorPacing, int defaultIndex)
+    public SteppingSlider(Integer[] values, int defaultIndex)
     {
 		super(0, values.length-1, defaultIndex);
 		this.values = values;
@@ -43,8 +43,4 @@ public class SteppingSlider extends JSlider
         setPreferredSize(new Dimension(400, 40));
     }
 
-    public int getDomainValue()
-    {
-        return values[getValue()];
-    }
 }

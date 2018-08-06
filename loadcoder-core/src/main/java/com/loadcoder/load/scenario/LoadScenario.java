@@ -37,6 +37,8 @@ public abstract class LoadScenario{
 	
 	private Load l;	
 	
+	Execution e;
+	
 	protected void setLoad(Load l){
 		this.l = l;
 	}
@@ -60,7 +62,7 @@ public abstract class LoadScenario{
 	}	
 	
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer(){
-		return l.getTransactionExecutionResultBuffer();
+		return l.getExecution().getTransactionExecutionResultBuffer();
 	}
 	
 	public int getAmountOfThreads(){
@@ -169,5 +171,5 @@ public abstract class LoadScenario{
 	public List<Thread> getThreads(){
 		return this.threads;
 	}
-	
+
 }

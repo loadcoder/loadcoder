@@ -35,7 +35,7 @@ public class ThreadRunner implements Runnable{
 		log.debug("Thread {} started" + Thread.currentThread());
 		LoadScenario ls = load.getLoadScenario();
 		
-		loadStartTime = load.getStartTime();
+		loadStartTime = load.getExecution().getStartTime();
 		ls.pre();
 		while (decideIfContinue()) {
 			try {
@@ -49,13 +49,13 @@ public class ThreadRunner implements Runnable{
 	}
 	
 	protected boolean decideIfContinue() {
-		boolean result = false;
+		boolean continueExecution = false;
 		synchronized (load) {
-			result = load.getContinueToExecute().continueToExecute(loadStartTime, load.getTimesExecuted());
-			if (result)
+			continueExecution = ! load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted());
+			if (continueExecution)
 				load.increaseTimesExecuted();
 		}
-		return result;
+		return continueExecution;
 	}
 	
 }

@@ -32,36 +32,38 @@ import ch.qos.logback.classic.Logger;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
+import static com.loadcoder.statics.LogbackLogging.*;
 
-public class LogbackTest extends TestNGBase{
+public class LogbackTest extends TestNGBase {
 
 	String rootLogDir = "target";
-	
-	public static SharedDirFileAppenderLogback getFileAppender(String filename){
-		SharedDirFileAppenderLogback theResultSharedDirFileAppender = LogbackUtils.getSharedDirFileAppender(new File(filename));
+
+	public static SharedDirFileAppenderLogback getFileAppender(String filename) {
+		SharedDirFileAppenderLogback theResultSharedDirFileAppender = LogbackUtils
+				.getSharedDirFileAppender(new File(filename));
 		return theResultSharedDirFileAppender;
 	}
 
 	@Test
 	public void test(Method method) throws IOException {
 
-		String dirPath = rootLogDir + "/" +method.getName();
-		String logFileName =  "1.log";
+		String dirPath = rootLogDir + "/" + method.getName();
+		String logFileName = "1.log";
 		String logFileName2 = "2.log";
 		String fullPathFile = dirPath + "/" + logFileName;
 		String fullPathFile2 = dirPath + "/" + logFileName2;
-		
+
 		/*
-		 * Create 2 Appenders with Loggers and verify that they are appending to 
+		 * Create 2 Appenders with Loggers and verify that they are appending to
 		 * separate files
 		 */
 		SharedDirFileAppenderLogback sharedDirFileAppender = getFileAppender(fullPathFile);
 		SharedDirFileAppenderLogback sharedDirFileAppender2 = getFileAppender(fullPathFile2);
 
-		Logger logger = (Logger)LoggerFactory.getLogger(this.getClass() +"1");
+		Logger logger = (Logger) LoggerFactory.getLogger(this.getClass() + "1");
 		logger.addAppender(sharedDirFileAppender);
 
-		Logger logger2 = (Logger) LoggerFactory.getLogger(this.getClass() +"2");
+		Logger logger2 = (Logger) LoggerFactory.getLogger(this.getClass() + "2");
 		logger2.addAppender(sharedDirFileAppender2);
 
 		String msg = "foo1";
@@ -72,13 +74,12 @@ public class LogbackTest extends TestNGBase{
 		dirPath = rootLogDir + "/newDir";
 		String fullPathFile3 = dirPath + "/" + logFileName;
 		String fullPathFile4 = dirPath + "/" + logFileName2;
-	
-		
+
 		/*
 		 * Change the dir where the files should be appended
 		 */
-		Logs.changeToSharedDir(new File(dirPath));
-		
+		setResultDestination(new File(dirPath));
+
 		String msg3 = "foo3";
 		logger.info(msg3);
 		String msg4 = "bar4";
@@ -91,7 +92,7 @@ public class LogbackTest extends TestNGBase{
 		List<String> content2 = LoadUtility.readFile(new File(fullPathFile2));
 		Assert.assertTrue(content2.size() == 1);
 		Assert.assertTrue(content2.get(0).contains(msg2));
-		
+
 		content = LoadUtility.readFile(new File(fullPathFile3));
 		Assert.assertTrue(content.size() == 1);
 		Assert.assertTrue(content.get(0).contains(msg3));
@@ -100,5 +101,5 @@ public class LogbackTest extends TestNGBase{
 		Assert.assertTrue(content2.size() == 1);
 		Assert.assertTrue(content2.get(0).contains(msg4));
 	}
-	
+
 }

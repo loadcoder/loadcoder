@@ -19,21 +19,28 @@
 package com.loadcoder.load.chart.logic;
 
 import java.awt.BasicStroke;
+import java.awt.Dimension;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-import org.jfree.chart.axis.NumberAxis;
+import javax.swing.JMenu;
+
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.util.ShapeUtilities;
 
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
+import com.loadcoder.load.chart.menu.AboutPopup;
+import com.loadcoder.load.chart.menu.MouseClickedListener;
+import com.loadcoder.load.chart.menu.settings.SettingsWindow;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public abstract class Chart {
@@ -57,7 +64,7 @@ public abstract class Chart {
 		
 		//this is done in order to set the size of the dots shown in dotted mode.
 		DrawingSupplier newSup = new DefaultDrawingSupplier(null, new Paint[] { }, strokes,
-				strokes, new Shape[] { ShapeUtilities.createDiamond(3) });
+				strokes, new Shape[] { new Rectangle(new Dimension(8, 8)) });
 		chartFrame.getPlot().setDrawingSupplier(newSup);
 	}
 	
@@ -68,6 +75,43 @@ public abstract class Chart {
 		chartFrame.waitUntilClosed();
 	}
 
+	JMenu createAboutMenu(){
+
+		JMenu about = new JMenu("About");
+		about.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				AboutPopup.showAboutPopup(chartFrame);
+			}
+		});
+		
+		return about;
+	}
+	
+	JMenu createSettingsMenu(ChartLogic logic){
+		JMenu settings = new JMenu("Settings");
+		settings.addMouseListener(new MouseClickedListener() {
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				new SettingsWindow(chartFrame, "Settings", logic);
+			}
+		});
+		return settings;
+	}
 	protected Chart use(DataSetUser dataSetUser) {
 		chartFrame.use(dataSetUser);
 		return this;
@@ -84,5 +128,4 @@ public abstract class Chart {
 	protected XYLineAndShapeRendererExtention getRenderer(){
 		return chartFrame.getRenderer();
 	}
-
 }

@@ -39,7 +39,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 			Transaction<R> trans, 
 			LoadScenario ls,
 			RateLimiter limiter){
-		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getResultFormatter(), limiter);
+		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(), limiter);
 		this.transactionName = defaultName;
 		this.trans = trans;
 	}

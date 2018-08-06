@@ -18,343 +18,134 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.intensity.ThrottleMode;
 import com.loadcoder.load.intensity.Throttler;
-import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
-import com.loadcoder.result.ResultFormatter;
-import com.loadcoder.result.TransactionExecutionResult;
-import com.loadcoder.statics.Formatter;
-import com.loadcoder.statics.TimeUnit;
 
 public class Load {
 
 	final LoadScenario ls;
-	
+
 	StartedLoad startedLoad;
-	private ContinueDecision continueToExecute;
+	private StopDecision stopDecision;
 	private int amountOfthreads;
 	private long rampup;
-	private ResultFormatter resultFormatter;
-	
+
 	boolean continueRuntimeResultUpdaterThread = true;
 
 	private Throttler throttler;
 
 	List<Thread> threads;
-	
-	private long startTime;
-	
-	Thread runtimeResultUpdaterThread;
 
-	RuntimeDataUser user;
-	
 	Thread loadStateThread = new Thread(new LoadStateRunner(this));
 
-	List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
-	
 	protected long timesExecuted = 0;
+
+	Execution e;
+
+	protected Execution getExecution() {
+		return this.e;
+	}
+
+	protected void setExecution(Execution e) {
+		this.e = e;
+	}
 
 	protected Executable getPreExecution() {
 		return preExecution;
 	}
-	
+
 	protected Executable getPostExecution() {
 		return postExecution;
 	}
 
 	private Executable preExecution;
 	private Executable postExecution;
-	
-	ContinueDecision defaultContinueToExecute = (a, b)->{
-		if(b > 0)
-			return false;
-		return true;
+
+	StopDecision defaultStopDecision = (a, b) -> {
+		if (b > 0)
+			return true;
+		return false;
 	};
-	
-	TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
-	
-	private StartedLoad getStartedLoad() {
+
+	protected StartedLoad getStartedLoad() {
 		return startedLoad;
 	}
+
 	protected Throttler getThrottler() {
 		return throttler;
 	}
 
-	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
-		return transactionExecutionResultBuffer;
-	}
-
-	protected void start(){
-		this.startTime = System.currentTimeMillis();
-	}
-	
-	protected long getTimesExecuted(){
+	protected long getTimesExecuted() {
 		return timesExecuted;
 	}
-	protected synchronized void increaseTimesExecuted(){
+
+	protected synchronized void increaseTimesExecuted() {
 		timesExecuted++;
 	}
+
 	public interface Executable {
 		public void execute();
 	}
-	
-	public interface ContinueDecision {
-		public boolean continueToExecute(long startTime, long timesExecuted);
-	}
-	
-	public interface ExceptionUser {
-		public void handleRunTimeException(Exception e);
-	}
-	
-	protected ResultFormatter getResultFormatter(){
-		return resultFormatter;
-	}
-	protected long getRampup(){
+
+	// protected ResultFormatter getResultFormatter(){
+	// return resultFormatter;
+	// }
+	protected long getRampup() {
 		return rampup;
 	}
-	
-	protected List<List<TransactionExecutionResult>> getRuntimeResultList() {
-		return runtimeResultList;
+
+	// protected long getStartTime(){
+	// return startTime;
+	// }
+	protected StopDecision getStopDecision() {
+		return stopDecision;
 	}
-	
-	protected long getStartTime(){
-		return startTime;
-	}
-	protected ContinueDecision getContinueToExecute(){
-		return continueToExecute;
-	}
-	protected LoadScenario getLoadScenario(){
+
+	protected LoadScenario getLoadScenario() {
 		return ls;
 	}
-	
-	protected int getAmountOfThreads(){
+
+	protected int getAmountOfThreads() {
 		return amountOfthreads;
 	}
-	
+
 	Object continueDecisionSynchronizer = new Object();
-	
-	public interface Transaction<T>{
+
+	public interface Transaction<T> {
 		T transaction() throws Exception;
 	}
 
-	public interface TransactionVoid{
+	public interface TransactionVoid {
 		void transaction() throws Exception;
 	}
 
-	private Load(	 
-			 LoadScenario ls,
-				ContinueDecision continueToExecute,
-				int amountOfthreads,
-				long rampup,
-				Executable preExecution,
-				Executable postExecution,
-				Intensity intensity,
-				ResultFormatter resultFormatter,
-				RuntimeDataUser user
-				){
+	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup,
+			Executable preExecution, Executable postExecution, Intensity intensity) {
 		this.ls = ls;
-		this.continueToExecute = continueToExecute == null ? defaultContinueToExecute : continueToExecute ;
+		this.stopDecision = stopDecision == null ? defaultStopDecision : stopDecision;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
 		this.preExecution = preExecution;
 		this.postExecution = postExecution;
-		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
-		this.user = user;
-		
+
 		List<Thread> temporaryThreadList = new ArrayList<Thread>();
-		for(int i =0; i<amountOfthreads; i++){
-			Thread thread = new Thread(new ThreadRunner(this) );	
+		for (int i = 0; i < amountOfthreads; i++) {
+			Thread thread = new Thread(new ThreadRunner(this));
 			temporaryThreadList.add(thread);
 		}
 		threads = Collections.unmodifiableList(temporaryThreadList);
-		
-		if(intensity != null){
+
+		if (intensity != null) {
 			this.throttler = new Throttler(intensity, threads);
 		}
-		
-		if(user != null) {
-			runtimeResultUpdaterThread = new Thread(new RuntimeResultUpdaterRunner(this, user));
-		}
-	}
-	
-	public static class LoadBuilder {
-		final LoadScenario ls;
-		private ContinueDecision continueToExecute;
-		private int amountOfthreads = 1;
-		private long rampupMillis;
-		private Executable preExecution;
-		private Executable postExecution;
-		private Intensity intensity;
-		private ResultFormatter resultFormatter;
-		private RuntimeDataUser user;
 
-		public LoadBuilder (LoadScenario ls){
-			this.ls = ls;
-		}
-		
-		
-		/**
-		 * Build the Load from the LoadBuilders load definition
-		 * 
-		 * @return a Load instance 
-		 */
-		public Load build(){
-			Load previousLoad = ls.getLoad();
-			if(previousLoad != null) {
-				StartedLoad previouslyStartedLoad = previousLoad.getStartedLoad();
-				
-				/*
-				 * throw InvalidLoadStateException if there was a previously started load
-				 * and it didnt finish yet
-				 * 
-				 */
-				if(previouslyStartedLoad != null &&! previouslyStartedLoad.isScenarioTerminated())
-					throw new InvalidLoadStateException(PreviousLoadStillRunning.toString());
-			}
-				
-			Load l = new Load(
-					ls, 
-					continueToExecute,
-					amountOfthreads,
-					rampupMillis,
-					preExecution,
-					postExecution,
-					intensity, 
-					resultFormatter,
-					user
-					);
-			
-			ls.setLoad(l);
-			return l;
-		}
-
-		protected ResultFormatter getResultFormatter() {
-			return resultFormatter;
-		}
-
-		protected int getAmountOfthreads() {
-			return amountOfthreads;
-		}
-
-		
-		/**
-		 * state the amount of threads for the load test
-		 * 
-		 * @param amountOfthreads is the target amount of threads that should be started and run the load
-		 * @return the builder instance
-		 */
-		public LoadBuilder amountOfThreads(int amountOfthreads) {
-			this.amountOfthreads = amountOfthreads;
-			return this;
-		}
-
-		protected Intensity getIntensity() {
-			return intensity;
-		}
-
-		protected ContinueDecision getContinueToExecute() {
-			return continueToExecute;
-		}
-
-		public LoadBuilder continueCriteria(ContinueDecision continueToExecute) {
-			this.continueToExecute = continueToExecute;
-			return this;
-		}
-
-		protected Executable getPreExecution() {
-			return preExecution;
-		}
-
-		protected Executable getPostExecution() {
-			return postExecution;
-		}
-
-		public LoadBuilder resultUser(RuntimeDataUser user){
-			this.user = user;
-			return this;
-		}
-		public LoadBuilder preExecution(Executable preExecution) {
-			this.preExecution = preExecution;
-			return this;
-		}
-
-		public LoadBuilder postExecution(Executable postExecution) {
-			this.postExecution = postExecution;
-			return this;
-		}
-
-		protected long getRampup() {
-			return rampupMillis;
-		}
-
-		public class Rampup{
-			long amount;
-			TimeUnit timeUnit;
-			
-			Rampup(long amount, TimeUnit timeUnit){
-				this.amount = amount;
-				this.timeUnit = timeUnit;
-			}
-		}
-		
-		/**
-		 * rampup is process of increasing the running amount of thread from 1 to
-		 * the stated amount of threads for the load test over rampupMillis milliseconds.
-		 * 
-		 * Note that the rampup functionality only ramps up threads, not the intensity.
-		 * 
-		 * @param rampupMillis is the duration of the rampup in milliseconds
-		 * @return the builder instance
-		 */
-		public LoadBuilder rampup(long rampupMillis) {
-			this.rampupMillis = rampupMillis;
-			return this;
-		}
-
-		/**
- 
-		 * 
-		 * @param rampupMillis is the duration of the rampup in milliseconds
-		 * @return the builder instance
-		 */
-		
-		
-		/**
-		 * The throughput can be throttled by using this method.
-		 * So if the throttle is set to 5 PerSecond with SHARED ThrottleMode
-		 * The total throughput wont't be over 5 TPS
-		 * 
-		 * @param amount of stated PerTimeUnit will be the throttle limit 
-		 * @param perTimeUnit is the unit of which to throttle limit is defined by
-		 * @param throttleMode states whether the limit should be shared (SHARED) among
-		 * the threads, or if the there should be a separate throttle per thread (PER_THREAD)
-		 * The difference between these two is that if SHARED is used, the total throughput won't
-		 * be higher than the defined limit, no matter the amount of threads.
-		 * If PER_THREAD is used, the separate thread can't produce a higher throughput than the limit,
-		 * but the total througput for all threads together will theoretically be limit * amountOfThreads
-		 * 
-		 * @return the builder instance
-		 */
-		public LoadBuilder throttle(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
-			this.intensity = new Intensity(amount, perTimeUnit, throttleMode);
-			return this;
-		}
-
-		public LoadBuilder reportResultAs(ResultFormatter resultFormatter) {
-			this.resultFormatter = resultFormatter;
-			return this;
-		}
 	}
 
-	List<Thread> getThreads(){
+	List<Thread> getThreads() {
 		return threads;
 	}
 
@@ -364,41 +155,22 @@ public class Load {
 			rampUpSleepTime = rampup / (amountOfThreads - 1);
 		return rampUpSleepTime;
 	}
-	
+
 	/**
 	 * Start the load
 	 * 
-	 * @return
-	 * a StartedLoad instance
+	 * @return a StartedLoad instance
 	 */
-	public synchronized StartedLoad runLoad() {
-		if (startedLoad != null) {
-			throw new InvalidLoadStateException(LoadAlreadyStarted.toString());
-		}
-		
-		Load setLoad = ls.getLoad();
-		if(! setLoad.equals(this)) {
-			throw new InvalidLoadStateException(ScenarioConnectedToOtherLoad.toString());
-		}
-		
-		if(runtimeResultUpdaterThread != null) {
-			runtimeResultUpdaterThread.start();
-		}
-		
-		startTime = System.currentTimeMillis();
-		Thread scenarioStarter = new Thread(new ScenarioRunner(this) );
+	protected synchronized StartedLoad runLoad() {
+		Thread scenarioStarter = new Thread(new ScenarioRunner(this));
 		scenarioStarter.start();
 
 		startedLoad = new StartedLoad(this);
 		return startedLoad;
 	}
 
-
-	Thread getLoadStateThread(){
+	Thread getLoadStateThread() {
 		return loadStateThread;
 	}
 
-	protected Thread getRuntimeResultUpdaterThread(){
-		return runtimeResultUpdaterThread;
-	}
 }

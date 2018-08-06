@@ -19,6 +19,8 @@
 package com.loadcoder.load.chart.jfreechart;
 
 import java.awt.Color;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -67,7 +69,7 @@ import org.slf4j.LoggerFactory;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.logic.Chart;
-import com.loadcoder.load.chart.menu.AboutPopup;
+import com.loadcoder.load.chart.menu.settings.SettingsWindow;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public class ChartFrame extends ApplicationFrame {
@@ -76,24 +78,24 @@ public class ChartFrame extends ApplicationFrame {
 
 	public static Logger log = LoggerFactory.getLogger(ChartFrame.class);
 
-	JFrame chartFrame = this;
-	
-	private JMenuBar menuBar;
-	
+	ChartFrame chartFrame = this;
+
+	private JMenuBar menuBar = new JMenuBar(); // Window menu bar
+
 	/** The chart theme. */
 	private static ChartTheme currentTheme = new StandardChartTheme("JFree");
 	JFreeChart chart;
 
 	ChartPanel chartPanel;
-	
+
 	XYPlotExtension plot;
-	
+
 	XYLineAndShapeRendererExtention renderer;
 
 	Map<Comparable, Boolean> seriesVisible = new HashMap<Comparable, Boolean>();
-	
+
 	XYSeriesCollectionExtention seriesCollection = new XYSeriesCollectionExtention();
-	
+
 	List<DataSetUser> dataSetUsers = new ArrayList<DataSetUser>();
 
 	JPanel panelForButtons;
@@ -110,7 +112,6 @@ public class ChartFrame extends ApplicationFrame {
 		return renderer;
 	}
 
-
 	public Map<Comparable, Boolean> getSeriesVisible() {
 		return seriesVisible;
 	}
@@ -124,43 +125,49 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
-	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset, XYLineAndShapeRendererExtention renderer) {
+	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset,
+			XYLineAndShapeRendererExtention renderer) {
 		NumberAxis yAxis = new NumberAxis(yAxisLabel);
 		NumberAxis xAxis = new NumberAxis(xAxisLabel);
 		xAxis.setAutoRangeIncludesZero(false);
 		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
+
 		return plot;
 	}
-	
+
 	public ChartFrame(boolean linesVisible, boolean shapesVisible) {
 		super("");
+		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/polarbear.png"));
+		image.getScaledInstance(200, 200, Image.SCALE_FAST);
+		setIconImage(image);
 		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection);
 
 		plot = createXYPlotExtension("X", "Y", seriesCollection, renderer);
 		plot.setRenderer(renderer);
 		plot.getDomainAxis().setAutoRange(true);
 		plot.getRangeAxis().setAutoRange(true);
+
 		showChart();
-		
+
 		addKeyListener(new KeyListener() {
 
-            @Override
-            public void keyTyped(KeyEvent e) {
-            }
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if ((e.getKeyCode() == KeyEvent.VK_C) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
-                    chartPanel.doCopy();
-                }
-            }
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if ((e.getKeyCode() == KeyEvent.VK_C) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
+					chartPanel.doCopy();
+				}
+			}
 
-            @Override
-            public void keyReleased(KeyEvent e) {
-            }
-        });
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+		});
 	}
-	
+
 	XYDataItem xgetDataItem(XYSeriesExtension series, long x) {
 		int index = series.indexOf(x);
 		XYDataItem existing = (XYDataItem) series.getItems().get(index);
@@ -171,16 +178,17 @@ public class ChartFrame extends ApplicationFrame {
 		return seriesCollection;
 	}
 
-	public int getTotalSize(){
-		List l =  seriesCollection.getSeries();
+	public int getTotalSize() {
+		List l = seriesCollection.getSeries();
 		int totalSize = 0;
-		for(Object o : l){
-			XYSeriesExtension series = (XYSeriesExtension)o;
+		for (Object o : l) {
+			XYSeriesExtension series = (XYSeriesExtension) o;
 			int seriesSize = series.getItemCount();
 			totalSize = totalSize + seriesSize;
 		}
 		return totalSize;
 	}
+
 	public static JFreeChart createXYLineChart(String title, PlotOrientation orientation, boolean legend,
 			boolean tooltips, boolean urls, XYPlot plot) {
 
@@ -200,34 +208,6 @@ public class ChartFrame extends ApplicationFrame {
 		return chart;
 	}
 
-	JMenuBar createMenu(){
-		JMenuBar menuBar = new JMenuBar(); // Window menu bar
-
-		JLabel about = new JLabel("About");
-		about.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseReleased(MouseEvent e) {}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				AboutPopup.showAboutPopup(chartFrame);
-			}
-		});
-		menuBar.add(about);
-
-		return menuBar;
-	}
-
 	public ChartFrame showChart() {
 
 		panelForButtons = new JPanel();
@@ -236,25 +216,20 @@ public class ChartFrame extends ApplicationFrame {
 		panelForButtons.setLayout(new BoxLayout(panelForButtons, BoxLayout.PAGE_AXIS));
 
 		chart = createXYLineChart(null, PlotOrientation.VERTICAL, true, true, false, plot);
-		
-		//using this constructor in order to get rid of jcharts right click popup menu
-		chartPanel = new ChartPanelExtension(chart,            
-				ChartPanel.DEFAULT_WIDTH,
-				ChartPanel.DEFAULT_HEIGHT,
-				ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH,
-				ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT,
-				ChartPanel.DEFAULT_MAXIMUM_DRAW_WIDTH,
-				ChartPanel.DEFAULT_MAXIMUM_DRAW_HEIGHT,
+
+		// using this constructor in order to get rid of jcharts right click popup menu
+		chartPanel = new ChartPanelExtension(chart, ChartPanel.DEFAULT_WIDTH, ChartPanel.DEFAULT_HEIGHT,
+				ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT,
+				ChartPanel.DEFAULT_MAXIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MAXIMUM_DRAW_HEIGHT,
 				ChartPanel.DEFAULT_BUFFER_USED, false, false, false, false, false, false);
 
-		menuBar = createMenu();
 		setJMenuBar(menuBar);
 
 		DateAxis dateAxis = new DateAxis();
 
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 
-				format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));
 		dateAxis.setDateFormatOverride(format);
 
 		plot.setDomainAxis(dateAxis);
@@ -267,7 +242,8 @@ public class ChartFrame extends ApplicationFrame {
 				handleClick(button, entity, seriesCollection);
 			}
 
-			public void chartMouseMoved(ChartMouseEvent e) { }
+			public void chartMouseMoved(ChartMouseEvent e) {
+			}
 
 		});
 
@@ -296,7 +272,7 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
-	void setVisibility(XYSeriesExtension clickedSeries, int iterator, LegendItem legend, boolean visible){
+	void setVisibility(XYSeriesExtension clickedSeries, int iterator, LegendItem legend, boolean visible) {
 
 		if (clickedSeries instanceof XYDottedSeriesExtension) {
 			renderer.setSeriesShapesVisible(iterator, visible);
@@ -305,69 +281,70 @@ public class ChartFrame extends ApplicationFrame {
 		}
 		seriesVisible.put(clickedSeries.getKey(), visible);
 		clickedSeries.setVisible(visible);
-		legend.setLineVisible(visible);
+		// legend.setLineVisible(visible);
+		legend.setShapeVisible(visible);
 	}
-	
+
 	public void handleClick(int button, Object clickedObject, XYSeriesCollectionExtention serieses) {
 
 		synchronized (plot) {
 
-		if (clickedObject instanceof PlotEntity) {
-			chart.setNotify(false);
-			if (button == 1) {
-			} else {
-				chartPanel.restoreAutoBounds();
-			}
-			chart.setNotify(true);
-			serieses.fireChange();
-		}else if (clickedObject instanceof LegendItemEntity) {
-			chart.setNotify(false);
-			LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
-			Comparable pushedLegend = legendItemEntity.getSeriesKey();
-			List<XYSeriesExtension> lista = serieses.getSeries();
-			int iterator = 0;
-			XYSeriesExtension clickedSeries = null;
-
-			for (XYSeriesExtension xy : lista) {
-				Comparable c = xy.getKey();
-				if (pushedLegend.compareTo(c) == 0) {
-					clickedSeries = xy;
-					break;
+			if (clickedObject instanceof PlotEntity) {
+				chart.setNotify(false);
+				if (button == 1) {
+				} else {
+					chartPanel.restoreAutoBounds();
 				}
-				iterator++;
-			}
+				chart.setNotify(true);
+				serieses.fireChange();
+			} else if (clickedObject instanceof LegendItemEntity) {
+				chart.setNotify(false);
+				LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
+				Comparable pushedLegend = legendItemEntity.getSeriesKey();
+				List<XYSeriesExtension> lista = serieses.getSeries();
+				int iterator = 0;
+				XYSeriesExtension clickedSeries = null;
 
-			LegendItem clickedLegend = clickedSeries.getLegend();
-			if (button == 1) {
-				boolean visible = !clickedSeries.isVisible();
-				setVisibility(clickedSeries, iterator, clickedLegend, visible);
-			} else {
-				int iterator2 = 0;
 				for (XYSeriesExtension xy : lista) {
-					LegendItem legend = xy.getLegend();
-
-					boolean visible = false;
-					if (xy.equals(clickedSeries))
-						visible = true;
-					setVisibility(xy, iterator2, legend, visible);
-					iterator2++;
+					Comparable c = xy.getKey();
+					if (pushedLegend.compareTo(c) == 0) {
+						clickedSeries = xy;
+						break;
+					}
+					iterator++;
 				}
+
+				LegendItem clickedLegend = clickedSeries.getLegend();
+				if (button == 1) {
+					boolean visible = !clickedSeries.isVisible();
+					setVisibility(clickedSeries, iterator, clickedLegend, visible);
+				} else {
+					int iterator2 = 0;
+					for (XYSeriesExtension xy : lista) {
+						LegendItem legend = xy.getLegend();
+
+						boolean visible = false;
+						if (xy.equals(clickedSeries))
+							visible = true;
+						setVisibility(xy, iterator2, legend, visible);
+						iterator2++;
+					}
+				}
+				chart.setNotify(true);
+				serieses.fireChange();
 			}
-			chart.setNotify(true);
-			serieses.fireChange();
-		}
 		}
 	}
-	
-	public void copy(){
+
+	public void copy() {
 		chartPanel.doCopy();
 	}
-	
+
 	void addPanel(JPanel resultChartPanel) {
 		panelForButtons.add(resultChartPanel);
 	}
-	
-	public JMenuBar getMenu(){
+
+	public JMenuBar getMenu() {
 		return menuBar;
 	}
 

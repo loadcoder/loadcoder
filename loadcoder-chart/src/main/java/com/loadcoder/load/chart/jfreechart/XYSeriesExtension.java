@@ -39,13 +39,35 @@ public class XYSeriesExtension extends XYSeries {
 
 	private static final long serialVersionUID = 1L;
 	
+	
 	private boolean visible = true;
 	Paint colorInTheChart;
-
+	
+	private final int hash;
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof XYSeriesExtension) {
+			XYSeriesExtension toCompare = (XYSeriesExtension)o;
+			if(toCompare.hashCode() == hash)
+				return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return hash;
+	}
+	
 	public Paint getColorInTheChart() {
 		return colorInTheChart;
 	}
 
+	public void setColorInTheChart(Paint paint) {
+		this.colorInTheChart = paint;
+	}
+	
 	LegendItem legend;
 	
 	public void add(XYDataItem item, boolean notify, boolean debug) {
@@ -83,6 +105,7 @@ public class XYSeriesExtension extends XYSeries {
 			boolean allowDuplicateXValues, 
 			Paint colorInTheChart) {
 		super(key, autoSort, allowDuplicateXValues);
+		hash = super.hashCode();
 		setNotify(false);
 		this.colorInTheChart = colorInTheChart;
 	}
@@ -95,4 +118,5 @@ public class XYSeriesExtension extends XYSeries {
 	public String toString(){
 		return "" + getKey() + " visible:" + isVisible();
 	}
+	
 }

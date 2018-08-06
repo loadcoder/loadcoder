@@ -23,15 +23,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 public class ColorUtils {
+	
+	public static final List<Color> extremeColors = Arrays.asList(Color.BLACK, Color.RED, Color.GREEN, Color.BLUE, new Color(255,255,0), new Color(255, 0, 255), new Color(0, 255, 255), Color.WHITE);
 
-	public static final List<Color> extremeColors = Arrays.asList(Color.BLACK, Color.RED, Color.GREEN, Color.BLUE, new Color(255,255,0), new Color(255, 0, 255), new Color(0, 255, 255));
-
-	public static final List<Color> blacklistColors = Arrays.asList(new Color(255,255,0));
-
+	public static final List<Color> defaultBlacklistColors = Arrays.asList(Color.YELLOW, Color.WHITE);
+	
 	public static Color getNewContrastfulColor(List<Color> alreadyExistingColors){
-		List<Color> newColors = getNewPotentialColors(alreadyExistingColors);
-		Color newColor = findColorWithLongestDistanceToClosestNeighbour(newColors, alreadyExistingColors);
+		return getNewContrastfulColor(alreadyExistingColors, new ArrayList<Color>());
+	}
+	
+	public static Color getNewContrastfulColor(List<Color> alreadyExistingColors, List<Color> blacklistedColors){
+		
+		List<Color> colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible = new ArrayList<>();
+		colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.addAll(alreadyExistingColors);
+		colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.addAll(blacklistedColors);
+		List<Color> newColors = getNewPotentialColors(colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible);
+		
+		Color newColor = findColorWithLongestDistanceToClosestNeighbour(newColors, colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible);
 		return newColor;
 	}
 
@@ -69,17 +79,14 @@ public class ColorUtils {
 		return result;
 	}
 	
-	protected static List<Color> getNewPotentialColors(List<Color> alreadyExistingColors2){
+	protected static List<Color> getNewPotentialColors(List<Color> colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible){
 		
-		List<Color> alreadyExistingColors = new ArrayList<Color>();
-		alreadyExistingColors.addAll(alreadyExistingColors2);
-		alreadyExistingColors.addAll(blacklistColors);
-		List<Color> result = getExtremeColorsAsPotentials(alreadyExistingColors);
+		List<Color> result = getExtremeColorsAsPotentials(colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible);
 		
-		for(int i = 0; i<alreadyExistingColors.size(); i++){
-			Color toBeCompared = alreadyExistingColors.get(i);
-			for(int j = i+1; j<alreadyExistingColors.size(); j++){
-				Color toMixWith = alreadyExistingColors.get(j);
+		for(int i = 0; i<colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.size(); i++){
+			Color toBeCompared = colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.get(i);
+			for(int j = i+1; j<colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.size(); j++){
+				Color toMixWith = colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.get(j);
 				Color mixed = mixColors(toBeCompared, toMixWith);
 				result.add(mixed);
 			}
@@ -105,7 +112,12 @@ public class ColorUtils {
 
 		int b1 = c1.getBlue();
 		int b2 = c2.getBlue();
-		
+
+		/*
+		 * The 3D Pythagorean Theorem => 
+		 * s2 = a^2 + b^2 + c^2 =>
+		 * s = sqrt(a^2 + b^2 + c^2)
+		 */
 		double distance = Math.sqrt(
 				Math.pow(r1 - r2, 2) +
 				Math.pow(g1 - g2, 2) +
