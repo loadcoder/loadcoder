@@ -50,11 +50,11 @@ public class Slf4jTest {
 		infoLog.error(infoMsg);
 		
 		List<String> content = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/info-logback.log"));
-		Assert.assertTrue(content.size() == 1);
-		Assert.assertTrue(content.get(0).contains(infoMsg));
+		Assert.assertEquals(content.size(), 2);
+		Assert.assertTrue(content.get(1).contains(infoMsg));
 
 		List<String> content2 = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/result-logback.log"));
-		Assert.assertTrue(content2.size() == 1);
+		Assert.assertEquals(content2.size(), 1);
 		Assert.assertTrue(content2.get(0).contains(resultMsg));
 		
 	}

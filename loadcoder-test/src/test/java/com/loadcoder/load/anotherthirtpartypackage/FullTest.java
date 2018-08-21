@@ -25,6 +25,7 @@ import static com.loadcoder.statics.Time.PER_MINUTE;
 import static com.loadcoder.statics.Time.PER_SECOND;
 import static com.loadcoder.statics.Time.SECOND;
 import static com.loadcoder.statics.ThrottleMode.*;
+import static com.loadcoder.statics.Formatter.*;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
+import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
@@ -353,26 +355,24 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 
-				load("t1", () -> {
-					sut.sleepCos();
+				load("get", () -> {
+					sut.methodWhereResponseTimeFollowSomeKindOfPattern(sut);
 				}).handleResult((a) -> {
 				}).perform();
-				load("t2", () -> {
+				load("create", () -> {
 					sut.methodThatTakesBetweenTheseResponseTimes(200, 220);
 					return "";
 				}).handleResult((a) -> {
 				}).perform();
 
-				load("t3", () -> sut.methodThatTakesBetweenTheseResponseTimes(300, 320)).handleResult((a) -> {
+				load("change", () -> sut.methodThatTakesBetweenTheseResponseTimes(300, 320)).handleResult((a) -> {
 				}).perform();
 
-				load("sometimesFails", () -> {
+				load("commit", () -> {
 					sut.methodThatSomeTimesThrowsCheckedException();
 				}).handleResult((a) -> {
 				}).perform();
 
-				DomainDto dto = load("getDomain", () -> sut.getDomainDto()).handleResult((a) -> {
-				}).perform();
 			}
 		};
 
@@ -429,7 +429,12 @@ public class FullTest extends TestNGBase {
 
 		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(runtimeChart).build().execute()
 				.andWait();
-
+		
+		Execution execution = new ExecutionBuilder(l)
+				.runtimeResultUser(new RuntimeChart())
+				.resultFormatter(SIMPLE_RESULT_FORMATTER)
+				.build();
+		
 		Result result = finished.getReportedResultFromResultFile();
 		ResultChart resultChart = new ResultChart(result);
 
@@ -463,6 +468,8 @@ public class FullTest extends TestNGBase {
 				.andWait();
 
 		Result result = finished.getReportedResultFromResultFile();
+		
+		Result r = new Result(new File("src/test/resources/testresults/2min.log"));
 
 		Chart c = new ResultChart(result);
 		c.waitUntilClosed();

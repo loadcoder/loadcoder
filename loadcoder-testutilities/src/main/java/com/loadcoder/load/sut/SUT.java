@@ -107,8 +107,8 @@ public class SUT {
 		return;
 	}
 	
-	public void loggingMethod(){
-		log.info("logged by SUT in method loggingMethod");
+	public void loggingMethod(String toLog){
+		log.info(toLog);
 		return;
 	}
 	

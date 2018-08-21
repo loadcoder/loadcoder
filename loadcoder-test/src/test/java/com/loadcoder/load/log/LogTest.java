@@ -55,11 +55,11 @@ public class LogTest extends TestNGBase{
 		infoLog.error(infoMsg);
 		
 		List<String> content = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/info.log"));
-		Assert.assertTrue(content.size() == 1);
-		Assert.assertTrue(content.get(0).contains(infoMsg));
+		Assert.assertEquals(content.size(), 2);
+		Assert.assertTrue(content.get(1).contains(infoMsg));
 
 		List<String> content2 = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/result.log"));
-		Assert.assertTrue(content2.size() == 1);
+		Assert.assertEquals(content2.size(), 1);
 		Assert.assertTrue(content2.get(0).contains(resultMsg));
 		
 	}
@@ -75,7 +75,8 @@ public class LogTest extends TestNGBase{
 		resultLog.info(resultMsg);
 		infoLog.error(infoMsg);
 		SUT sut = new SUT();
-		sut.loggingMethod();
+		String loggedInOtherClass = "logged by SUT";
+		sut.loggingMethod(loggedInOtherClass);
 		
 		
 		List<String> content2 = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/result.log"));
@@ -83,9 +84,9 @@ public class LogTest extends TestNGBase{
 		Assert.assertTrue(content2.get(0).contains(resultMsg));
 	
 		List<String> content = LoadUtility.readFile(new File(resultDir.getAbsolutePath() +"/info.log"));
-		Assert.assertTrue(content.size() == 2);
-		Assert.assertTrue(content.get(0).contains(infoMsg));
-		Assert.assertTrue(content.get(1).contains("logged by SUT"));
+		Assert.assertEquals(content.size(),3);
+		Assert.assertTrue(content.get(1).contains(infoMsg));
+		Assert.assertTrue(content.get(2).contains(loggedInOtherClass));
 		
 	}
 }
