@@ -122,7 +122,7 @@ public class SUT {
 	
 	public void methodThatSomeTimesThrowsCheckedException() throws IOException{
 		sleep(random(40, 100));
-		if(random(0, 100) == 5)
+		if(random(0, 10) == 5)
 			throw new IOException("a RuntimeException occured in SUT");
 	}
 	

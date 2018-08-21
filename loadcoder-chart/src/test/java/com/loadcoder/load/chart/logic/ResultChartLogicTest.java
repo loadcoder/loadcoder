@@ -31,30 +31,31 @@ import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.logic.ResultChartLogic;
+import com.loadcoder.load.chart.logic.ResultChartTest.ResultExtention;
 import com.loadcoder.load.chart.logic.RuntimeChartLogic;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 
-public class ResultChartLogicTest extends TestNGBase{
+public class ResultChartLogicTest extends TestNGBase {
 
 	XYSeriesCollectionExtention collection;
-	
+
 	LoadcoderRenderer renderer;
 
 	Map<Comparable, Boolean> map;
-	
+
 	XYPlotExtension plot;
-	
+
 	RuntimeChartLogic logic;
 
 	@BeforeMethod
-	public void setup(){
+	public void setup() {
 		collection = new XYSeriesCollectionExtention();
 		renderer = new LoadcoderRenderer(true, false, collection);
 		map = new HashMap<Comparable, Boolean>();
 		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
 	}
-	
+
 	@Test
 	public void testcalculateSampleLengthDefault() {
 
@@ -79,10 +80,9 @@ public class ResultChartLogicTest extends TestNGBase{
 
 		result = ResultChartLogic.calculateSampleLengthDefault(0, 15_000_000L, 1);
 
-		
 		result = ResultChartLogic.calculateSampleLengthDefault(0, 17_000_000L, 1);
 		Assert.assertEquals(result, 18_000);
-		
+
 		result = ResultChartLogic.calculateSampleLengthDefault(0, 5_000_000L, 20);
 		Assert.assertEquals(result, 10_000);
 
@@ -92,23 +92,13 @@ public class ResultChartLogicTest extends TestNGBase{
 		result = ResultChartLogic.calculateSampleLengthDefault(0, 5_000_000L, 50);
 		Assert.assertEquals(result, 13_000);
 	}
-	
+
 	@Test
-	public void updateTest(){
-		Result r = new Result(ResultChartTestUtility.getTranses(10));
-		ResultChartLogic logic = new ResultChartLogic(
-				collection, 
-				plot, 
-				renderer, 
-				map, 
-				true, 
-				CommonSeries.values(), 
-				null,
-				false,
-				r
-				);
+	public void updateTest() {
+		Result r = new ResultExtention(ResultChartTestUtility.getTranses(10));
+		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
+				null, false, r);
 		logic.createHashesAndUpdate(false);
-		
-		
+
 	}
 }

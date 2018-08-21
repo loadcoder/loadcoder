@@ -16,23 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result;
+package com.loadcoder.load.chart.sampling;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import org.testng.annotations.Test;
 
-public abstract class ResultFormatter{
-	
-	public abstract String toString(TransactionExecutionResult TransactionExecutionResult);
-	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
-	
-	public Result toResultList(File file) throws IOException{
-//		List<List<TransactionExecutionResult>> resultLists = toResultLists(file);
+import com.loadcoder.load.chart.common.YCalculator;
+import com.loadcoder.load.chart.data.Point;
+
+import junit.framework.Assert;
+
+public class SampleTest {
+
+	@Test
+	public void calculateYTest(){
+		Sample s = new Sample(0, 1000, "Hello");
+		s.addPoint(new Point(0, 0, true));
+		s.addPoint(new Point(0, 10, true));
+		s.calculateY(YCalculator.avg);
+		long y = s.getY();
+		Assert.assertEquals(5, y); //10/2=5
 		
-		Result r = new Result(file, this);
-
-		return r;
+		s.addPoint(new Point(0, 1, true));
+		s.calculateY(YCalculator.avg);
+		y = s.getY();
+		Assert.assertEquals(4, y); //11/3 = 3.67
+		
+		s.addPoint(new Point(0, 1, true));
+		s.calculateY(YCalculator.avg);
+		y = s.getY();
+		Assert.assertEquals(3, y); //13/4 = 3.25
+		
 	}
-	
 }

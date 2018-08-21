@@ -127,7 +127,7 @@ public class RuntimeChartLogicTest extends TestNGBase{
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
 		
 		Assert.assertEquals(a, b); //assert concaternation 
-		Assert.assertEquals(10.0, b.getY());
+		Assert.assertEquals(10, b.getY());
 	}
 	
 	@Test
@@ -161,7 +161,7 @@ public class RuntimeChartLogicTest extends TestNGBase{
 		Sample b = sampleGroup.getExistingSample(999, 1000);
 		
 		Assert.assertEquals(a, b); //assert concaternation 
-		Assert.assertEquals(1.0, b.getY());
+		Assert.assertEquals(1, b.getY());
 	
 		Sample shouldNotHaveBeenConcatedA = sampleGroup.getExistingSample(-3000, 1000);
 		Sample shouldNotHaveBeenConcatedB= sampleGroup.getExistingSample(-1001, 1000);

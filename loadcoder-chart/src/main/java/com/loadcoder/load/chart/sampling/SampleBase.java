@@ -33,7 +33,7 @@ public class SampleBase {
 	
 	protected long lastTs;
 	
-	protected double y =-1;
+	protected long y = -1;
 	
 	SampleBase previousSample;
 	
@@ -54,7 +54,7 @@ public class SampleBase {
 		return lastTs;
 	}
 	
-	public double getY() {
+	public long getY() {
 		return y;
 	}
 

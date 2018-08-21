@@ -27,7 +27,7 @@ import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 
 public class Sample extends SampleBase{
 
-	boolean locked = true;
+	private boolean locked = true;
 	
 	long pointsSum =0;
 	
@@ -142,7 +142,7 @@ public class Sample extends SampleBase{
 	}
 	
 	public static double avg(long sum, long amount) {
-		double avg = sum / amount;
+		double avg = (double)sum / amount;
 		return avg;
 	}
 	
@@ -151,17 +151,13 @@ public class Sample extends SampleBase{
 		if(locked) {
 			calculated = avg(pointsSum, pointsAmount);
 		}else {
-			calculated = calc.calculateCommonY(points);
+			calculated = calc.calculateY(points);
 		}
 		
-		long longAmount = (long)calculated;
-		if(calculated > longAmount){
-			longAmount = longAmount +1;
-		}
-		this.y = longAmount;
+		this.y = Math.round(calculated);
 	}
 	
-	public double getY(){
+	public long getY(){
 		return y;
 	}
 	

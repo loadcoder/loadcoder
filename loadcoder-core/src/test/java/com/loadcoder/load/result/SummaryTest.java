@@ -80,9 +80,15 @@ public class SummaryTest extends TestNGBase{
 		return summaryWithTable;
 	}
 
+	class ResultExtention extends Result{
+		public ResultExtention(List<List<TransactionExecutionResult>> resultLists) {
+			super(resultLists);
+		}
+	}
+	
 	@Test
 	public void testLogSummaryRow() {
-		Result result = new Result(getResultList());
+		Result result = new ResultExtention(getResultList());
 		Summary summary = new Summary(result);
 		summary
 		.log(a -> "Foo")
@@ -92,7 +98,7 @@ public class SummaryTest extends TestNGBase{
 	
 	@Test
 	public void test(Method m) {
-		Result result = new Result(getResultList());
+		Result result = new ResultExtention(getResultList());
 		SummaryWithTable summaryWithTable = fullSummary(result, m);
 		Assert.assertTrue(summaryWithTable.getAsString().contains("Throughput: 2.0TPS"));
 		

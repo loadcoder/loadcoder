@@ -53,10 +53,12 @@ public class ResultChart extends Chart {
 
 	final CommonSeries[] commonSeries;
 
+	private final boolean locked = false;
+
 	public ResultChart(Map<Comparable, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
 		super(true, false);
 		logic = new ResultChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, false, results);
+				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, locked, results);
 
 		long sampleLengthToUse = logic.getSampleLengthToUse();
 		int defaultIndex = logic.getDefaultSliderIndex();

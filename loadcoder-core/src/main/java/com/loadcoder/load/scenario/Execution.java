@@ -128,11 +128,6 @@ public class Execution {
 		this.startTime = System.currentTimeMillis();
 	}
 	
-	protected Result getRuntimeResult() throws NoResultOrFormatterException{
-		Result r = new Result(getRuntimeResultList());
-		return r;
-	}
-
 	public long getStartTime() {
 		return startTime;
 	}

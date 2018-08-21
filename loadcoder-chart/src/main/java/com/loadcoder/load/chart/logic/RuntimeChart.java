@@ -40,6 +40,7 @@ public class RuntimeChart extends Chart implements RuntimeResultUser{
 	
 	StartedLoad startedScenarios;
 	
+	private final boolean locked = true;
 	public RuntimeChart() {
 		this(CommonSeries.values());
 	}
@@ -54,7 +55,7 @@ public class RuntimeChart extends Chart implements RuntimeResultUser{
 				chartFrame.getSeriesVisible(),
 				commonSeries,
 				startedScenarios,
-				true
+				locked
 				);
 		
 		JMenu settingsMenu = createSettingsMenu(logic);
