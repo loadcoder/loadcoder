@@ -23,8 +23,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.SimpleDateFormat;
@@ -36,9 +34,6 @@ import java.util.TimeZone;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
@@ -68,8 +63,6 @@ import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
-import com.loadcoder.load.chart.logic.Chart;
-import com.loadcoder.load.chart.menu.settings.SettingsWindow;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public class ChartFrame extends ApplicationFrame {

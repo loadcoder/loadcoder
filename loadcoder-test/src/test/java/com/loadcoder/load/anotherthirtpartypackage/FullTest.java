@@ -57,6 +57,8 @@ public class FullTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(FullTest.class);
 
+
+	
 	@Test(groups = "manual")
 	public void create(Method method) {
 

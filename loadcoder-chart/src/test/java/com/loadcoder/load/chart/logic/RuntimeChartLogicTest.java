@@ -24,9 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
-import org.jfree.data.xy.XYSeries;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,6 +38,8 @@ import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
+
+import junit.framework.Assert;
 
 public class RuntimeChartLogicTest extends TestNGBase{
 

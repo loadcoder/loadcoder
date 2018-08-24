@@ -75,7 +75,7 @@ public abstract class LoadScenario{
 	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
 	 * @param transaction
 	 * is the transaction, done with implementing functional interface Transaction
-	 * @return
+	 * @return the builder instance
 	 */
 	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction){
 		RateLimiter limiterToBeUsed = null;
@@ -101,7 +101,7 @@ public abstract class LoadScenario{
 	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
 	 * @param transaction
 	 * is the transaction, done with implementing functional interface TransactionVoid
-	 * @return
+	 * @return the builder instance
 	 */
 	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction){
 		RateLimiter limiterToBeUsed = null;

@@ -21,7 +21,6 @@ package com.loadcoder.load.chart.jfreechart;
 import java.io.Serializable;
 
 import org.jfree.data.xy.XYDataItem;
-import org.jfree.util.ObjectUtilities;
 
 public class XYDataItemExtension extends XYDataItem implements Cloneable, Comparable, Serializable {
 

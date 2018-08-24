@@ -96,7 +96,7 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 				String name = transactionExecutionResult.getName();
 				List<TransactionExecutionResult> listToAddTo = map.get(name);
 				if (listToAddTo == null) {
-					listToAddTo = new ArrayListExtension<TransactionExecutionResult>();
+					listToAddTo = new ArrayList<TransactionExecutionResult>();
 					runtimeResultList.add(listToAddTo);
 					map.put(name, listToAddTo);
 				}
@@ -109,11 +109,11 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 		map.clear();
 	}
 
-	public static class ArrayListExtension <E> extends ArrayList <E>{
-		private static final long serialVersionUID = 1L;
-		
-		public boolean add(E e) {
-			return super.add(e);
-		}
-	}
+//	public static class ArrayListExtension <E> extends ArrayList <E>{
+//		private static final long serialVersionUID = 1L;
+//		
+//		public boolean add(E e) {
+//			return super.add(e);
+//		}
+//	}
 }

@@ -32,7 +32,6 @@ import javax.swing.JMenu;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
-import org.jfree.util.ShapeUtilities;
 
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;

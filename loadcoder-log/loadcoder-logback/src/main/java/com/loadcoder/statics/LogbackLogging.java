@@ -105,7 +105,7 @@ public class LogbackLogging extends Logs {
 	 *            is the directory for all your logs
 	 * 
 	 * @return a File that will have a path according to following pattern:
-	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
+	 *         {@code dirForAllLogs/<date and time>(-<unique modifier>)}
 	 */
 	public static File getNewLogDir(String dirForAllLogs) {
 		LocalDateTime timePoint = LocalDateTime.now();

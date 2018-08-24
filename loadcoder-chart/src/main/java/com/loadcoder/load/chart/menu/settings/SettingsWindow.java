@@ -1,10 +1,30 @@
+/*******************************************************************************
+ * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * 
+ * This file is part of Loadcoder.
+ * 
+ * Loadcoder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Loadcoder is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package com.loadcoder.load.chart.menu.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
@@ -68,15 +88,12 @@ public class SettingsWindow extends JDialog {
 		getContentPane().add(base);
 
 		JTabbedPane jtp = new JTabbedPane(JTabbedPane.LEFT);
-		jtp.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 		base.add(jtp);
 
 		JPanel bottomButtonsBase = new JPanel();
-		bottomButtonsBase.setBorder(BorderFactory.createLineBorder(Color.ORANGE));
 
 		bottomButtonsBase.add(bottomButtons, BorderLayout.EAST);
 
-		bottomButtons.setBorder(BorderFactory.createLineBorder(Color.pink));
 		base.add(bottomButtonsBase, BorderLayout.SOUTH);
 
 		List<XYSeries> list = parent.getSeriesCollection().getSeries();
@@ -88,7 +105,24 @@ public class SettingsWindow extends JDialog {
 
 		JPanel detailsLeftArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		jtp.addTab("Details", detailsLeftArea);
-
+		
+		GridBagConstraints c = new GridBagConstraints();
+		JPanel jp2 = new JPanel(new GridBagLayout());
+		colorsLeftArea.add(jp2, BorderLayout.WEST);
+		
+		JLabel keepFactorSliderDescription = new JLabel("Drag the slider in order to change how many percent of the points that is going to be rendered");
+		Font f = keepFactorSliderDescription.getFont();
+		keepFactorSliderDescription.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
+		
+		keepFactorSliderDescription.setBackground(Color.LIGHT_GRAY);
+		keepFactorSliderDescription.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		jp2.add(keepFactorSliderDescription, c);
+		
+		detailsLeftArea.add(jp2);
+		
 		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
 
 		List<Double> keepFactorValues = new ArrayList<Double>();
@@ -104,6 +138,8 @@ public class SettingsWindow extends JDialog {
 		labelTable.put(0, new JLabel("" + (keepFactorValues.get(0) * 100) + "%"));
 		labelTable.put(keepFactorValues.size() - 1, new JLabel("100%"));
 
+
+		
 		JTextArea textField = new JTextArea();
 		Double[] doubles = keepFactorValues.toArray(new Double[keepFactorValues.size()]);
 
@@ -135,14 +171,18 @@ public class SettingsWindow extends JDialog {
 		};
 		pointsKeepFactorSlider.addChangeListener(listener);
 
-		detailsLeftArea.add(pointsKeepFactorSlider);
-		detailsLeftArea.add(textField);
+		c.gridx = 0;
+		c.gridy = 1;
+		jp2.add(pointsKeepFactorSlider, c);
+		c.gridx = 1;
+		c.gridy = 1;
+		jp2.add(textField, c);
 
+		
 		JPanel jp1 = new JPanel(new GridBagLayout());
 		colorsLeftArea.add(jp1, BorderLayout.NORTH);
 
 		JPanel colorChooserPanel = new JPanel(new BorderLayout());
-		colorChooserPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
 		colorsLeftArea.add(colorChooserPanel, BorderLayout.NORTH);
 
 		addSeriesOptions(list, jp1);

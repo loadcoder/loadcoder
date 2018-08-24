@@ -31,7 +31,6 @@ import ch.qos.logback.classic.Logger;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.result.Logs;
 import static com.loadcoder.statics.LogbackLogging.*;
 
 public class LogbackTest extends TestNGBase {

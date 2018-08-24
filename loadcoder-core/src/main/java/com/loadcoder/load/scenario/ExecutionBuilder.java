@@ -27,11 +27,23 @@ public class ExecutionBuilder {
 	RuntimeResultUser user;
 	final Load[] loads;
 
-	public ExecutionBuilder runtimeResultUser(RuntimeResultUser user) {
-		this.user = user;
+	
+	/**
+	 * sets a RuntimeResultUser that will use the results in runtime. You can use a RuntimeChart instance here
+	 * @param runtimeResultUser
+	 * @return the builder instance
+	 */
+	public ExecutionBuilder runtimeResultUser(RuntimeResultUser runtimeResultUser) {
+		this.user = runtimeResultUser;
 		return this;
 	}
 
+	/**
+	 * sets a ResultFormatter used to format the results that is going to be logged in the result file.
+	 * Default formatter is the com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER
+	 * @param resultFormatter
+	 * @return the builder instance
+	 */
 	public ExecutionBuilder resultFormatter(ResultFormatter resultFormatter) {
 		this.resultFormatter = resultFormatter;
 		return this;
@@ -41,6 +53,10 @@ public class ExecutionBuilder {
 		this.loads = loads;
 	}
 
+	/**
+	 * Builds an Execution instance.
+	 * @return an Execution instance.
+	 */
 	public Execution build() {
 		return new Execution(resultFormatter, user, Arrays.asList(loads));
 	}

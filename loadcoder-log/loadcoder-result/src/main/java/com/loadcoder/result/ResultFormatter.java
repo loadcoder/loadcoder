@@ -22,16 +22,31 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Extend this abstract class in order to implement your own ResultFormatter.
+ */
 public abstract class ResultFormatter{
 	
+	/**
+	 * Generates and returns a String representation of the TransactionExecutionResult
+	 * @param TransactionExecutionResult get the String representation from
+	 * @return the string representation of TransactionExecutionResult
+	 */
 	public abstract String toString(TransactionExecutionResult TransactionExecutionResult);
+	
+	
+	/**
+	 * Reads the File and parses the expected TransactionExecutionResults.
+	 * All TransactionExecutionResults with the same name is then added to a list,
+	 * and then all lists with the TransactionExecutionResult are added to a list of lists
+	 * @param file to read and parse the TransactionExecutionResults from
+	 * @return a list of list of TransactionExecutionResults
+	 * @throws IOException
+	 */
 	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
 	
 	public Result toResultList(File file) throws IOException{
-//		List<List<TransactionExecutionResult>> resultLists = toResultLists(file);
-		
 		Result r = new Result(file, this);
-
 		return r;
 	}
 	

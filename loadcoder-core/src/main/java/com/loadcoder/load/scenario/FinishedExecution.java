@@ -39,11 +39,12 @@ public class FinishedExecution {
 	}
 
 	/**
+	 * Returns a Result for the default log file (result.log)
 	 * @return a new Result instance from the finished load, assuming that the name
 	 *         of the file containing the result is result.log So if the directory
 	 *         for the result is set to /foo/bar, the the Result will be generated
 	 *         from the file /foo/bar/result.log
-	 * @throws NoResultOrFormatterException
+	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
 	 */
 	public Result getReportedResultFromResultFile() throws NoResultOrFormatterException {
 		return getReportedResultFromResultFile(RESULTFILE_DEFAULT);
@@ -55,7 +56,7 @@ public class FinishedExecution {
 	 *            directory for the result is set to /foo/bar, the the Result will
 	 *            be generated from the file /foo/bar/result.log
 	 * @return a new Result instance from the finished exeuction
-	 * @throws NoResultOrFormatterException
+	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
 	 */
 	public Result getReportedResultFromResultFile(String fileName) throws NoResultOrFormatterException {
 		File resultDir = Logs.getLogDir();

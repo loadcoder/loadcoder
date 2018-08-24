@@ -275,12 +275,14 @@ public class ResultChartLogic extends ChartLogic {
 		Map<Comparable, SampleGroup> sampleGroups = new HashMap<Comparable, SampleGroup>();
 		createSamplesGroups(seriesMap, sampleGroups);
 
+		createCommons();
+		addAllCommonSeriesToTheChart();
+		
 		addSerieseToChart(seriesMap);
 
 		adjustVisibility(seriesMap);
 
-		createCommons();
-		addAllCommonSeriesToTheChart();
+
 
 		for (XYSeriesExtension commonSerie : commonSeries) {
 			adjustVisibilityOfSeries(commonSerie);

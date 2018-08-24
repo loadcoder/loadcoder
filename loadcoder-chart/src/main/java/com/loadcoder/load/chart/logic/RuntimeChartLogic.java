@@ -18,7 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +43,6 @@ import com.loadcoder.load.chart.sampling.SampleConcaternatorRunDecider;
 import com.loadcoder.load.chart.sampling.SampleConcaternatorSpec;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
-import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.load.scenario.StartedLoad;
