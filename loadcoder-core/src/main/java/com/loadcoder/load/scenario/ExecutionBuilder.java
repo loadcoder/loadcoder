@@ -29,8 +29,8 @@ public class ExecutionBuilder {
 
 	
 	/**
-	 * sets a RuntimeResultUser that will use the results in runtime. You can use a RuntimeChart instance here
-	 * @param runtimeResultUser
+	 * sets a RuntimeResultUser that will use the results in runtime. You can use a {@code com.loadcoder.load.chart.logic.RuntimeChart} instance here.
+	 * @param runtimeResultUser is the instance that will consume the runtime result data during the execution
 	 * @return the builder instance
 	 */
 	public ExecutionBuilder runtimeResultUser(RuntimeResultUser runtimeResultUser) {
@@ -41,7 +41,7 @@ public class ExecutionBuilder {
 	/**
 	 * sets a ResultFormatter used to format the results that is going to be logged in the result file.
 	 * Default formatter is the com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER
-	 * @param resultFormatter
+	 * @param resultFormatter is the instance that will format the TransactionExecutionResult to and from loggable Strings
 	 * @return the builder instance
 	 */
 	public ExecutionBuilder resultFormatter(ResultFormatter resultFormatter) {
