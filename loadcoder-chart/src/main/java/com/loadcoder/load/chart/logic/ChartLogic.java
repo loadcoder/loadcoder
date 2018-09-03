@@ -121,12 +121,24 @@ public abstract class ChartLogic {
 
 	protected abstract void doUpdate();
 
+	public YCalculator getYCalculatorToUse() {
+		return yCalculatorToUse;
+	}
+
+	protected XYSeriesCollectionExtention getSeriesCollection() {
+		return seriesCollection;
+	}
+
 	public List<Color> getExistingColors() {
 		return existingColors;
 	}
 
 	public XYPlotExtension getPlot() {
 		return plot;
+	}
+
+	protected List<XYSeriesExtension> getCommonSeries() {
+		return commonSeries;
 	}
 
 	protected long getXDiff() {

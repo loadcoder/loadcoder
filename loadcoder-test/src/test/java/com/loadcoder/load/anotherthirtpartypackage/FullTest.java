@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.TestUtility;
+import com.loadcoder.load.TestUtils;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
@@ -216,6 +217,35 @@ public class FullTest extends TestNGBase {
 		chart.waitUntilClosed();
 	}
 
+	@Test(groups = "manual")
+	public void highestPossibleLoad2(Method method) {
+
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+
+		LoadScenario ls = new LoadScenario() {
+			SUT sut = new SUT();
+
+			@Override
+			public void loadScenario() {
+				load("fast", () -> { LoadUtility.sleep(5);
+					
+				}).perform();
+			}
+		};
+
+		RuntimeChart chart = new RuntimeChart();
+		Load l = new LoadBuilder(ls)
+				.throttle(20, PER_MINUTE, PER_THREAD)
+				.stopDecision(duration(20 * SECOND))
+				.amountOfThreads(10).build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+
+		SummaryUtils.printSimpleSummary(finished.getReportedResultFromResultFile(), method.getName());
+
+		chart.waitUntilClosed();
+	}
+	
 	@Test(groups = "manual")
 	public void twoLoads(Method method) {
 		RuntimeChart chart = new RuntimeChart();

@@ -38,20 +38,20 @@ import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.menu.SteppingSlider;
+import com.loadcoder.load.chart.menu.settings.DetailsSettings;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-
-public class ResultChartTest extends TestNGBase{
+public class ResultChartTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(ResultChartTest.class);
-	
+
 	List<DataSet> getNewDataList(int size) {
 		return getNewDataList(size, 1);
 	}
-	
+
 	List<DataSet> getNewDataList(int size, int serieses) {
 		List<DataSet> list = new ArrayList<DataSet>();
 		for (int j = 0; j < serieses; j++) {
@@ -66,87 +66,74 @@ public class ResultChartTest extends TestNGBase{
 		return list;
 	}
 
-	interface YGiver{
+	interface YGiver {
 		long y(int i);
 	}
 
-	private void printArray(Integer[] ints){
-		log.info(Arrays.asList(ints).toString());
-	}
-	
-	private String intArrayAsString(Integer[] ints){
+	private String intArrayAsString(Integer[] ints) {
 		String result = "";
-		for(int i : ints){
+		for (int i : ints) {
 			result = result + i + " ";
 		}
 		return result;
 	}
-	
-	@Test
-	public void testCreateSlider(Method method){
 
-		long tickSize = 1;
-		int defaultIndex = 4;
-		long sampleLengthToUse = 5000;
-		
-		SteppingSlider s;
-		
-		s = ResultChart.createSlider(sampleLengthToUse, (int)tickSize, defaultIndex);
-
-		printArray(s.getValues());
-		Assert.assertTrue(Arrays.asList(s.getValues()).contains((int)(sampleLengthToUse / 1000)));
-	}	
-	
-	public static class ResultExtention extends Result{
-		ResultExtention(List<List<TransactionExecutionResult>> resultLists){
+	public static class ResultExtention extends Result {
+		ResultExtention(List<List<TransactionExecutionResult>> resultLists) {
 			super(resultLists);
 		}
 	}
-	
-	@Test(groups = "manual")
-	public void testManyTransactions(Method method){
-		Result result = new ResultExtention(getTranses(1000, 20, 20, (i)->{return TestUtility.random(5, 9);}));
-		ResultChart c = new ResultChart(result);
-		c.waitUntilClosed();
-	}
-	
-	@Test(groups = "manual")
-	public void testHighIntensity(Method method){
 
-		Result result = new ResultExtention(getTranses(1000, 10, 20, (i)->{return TestUtility.random(5, 9);}));
+	@Test(groups = "manual")
+	public void testManyTransactions(Method method) {
+		Result result = new ResultExtention(getTranses(1000, 20, 20, (i) -> {
+			return TestUtility.random(5, 9);
+		}));
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
-	@Test(groups = "manual")
-	public void startResultChart(Method method){
 
-		Result result = new ResultExtention(getTranses(10));
+	@Test(groups = "manual")
+	public void testHighIntensity(Method method) {
+
+		Result result = new ResultExtention(getTranses(1000, 10, 20, (i) -> {
+			return TestUtility.random(5, 9);
+		}));
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
+
 	@Test(groups = "manual")
-	public void oneSlide(Method method){
+	public void startResultChart(Method method) {
 
 		Result result = new ResultExtention(getTranses(10));
 		ResultChart c = new ResultChart(result);
+		c.waitUntilClosed();
+	}
+
+	@Test(groups = "manual")
+	public void oneSlide(Method method) {
+
+		Result result = new ResultExtention(getTranses(10));
+		ResultChart f = new ResultChart(result);
+		ResultChartLogic c = (ResultChartLogic) f.getLogic();
 		c.chartSliderAjustment(2000);
-		c.waitUntilClosed();
+		f.waitUntilClosed();
 	}
-	
+
 	@Test(groups = "manual")
-	public void twoSlide(Method method){
+	public void twoSlide(Method method) {
 
 		Result result = new ResultExtention(getTranses(10));
-		ResultChart c = new ResultChart(result);
+		ResultChart f = new ResultChart(result);
+		ResultChartLogic c = (ResultChartLogic) f.getLogic();
 		c.chartSliderAjustment(2000);
 		c.chartSliderAjustment(4000);
-		c.waitUntilClosed();
+		f.waitUntilClosed();
 	}
-	
+
 	@Test(groups = "manual")
-	public void dotting(Method method){
+	public void dotting(Method method) {
 
 		Result result = new ResultExtention(getTranses(10));
 		ResultChart c = new ResultChart(result);
@@ -155,28 +142,28 @@ public class ResultChartTest extends TestNGBase{
 	}
 
 	@Test(groups = "manual")
-	public void dottingAndSample(Method method){
-
-		Result result = new ResultExtention(getTranses(10));
-		ResultChart c = new ResultChart(result);
-		c.ajustDottedMode(true);
-		c.ajustDottedMode(false);
-		c.waitUntilClosed();
-	}
-	
-	@Test(groups = "manual")
-	public void dottingSampleDotting(Method method){
+	public void dottingAndSample(Method method) {
 
 		Result result = new ResultExtention(getTranses(10));
 		ResultChart c = new ResultChart(result);
 		c.ajustDottedMode(true);
 		c.ajustDottedMode(false);
+		c.waitUntilClosed();
+	}
+
+	@Test(groups = "manual")
+	public void dottingSampleDotting(Method method) {
+
+		Result result = new ResultExtention(getTranses(10));
+		ResultChart c = new ResultChart(result);
+		c.ajustDottedMode(true);
+		c.ajustDottedMode(false);
 		c.ajustDottedMode(true);
 		c.waitUntilClosed();
 	}
-	
+
 	@Test(groups = "manual")
-	public void removeHighest(Method method){
+	public void removeHighest(Method method) {
 
 		Result result = new ResultExtention(getTranses(100));
 		ResultChart c = new ResultChart(result);
@@ -185,7 +172,7 @@ public class ResultChartTest extends TestNGBase{
 		c.ajustDottedMode(true);
 		c.waitUntilClosed();
 	}
-	
+
 	@Test
 	public void testRemovalFilterHighestPercent() {
 
@@ -196,12 +183,12 @@ public class ResultChartTest extends TestNGBase{
 		Assert.assertEquals(pointList.size(), 100);
 		int amountDisabled = 0;
 		for (Point point : pointList) {
-			if(! point.isEnabled())
+			if (!point.isEnabled())
 				amountDisabled++;
 		}
 		Assert.assertEquals(amountDisabled, 10);
 	}
-	
+
 	@Test
 	public void addSurroundingTimestampsWhenEmptyTest() {
 
@@ -210,8 +197,8 @@ public class ResultChartTest extends TestNGBase{
 		HashSet<Long> sampleTimestamps = new HashSet<Long>();
 
 		List<Range> ranges = Arrays.asList(new Range(Long.MIN_VALUE, Long.MAX_VALUE, sampleLength));
-		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 7000, 1000, 15000, ranges,
-				sampleLength, sampleTimestamps, new HashMap<Long, Sample>());
+		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 7000, 1000, 15000, ranges, sampleLength,
+				sampleTimestamps, new HashMap<Long, Sample>());
 
 		Assert.assertEquals(hashesGettingUpdated.size(), 14);
 	}
@@ -227,8 +214,8 @@ public class ResultChartTest extends TestNGBase{
 
 		List<Range> ranges = Arrays.asList(new Range(Long.MIN_VALUE, 14_999, sampleLength),
 				new Range(15_000, Long.MAX_VALUE, sampleLength * 2));
-		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 10_000, 1_000, 30_000, ranges,
-				sampleLength, sampleTimestamps, new HashMap<Long, Sample>());
+		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 10_000, 1_000, 30_000, ranges, sampleLength,
+				sampleTimestamps, new HashMap<Long, Sample>());
 
 		Assert.assertTrue(hashesGettingUpdated.contains(9000L));
 
@@ -239,9 +226,9 @@ public class ResultChartTest extends TestNGBase{
 		Assert.assertTrue(hashesGettingUpdated.contains(15_000L));
 		Assert.assertFalse(hashesGettingUpdated.contains(16_000L)); // 16 should not exist
 		Assert.assertTrue(hashesGettingUpdated.contains(17_000L));
-		
+
 	}
-	
+
 	@Test
 	public void amountOfSeriesesFactorTest() {
 		double factor = ResultChartLogic.amountOfSeriesesFactor(1);
@@ -266,10 +253,10 @@ public class ResultChartTest extends TestNGBase{
 		DataSetUser percentRemovalFilter = ResultChartLogic.removePercentile(10);
 		percentRemovalFilter.useDataSet(list);
 		List<Point> pointList = list.get(0).getPoints();
-		
+
 		int amountDisabled = 0;
 		for (Point point : pointList) {
-			if(! point.isEnabled())
+			if (!point.isEnabled())
 				amountDisabled++;
 		}
 		Assert.assertEquals(amountDisabled, 0);
@@ -286,7 +273,7 @@ public class ResultChartTest extends TestNGBase{
 
 		int amountDisabled = 0;
 		for (Point point : pointList) {
-			if(! point.isEnabled())
+			if (!point.isEnabled())
 				amountDisabled++;
 		}
 		Assert.assertEquals(amountDisabled, 0);

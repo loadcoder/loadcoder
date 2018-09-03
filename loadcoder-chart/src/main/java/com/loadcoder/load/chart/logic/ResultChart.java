@@ -19,28 +19,20 @@
 package com.loadcoder.load.chart.logic;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JSlider;
 
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.menu.DataSetUserType;
-import com.loadcoder.load.chart.menu.SteppingSlider;
-import com.loadcoder.load.chart.menu.settings.SettingsLogic;
-import com.loadcoder.load.chart.utilities.ChartUtils;
+import com.loadcoder.load.chart.menu.settings.DetailsSettings;
 import com.loadcoder.result.Result;
 
 public class ResultChart extends Chart {
@@ -130,7 +122,7 @@ public class ResultChart extends Chart {
 		double keepFactor = logic.getCurrentKeepFactor();
 		String pointsRadioButtonText = "Points";
 		if (keepFactor != 1.0) {
-			pointsRadioButtonText = String.format("Points (%s)", SettingsLogic.keepFactorToProcentString(keepFactor));
+			pointsRadioButtonText = String.format("Points (%s)", DetailsSettings.keepFactorToProcentString(keepFactor));
 		}
 		logic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
 
@@ -150,30 +142,15 @@ public class ResultChart extends Chart {
 		});
 		JMenu sampleMethod = new JMenu("Sample method");
 
-		JMenu sampleLengthMenu = new JMenu("Sample length");
-
-		SteppingSlider slider = createSlider(initialSampleLength, logic.getMinorTickLength(), defaultIndex);
-		slider.addChangeListener((e) -> {
-			JSlider source = (JSlider) e.getSource();
-			if (!source.getValueIsAdjusting()) {
-				int indexOfSlider = (int) source.getValue();
-
-				long newSampleLength = logic.calculateSampleLengthWith(indexOfSlider);
-				chartSliderAjustment(newSampleLength);
-			}
-
-		});
-
-		sampleLengthMenu.add(slider);
 		sampling.add(sampleMethod);
 		resultMenu.add(sampling);
-		sampling.add(sampleLengthMenu);
 
 		ButtonGroup group = new ButtonGroup();
 		List<YCalculator> yCalculators = logic.getyCalculators();
 		for (YCalculator calc : yCalculators) {
 
-			JRadioButtonMenuItem sampleMethodMenuIten = new JRadioButtonMenuItem(calc.getName());
+			boolean selected = calc.equals(logic.getYCalculatorToUse());
+			JRadioButtonMenuItem sampleMethodMenuIten = new JRadioButtonMenuItem(calc.getName(), selected);
 			group.add(sampleMethodMenuIten);
 
 			sampleMethod.add(sampleMethodMenuIten);
@@ -188,39 +165,8 @@ public class ResultChart extends Chart {
 		return resultMenu;
 	}
 
-	protected static SteppingSlider createSlider(long initialSampleLength, int minorTickPacing, int defaultIndex) {
-
-		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
-		labelTable.put(1, new JLabel("1"));
-
-		int max = ChartUtils.calculateSampleLengthSliderMax(initialSampleLength);
-		max = ((int) initialSampleLength / 1000) + minorTickPacing * 4;
-		List<Integer> valuesList = new ArrayList<Integer>();
-		valuesList.add(1);
-		for (int i = minorTickPacing; i <= max; i = i + minorTickPacing) {
-			if (!valuesList.contains(i))
-				valuesList.add(i);
-		}
-
-		for (int i = 0; i < valuesList.size(); i++) {
-			labelTable.put(i, new JLabel("" + valuesList.get(i)));
-		}
-
-		Integer[] values = valuesList.toArray(new Integer[valuesList.size()]);
-
-		SteppingSlider slider = new SteppingSlider(values, defaultIndex);
-		slider.setLabelTable(labelTable);
-
-		return slider;
-	}
-
 	void ajustDottedMode(boolean dottedMode) {
 		logic.useDottedModeValue(dottedMode);
 	}
 
-	void chartSliderAjustment(long newSampleLength) {
-		long sampleLengthToUse = newSampleLength;
-		logic.setSampleLengthToUse(sampleLengthToUse);
-		logic.createHashesAndUpdate(true);
-	}
 }

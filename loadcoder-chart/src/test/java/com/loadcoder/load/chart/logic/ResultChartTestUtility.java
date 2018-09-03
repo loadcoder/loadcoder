@@ -26,27 +26,46 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartTestUtility {
 
-	public static List<List<TransactionExecutionResult>> getTranses(int amount){
+	public static List<List<TransactionExecutionResult>> getTranses(int amount) {
 		return getTranses(amount, 1000);
 	}
-	public static List<List<TransactionExecutionResult>> getTranses(int amount, long timeBetweenTransactions){
-		return getTranses(amount, timeBetweenTransactions, (i)->{return i +1;});
+
+	public static List<List<TransactionExecutionResult>> getTranses2(long[]... is) {
+
+		List<List<TransactionExecutionResult>> listOfLists = new ArrayList<List<TransactionExecutionResult>>();
+		List<TransactionExecutionResult> ttanses = new ArrayList<TransactionExecutionResult>();
+		listOfLists.add(ttanses);
+		for (long[] i : is) {
+			TransactionExecutionResult trans = new TransactionExecutionResult("a", i[0], i[1], true, null);
+			ttanses.add(trans);
+		}
+		return listOfLists;
 	}
 
-	public static List<List<TransactionExecutionResult>> getTranses(int amount, long timeBetweenTransactions, YGiver y){
+	public static List<List<TransactionExecutionResult>> getTranses(int amount, long timeBetweenTransactions) {
+		return getTranses(amount, timeBetweenTransactions, (i) -> {
+			return i + 1;
+		});
+	}
+
+	public static List<List<TransactionExecutionResult>> getTranses(int amount, long timeBetweenTransactions,
+			YGiver y) {
 		return getTranses(amount, 1, timeBetweenTransactions, y);
 	}
-	
-	public static List<List<TransactionExecutionResult>> getTranses(int amount, int serieses, long timeBetweenTransactions, YGiver y){
-		
+
+	public static List<List<TransactionExecutionResult>> getTranses(int amount, int serieses,
+			long timeBetweenTransactions, YGiver y) {
+
 		List<List<TransactionExecutionResult>> listOfLists = new ArrayList<List<TransactionExecutionResult>>();
-		for(int j =0; j<serieses; j++){
+		for (int j = 0; j < serieses; j++) {
 			List<TransactionExecutionResult> ttanses = new ArrayList<TransactionExecutionResult>();
 			listOfLists.add(ttanses);
-	
+
 			long start = 1000;
-			for(int i =0; i<amount; i++){
-				TransactionExecutionResult  trans = new TransactionExecutionResult("a" + j, start + i*timeBetweenTransactions, j*10 + y.y(i), true, null, Thread.currentThread().getName());
+			for (int i = 0; i < amount; i++) {
+				TransactionExecutionResult trans = new TransactionExecutionResult("a" + j,
+						start + i * timeBetweenTransactions, j * 10 + y.y(i), true, null,
+						Thread.currentThread().getName());
 				ttanses.add(trans);
 			}
 		}

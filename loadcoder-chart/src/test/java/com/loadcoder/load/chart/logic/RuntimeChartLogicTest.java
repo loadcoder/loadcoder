@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.jfree.data.xy.XYDataItem;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,6 +34,7 @@ import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
+import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.sampling.SampleGroup;
@@ -41,7 +43,7 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 import junit.framework.Assert;
 
-public class RuntimeChartLogicTest extends TestNGBase{
+public class RuntimeChartLogicTest extends TestNGBase {
 
 	XYSeriesCollectionExtention collection;
 	LoadcoderRenderer renderer;
@@ -49,19 +51,19 @@ public class RuntimeChartLogicTest extends TestNGBase{
 	Map<Comparable, Boolean> map;
 	XYPlotExtension plot;
 	RuntimeChartLogic logic;
-	
-	List<List<TransactionExecutionResult>> getNewListsOfLists(TransactionExecutionResult ... points){
-		List<TransactionExecutionResult> transactions = new ArrayList<TransactionExecutionResult>(); 
+
+	List<List<TransactionExecutionResult>> getNewListsOfLists(TransactionExecutionResult... points) {
+		List<TransactionExecutionResult> transactions = new ArrayList<TransactionExecutionResult>();
 		List<List<TransactionExecutionResult>> listOfListOfList = new ArrayList<List<TransactionExecutionResult>>();
 		listOfListOfList.add(transactions);
-		for(TransactionExecutionResult point : points){
+		for (TransactionExecutionResult point : points) {
 			transactions.add(point);
 		}
 		return listOfListOfList;
 	}
 
 	@BeforeMethod
-	public void setup(){
+	public void setup() {
 		collection = new XYSeriesCollectionExtention();
 		renderer = new LoadcoderRenderer(true, false, collection);
 		map = new HashMap<Comparable, Boolean>();
@@ -70,101 +72,140 @@ public class RuntimeChartLogicTest extends TestNGBase{
 	}
 
 	@Test
-	public void testRuntimeChart(){
+	public void testRuntimeChart() {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs, 1, true, null));
+		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 1, true, null));
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		logic.update(listOfListOfList, hashesGettingUpdated, true);
-		
+
 		collection.getSeries("foo");
-		
+
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs +1200, 2, true, null));
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs + 1200, 2, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs +2200, 3, true, null));
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs + 2200, 3, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs + 3200, 4, true, null));
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs + 3200, 4, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		
-		logic.addNewConcater(2, (a)->{return true;});
-		
+
+		logic.addNewConcater(2, (a) -> {
+			return true;
+		});
+
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
-		
+
 		Range range = logic.lookupCorrectRange(0);
 		Assert.assertEquals(2000, range.getSampleLength());
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
-		Assert.assertEquals(a, b); //assert concaternation 
+		Assert.assertEquals(a, b); // assert concaternation
 	}
-	
+
 	@Test
-	public void testRuntimeChartOneTransaction(){
+	public void testSurroundingTimestamps() {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
 
-		List<List<TransactionExecutionResult>> listOfListOfList = 
-				getNewListsOfLists(new TransactionExecutionResult("foo", startTs, 10, true, null));
+		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
+
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs + 3000, 10, true, null));
+		logic.update(listOfListOfList, new HashSet<Long>(), true);
+
+		// verify that the surroundingTimestamps functionality are working as expected
+		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
+		for (XYSeriesExtension commonSeries : commonSerieses) {
+			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
+				List<XYDataItem> items = commonSeries.getItems();
+
+				Assert.assertEquals(items.size(), 4);
+				Assert.assertEquals(items.get(0).getY(), 1.0D);
+				Assert.assertEquals(items.get(1).getY(), 0.0D);
+				Assert.assertEquals(items.get(2).getY(), 0.0D);
+				Assert.assertEquals(items.get(3).getY(), 1.0D);
+			}
+		}
+	}
+
+	@Test
+	public void testRuntimeChartOneTransaction() {
+		long startTs = System.currentTimeMillis();
+		String transactionKey = "foo";
+
+		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
+		logic.update(listOfListOfList, new HashSet<Long>(), true);
+
 		logic.lookupCorrectRange(-1);
 		logic.lookupCorrectRange(1);
-		collection.getSeries("foo");
-		
+
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
-		logic.addNewConcater(2, (a)->{return true;});
+		logic.addNewConcater(2, (a) -> {
+			return true;
+		});
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
-		
-		
+
 		Range range3 = logic.lookupCorrectRange(-1);
 		Assert.assertEquals(1000, range3.getSampleLength());
-		
+
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
-		
-		Assert.assertEquals(a, b); //assert concaternation 
+
+		Assert.assertEquals(a, b); // assert concaternation
 		Assert.assertEquals(10, b.getY());
 	}
-	
+
 	@Test
-	public void testRuntimeChartUnorderedData(){
+	public void testRuntimeChartUnorderedData() {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
 
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(new TransactionExecutionResult("foo", startTs, 1, true, null));
+		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 1, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		
-		collection.getSeries("foo");
-		
+
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs -500, 2, true, null));
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs - 500, 2, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
 
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs - 1500, 3, true, null));
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs - 1500, 3, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		
-		listOfListOfList = getNewListsOfLists(new TransactionExecutionResult(transactionKey, startTs - 2500, 4, true, null));
+
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs - 2500, 4, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>(), true);
-		logic.addNewConcater(2, (a)->{return true;});
+		logic.addNewConcater(2, (a) -> {
+			return true;
+		});
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
-		
+
 		Range range = logic.lookupCorrectRange(-1);
 		Assert.assertEquals(1000, range.getSampleLength());
-		
+
 		Sample a = sampleGroup.getExistingSample(0, 1000);
 		Sample b = sampleGroup.getExistingSample(999, 1000);
-		
-		Assert.assertEquals(a, b); //assert concaternation 
+
+		Assert.assertEquals(a, b); // assert concaternation
 		Assert.assertEquals(1, b.getY());
-	
+
 		Sample shouldNotHaveBeenConcatedA = sampleGroup.getExistingSample(-3000, 1000);
-		Sample shouldNotHaveBeenConcatedB= sampleGroup.getExistingSample(-1001, 1000);
+		Sample shouldNotHaveBeenConcatedB = sampleGroup.getExistingSample(-1001, 1000);
 		Assert.assertFalse(shouldNotHaveBeenConcatedA.equals(shouldNotHaveBeenConcatedB));
 	}
-	
+
 }

@@ -69,8 +69,6 @@ public class ResultChartLogic extends ChartLogic {
 
 	Map<Comparable, XYSeriesExtension> dottedSeries = null;
 
-	Map<Comparable, XYSeriesExtension> series;
-
 	private double keepFactorChosen = -1;
 
 	JRadioButtonMenuItem pointsRadioButton;
@@ -82,6 +80,7 @@ public class ResultChartLogic extends ChartLogic {
 			return getKeepFactorDefault();
 		}
 	}
+
 	public JRadioButtonMenuItem getPointsRadioButton() {
 		return pointsRadioButton;
 	}
@@ -150,17 +149,30 @@ public class ResultChartLogic extends ChartLogic {
 		calculateSliderValueCompensation(minorTickLength);
 
 		defaultIndex = 4;
-		sampleLengthToUse = calculateSampleLengthWith(defaultIndex);
+		int minorTickLengthInAmountOfSeconds = getMinorTickLength();
+		if (minorTickLengthInAmountOfSeconds <= 4) {
+			defaultIndex = 3;
+		}
+		if (minorTickLengthInAmountOfSeconds <= 3) {
+			defaultIndex = 2;
+		}
+		if (minorTickLengthInAmountOfSeconds <= 2) {
+			defaultIndex = 1;
+		}
+		if (minorTickLengthInAmountOfSeconds <= 1) {
+			defaultIndex = 0;
+		}
 
-		calculateDefaultIndex(sampleLengthToUse, minorTickLength);
+		sampleLengthToUse = calculateSampleLengthWith(defaultIndex, minorTickLengthInAmountOfSeconds,
+				getsliderCompensation());
 
 		doSafeUpdate();
 	}
 
-	public long calculateSampleLengthWith(int indexOfSlider) {
+	public long calculateSampleLengthWith(int indexOfSlider, int minorTickLength, int sliderCompensation) {
 		long newSampleLength = 1000;
 		if (indexOfSlider != 0) {
-			long valueOfSlider = indexOfSlider * getMinorTickLength() + getsliderCompensation();
+			long valueOfSlider = indexOfSlider * minorTickLength + sliderCompensation;
 			newSampleLength = valueOfSlider * 1000;
 		}
 		return newSampleLength;
@@ -180,6 +192,12 @@ public class ResultChartLogic extends ChartLogic {
 			sliderCompensation = 1;
 
 		this.sliderCompensation = sliderCompensation;
+	}
+
+	public void chartSliderAjustment(long newSampleLength) {
+		long sampleLengthToUse = newSampleLength;
+		setSampleLengthToUse(sampleLengthToUse);
+		createHashesAndUpdate(true);
 	}
 
 	public int getMinorTickLength() {
@@ -226,13 +244,6 @@ public class ResultChartLogic extends ChartLogic {
 		}
 	}
 
-	private void sleep() {
-		try {
-			Thread.sleep(150);
-		} catch (Exception e) {
-		}
-	}
-
 	void setCorrectColorsForDottedSerieses(Map<Comparable, XYSeriesExtension> dottedSerieses) {
 		dottedSerieses.entrySet().stream().forEach((entry) -> {
 			XYSeriesExtension dottedSeries = entry.getValue();
@@ -265,7 +276,7 @@ public class ResultChartLogic extends ChartLogic {
 		Map<Comparable, XYSeriesExtension> seriesMap = new HashMap<Comparable, XYSeriesExtension>();
 		if (dottedMode) {
 			if (dottedSeries == null) {
-				dottedSeries = createDottedSeries(filteredData.getDataSets());
+				setDottedSeries(createDottedSeries(filteredData.getDataSets()));
 			}
 			seriesMap = dottedSeries;
 		} else {
@@ -277,12 +288,10 @@ public class ResultChartLogic extends ChartLogic {
 
 		createCommons();
 		addAllCommonSeriesToTheChart();
-		
+
 		addSerieseToChart(seriesMap);
 
 		adjustVisibility(seriesMap);
-
-
 
 		for (XYSeriesExtension commonSerie : commonSeries) {
 			adjustVisibilityOfSeries(commonSerie);
@@ -313,6 +322,7 @@ public class ResultChartLogic extends ChartLogic {
 			for (DataSet set : filteredData.getDataSets()) {
 				SampleGroup group = sampleGroups.get(set.getName());
 				XYSeriesExtension series = group.getSeries();
+
 				ChartUtils.populateSeriesWithPoints(set.getPoints(), series, keepFactor);
 			}
 		}

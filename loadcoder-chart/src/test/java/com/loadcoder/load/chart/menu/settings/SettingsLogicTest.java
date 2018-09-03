@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jfree.chart.LegendItem;
+import org.jfree.data.xy.XYSeries;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
@@ -40,14 +41,17 @@ public class SettingsLogicTest {
 	@Test
 	public void create() {
 		ChartLogic chartLogic = mock(ChartLogic.class);
-		SettingsLogic logic = new SettingsLogic(chartLogic);
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
 		Assert.assertEquals(false, logic.isColorChooserVisible());
 	}
 
 	@Test
 	public void selectColorTest() {
 		ChartLogic chartLogic = mock(ChartLogic.class);
-		SettingsLogic logic = new SettingsLogic(chartLogic);
+
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
 
 		Color chosenColor = Color.PINK;
 		logic.changeSeriesColorSelection(chosenColor);
@@ -66,17 +70,20 @@ public class SettingsLogicTest {
 		when(series.getLegend()).thenReturn(legend);
 		when(chartLogic.getExistingColors()).thenReturn(existingColors);
 
-		SettingsLogic logic = new SettingsLogic(chartLogic);
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
 		logic.setChosenSeries(series);
 		Color chosenColor = Color.PINK;
 		logic.changeSeriesColorSelection(chosenColor);
-		logic.applyColorSelections();
+
+		ChartSettingsActionsModel chartSettingsActionsModel = new ChartSettingsActionsModel();
+		logic.apply(chartSettingsActionsModel);
 
 		verify(series).setColorInTheChart(Color.PINK);
 		verify(legend).setFillPaint(Color.PINK);
 		verify(legend).setOutlinePaint(Color.PINK);
 		Assert.assertEquals(1, existingColors.size());
 		Assert.assertEquals(Color.PINK, existingColors.get(0));
-		
+
 	}
 }
