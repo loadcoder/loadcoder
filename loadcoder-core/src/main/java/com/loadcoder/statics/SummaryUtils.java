@@ -61,7 +61,7 @@ public class SummaryUtils {
 	public static ResultSummarizer throughput(){
 		return (a)->{
 			int seconds = calculateDurationOfTest(a.getDuration());
-			double throughput = a.getNoOfTransactions() / seconds;
+			double throughput = a.getAmountOfTransactions() / seconds;
 			return String.format("Throughput: %sTPS", throughput);
 		};
 	}
@@ -83,7 +83,7 @@ public class SummaryUtils {
 	 */
 	public static ResultSummarizer amountOfTransactions(){
 		return (a)->{
-			return String.format("Amount of transactions: %s", a.getNoOfTransactions());
+			return String.format("Amount of transactions: %s", a.getAmountOfTransactions());
 		};
 	}
 
@@ -93,7 +93,7 @@ public class SummaryUtils {
 	 */
 	public static ResultSummarizer amountOfFails(){
 		return (a)->{
-			return String.format("Amount of fails: %s", a.getNoOfFails());
+			return String.format("Amount of fails: %s", a.getAmountOfFails());
 		};
 	}
 	

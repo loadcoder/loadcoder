@@ -32,8 +32,8 @@ public class Result {
 	long end;
 	long duration;
 
-	int noOfFails;
-	int noOfTransactions;
+	int amountOfFails;
+	int amountOfTransactions;
 
 	File resultFile;
 
@@ -96,8 +96,8 @@ public class Result {
 		setStart(start);
 		setEnd(end);
 		setDuration(end - start);
-		setNoOfFails(fails);
-		setNoOfTransactions(transactions);
+		setAmountOfFails(fails);
+		setAmountOfTransactions(transactions);
 	}
 
 	public File getResultFile() {
@@ -120,20 +120,20 @@ public class Result {
 		this.duration = duration;
 	}
 
-	public void setNoOfFails(int noOfFails) {
-		this.noOfFails = noOfFails;
+	protected void setAmountOfFails(int noOfFails) {
+		this.amountOfFails = noOfFails;
 	}
 
-	public void setNoOfTransactions(int noOfTransactions) {
-		this.noOfTransactions = noOfTransactions;
+	protected void setAmountOfTransactions(int noOfTransactions) {
+		this.amountOfTransactions = noOfTransactions;
 	}
 
 	public long getDuration() {
 		return duration;
 	}
 
-	public int getNoOfTransactions() {
-		return noOfTransactions;
+	public int getAmountOfTransactions() {
+		return amountOfTransactions;
 	}
 
 	public List<List<TransactionExecutionResult>> getResultLists() {
@@ -148,8 +148,8 @@ public class Result {
 		return end;
 	}
 
-	public int getNoOfFails() {
-		return noOfFails;
+	public int getAmountOfFails() {
+		return amountOfFails;
 	}
 
 	public void mergeResult(Result resultToBeMerged) {
@@ -169,8 +169,8 @@ public class Result {
 		duration = end - start;
 		resultToBeMerged.setDuration(-1);
 
-		noOfFails += resultToBeMerged.getNoOfFails();
-		noOfTransactions += resultToBeMerged.getNoOfTransactions();
+		amountOfFails += resultToBeMerged.getAmountOfFails();
+		amountOfTransactions += resultToBeMerged.getAmountOfTransactions();
 	}
 
 }

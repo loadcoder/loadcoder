@@ -27,7 +27,7 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 public class ResultTest extends TestNGBase{
 
@@ -63,12 +63,11 @@ public class ResultTest extends TestNGBase{
 	
 		r.mergeResult(r2);
 	
-		Assert.assertEquals(40, r.getNoOfTransactions());
-		Assert.assertEquals(4, r.getNoOfFails());
-		Assert.assertEquals(10, r.getStart());
-		Assert.assertEquals(9070, r.getEnd());
-		
-		Assert.assertEquals(9060, r.getDuration());
+		assertEquals(40, r.getAmountOfTransactions());
+		assertEquals(4, r.getAmountOfFails());
+		assertEquals(10, r.getStart());
+		assertEquals(9070, r.getEnd());
+		assertEquals(9060, r.getDuration());
 		
 	}
 }

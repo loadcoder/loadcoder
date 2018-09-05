@@ -46,6 +46,6 @@ public class FinishedLoadTest {
 		FinishedExecution finished = new ExecutionBuilder(s).build().execute().andWait();
 		
 		Result r = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
-		Assert.assertEquals(r.getNoOfTransactions(), 1);
+		Assert.assertEquals(r.getAmountOfTransactions(), 1);
 	}
 }

@@ -62,9 +62,11 @@ public class SettingsWindow extends JDialog {
 		this.chartLogic = chartLogic;
 		settings.add(new ColorSettings(chartLogic, parent.getSeriesCollection().getSeries()));
 
+		// DetailsSettings shall only be added for the ResultChart
 		if (chartLogic instanceof ResultChartLogic) {
 			settings.add(new DetailsSettings((ResultChartLogic) chartLogic));
 		}
+
 		JPanel base = new JPanel(new BorderLayout());
 		getContentPane().add(base);
 

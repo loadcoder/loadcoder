@@ -169,7 +169,7 @@ public class DetailsSettings extends Settings {
 		jp2.add(space, c);
 		
 		JLabel keepFactorSliderDescription2 = new JLabel(
-				"Drag the slider in order to change how many percent of the points that is going to be rendered");
+				"Drag the slider to adjust the sample length in seconds");
 		f = keepFactorSliderDescription2.getFont();
 		keepFactorSliderDescription2.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
 		c.gridx = 0;

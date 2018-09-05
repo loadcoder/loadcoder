@@ -41,7 +41,7 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 public class RuntimeChartLogicTest extends TestNGBase {
 
@@ -80,6 +80,14 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		logic.update(listOfListOfList, hashesGettingUpdated, true);
 
+		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
+		assertEquals(2, commonSerieses.size());
+
+		for (XYSeriesExtension commonSeries : commonSerieses) {
+			assertTrue(commonSeries.isVisible());
+			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
+			}
+		}
 		collection.getSeries("foo");
 
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
@@ -102,10 +110,10 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
 		Range range = logic.lookupCorrectRange(0);
-		Assert.assertEquals(2000, range.getSampleLength());
+		assertEquals(2000, range.getSampleLength());
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
-		Assert.assertEquals(a, b); // assert concaternation
+		assertEquals(a, b); // assert concaternation
 	}
 
 	@Test
@@ -127,11 +135,11 @@ public class RuntimeChartLogicTest extends TestNGBase {
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 				List<XYDataItem> items = commonSeries.getItems();
 
-				Assert.assertEquals(items.size(), 4);
-				Assert.assertEquals(items.get(0).getY(), 1.0D);
-				Assert.assertEquals(items.get(1).getY(), 0.0D);
-				Assert.assertEquals(items.get(2).getY(), 0.0D);
-				Assert.assertEquals(items.get(3).getY(), 1.0D);
+				assertEquals(items.size(), 4);
+				assertEquals(items.get(0).getY(), 1.0D);
+				assertEquals(items.get(1).getY(), 0.0D);
+				assertEquals(items.get(2).getY(), 0.0D);
+				assertEquals(items.get(3).getY(), 1.0D);
 			}
 		}
 	}
@@ -157,13 +165,13 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
 		Range range3 = logic.lookupCorrectRange(-1);
-		Assert.assertEquals(1000, range3.getSampleLength());
+		assertEquals(1000, range3.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
 
-		Assert.assertEquals(a, b); // assert concaternation
-		Assert.assertEquals(10, b.getY());
+		assertEquals(a, b); // assert concaternation
+		assertEquals(10, b.getY());
 	}
 
 	@Test
@@ -195,17 +203,17 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
 		Range range = logic.lookupCorrectRange(-1);
-		Assert.assertEquals(1000, range.getSampleLength());
+		assertEquals(1000, range.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 1000);
 		Sample b = sampleGroup.getExistingSample(999, 1000);
 
-		Assert.assertEquals(a, b); // assert concaternation
-		Assert.assertEquals(1, b.getY());
+		assertEquals(a, b); // assert concaternation
+		assertEquals(1, b.getY());
 
 		Sample shouldNotHaveBeenConcatedA = sampleGroup.getExistingSample(-3000, 1000);
 		Sample shouldNotHaveBeenConcatedB = sampleGroup.getExistingSample(-1001, 1000);
-		Assert.assertFalse(shouldNotHaveBeenConcatedA.equals(shouldNotHaveBeenConcatedB));
+		assertFalse(shouldNotHaveBeenConcatedA.equals(shouldNotHaveBeenConcatedB));
 	}
 
 }

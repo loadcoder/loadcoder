@@ -89,7 +89,7 @@ public class LoadTest extends TestNGBase{
 		FinishedExecution finishedExecution = new ExecutionBuilder(l, l2).build().execute().andWait();
 		Result result = finishedExecution.getReportedResultFromResultFile();
 		
-		Assert.assertEquals(result.getNoOfTransactions(), 4);
+		Assert.assertEquals(result.getAmountOfTransactions(), 4);
 	}
 	
 	@Test(groups = "timeconsuming")
