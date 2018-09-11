@@ -26,7 +26,7 @@ public class CommonYCalculators {
 	public static final CommonYCalculator throughput = (keys, timestamp, sampleGroups, sampleLength) -> {
 		double amount = 0;
 
-		for(Comparable key : keys){
+		for(String key : keys){
 			SampleGroup group = sampleGroups.get(key);
 			Sample s = group.getExistingSample(timestamp, sampleLength);
 
@@ -48,7 +48,7 @@ public class CommonYCalculators {
 	public static final CommonYCalculator FAILS = (keys, timestamp, sampleGroups, sampleLength) -> {
 		double amount = 0;
 
-		for(Comparable key : keys){
+		for(String key : keys){
 			SampleGroup group = sampleGroups.get(key);
 
 			Sample s = group.getExistingSample(timestamp, sampleLength);

@@ -37,16 +37,16 @@ public class Sample extends SampleBase{
 
 	int amountOfFails =0;
 	
-	Comparable seriesName;
+	String seriesName;
 
 	private List<Point> points = new ArrayList<Point>();
 
-	public Sample(long startTs, long length, Comparable seriesName, boolean locked){
+	public Sample(long startTs, long length, String seriesName, boolean locked){
 		this(startTs, length, seriesName);
 		this.locked = locked;
 	}
 	
-	public Sample(long startTs, long length, Comparable seriesName){
+	public Sample(long startTs, long length, String seriesName){
 		this.firstTs = startTs;
 		this.lastTs = startTs + length -1;
 		this.length = length;

@@ -45,7 +45,7 @@ public class XYDottedSeriesExtension extends XYSeriesExtension {
 		this.visible = visible;
 	}
 
-	public XYDottedSeriesExtension(Comparable key, boolean autoSort, boolean allowDuplicateXValues, Paint color) {
+	public XYDottedSeriesExtension(String key, boolean autoSort, boolean allowDuplicateXValues, Paint color) {
 		super(key, autoSort, allowDuplicateXValues, color);
 	}
 

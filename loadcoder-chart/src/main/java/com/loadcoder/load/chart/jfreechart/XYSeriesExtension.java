@@ -56,6 +56,12 @@ public class XYSeriesExtension extends XYSeries {
 	}
 	
 	@Override
+	public String getKey() {
+		String c = (String)super.getKey();
+		return c;
+	}
+	
+	@Override
 	public int hashCode() {
 		return hash;
 	}
@@ -100,7 +106,7 @@ public class XYSeriesExtension extends XYSeries {
     }
     
 	public XYSeriesExtension(
-			Comparable key, 
+			String key, 
 			boolean autoSort, 
 			boolean allowDuplicateXValues, 
 			Paint colorInTheChart) {

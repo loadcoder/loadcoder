@@ -18,6 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
+import static com.loadcoder.statics.Time.DAY;
+import static com.loadcoder.statics.Time.HOUR;
+import static com.loadcoder.statics.Time.MINUTE;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,16 +49,13 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
 import com.loadcoder.load.chart.utilities.Utilities;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.result.TransactionExecutionResult;
-
-import static com.loadcoder.statics.Time.*;
 
 public class RuntimeChartLogic extends ChartLogic {
 
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private Map<Comparable, XYSeriesExtension> seriesMap = new HashMap<Comparable, XYSeriesExtension>();
+	private Map<String, XYSeriesExtension> seriesMap = new HashMap<String, XYSeriesExtension>();
 
 	private long[] minmax = { Long.MAX_VALUE, Long.MIN_VALUE };
 
@@ -62,56 +63,60 @@ public class RuntimeChartLogic extends ChartLogic {
 
 	private long tsForFirstUpdateContainingData = Long.MAX_VALUE;
 
-	public List<SampleConcaternator> sampleConcaternatorList = new ArrayList<SampleConcaternator>();
+	protected List<SampleConcaternator> sampleConcaternatorList = new ArrayList<SampleConcaternator>();
 
 	private Set<Long> sampleTimestamps = new HashSet<Long>();
 
-	long updateTimestamp;
+	private long updateTimestamp;
 
-	Map<Comparable, SampleGroup> sampleGroups = new HashMap<Comparable, SampleGroup>();
+	private Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
 
-	protected List<SampleConcaternatorSpec> concaterSpecList = new ArrayList<SampleConcaternatorSpec>();
+	private final List<SampleConcaternatorSpec> concaterSpecList;// = new ArrayList<SampleConcaternatorSpec>();
 
-	Map<Comparable, CommonSampleGroup> samplesCommonMap = new HashMap<Comparable, CommonSampleGroup>();
-	List<CommonSampleGroup> sampleGroupCommonList = new ArrayList<CommonSampleGroup>();
+	private Map<String, CommonSampleGroup> samplesCommonMap = new HashMap<String, CommonSampleGroup>();
 
-	List<List<TransactionExecutionResult>> incomingData;
+	private List<CommonSampleGroup> sampleGroupCommonList = new ArrayList<CommonSampleGroup>();
+
+	private List<List<TransactionExecutionResult>> incomingData;
+
+	public List<SampleConcaternator> getSampleConcaternatorList() {
+		return sampleConcaternatorList;
+	}
 
 	public void setIncomingData(List<List<TransactionExecutionResult>> incomingData) {
 		this.incomingData = incomingData;
 	}
 
-	public Map<Comparable, SampleGroup> getSampleGroups() {
+	public Map<String, SampleGroup> getSampleGroups() {
 		return sampleGroups;
 	}
 
 	public RuntimeChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<Comparable, Boolean> seriesVisible,
-			CommonSeries[] commonSeries, StartedLoad startedScenario, boolean locked) {
-		super(seriesCollection, plot, renderer, seriesVisible, locked);
+			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
+			boolean locked) {
+		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked);
 
-		sampleLengthToUse = 1000;
-		this.commonsToBeUsed = commonSeries;
-		addSampleConcaternatorSpecs(concaterSpecList);
+		setSampleLengthToUse(SAMPLELENGTH_DEFAULT);
+		concaterSpecList = getSampleConcaternatorSpecs();
 
 		createCommons();
 		addAllCommonSeriesToTheChart();
 
 		// Init the first ranges
-		ranges.add(new Range(Long.MIN_VALUE, -1, sampleLengthToUse));
-		ranges.add(new Range(0, Long.MAX_VALUE, sampleLengthToUse));
+		ranges.add(new Range(Long.MIN_VALUE, -1, getSampleLengthToUse()));
+		ranges.add(new Range(0, Long.MAX_VALUE, getSampleLengthToUse()));
 	}
 
-	public int getIncomingSize(List<List<TransactionExecutionResult>> listOfListOfList) {
+	public int getIncomingSize(Map<String, List<TransactionExecutionResult>> listOfListOfList) {
 		int size = 0;
-		for (List<TransactionExecutionResult> list : listOfListOfList) {
+		for (String key : getSeriesKeys()) {
+			List<TransactionExecutionResult> list = listOfListOfList.get(key);
+			if (list == null) {
+				continue;
+			}
 			size += list.size();
 		}
 		return size;
-	}
-
-	protected void getDataAndUpdate(HashSet<Long> hashesGettingUpdated, boolean updateSample) {
-		update(incomingData, hashesGettingUpdated, updateSample);
 	}
 
 	public void updateRangesForSampleConcaternatorAfterConcaternation(SampleConcaternator concater) {
@@ -144,7 +149,7 @@ public class RuntimeChartLogic extends ChartLogic {
 	}
 
 	public void concatAndAdjustRanges(SampleConcaternator concater, Set<Long> hashesGettingUpdated) {
-		for (Comparable key : seriesKeys) {
+		for (String key : getSeriesKeys()) {
 			SampleGroup sampleGroup = sampleGroups.get(key);
 			ConcaternationResult concaternationResult = sampleGroup.concaternate(concater);
 			concaternationResult.fixPointsForSeries(sampleGroup.getSeries());
@@ -165,7 +170,7 @@ public class RuntimeChartLogic extends ChartLogic {
 		long start = System.currentTimeMillis();
 		int mostConcatsAtOnce = 1000;
 
-		for (SampleConcaternator concater : sampleConcaternatorList) {
+		for (SampleConcaternator concater : getSampleConcaternatorList()) {
 			int i = 0;
 			while (concater.getSampleConcaternatorRunDecider().timeForConcaternation(concater)) {
 				concatAndAdjustRanges(concater, hashesGettingUpdated);
@@ -180,34 +185,31 @@ public class RuntimeChartLogic extends ChartLogic {
 	void performUpdate() {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		concat(hashesGettingUpdated);
-		getDataAndUpdate(hashesGettingUpdated, true);
+		Map<String, List<TransactionExecutionResult>> map = TransactionExecutionResult.mergeList(incomingData);
+		update(map, hashesGettingUpdated);
 		addNewSampleConcaternaterIfItsTime();
 	}
 
-	public void update(List<List<TransactionExecutionResult>> listOfListOfList, HashSet<Long> hashesGettingUpdated,
-			boolean updateSample) {
+	public void update(Map<String, List<TransactionExecutionResult>> incomingData, HashSet<Long> hashesGettingUpdated) {
 		updateTimestamp = System.currentTimeMillis();
-		int incomingSize = getIncomingSize(listOfListOfList);
+
+		incomingData.keySet().stream().forEach(key -> addSeriesKey(key));
+
+		int incomingSize = getIncomingSize(incomingData);
 		if (incomingSize == 0) {
 			updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 			return;
 		}
+
 		/*
 		 * tsForFirstUpdateContainingData is needed in order to determine when to add
-		 * new concaternators os samples. this variable is only set once, which is the
+		 * new concatenators as samples. this variable is only set once, which is the
 		 * first time data arrives to the chart.
 		 */
 		if (tsForFirstUpdateContainingData == Long.MAX_VALUE)
 			tsForFirstUpdateContainingData = updateTimestamp;
 
-		/*
-		 * The listOfListOfList can be results from many Scenarios, possibly reporting
-		 * transactions with the same name. Here we merge everything together so that
-		 * all transactions with the same name are placed in the same List.
-		 */
-		List<List<TransactionExecutionResult>> resultLists = TransactionExecutionResult.mergeList(listOfListOfList);
-
-		long[] minmaxNew = Utilities.findMinMaxTimestamp(listOfListOfList);
+		long[] minmaxNew = Utilities.findMinMaxTimestamp(incomingData, getSeriesKeys());
 		if (minmaxNew[0] < minmax[0]) {
 			minmax[0] = minmaxNew[0];
 		}
@@ -221,29 +223,29 @@ public class RuntimeChartLogic extends ChartLogic {
 
 		long[] minmaxPoints = { 0, minmax[1] - minmax[0] };
 
-		List<DataSet> dataSets = Utilities.convert(resultLists, firstTsToBeReceived, true);
-		filteredData = new FilteredData(dataSets, minmax, minmaxPoints);
+		List<DataSet> dataSets = Utilities.convert(incomingData, firstTsToBeReceived, true, getSeriesKeys());
+		setFilteredData(new FilteredData(dataSets, minmax, minmaxPoints));
 
-		addToSeriesKeys(filteredData, seriesKeys);
+		addToSeriesKeys(getFilteredData(), getSeriesKeys());
 
-		for (DataSetUserType type : removalFiltersInUse) {
+		for (DataSetUserType type : getRemovalFiltersInUse()) {
 			type.getDataSetUser().useDataSet(dataSets);
 		}
 
-		getSerieses(filteredData.getDataSets(), false, seriesMap);
+		getSerieses(getFilteredData().getDataSets(), false, seriesMap);
 		addSeriesNotAdded(seriesMap);
 		createSamplesGroups(seriesMap, sampleGroups);
-		addPoints(filteredData.getDataSets(), sampleGroups, sampleTimestamps);
+		addPoints(getFilteredData().getDataSets(), sampleGroups, sampleTimestamps);
 
-		updateSeriesWithSamples(hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps,
+		updateSeriesWithSamples(hashesGettingUpdated, getFilteredData().getDataSets(), sampleGroups, sampleTimestamps,
 				false);
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 
 		forceRerender();
 	}
 
-	private void addSeriesNotAdded(Map<Comparable, XYSeriesExtension> seriesMap) {
-		for (Comparable key : seriesKeys) {
+	private void addSeriesNotAdded(Map<String, XYSeriesExtension> seriesMap) {
+		for (String key : getSeriesKeys()) {
 			if (sampleGroups.get(key) == null) {
 				XYSeriesExtension series = seriesMap.get(key);
 				addSeries(series);
@@ -260,7 +262,7 @@ public class RuntimeChartLogic extends ChartLogic {
 		ranges.add(newRange);
 		SampleConcaternator sampleConcaternator = new SampleConcaternator(oldRange, newRange,
 				amountOfSamplesToConcaternate, sampleConcaternatorRunDecider);
-		sampleConcaternatorList.add(sampleConcaternator);
+		getSampleConcaternatorList().add(sampleConcaternator);
 	}
 
 	public void addNewSampleConcaternaterIfItsTime() {
@@ -337,8 +339,9 @@ public class RuntimeChartLogic extends ChartLogic {
 		}
 	}
 
-	public void addSampleConcaternatorSpecs(List<SampleConcaternatorSpec> concaterSpecs) {
+	public List<SampleConcaternatorSpec> getSampleConcaternatorSpecs() {
 
+		List<SampleConcaternatorSpec> concaterSpecs = new ArrayList<SampleConcaternatorSpec>();
 		/*
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
@@ -351,6 +354,7 @@ public class RuntimeChartLogic extends ChartLogic {
 		concaterSpecs.add(getNewSpec(concatenationDefinitions[2]));
 		concaterSpecs.add(getNewSpec(concatenationDefinitions[3]));
 		concaterSpecs.add(getNewSpec(concatenationDefinitions[4]));
+		return concaterSpecs;
 	}
 
 	public void calculateAmountOfPoints() {

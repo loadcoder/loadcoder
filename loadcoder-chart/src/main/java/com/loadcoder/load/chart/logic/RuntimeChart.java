@@ -54,7 +54,6 @@ public class RuntimeChart extends Chart implements RuntimeResultUser{
 				chartFrame.getRenderer(),
 				chartFrame.getSeriesVisible(),
 				commonSeries,
-				startedScenarios,
 				locked
 				);
 		

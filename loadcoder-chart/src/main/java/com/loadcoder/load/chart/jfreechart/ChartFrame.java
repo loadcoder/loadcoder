@@ -85,7 +85,7 @@ public class ChartFrame extends ApplicationFrame {
 
 	XYLineAndShapeRendererExtention renderer;
 
-	Map<Comparable, Boolean> seriesVisible = new HashMap<Comparable, Boolean>();
+	Map<String, Boolean> seriesVisible = new HashMap<String, Boolean>();
 
 	XYSeriesCollectionExtention seriesCollection = new XYSeriesCollectionExtention();
 
@@ -105,7 +105,7 @@ public class ChartFrame extends ApplicationFrame {
 		return renderer;
 	}
 
-	public Map<Comparable, Boolean> getSeriesVisible() {
+	public Map<String, Boolean> getSeriesVisible() {
 		return seriesVisible;
 	}
 
@@ -299,7 +299,7 @@ public class ChartFrame extends ApplicationFrame {
 				XYSeriesExtension clickedSeries = null;
 
 				for (XYSeriesExtension xy : lista) {
-					Comparable c = xy.getKey();
+					String c = xy.getKey();
 					if (pushedLegend.compareTo(c) == 0) {
 						clickedSeries = xy;
 						break;

@@ -57,28 +57,27 @@ import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.ColorUtils;
 import com.loadcoder.load.chart.utilities.SampleStatics;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
-import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public abstract class ChartLogic {
 
-	List<XYSeriesExtension> commonSeries = new ArrayList<XYSeriesExtension>();
+	private List<XYSeriesExtension> commonSeries = new ArrayList<XYSeriesExtension>();
 
-	Map<Comparable, XYSeriesExtension> seriesCommonMap = new HashMap<Comparable, XYSeriesExtension>();
+	private Map<String, XYSeriesExtension> seriesCommonMap = new HashMap<String, XYSeriesExtension>();
 
-	CommonSeries[] commonsToBeUsed = CommonSeries.values();
+	private CommonSeries[] commonsToBeUsed;
 
 	protected Long earliestX;
 
 	protected long highestX = 0;
 
-	protected long sampleLengthToUse;
+	private long sampleLengthToUse;
 
 	final boolean locked;
 
-	FilteredData filteredData;
+	private FilteredData filteredData;
 
-	List<DataSetUserType> removalFiltersInUse = new ArrayList<DataSetUserType>();
+	private List<DataSetUserType> removalFiltersInUse = new ArrayList<DataSetUserType>();
 
 	protected final XYSeriesCollectionExtention seriesCollection;
 
@@ -86,38 +85,45 @@ public abstract class ChartLogic {
 
 	protected final XYLineAndShapeRendererExtention renderer;
 
-	protected final Map<Comparable, Boolean> seriesVisible;
+	protected final Map<String, Boolean> seriesVisible;
 
-	protected List<YCalculator> yCalculators = new ArrayList<YCalculator>();
+	protected final List<YCalculator> yCalculators = new ArrayList<YCalculator>();
 
 	public YCalculator yCalculatorToUse = avg;
 
-	List<Color> existingColors = new ArrayList<Color>();
+	private List<Color> existingColors = new ArrayList<Color>();
 
 	public final static int TARGET_AMOUNT_OF_POINTS_DEFAULT = 20_000;
 
+	protected static final long SAMPLELENGTH_DEFAULT = 1000;
 	/**
-	 * customizedColors is not yet supported
+	 * customizedColors is not yet supported.
 	 */
 	@Deprecated
-	Map<Comparable, Color> customizedColors;
+	Map<String, Color> customizedColors;
 
-	protected List<Comparable> seriesKeys = new ArrayList<Comparable>();
+	private final List<String> seriesKeys = new ArrayList<String>();
 
-	protected Map<Comparable, LegendItem> legends = new HashMap<Comparable, LegendItem>();
+	protected List<String> getSeriesKeys() {
+		return seriesKeys;
+	}
 
-	protected List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
+	protected void addSeriesKey(String key) {
+		if (!seriesKeys.contains(key)) {
+			seriesKeys.add(key);
+		}
+	}
 
-	protected List<Range> ranges = new ArrayList<Range>();
+	protected final Map<String, LegendItem> legends = new HashMap<String, LegendItem>();
 
-	protected boolean shallUpdate = true;
+	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
+
+	protected final List<Range> ranges = new ArrayList<Range>();
 
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
-	protected abstract void getDataAndUpdate(HashSet<Long> hashesGettingUpdated, boolean updateSamples);
-
-	protected abstract void update(List<List<TransactionExecutionResult>> listOfListOfList,
-			HashSet<Long> hashesGettingUpdated, boolean updateSamples);
+	protected abstract void update(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+			HashSet<Long> hashesGettingUpdated);
 
 	protected abstract void doUpdate();
 
@@ -171,11 +177,7 @@ public abstract class ChartLogic {
 		return removalFiltersInUse;
 	}
 
-	public void setRemovalFiltersInUse(List<DataSetUserType> removalFiltersInUse) {
-		this.removalFiltersInUse = removalFiltersInUse;
-	}
-
-	public void setFilteredData(FilteredData filteredData) {
+	protected void setFilteredData(FilteredData filteredData) {
 		this.filteredData = filteredData;
 	}
 
@@ -195,11 +197,7 @@ public abstract class ChartLogic {
 		return yCalculators;
 	}
 
-	public void setyCalculators(List<YCalculator> yCalculators) {
-		this.yCalculators = yCalculators;
-	}
-
-	void addToSeriesKeys(FilteredData filteredData, List<Comparable> seriesKeys) {
+	void addToSeriesKeys(FilteredData filteredData, List<String> seriesKeys) {
 		for (DataSet dataSet : filteredData.getDataSets()) {
 			String s = dataSet.getName();
 			if (!seriesKeys.contains(s))
@@ -208,12 +206,14 @@ public abstract class ChartLogic {
 	}
 
 	public ChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<Comparable, Boolean> seriesVisible, boolean locked) {
+			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
+			boolean locked) {
 		this.locked = locked;
 		this.seriesCollection = seriesCollection;
 		this.plot = plot;
 		this.renderer = renderer;
 		this.seriesVisible = seriesVisible;
+		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
 
 		yCalculators.add(avg);
 		yCalculators.add(max);
@@ -282,6 +282,7 @@ public abstract class ChartLogic {
 			commonSeriesCalculators.add(new CommonSeriesCalculator(xySeries, common.getCommonYCalculator()));
 			commonSeries.add(xySeries);
 		});
+
 	}
 
 	public void addSeries(XYSeriesExtension serie) {
@@ -312,8 +313,8 @@ public abstract class ChartLogic {
 	 * samples. The series that are affected by the transaction series are going to
 	 * be upated below
 	 */
-	void updateCommonsWithSamples(HashSet<Long> hashesGettingUpdated, Map<Comparable, SampleGroup> sampleGroups,
-			Map<Comparable, CommonSampleGroup> samplesCommonMap, List<CommonSampleGroup> sampleGroupCommonList) {
+	void updateCommonsWithSamples(HashSet<Long> hashesGettingUpdated, Map<String, SampleGroup> sampleGroups,
+			Map<String, CommonSampleGroup> samplesCommonMap, List<CommonSampleGroup> sampleGroupCommonList) {
 
 		/*
 		 * iterate through all timestamp that are the first one in one of the updated
@@ -329,7 +330,7 @@ public abstract class ChartLogic {
 				double amount = calculator.calculateCommonY(seriesKeys, l, sampleGroups, r.getSampleLength());
 
 				// get or create the samplegroup for the common series
-				Comparable commonKey = series.getKey();
+				String commonKey = series.getKey();
 				CommonSampleGroup commonSampleGroup = samplesCommonMap.get(commonKey);
 				if (commonSampleGroup == null) {
 					commonSampleGroup = new CommonSampleGroup(series);
@@ -337,7 +338,7 @@ public abstract class ChartLogic {
 					sampleGroupCommonList.add(commonSampleGroup);
 				}
 
-				CommonSample cs = commonSampleGroup.getAndCreateSample(l, (String) commonKey, r.getSampleLength());
+				CommonSample cs = commonSampleGroup.getAndCreateSample(l, commonKey, r.getSampleLength());
 
 				long longAmount = Sample.amountToYValue(amount);
 				cs.setY(longAmount);
@@ -354,7 +355,7 @@ public abstract class ChartLogic {
 		}
 	}
 
-	Paint getSeriesColor(Comparable dataSetName) {
+	Paint getSeriesColor(String dataSetName) {
 		LegendItem legend = legends.get(dataSetName);
 
 		Paint seriesColor = null;
@@ -366,7 +367,7 @@ public abstract class ChartLogic {
 		return seriesColor;
 	}
 
-	void getSerieses(List<DataSet> dataSets, boolean dottedMode, Map<Comparable, XYSeriesExtension> seriesMap) {
+	void getSerieses(List<DataSet> dataSets, boolean dottedMode, Map<String, XYSeriesExtension> seriesMap) {
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 
@@ -398,18 +399,17 @@ public abstract class ChartLogic {
 		renderer.setSeriesShapesVisible(indexOfSeries, false);
 	}
 
-	void addPoints(List<DataSet> dataSets, Map<Comparable, SampleGroup> sampleGroups, Set<Long> sampleTimestamps) {
+	void addPoints(List<DataSet> dataSets, Map<String, SampleGroup> sampleGroups, Set<Long> sampleTimestamps) {
 		long start = System.currentTimeMillis();
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 			SampleGroup sampleGroup = sampleGroups.get(dataSetName);
-			XYSeriesExtension series = sampleGroup.getSeries();
 			createSamplesAndAddPoints(dataSetName, sampleGroup.getSeries(), dataSet, sampleGroup, sampleTimestamps);
 		}
 	}
 
-	void createSamplesGroups(Map<Comparable, XYSeriesExtension> seriesMap, Map<Comparable, SampleGroup> sampleGroups) {
-		for (Comparable key : seriesKeys) {
+	void createSamplesGroups(Map<String, XYSeriesExtension> seriesMap, Map<String, SampleGroup> sampleGroups) {
+		for (String key : seriesKeys) {
 			XYSeriesExtension serie = seriesMap.get(key);
 			SampleGroup sampleGroup = sampleGroups.get(key);
 			if (sampleGroup == null) {
@@ -419,7 +419,7 @@ public abstract class ChartLogic {
 		}
 	}
 
-	void createSamplesAndAddPoints(Comparable dataSetName, XYSeriesExtension serie, DataSet dataSet,
+	void createSamplesAndAddPoints(String dataSetName, XYSeriesExtension serie, DataSet dataSet,
 			SampleGroup sampleGroup, Set<Long> sampleTimestamps) {
 		for (Point point : dataSet.getPoints()) {
 			long x = point.getX();
@@ -488,18 +488,6 @@ public abstract class ChartLogic {
 		}
 	}
 
-	protected void useResult(Result r, List<List<TransactionExecutionResult>> listOfListOfList) {
-		List<List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
-		synchronized (transactionExecutionResults) {
-
-			for (List<TransactionExecutionResult> listToBeCopiedAndCleared : transactionExecutionResults) {
-				List<TransactionExecutionResult> newList = new ArrayList<TransactionExecutionResult>();
-				listOfListOfList.add(newList);
-				newList.addAll(listToBeCopiedAndCleared);
-			}
-		}
-	}
-
 	public Range getSampleLength(long timestamp) {
 		for (Range range : ranges) {
 			if (timestamp >= range.getStart() && timestamp <= range.getEnd()) {
@@ -511,9 +499,9 @@ public abstract class ChartLogic {
 
 	void populateColorArray() {
 		if (customizedColors != null) {
-			Iterator<Entry<Comparable, Color>> i = customizedColors.entrySet().iterator();
+			Iterator<Entry<String, Color>> i = customizedColors.entrySet().iterator();
 			while (i.hasNext()) {
-				Entry<Comparable, Color> e = i.next();
+				Entry<String, Color> e = i.next();
 				existingColors.add(e.getValue());
 			}
 		}
@@ -523,7 +511,7 @@ public abstract class ChartLogic {
 		}
 	}
 
-	public synchronized Color getNewColor(Comparable seriesKey) {
+	public synchronized Color getNewColor(String seriesKey) {
 
 		if (customizedColors != null) {
 			Color color = customizedColors.get(seriesKey);
@@ -539,13 +527,13 @@ public abstract class ChartLogic {
 	}
 
 	void updateSeriesWithSamples(Set<Long> hashesGettingUpdated, List<DataSet> dataSets,
-			Map<Comparable, SampleGroup> sampleGroups, Set<Long> sampleTimestamps, boolean dottedMode) {
+			Map<String, SampleGroup> sampleGroups, Set<Long> sampleTimestamps, boolean dottedMode) {
 
 		/*
 		 * The new data has now been arranged into correct Samples. Time to calculate
 		 * each of the affected Samples and update the points.
 		 */
-		for (Comparable key : seriesKeys) {
+		for (String key : seriesKeys) {
 
 			SampleGroup group = sampleGroups.get(key);
 			XYSeriesExtension series = group.getSeries();
@@ -572,7 +560,7 @@ public abstract class ChartLogic {
 					hashesGettingUpdated.add(l);
 				}
 
-				long[] minmaxPoints = filteredData.getMinmaxPoints();
+				long[] minmaxPoints = getFilteredData().getMinmaxPoints();
 
 				long earliest = minmaxPoints[0];
 				long latest = minmaxPoints[1];

@@ -24,22 +24,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeResultUpdaterRunner implements Runnable{
-	
-	Execution execution;
-	
-	RuntimeResultUser runtimeDataUser;
-	
-	Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-	
-	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser){
+public class RuntimeResultUpdaterRunner implements Runnable {
+
+	private final Logger logger = LoggerFactory.getLogger(RuntimeResultUpdaterRunner.class);
+
+	private final Execution execution;
+
+	private final RuntimeResultUser runtimeDataUser;
+
+	private final Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+
+	private final List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
+
+	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}
-	
+
 	protected void useResult(Result r, List<List<TransactionExecutionResult>> listOfListOfList) {
 		List<List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
 		synchronized (transactionExecutionResults) {
@@ -52,7 +59,7 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 			}
 		}
 	}
-	
+
 	public void run() {
 
 		while (true) {
@@ -61,20 +68,20 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 				Thread.sleep(3_000);
 			} catch (InterruptedException ie) {
 			}
-			
+
 			boolean oneLoadStillNotTerminated = false;
-			
-			for(Load load : execution.getLoads()) {
+
+			for (Load load : execution.getLoads()) {
 				State scenarioStateManagerState = load.getLoadStateThread().getState();
 				if (scenarioStateManagerState != State.TERMINATED) {
 					oneLoadStillNotTerminated = true;
 					break;
 				}
 			}
-			
+
 			swapOutDataAndCallUser(map);
-			
-			if (! oneLoadStillNotTerminated) {
+
+			if (!oneLoadStillNotTerminated) {
 				break;
 			}
 		}
@@ -83,15 +90,17 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
 		List<TransactionExecutionResult> switchDestination;
 
-		//swap the bucket. The running load threads will after this add results to the new list
+		// swap the bucket. The running load threads will after this add results to the
+		// new list listForComingTransactions
 		synchronized (execution.getTransactionExecutionResultBuffer()) {
 			switchDestination = execution.getTransactionExecutionResultBuffer().getBuffer();
-			execution.getTransactionExecutionResultBuffer().setBuffer(new ArrayList<TransactionExecutionResult>());
+
+			List<TransactionExecutionResult> listForComingTransactions = new ArrayList<TransactionExecutionResult>();
+			execution.getTransactionExecutionResultBuffer().setBuffer(listForComingTransactions);
 		}
 
-		//add all the swaped out results to the runtimeResultList
-		synchronized (execution.getRuntimeResultList()) {
-			List<List<TransactionExecutionResult>> runtimeResultList = execution.getRuntimeResultList();
+		// add all the swaped out results to the runtimeResultList
+		synchronized (runtimeResultList) {
 			for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
 				String name = transactionExecutionResult.getName();
 				List<TransactionExecutionResult> listToAddTo = map.get(name);
@@ -104,16 +113,13 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 			}
 		}
 
-		runtimeDataUser.useData(execution.getRuntimeResultList());
-		execution.getRuntimeResultList().clear();
+		try {
+			runtimeDataUser.useData(runtimeResultList);
+		} catch (RuntimeException rte) {
+			logger.error("An exception occured when trying to use the runtime result data", rte);
+		}
+
+		runtimeResultList.clear();
 		map.clear();
 	}
-
-//	public static class ArrayListExtension <E> extends ArrayList <E>{
-//		private static final long serialVersionUID = 1L;
-//		
-//		public boolean add(E e) {
-//			return super.add(e);
-//		}
-//	}
 }

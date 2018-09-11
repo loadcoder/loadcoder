@@ -48,15 +48,18 @@ public class RuntimeChartLogicTest extends TestNGBase {
 	XYSeriesCollectionExtention collection;
 	LoadcoderRenderer renderer;
 
-	Map<Comparable, Boolean> map;
+	Map<String, Boolean> map;
 	XYPlotExtension plot;
 	RuntimeChartLogic logic;
 
-	List<List<TransactionExecutionResult>> getNewListsOfLists(TransactionExecutionResult... points) {
-		List<TransactionExecutionResult> transactions = new ArrayList<TransactionExecutionResult>();
-		List<List<TransactionExecutionResult>> listOfListOfList = new ArrayList<List<TransactionExecutionResult>>();
-		listOfListOfList.add(transactions);
+	Map<String, List<TransactionExecutionResult>> getNewListsOfLists(TransactionExecutionResult... points) {
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = new HashMap<String, List<TransactionExecutionResult>>();
 		for (TransactionExecutionResult point : points) {
+			List<TransactionExecutionResult> transactions = listOfListOfList.get(point.getName());
+			if(transactions == null) {
+				transactions = new ArrayList<TransactionExecutionResult>();
+				listOfListOfList.put(point.getName(), transactions);
+			}
 			transactions.add(point);
 		}
 		return listOfListOfList;
@@ -66,19 +69,19 @@ public class RuntimeChartLogicTest extends TestNGBase {
 	public void setup() {
 		collection = new XYSeriesCollectionExtention();
 		renderer = new LoadcoderRenderer(true, false, collection);
-		map = new HashMap<Comparable, Boolean>();
+		map = new HashMap<String, Boolean>();
 		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
-		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), null, false);
+		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), false);
 	}
 
 	@Test
 	public void testRuntimeChart() {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs, 1, true, null));
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
-		logic.update(listOfListOfList, hashesGettingUpdated, true);
+		logic.update(listOfListOfList, hashesGettingUpdated);
 
 		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
 		assertEquals(2, commonSerieses.size());
@@ -94,13 +97,13 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs + 1200, 2, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs + 2200, 3, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs + 3200, 4, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		logic.addNewConcater(2, (a) -> {
 			return true;
@@ -121,13 +124,13 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
 
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs + 3000, 10, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		// verify that the surroundingTimestamps functionality are working as expected
 		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
@@ -149,9 +152,9 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
 
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		logic.lookupCorrectRange(-1);
 		logic.lookupCorrectRange(1);
@@ -179,23 +182,23 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		long startTs = System.currentTimeMillis();
 		String transactionKey = "foo";
 
-		List<List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs, 1, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs - 500, 2, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs - 1500, 3, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 
 		listOfListOfList = getNewListsOfLists(
 				new TransactionExecutionResult(transactionKey, startTs - 2500, 4, true, null));
-		logic.update(listOfListOfList, new HashSet<Long>(), true);
+		logic.update(listOfListOfList, new HashSet<Long>());
 		logic.addNewConcater(2, (a) -> {
 			return true;
 		});

@@ -12,9 +12,9 @@ The sources for this library are kept in the following repository at GitHub:
 
 ## 3. Community
 
-If you would like to contribute to Loadcoder, introduce yourself through info@loadcoder.com and elaborate what you think of Loadcoder and you thoughts of taking the tool further.
+If you would like to contribute to Loadcoder, introduce yourself through info@loadcoder.com and elaborate what you think of Loadcoder and your thoughts of taking the tool further.
 
-The next step is that you will be invited to the github loadcoder organisation as a member.
+The next step is that you will be invited to the loadcoder github organisation as a member.
 
 ### 3.1 Issues and feature branches.
 Issues are used to keep track of everything that happens in the source code. The main purpose of an Issue is to explain the purpose of the change. Depending on the nature of the change, a description of the change should also be added. For example, an Issue for a bug can have a description that explains the cause of the problem, and suggest a solution.
@@ -27,7 +27,7 @@ A Pull Request created by a member can not be merged to master without the appro
 
 The following are guidelines to follow as a member and contributor of Loadcoder:
 
-* All changes shall be preceded by a describing Issue in order for you and others to understand what the purpose is with the change. In order to map the branch to the corresponding Issue, add the Issue ID (#<number>) in the name of the branch you are working in, similar to any of the following:
+* All changes shall be preceded by a describing Issue in order for you and others to understand what the purpose is with the change. In order to map the branch to the corresponding Issue, add the Issue ID (#[number]) in the name of the branch you are working in, similar to any of the following:
 
 ```
 bugfix_#3_memory-leak-in-chart

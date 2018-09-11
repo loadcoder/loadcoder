@@ -47,7 +47,7 @@ public class ResultChart extends Chart {
 
 	private final boolean locked = false;
 
-	public ResultChart(Map<Comparable, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
+	public ResultChart(Map<String, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
 		super(true, false);
 		logic = new ResultChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
 				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, locked, results);

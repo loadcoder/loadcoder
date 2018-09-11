@@ -3,7 +3,7 @@
 
 	<appender name="resultappender" class="com.loadcoder.logback.SharedDirFileAppenderLogback">
 		<file>result.log</file>
-		<append>true</append>
+		<append>false</append>
 		<encoder>
 			<pattern>%m%n</pattern>
 		</encoder>

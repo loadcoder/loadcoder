@@ -31,12 +31,12 @@ public class TransactionExecutionResult {
 	final boolean status;
 	final String message;
 	final String threadId;
-	
+
 	public boolean equals(Object obj) {
 		return super.equals(obj);
 	}
 
-	public String toString(){
+	public String toString() {
 		return String.format("name:%s, ts:%s, rt:%s)", name, ts, rt);
 	}
 
@@ -54,7 +54,6 @@ public class TransactionExecutionResult {
 		this.threadId = threadId;
 	}
 
-
 	public String getName() {
 		return name;
 	}
@@ -71,25 +70,25 @@ public class TransactionExecutionResult {
 		return status;
 	}
 
-	public String getMessage(){
+	public String getMessage() {
 		return message;
 	}
 
-	public String getThread(){
+	public String getThread() {
 		return threadId;
 	}
 
-	public static List<List<TransactionExecutionResult>> mergeList(
+	public static Map<String, List<TransactionExecutionResult>> mergeList(
 			List<List<TransactionExecutionResult>> listOfListOfList) {
 
 		Map<String, List<TransactionExecutionResult>> m = new HashMap<String, List<TransactionExecutionResult>>();
 		List<List<TransactionExecutionResult>> mergeToThisList = new ArrayList<List<TransactionExecutionResult>>();
 
-		
 		for (List<TransactionExecutionResult> list : listOfListOfList) {
 			if (list.isEmpty()) {
 				continue;
 			}
+
 			TransactionExecutionResult firstOne = list.get(0);
 			List<TransactionExecutionResult> lista = m.get(firstOne.getName());
 			if (lista == null) {
@@ -99,7 +98,7 @@ public class TransactionExecutionResult {
 			}
 			lista.addAll(list);
 		}
-		return mergeToThisList;
+		return m;
 	}
 
 }

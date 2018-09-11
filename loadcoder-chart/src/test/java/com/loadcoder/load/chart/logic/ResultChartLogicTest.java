@@ -46,7 +46,7 @@ public class ResultChartLogicTest extends TestNGBase {
 
 	LoadcoderRenderer renderer;
 
-	Map<Comparable, Boolean> map;
+	Map<String, Boolean> map;
 
 	XYPlotExtension plot;
 
@@ -56,7 +56,7 @@ public class ResultChartLogicTest extends TestNGBase {
 	public void setup() {
 		collection = new XYSeriesCollectionExtention();
 		renderer = new LoadcoderRenderer(true, false, collection);
-		map = new HashMap<Comparable, Boolean>();
+		map = new HashMap<String, Boolean>();
 		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
 	}
 
@@ -103,7 +103,7 @@ public class ResultChartLogicTest extends TestNGBase {
 		Result r = new ResultExtention(ResultChartTestUtility.getTranses(amountOfTransaction));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
 				null, false, r);
-		Map<Comparable, XYSeriesExtension> dottedSerieses = logic.getDottedSeries();
+		Map<String, XYSeriesExtension> dottedSerieses = logic.getDottedSeries();
 
 		Assert.assertEquals(dottedSerieses.size(), 1);
 		dottedSerieses.values().forEach(series -> Assert.assertEquals(series.getItems().size(), amountOfTransaction));

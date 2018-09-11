@@ -47,9 +47,7 @@ public class Execution {
 
 	private long startTime;
 
-	TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
-
-	List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
+	private TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
 
 	protected ResultFormatter getResultFormatter() {
 		return resultFormatter;
@@ -63,17 +61,13 @@ public class Execution {
 		return runtimeResultUpdaterThread;
 	}
 
-	protected List<List<TransactionExecutionResult>> getRuntimeResultList() {
-		return runtimeResultList;
-	}
-
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
 		return transactionExecutionResultBuffer;
 	}
 
-	public Execution(ResultFormatter resultFormatter, RuntimeResultUser user, List<Load> loads) {
+	public Execution(ResultFormatter resultFormatter, RuntimeResultUser resultUser, List<Load> loads) {
 		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
-		this.user = user;
+		this.user = resultUser;
 		this.loads = loads;
 		loads.stream().forEach((load) -> {
 			load.setExecution(this);

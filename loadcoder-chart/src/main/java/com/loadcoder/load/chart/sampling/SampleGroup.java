@@ -157,11 +157,11 @@ public class SampleGroup extends Group{
 
 	}
 
-	private Sample createSample(long first, Comparable name) {
+	private Sample createSample(long first, String name) {
 		return createSample(first, name, sampleLengthBase);
 	}
 
-	private Sample createSample(long first, Comparable name, long sampleLength) {
+	private Sample createSample(long first, String name, long sampleLength) {
 
 		Sample s = new Sample(first, sampleLength, name, locked);
 		samples.put(first, s);
@@ -178,7 +178,7 @@ public class SampleGroup extends Group{
 		return s;
 	}
 
-	public Sample getAndCreateSample_old(long ts, Comparable name, long sampleLength) {
+	public Sample getAndCreateSample_old(long ts, String name, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		Sample s = samples.get(first);
 		if (s == null) {
@@ -187,7 +187,7 @@ public class SampleGroup extends Group{
 		return s;
 	}
 	
-	public Sample getAndCreateSample(long ts, Comparable name, long sampleLength) {
+	public Sample getAndCreateSample(long ts, String name, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		Sample s = samples.get(first);
 		if (s == null) {
