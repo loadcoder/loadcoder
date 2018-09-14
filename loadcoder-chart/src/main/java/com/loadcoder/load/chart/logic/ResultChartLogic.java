@@ -129,8 +129,7 @@ public class ResultChartLogic extends ChartLogic {
 		this.results = results;
 		populateRemovalFilters();
 
-		List<List<TransactionExecutionResult>> listOfList = populateResultLists(results);
-		originalFromFile = TransactionExecutionResult.mergeList(listOfList);
+		originalFromFile = populateResultLists(results);
 		originalFromFile.keySet().stream().forEach(key -> addSeriesKey(key));
 
 		setFilteredData(generateDataSets(originalFromFile));
@@ -361,23 +360,26 @@ public class ResultChartLogic extends ChartLogic {
 		createHashesAndUpdate(false);
 	}
 
-	protected List<List<TransactionExecutionResult>> populateResultLists(Result... results) {
-		List<List<TransactionExecutionResult>> listOfListOfTransactionResults = new ArrayList<List<TransactionExecutionResult>>();
+	protected Map<String, List<TransactionExecutionResult>> populateResultLists(Result... results) {
+		Map<String, List<TransactionExecutionResult>> listOfListOfTransactionResults = new HashMap<String, List<TransactionExecutionResult>>();
 		for (Result r : results) {
 			useResult(r, listOfListOfTransactionResults);
 		}
+
 		return listOfListOfTransactionResults;
 	}
 
-	protected void useResult(Result r, List<List<TransactionExecutionResult>> listOfListOfTransactionResults) {
-		List<List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
-		synchronized (transactionExecutionResults) {
+	protected void useResult(Result r, Map<String, List<TransactionExecutionResult>> listOfListOfTransactionResults) {
+		Map<String, List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
 
-			for (List<TransactionExecutionResult> listToBeCopiedAndCleared : transactionExecutionResults) {
-				List<TransactionExecutionResult> newList = new ArrayList<TransactionExecutionResult>();
-				listOfListOfTransactionResults.add(newList);
-				newList.addAll(listToBeCopiedAndCleared);
+		for (String key : transactionExecutionResults.keySet()) {
+			List<TransactionExecutionResult> listToBeCopiedAndCleared = transactionExecutionResults.get(key);
+			List<TransactionExecutionResult> newList = listOfListOfTransactionResults.get(key);
+			if (newList == null) {
+				newList = new ArrayList<TransactionExecutionResult>();
+				listOfListOfTransactionResults.put(key, newList);
 			}
+			newList.addAll(listToBeCopiedAndCleared);
 		}
 	}
 

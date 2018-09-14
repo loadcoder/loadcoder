@@ -52,9 +52,7 @@ public class Utilities {
 			return dataSets;
 		for (String key : keys) {
 			List<TransactionExecutionResult> resultList = resultLists.get(key);
-			TransactionExecutionResult firstResult = resultList.get(0);
-
-			DataSet dataSet = new DataSet(firstResult.getName(), new ArrayList<Point>());
+			DataSet dataSet = new DataSet(key, new ArrayList<Point>());
 			dataSets.add(dataSet);
 			for (TransactionExecutionResult result : resultList) {
 				if (convertToRelativeTime) {

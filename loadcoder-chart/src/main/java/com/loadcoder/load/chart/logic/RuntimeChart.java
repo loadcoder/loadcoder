@@ -19,6 +19,7 @@
 package com.loadcoder.load.chart.logic;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JMenu;
 
@@ -30,45 +31,40 @@ import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChart extends Chart implements RuntimeResultUser{
+public class RuntimeChart extends Chart implements RuntimeResultUser {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	RuntimeChartLogic logic;
-	
+
 	CommonSeries[] commonSeries;
-	
+
 	StartedLoad startedScenarios;
-	
+
 	private final boolean locked = true;
+
 	public RuntimeChart() {
 		this(CommonSeries.values());
 	}
-	
+
 	public RuntimeChart(CommonSeries[] commonSeries) {
 		super(true, false);
 		this.commonSeries = commonSeries;
-		logic = new RuntimeChartLogic(
-				chartFrame.getSeriesCollection(),
-				chartFrame.getPlot(),
-				chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(),
-				commonSeries,
-				locked
-				);
-		
+		logic = new RuntimeChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
+				chartFrame.getSeriesVisible(), commonSeries, locked);
+
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();
-		
+
 		chartFrame.getMenu().add(settingsMenu);
 		chartFrame.getMenu().add(aboutMenu);
-		
+
 		chartFrame.setVisible(true);
 	}
-	
+
 	@Override
-	public void useData(List<List<TransactionExecutionResult>> listOfListOfList) {
-		logic.setIncomingData(listOfListOfList);
+	public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
+		logic.setIncomingData(transactionsMap);
 		chartFrame.getChart().setNotify(false);
 		long start = System.currentTimeMillis();
 		logic.doSafeUpdate();
@@ -77,5 +73,5 @@ public class RuntimeChart extends Chart implements RuntimeResultUser{
 		logger.debug("Total Points in chart: {}", chartFrame.getTotalSize());
 		chartFrame.getChart().setNotify(true);
 	}
-	
+
 }

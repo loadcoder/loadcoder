@@ -21,6 +21,7 @@ package com.loadcoder.result;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Extend this abstract class in order to implement your own ResultFormatter.
@@ -43,7 +44,7 @@ public abstract class ResultFormatter{
 	 * @return a list of list of TransactionExecutionResults
 	 * @throws IOException
 	 */
-	protected abstract List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
+	protected abstract Map<String, List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
 	
 	public Result toResultList(File file) throws IOException{
 		Result r = new Result(file, this);

@@ -25,12 +25,12 @@ import java.util.Map;
 
 public class TransactionExecutionResult {
 
-	final String name;
-	final long ts;
-	final long rt;
-	final boolean status;
-	final String message;
-	final String threadId;
+	private final String name;
+	private final long ts;
+	private final long rt;
+	private final boolean status;
+	private final String message;
+	private final String threadId;
 
 	public boolean equals(Object obj) {
 		return super.equals(obj);
@@ -38,6 +38,10 @@ public class TransactionExecutionResult {
 
 	public String toString() {
 		return String.format("name:%s, ts:%s, rt:%s)", name, ts, rt);
+	}
+
+	public TransactionExecutionResult(long ts, long rt, boolean status, String message) {
+		this(null, ts, rt, status, message, Thread.currentThread().getName());
 	}
 
 	public TransactionExecutionResult(String name, long ts, long rt, boolean status, String message) {
@@ -77,28 +81,4 @@ public class TransactionExecutionResult {
 	public String getThread() {
 		return threadId;
 	}
-
-	public static Map<String, List<TransactionExecutionResult>> mergeList(
-			List<List<TransactionExecutionResult>> listOfListOfList) {
-
-		Map<String, List<TransactionExecutionResult>> m = new HashMap<String, List<TransactionExecutionResult>>();
-		List<List<TransactionExecutionResult>> mergeToThisList = new ArrayList<List<TransactionExecutionResult>>();
-
-		for (List<TransactionExecutionResult> list : listOfListOfList) {
-			if (list.isEmpty()) {
-				continue;
-			}
-
-			TransactionExecutionResult firstOne = list.get(0);
-			List<TransactionExecutionResult> lista = m.get(firstOne.getName());
-			if (lista == null) {
-				lista = new ArrayList<TransactionExecutionResult>();
-				m.put(firstOne.getName(), lista);
-				mergeToThisList.add(lista);
-			}
-			lista.addAll(list);
-		}
-		return m;
-	}
-
 }

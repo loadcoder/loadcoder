@@ -16,14 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario;
+package com.loadcoder.result.clients;
 
-import java.util.List;
-import java.util.Map;
-
-import com.loadcoder.result.TransactionExecutionResult;
-
-@FunctionalInterface
-public interface RuntimeResultUser {
-	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);
+public class Header {
+	String name;
+	String value;
+	Header(String name, String value){
+		this.name = name;
+		this.value = value;
+	}
+	
+	String getName() {
+		return name;
+	}
+	
+	String getValue() {
+		return value;
+	}
 }

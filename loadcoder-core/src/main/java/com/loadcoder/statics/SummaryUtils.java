@@ -102,7 +102,7 @@ public class SummaryUtils {
 	 * @return ValueCalculator
 	 */
 	public static ValueCalculator avg(){
-		ValueCalculator max = (rr)->{
+		ValueCalculator avgCalculator = (name, rr)->{
 			long totalSum = 0;
 			for(TransactionExecutionResult transactionExecutionResult : rr){
 				totalSum += transactionExecutionResult.getRt();
@@ -111,7 +111,7 @@ public class SummaryUtils {
 
 			return "" + avgValue;
 		};
-		return max;
+		return avgCalculator;
 	}
 
 
@@ -121,7 +121,7 @@ public class SummaryUtils {
 	 * @return
 	 */
 	public static ValueCalculator percentile(int percentile){
-		ValueCalculator max = (rr)->{
+		ValueCalculator percentileCalculator = (name, rr)->{
 
 			List<Long> allResponseTimes = new ArrayList<Long>();
 			for(TransactionExecutionResult r : rr){
@@ -132,7 +132,7 @@ public class SummaryUtils {
 			Long responseTimePercentile = allResponseTimes.get(percentileIndex);
 			return "" + responseTimePercentile;
 		};
-		return max;
+		return percentileCalculator;
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class SummaryUtils {
 	 * @return ValueCalculator
 	 */
 	public static ValueCalculator max(){
-		ValueCalculator max = (rr)->{
+		ValueCalculator max = (name, rr)->{
 			long maxValue = 0;
 			for(TransactionExecutionResult transactionExecutionResult : rr){
 				if(transactionExecutionResult.getRt() > maxValue)
@@ -156,10 +156,10 @@ public class SummaryUtils {
 	 * @return ValueCalculator
 	 */
 	public static ValueCalculator transactions(){
-		ValueCalculator max = (rr)->{
+		ValueCalculator amountOfTransactionsCalculator = (name, rr)->{
 			return "" +rr.size();
 		};
-		return max;
+		return amountOfTransactionsCalculator;
 	}
 	
 	/**
@@ -167,7 +167,7 @@ public class SummaryUtils {
 	 * @return ValueCalculator
 	 */
 	public static ValueCalculator fails(){
-		ValueCalculator max = (rr)->{
+		ValueCalculator failsCalculator = (name, rr)->{
 			long noOfFails = 0;
 			for(TransactionExecutionResult transactionExecutionResult : rr){
 				if(transactionExecutionResult.isStatus() == false)
@@ -175,7 +175,7 @@ public class SummaryUtils {
 			}
 			return "" +noOfFails;
 		};
-		return max;
+		return failsCalculator;
 	}
 
 	/**
@@ -183,13 +183,9 @@ public class SummaryUtils {
 	 * @return ValueCalculator
 	 */
 	public static ValueCalculator transactionNames(){
-		ValueCalculator max = (rr)->{
-			if(rr.size() == 0) {
-				return "empty";
-			}
-			String name = rr.get(0).getName();
+		ValueCalculator nameCalculator = (name, rr)->{
 			return name;
 		};
-		return max;
+		return nameCalculator;
 	}
 }

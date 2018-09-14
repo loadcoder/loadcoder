@@ -19,7 +19,9 @@
 package com.loadcoder.result;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -33,29 +35,29 @@ public class ResultTest extends TestNGBase{
 
 	@Test
 	public void testToMerge(){
-		List<List<TransactionExecutionResult>> resultList = new ArrayList<List<TransactionExecutionResult>>();
+		Map<String, List<TransactionExecutionResult>> resultList = new HashMap<String, List<TransactionExecutionResult>>();
 
 		List<TransactionExecutionResult> result = new ArrayList<TransactionExecutionResult>();
-		resultList.add(result);
+		resultList.put("a", result);
 		for(int i =0; i<10; i++)
-			result.add(new TransactionExecutionResult("a", 10 + i *1000, 10, i==2 ? false : true, ""));
+			result.add(new TransactionExecutionResult(10 + i *1000, 10, i==2 ? false : true, ""));
 		
 		List<TransactionExecutionResult> result2 = new ArrayList<TransactionExecutionResult>();
-		resultList.add(result2);
+		resultList.put("b", result2);
 		for(int i =0; i<10; i++)
-			result2.add(new TransactionExecutionResult("b",70 +  i *1000, 20, i==2 ? false : true, ""));
+			result2.add(new TransactionExecutionResult(70 +  i *1000, 20, i==2 ? false : true, ""));
 		
 		Result r = new Result(resultList);
 		
-		List<List<TransactionExecutionResult>> resultList2 = new ArrayList<List<TransactionExecutionResult>>();
+		Map<String, List<TransactionExecutionResult>> resultList2 = new HashMap<String, List<TransactionExecutionResult>>();
 
 		List<TransactionExecutionResult> result3 = new ArrayList<TransactionExecutionResult>();
-		resultList2.add(result3);
+		resultList2.put("a", result3);
 		for(int i =0; i<10; i++)
 			result3.add(new TransactionExecutionResult("a",20 +  i *1000, 30, i==2 ? false : true, ""));
 		
 		List<TransactionExecutionResult> result4 = new ArrayList<TransactionExecutionResult>();
-		resultList2.add(result4);
+		resultList2.put("b", result4);
 		for(int i =0; i<10; i++)
 			result4.add(new TransactionExecutionResult("b",50 +  i *1000, 40, i==2 ? false : true, ""));
 		

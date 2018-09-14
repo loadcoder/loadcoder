@@ -40,24 +40,9 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	private final Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
 
-	private final List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
-
 	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
-	}
-
-	protected void useResult(Result r, List<List<TransactionExecutionResult>> listOfListOfList) {
-		List<List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
-		synchronized (transactionExecutionResults) {
-
-			for (List<TransactionExecutionResult> listToBeCopiedAndCleared : transactionExecutionResults) {
-				List<TransactionExecutionResult> newList = new ArrayList<TransactionExecutionResult>();
-				listOfListOfList.add(newList);
-				newList.addAll(listToBeCopiedAndCleared);
-				listToBeCopiedAndCleared.clear(); // todo?
-			}
-		}
 	}
 
 	public void run() {
@@ -90,8 +75,12 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
 		List<TransactionExecutionResult> switchDestination;
 
-		// swap the bucket. The running load threads will after this add results to the
-		// new list listForComingTransactions
+		/*
+		 * swap the bucket. The running load threads will after this add results to the
+		 * new list listForComingTransactions This is synchronized with
+		 * ResultHandlerBuilder:performResultHandeled and
+		 * ResultHandlerVoidBuilder:performResultHandeled where the transactions are added to the list
+		 */
 		synchronized (execution.getTransactionExecutionResultBuffer()) {
 			switchDestination = execution.getTransactionExecutionResultBuffer().getBuffer();
 
@@ -100,26 +89,24 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 		}
 
 		// add all the swaped out results to the runtimeResultList
-		synchronized (runtimeResultList) {
-			for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
-				String name = transactionExecutionResult.getName();
-				List<TransactionExecutionResult> listToAddTo = map.get(name);
-				if (listToAddTo == null) {
-					listToAddTo = new ArrayList<TransactionExecutionResult>();
-					runtimeResultList.add(listToAddTo);
-					map.put(name, listToAddTo);
-				}
-				listToAddTo.add(transactionExecutionResult);
+		for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
+			String name = transactionExecutionResult.getName();
+			List<TransactionExecutionResult> listToAddTo = map.get(name);
+			if (listToAddTo == null) {
+				listToAddTo = new ArrayList<TransactionExecutionResult>();
+				// runtimeResultList.add(listToAddTo);
+				map.put(name, listToAddTo);
 			}
+			listToAddTo.add(transactionExecutionResult);
 		}
 
 		try {
-			runtimeDataUser.useData(runtimeResultList);
+			runtimeDataUser.useData(map);
 		} catch (RuntimeException rte) {
 			logger.error("An exception occured when trying to use the runtime result data", rte);
 		}
 
-		runtimeResultList.clear();
+		// runtimeResultList.clear();
 		map.clear();
 	}
 }

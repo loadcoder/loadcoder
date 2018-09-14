@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class ResultChartTest extends TestNGBase {
 	}
 
 	public static class ResultExtention extends Result {
-		ResultExtention(List<List<TransactionExecutionResult>> resultLists) {
+		ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
 			super(resultLists);
 		}
 	}

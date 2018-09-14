@@ -46,14 +46,14 @@ public abstract class LoadScenario{
 	protected Load getLoad(){
 		return l;
 	}
-	
+	//TODO: why synchronized ? 
 	public synchronized void pre(){
 		Executable pre = l.getPreExecution();
 		if(pre!= null) {
 			pre.execute();
 		}
 	}	
-	
+	//TODO: why synchronized ? 
 	public synchronized void post(){
 		Executable post = l.getPostExecution();
 		if(post!= null) {

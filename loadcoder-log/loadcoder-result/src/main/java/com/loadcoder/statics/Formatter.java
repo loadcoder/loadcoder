@@ -77,12 +77,10 @@ public class Formatter {
 		}
 
 		@Override
-		public List<List<TransactionExecutionResult>> toResultLists(File file) throws IOException {
+		public Map<String, List<TransactionExecutionResult>> toResultLists(File file) throws IOException {
 			Logger log = LoggerFactory.getLogger(Formatter.class);
 			
-			
-			List<List<TransactionExecutionResult>> dataSets = new ArrayList<List<TransactionExecutionResult>>();
-			Map<String, List<TransactionExecutionResult>> dataSetMap = new HashMap<String, List<TransactionExecutionResult>>();
+			Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
 			int lineNumber = 0;
 			log.debug("reading file {}" ,file);
 			List<String> fileAsLineList = LoadUtility.readFile(file);
@@ -97,20 +95,18 @@ public class Formatter {
 				lineNumber++;
 				try {
 					TransactionExecutionResult result = toTransactionExecutionResult(line);
-
-					List<TransactionExecutionResult> s = dataSetMap.get(result.getName());
+					List<TransactionExecutionResult> s = transactions.get(result.getName());
 
 					if (s == null) {
 						s = new ArrayList<TransactionExecutionResult>();
-						dataSetMap.put(result.getName(), s);
-						dataSets.add(s);
+						transactions.put(result.getName(), s);
 					}
 					s.add(result);
 				} catch (ArrayIndexOutOfBoundsException aioube) {
 					log.debug(String.format("Line %s in file %s could not be formatted", lineNumber, file.getAbsolutePath()));
 				}
 			}
-			return dataSets;
+			return transactions;
 		}
 	};
 

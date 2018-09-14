@@ -152,14 +152,14 @@ public class Summary {
 						firstStringRow.add(new TableEntry(column, column.getName()));
 						maxWidthPerColumn.put(column, column.getName().length());
 					}
-					List<List<TransactionExecutionResult>> resultList = result.getResultLists();
-					for(List<TransactionExecutionResult> r : resultList){
-
+					Map<String, List<TransactionExecutionResult>> resultList = result.getResultLists();
+					for(String key : resultList.keySet()){
+						List<TransactionExecutionResult> transactions = resultList.get(key);
 						List<TableEntry> transactionStringRow = new ArrayList<TableEntry>();
 						stringTable.add(transactionStringRow);
 						for(Coloumn column : columns){
 							ValueCalculator calculator = column.getValueCalculator();
-							String value = calculator.calculateValue(r);
+							String value = calculator.calculateValue(key, transactions);
 							transactionStringRow.add(new TableEntry(column, value));
 							if(maxWidthPerColumn.get(column) < value.length())
 								maxWidthPerColumn.put(column, value.length());
@@ -227,6 +227,6 @@ public class Summary {
 	}
 
 	public interface ValueCalculator{
-		String calculateValue(List<TransactionExecutionResult> resultList);
+		String calculateValue(String key, List<TransactionExecutionResult> resultList);
 	}
 }

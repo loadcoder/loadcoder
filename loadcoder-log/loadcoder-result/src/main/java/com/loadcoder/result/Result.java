@@ -21,12 +21,13 @@ package com.loadcoder.result;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.loadcoder.statics.Formatter;
 
 public class Result {
 
-	List<List<TransactionExecutionResult>> resultLists;
+	Map<String, List<TransactionExecutionResult>> resultLists;
 
 	long start;
 	long end;
@@ -41,7 +42,7 @@ public class Result {
 		this(fileToGenerateResultFrom, Formatter.SIMPLE_RESULT_FORMATTER);
 	}
 
-	protected Result(List<List<TransactionExecutionResult>> resultLists) {
+	protected Result(Map<String, List<TransactionExecutionResult>> resultLists) {
 		init(resultLists);
 	}
 
@@ -49,7 +50,7 @@ public class Result {
 
 		this.resultFile = fileToGenerateResultFrom;
 
-		List<List<TransactionExecutionResult>> result;
+		Map<String, List<TransactionExecutionResult>> result;
 		try {
 			result = resultFormatter.toResultLists(fileToGenerateResultFrom);
 		} catch (IOException ioe) {
@@ -61,38 +62,31 @@ public class Result {
 		init(result);
 	}
 
-	protected void init(List<List<TransactionExecutionResult>> resultLists) {
+	private void init(Map<String, List<TransactionExecutionResult>> resultLists) {
 
 		this.resultLists = resultLists;
 
-		long start = 0;
-		long end = 0;
+		long start = Long.MAX_VALUE;
+		long end = Long.MIN_VALUE;
 
 		int fails = 0;
 		int transactions = 0;
-		if (resultLists.size() > 0 && resultLists.get(0).size() > 0)
-			start = resultLists.get(0).get(0).getTs();
 
-		/*
-		 * resultLists here needs to be synchronized with the usage of the same instace
-		 * in RuntimeResultUpdaterRunner:run, where new elements are added to this list
-		 */
-		synchronized (resultLists) {
+		for (String key : resultLists.keySet()) {
+			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			transactions += resultList.size();
+			for (TransactionExecutionResult transactionExecutionResult : resultList) {
+				long ts = transactionExecutionResult.getTs();
+				if (ts < start)
+					start = ts;
+				if (ts > end)
+					end = ts;
 
-			for (List<TransactionExecutionResult> resultList : resultLists) {
-				transactions += resultList.size();
-				for (TransactionExecutionResult transactionExecutionResult : resultList) {
-					long ts = transactionExecutionResult.getTs();
-					if (ts < start)
-						start = ts;
-					if (ts > end)
-						end = ts;
-
-					if (!transactionExecutionResult.isStatus())
-						fails++;
-				}
+				if (!transactionExecutionResult.isStatus())
+					fails++;
 			}
 		}
+
 		setStart(start);
 		setEnd(end);
 		setDuration(end - start);
@@ -104,7 +98,7 @@ public class Result {
 		return resultFile;
 	}
 
-	public void setResultLists(List<List<TransactionExecutionResult>> resultLists) {
+	public void setResultLists(Map<String, List<TransactionExecutionResult>> resultLists) {
 		this.resultLists = resultLists;
 	}
 
@@ -136,7 +130,7 @@ public class Result {
 		return amountOfTransactions;
 	}
 
-	public List<List<TransactionExecutionResult>> getResultLists() {
+	public Map<String, List<TransactionExecutionResult>> getResultLists() {
 		return resultLists;
 	}
 

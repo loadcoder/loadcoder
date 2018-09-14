@@ -77,13 +77,13 @@ public class RuntimeChartLogic extends ChartLogic {
 
 	private List<CommonSampleGroup> sampleGroupCommonList = new ArrayList<CommonSampleGroup>();
 
-	private List<List<TransactionExecutionResult>> incomingData;
+	private Map<String, List<TransactionExecutionResult>> incomingData;
 
 	public List<SampleConcaternator> getSampleConcaternatorList() {
 		return sampleConcaternatorList;
 	}
 
-	public void setIncomingData(List<List<TransactionExecutionResult>> incomingData) {
+	public void setIncomingData(Map<String, List<TransactionExecutionResult>> incomingData) {
 		this.incomingData = incomingData;
 	}
 
@@ -185,8 +185,7 @@ public class RuntimeChartLogic extends ChartLogic {
 	void performUpdate() {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		concat(hashesGettingUpdated);
-		Map<String, List<TransactionExecutionResult>> map = TransactionExecutionResult.mergeList(incomingData);
-		update(map, hashesGettingUpdated);
+		update(incomingData, hashesGettingUpdated);
 		addNewSampleConcaternaterIfItsTime();
 	}
 
@@ -318,7 +317,6 @@ public class RuntimeChartLogic extends ChartLogic {
 	/*
 	 * 1st: width for the unconcatenated samples 2nd: width of the 1st range of
 	 * concatenated samples 3rd: width of the 2nd range of concatenated samples
-	 * 
 	 */
 	protected static final ConcatenationDefinition[] concatenationDefinitions = new ConcatenationDefinition[] {
 			new ConcatenationDefinition(2 * MINUTE, 4), // 4
