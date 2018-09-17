@@ -88,6 +88,10 @@ public class SUT {
 		sleepWithDeviationFromLast(o, min, max);
 	}
 
+	public void methodWhereResponseTimeFollowSomeKindOfPattern(long min, long max) {
+		sleepWithDeviationFromLast(trackerObject, min, max);
+	}
+
 	long trackerObject2 = 100;
 
 	public void methodWhereResponseTimeIncreases() {

@@ -16,22 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result;
+package com.loadcoder.result.clients;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.result.clients.DateTimeUtil;
 import com.loadcoder.result.clients.GrafanaClient;
-import com.loadcoder.result.clients.GrafanaClient.CalendarUtils;
 
 public class GrafanaClientTest {
 
@@ -47,9 +48,9 @@ public class GrafanaClientTest {
 		Map<String, List<TransactionExecutionResult>> list = new HashMap<String, List<TransactionExecutionResult>>();
 		list.put("foo", Arrays.asList(new TransactionExecutionResult("foo", end - 10_000, 5, true, null),
 				new TransactionExecutionResult(end - 5_000, 6, true, null)));
-		Result r = new Result(list);
+		ResultExtention r = new ResultExtention(list);
 
-		//base64 encoded default grafana user:password
+		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
 		GrafanaClient cli = new GrafanaClient("localhost", 3000, false, authorizationValue);
 		int responseCode = cli.createNewDashboardFromResult(r, method.getName());
@@ -58,8 +59,15 @@ public class GrafanaClientTest {
 
 	@Test
 	public void testCalendarUtil(Method method) {
-		CalendarUtils calendar = new CalendarUtils();
-		String dateTime = calendar.convertMilliSecondsToFormattedDate(System.currentTimeMillis());
+
+		String dateTime = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis(),
+				GrafanaClient.TIMESPAN_FORMAT);
 		assertTrue(dateTime.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.000"));
+	}
+
+	public static class ResultExtention extends Result {
+		ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
+			super(resultLists);
+		}
 	}
 }

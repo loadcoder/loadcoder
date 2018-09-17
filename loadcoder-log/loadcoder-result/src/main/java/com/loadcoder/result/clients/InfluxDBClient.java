@@ -27,7 +27,7 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class InfluxDBClient extends HttpClient{
 
-	private String dbName;
+	private final String dbName;
 
 	private final static String WRITE_URL_TEMPLATE = "%s://%s:%s/write?db=";
 	private final static String QUERY_URL_TEMPLATE = "%s://%s:%s/query";
@@ -36,31 +36,32 @@ public class InfluxDBClient extends HttpClient{
 	private final String WRITE_URL;
 	private final String QUERY_URL;
 	 
-	public InfluxDBClient(String host, int port, boolean https) {
+	private String executionId = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis());
+	public InfluxDBClient(String host, int port, boolean https, String db) {
 		String protocol = protocolAsString(https);
 		WRITE_URL = String.format(WRITE_URL_TEMPLATE, protocol, host, port);
 		QUERY_URL = String.format(QUERY_URL_TEMPLATE, protocol, host, port);
+		this.dbName = db;
 	}
 
 	public String getDbName() {
 		return dbName;
 	}
 
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
+	public void newExecution() {
+		this.executionId = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis());
 	}
 
-	public void setAndCreateDB(String dbName) {
-		setDbName(dbName);
+	protected int createDB(String dbName) {
 		String body = String.format("q=CREATE DATABASE %s", dbName);
-		sendPost(body, QUERY_URL, Arrays.asList());
+		return sendPost(body, QUERY_URL, Arrays.asList());
 	}
 
-	public void writeTransactions(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
+	public int writeTransactions(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
 		long start = System.currentTimeMillis();
 		String body = convertTransactionsToWriteBody(listOfListOfList, executionId);
-		writeEntries(body);
-		System.out.println("influx store took" + (System.currentTimeMillis() - start) + " ms");
+		int responseCode = writeEntries(body);
+		return responseCode;
 	}
 	
 	public String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
@@ -69,15 +70,15 @@ public class InfluxDBClient extends HttpClient{
 		for (String key : listOfListOfList.keySet()) {
 			List<TransactionExecutionResult> list = listOfListOfList.get(key);
 			for (TransactionExecutionResult t : list) {
-				String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, t.getName(), executionId, t.getRt(), t.getTs());
+				String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getRt(), t.getTs());
 				entireBody = entireBody + urlParameters + "\n";
 			}
 		}
 		return entireBody;
 	}
 	
-	private void writeEntries(String body) {
-		sendPost(body, WRITE_URL + dbName, Arrays.asList());
+	private int writeEntries(String body) {
+		return sendPost(body, WRITE_URL + dbName, Arrays.asList());
 	}
 
 }

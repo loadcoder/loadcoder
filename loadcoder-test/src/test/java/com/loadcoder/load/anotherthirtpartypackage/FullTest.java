@@ -70,18 +70,20 @@ public class FullTest extends TestNGBase {
 
 			@Override
 			public void loadScenario() {
-				load("cosinus", () -> sut.sleepCos(300)).perform();
+				load("getCustomer", () -> sut.methodWhereResponseTimeFollowSomeKindOfPattern(sut, 100, 800)).perform();
+				load("updateCustomer", () -> sut.methodWhereResponseTimeFollowSomeKindOfPattern(200, 400)).perform();
+
 			}
 		};
 
 		// default Grafana authentication
-		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
+		String authenticationValue = "Basic YWRtaW46YWRtaW4=";
 
-		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false);
-		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authorizationValue);
-		influxClient.setDbName(method.getName());
-		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND))
-				.throttle(5, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(10).rampup(13 * SECOND).build();
+		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authenticationValue);
+		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND))
+				.rampup(6 * SECOND)
+				.throttle(3, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(20).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l)
 				.runtimeResultUser((result) -> influxClient.writeTransactions(result, dir.getName())).build().execute()

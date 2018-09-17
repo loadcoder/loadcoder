@@ -19,31 +19,30 @@
 package com.loadcoder.result.clients;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.loadcoder.load.LoadUtility;
 import com.loadcoder.result.Result;
 
 /**
- * This is an incredibly simlpe Grafana client build just upon java's net package
+ * This is an incredibly simlpe Grafana client build just upon java's net
+ * package
  */
 public class GrafanaClient extends HttpClient {
 
 	Logger log = LoggerFactory.getLogger(GrafanaClient.class);
 
-	static CalendarUtils calendarUtils = new CalendarUtils();
+	protected static final String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.000";
+	protected static final SimpleDateFormat TIMESPAN_FORMAT = new SimpleDateFormat(
+			GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
 	private final String DB_URL_TEMPLATE = "%s://%s:%s/api/dashboards/db";
 	private final String DB_URL;
 
@@ -53,17 +52,6 @@ public class GrafanaClient extends HttpClient {
 		String protocol = protocolAsString(https);
 		DB_URL = String.format(DB_URL_TEMPLATE, protocol, host, port);
 		this.authorizationValue = authorizationValue;
-	}
-
-	public static class CalendarUtils {
-		private String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.000";
-		private SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
-
-		public String convertMilliSecondsToFormattedDate(long milliSeconds) {
-			Timestamp ts = new Timestamp(milliSeconds);
-			Date date = new Date(ts.getTime());
-			return simpleDateFormat.format(date);
-		}
 	}
 
 	private static class Type {
@@ -79,10 +67,9 @@ public class GrafanaClient extends HttpClient {
 	List<Type> types = Arrays.asList(new Type("mean", "A"));
 
 	String getFileAsString(String filename) {
-//		File file = new File(classLoader.getResource("target_body_template.json").getFile());
-		InputStream in = getClass().getResourceAsStream("/" + filename); 
+		InputStream in = getClass().getResourceAsStream("/" + filename);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		
+
 		List<String> fileAsLineList = new ArrayList<String>();
 		reader.lines().forEach(line -> fileAsLineList.add(line));
 		try {
@@ -98,7 +85,7 @@ public class GrafanaClient extends HttpClient {
 
 	String getTargets(Set<String> measurementNames) {
 
-		String targetTemplate = getFileAsString("target_body_template.json");
+		String targetTemplate = getFileAsString("grafana_5.2.4/grafana_target_body_template.json");
 
 		List<String> targetsList = new ArrayList<String>();
 		for (String name : measurementNames) {
@@ -117,30 +104,23 @@ public class GrafanaClient extends HttpClient {
 	}
 
 	public int createNewDashboardFromResult(Result result, String name) {
-		String startTimespan = calendarUtils.convertMilliSecondsToFormattedDate(result.getStart());
-		String endTimespan = calendarUtils.convertMilliSecondsToFormattedDate(result.getEnd());
-		log.info("panel will have timespan: " + startTimespan + " - " + endTimespan);
+		String startTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getStart(), TIMESPAN_FORMAT);
+		String endTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getEnd(), TIMESPAN_FORMAT);
+		log.debug("panel will have timespan: " + startTimespan + " - " + endTimespan);
+		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getStart());
+		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template.json");
 
-		String fileAsString = getFileAsString("grafana_post_dashboard_body_template.json");
-//		List<String> measurementNames = new ArrayList<String>();
-//		result.getResultLists().stream().forEach(list -> measurementNames.add(list.get(0).getName()));
+		fileAsString = fileAsString.replace("${time_from}", startTimespan);
+		fileAsString = fileAsString.replace("${time_to}", endTimespan);
+		fileAsString = fileAsString.replace("${title}", name + "_" + dateTimeLabel);
 
-//		try {
-	
-			fileAsString = fileAsString.replace("${time_from}", startTimespan);
-			fileAsString = fileAsString.replace("${time_to}", endTimespan);
-			fileAsString = fileAsString.replace("${title}", name + System.currentTimeMillis());
+		String targets = getTargets(result.getResultLists().keySet());
+		fileAsString = fileAsString.replace("${targets}", targets);
+		fileAsString = fileAsString.replace("${requestid}", "" + System.currentTimeMillis());
 
-			String targets = getTargets(result.getResultLists().keySet());
-			fileAsString = fileAsString.replace("${targets}", targets);
-			fileAsString = fileAsString.replace("${requestid}", "" + System.currentTimeMillis());
+		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
+				new Header("Authorization", authorizationValue));
+		return sendPost(fileAsString, DB_URL, headers);
 
-			List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
-					new Header("Authorization", authorizationValue));
-			return sendPost(fileAsString, DB_URL, headers);
-
-//		} catch (Exception e) {
-//			throw new RuntimeException(e);
-//		}
 	}
 }

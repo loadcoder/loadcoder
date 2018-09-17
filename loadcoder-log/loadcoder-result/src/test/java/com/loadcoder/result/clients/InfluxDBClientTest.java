@@ -16,7 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result;
+package com.loadcoder.result.clients;
+
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,18 +27,20 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.InfluxDBClient;
 
 public class InfluxDBClientTest {
 
 	@Test(groups = "manual")
-	 public void createEntry() {
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false);
-		cli.setDbName("stefan");
+	public void createEntry() {
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		int responseCode = -1;
 		Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
-		transactions.put("t1", Arrays.asList(
-				new TransactionExecutionResult(System.currentTimeMillis(), 44L, true, "")));
-		
-		cli.writeTransactions(transactions, "exe1");
+		transactions.put("hej",
+				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
+
+		responseCode = cli.writeTransactions(transactions, "hello");
+		assertEquals(responseCode, 204);
 	}
 }
