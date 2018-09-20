@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jfree.chart.LegendItem;
@@ -39,7 +40,7 @@ public class ChartFrameTest {
 
 	@Test
 	public void testHandleClick() {
-		ChartFrame frame = new ChartFrame(true, false);
+		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>());
 		PlotEntity e = Mockito.mock(PlotEntity.class);
 		XYSeriesCollectionExtention xySeriesCollectionExtention = Mockito.mock(XYSeriesCollectionExtention.class);
 		List<XYSeries> list = new ArrayList<XYSeries>();

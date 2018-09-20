@@ -82,7 +82,7 @@ public class ResultChartTest extends TestNGBase {
 	}
 
 	public static class ResultExtention extends Result {
-		ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
+		public ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
 			super(resultLists);
 		}
 	}

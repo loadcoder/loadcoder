@@ -22,6 +22,7 @@ import static com.loadcoder.statics.Time.DAY;
 import static com.loadcoder.statics.Time.HOUR;
 import static com.loadcoder.statics.Time.MINUTE;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,8 +94,8 @@ public class RuntimeChartLogic extends ChartLogic {
 
 	public RuntimeChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
 			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
-			boolean locked) {
-		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked);
+			boolean locked, Map<String, Color> existingColors) {
+		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
 
 		setSampleLengthToUse(SAMPLELENGTH_DEFAULT);
 		concaterSpecList = getSampleConcaternatorSpecs();

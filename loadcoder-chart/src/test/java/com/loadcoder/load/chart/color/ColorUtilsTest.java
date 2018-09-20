@@ -21,7 +21,11 @@ package com.loadcoder.load.chart.color;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.testng.Assert.*;
 
@@ -45,9 +49,8 @@ public class ColorUtilsTest extends TestNGBase {
 		// empty blacklist
 		List<Color> colors = new ArrayList<Color>();
 		List<Color> blacklisted = Arrays.asList(colorToBeBlacklisted);
-
-		Color c = ColorUtils.getNewContrastfulColor(colors, blacklisted);
-		colors.add(c);
+		Set<Color> set = new HashSet<Color>(colors);
+		Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
 
 		boolean whiteExists = colors.stream().anyMatch((color) -> {
 			return color.equals(extremeColorToTheBlacklisted);
@@ -64,7 +67,8 @@ public class ColorUtilsTest extends TestNGBase {
 		List<Color> colors = new ArrayList<Color>();
 		List<Color> blacklisted = Arrays.asList();
 		for (int i = 0; i < 10; i++) {
-			Color c = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+			Set<Color> set = new HashSet<Color>(colors);
+			Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
 			colors.add(c);
 		}
 		boolean whiteExists = colors.stream().anyMatch((color) -> {
@@ -76,7 +80,8 @@ public class ColorUtilsTest extends TestNGBase {
 		colors = new ArrayList<Color>();
 		blacklisted = Arrays.asList(extremeColorToBeBlacklisted);
 		for (int i = 0; i < 10; i++) {
-			Color c = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+			Set<Color> set = new HashSet<Color>(colors);
+			Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
 			colors.add(c);
 		}
 		whiteExists = colors.stream().anyMatch((color) -> {
@@ -90,9 +95,12 @@ public class ColorUtilsTest extends TestNGBase {
 		List<Color> colors = Arrays.asList();
 		List<Color> blacklisted = Arrays.asList();
 
-		Color c = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+		Set<Color> set = new HashSet<Color>(colors);
+		Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		blacklisted = Arrays.asList(c);
-		Color c2 = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+		
+		set = new HashSet<Color>(colors);
+		Color c2 = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		assertNotSame(c, c2);
 	}
 
@@ -100,12 +108,15 @@ public class ColorUtilsTest extends TestNGBase {
 	public void testNewColor() {
 		List<Color> colors = Arrays.asList();
 		List<Color> blacklisted = Arrays.asList();
-		Color c = ColorUtils.getNewContrastfulColor(colors, blacklisted);
-		Color c2 = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+		Set<Color> set = new HashSet<Color>(colors);
+		Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
+		set = new HashSet<Color>(colors);
+		Color c2 = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		assertSame(c, c2);
 
 		colors = Arrays.asList(c2);
-		Color c3 = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+		set = new HashSet<Color>(colors);
+		Color c3 = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		assertNotSame(c, c3);
 	}
 
@@ -117,7 +128,8 @@ public class ColorUtilsTest extends TestNGBase {
 
 		List<Color> colors = new ArrayList<Color>();
 		for (int i = 0; i < 10; i++) {
-			Color c3 = ColorUtils.getNewContrastfulColor(colors, ColorUtils.defaultBlacklistColors);
+			Set<Color> set = new HashSet<Color>(colors);
+			Color c3 = ColorUtils.getNewContrastfulColor(set, ColorUtils.defaultBlacklistColors);
 			colors.add(c3);
 			log.info(c3.toString());
 		}
@@ -144,7 +156,8 @@ public class ColorUtilsTest extends TestNGBase {
 	public void findNewColorNoColorsExistingTest() {
 		List<Color> colors = Arrays.asList();
 		List<Color> blacklisted = Arrays.asList();
-		ColorUtils.getNewContrastfulColor(colors, blacklisted);
+		Set<Color> set = new HashSet<Color>(colors);
+		ColorUtils.getNewContrastfulColor(set, blacklisted);
 		assertEquals(colors, blacklisted);
 	}
 
@@ -166,7 +179,8 @@ public class ColorUtilsTest extends TestNGBase {
 		List<Color> colors = new ArrayList<Color>();
 		List<Color> blacklisted = Arrays.asList();
 		for (int i = 0; i < 10; i++) {
-			Color color = ColorUtils.getNewContrastfulColor(colors, blacklisted);
+			Set<Color> set = new HashSet<Color>(colors);
+			Color color = ColorUtils.getNewContrastfulColor(set, blacklisted);
 			colors.add(color);
 		}
 		assertTrue(colors.contains(Color.RED));
@@ -178,10 +192,13 @@ public class ColorUtilsTest extends TestNGBase {
 	@Test
 	public void findNewColorTest() {
 		List<Color> blacklisted = Arrays.asList();
-		List<Color> colors = Arrays.asList(Color.BLACK, Color.WHITE, new Color(255, 0, 0), new Color(255, 255, 0),
+		List<Color> colorList = Arrays.asList(Color.BLACK, Color.WHITE, new Color(255, 0, 0), new Color(255, 255, 0),
 				new Color(255, 0, 255), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255));
-		Color newColor = ColorUtils.getNewContrastfulColor(colors, blacklisted);
-		assertFalse(colors.contains(newColor));
+		
+		Set<Color> set = new HashSet<Color>(colorList);
+		Color newColor = ColorUtils.getNewContrastfulColor(set, blacklisted);
+		
+		assertFalse(set.contains(newColor));
 		
 	}
 

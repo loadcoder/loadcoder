@@ -24,6 +24,7 @@ import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.ExemptionMechanismSpi;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;
@@ -50,7 +51,7 @@ public class ResultChart extends Chart {
 	public ResultChart(Map<String, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
 		super(true, false);
 		logic = new ResultChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, locked, results);
+				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, locked, existingColors, results);
 
 		long sampleLengthToUse = logic.getSampleLengthToUse();
 		int defaultIndex = logic.getDefaultSliderIndex();

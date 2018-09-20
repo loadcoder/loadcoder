@@ -19,6 +19,7 @@
 package com.loadcoder.load.chart.logic;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Rectangle;
@@ -27,6 +28,8 @@ import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JMenu;
 
@@ -46,6 +49,8 @@ public abstract class Chart {
 
 	ChartFrame chartFrame;
 	
+	protected final Map<String, Color> existingColors = new HashMap<String, Color>();
+	
 	//only for test purposes, in order to create a chart, without the actual ChartFrame
 	protected Chart() {}
 	
@@ -57,7 +62,7 @@ public abstract class Chart {
 		 */
 		Toolkit.getDefaultToolkit().setDynamicLayout(false);
 		
-		this.chartFrame = new ChartFrame(linesVisible, shapesVisible);
+		this.chartFrame = new ChartFrame(linesVisible, shapesVisible, existingColors);
 		
 		Stroke[] strokes = new Stroke[] { new BasicStroke() };
 		

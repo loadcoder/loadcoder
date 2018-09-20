@@ -126,8 +126,8 @@ public class ColorSettings extends Settings {
 
 			JButton button = new JButton("");
 			selectionMap.put(button, series);
-
-			Color seriesColor = (Color) series.getColorInTheChart();
+//			Color seriesColor = (Color) series.getColorInTheChart();
+			Color seriesColor = chartLogic.getExistingColors().get(series.getKey());
 			button.setBackground(seriesColor);
 			button.setPreferredSize(new Dimension(25, 25));
 
@@ -172,14 +172,16 @@ public class ColorSettings extends Settings {
 				Entry<XYSeriesExtension, Color> entry = i.next();
 				Color newColor = entry.getValue();
 				XYSeriesExtension series = entry.getKey();
-				Color oldColor = (Color) series.getColorInTheChart();
+//				Color oldColor = (Color) series.getColorInTheChart();
+				Color oldColor = chartLogic.getExistingColors().get(series.getKey());
 				series.setColorInTheChart(newColor);
 				series.getLegend().setFillPaint(newColor);
 				series.getLegend().setOutlinePaint(newColor);
 
-				List<Color> existingColors = chartLogic.getExistingColors();
-				existingColors.remove(oldColor);
-				existingColors.add(newColor);
+				Map<String, Color> existingColors = chartLogic.getExistingColors();
+//				existingColors.remove(oldColor);
+//				existingColors.add(newColor);
+				existingColors.put(series.getKey(), newColor);
 			}
 
 		}

@@ -51,7 +51,7 @@ public class RuntimeChart extends Chart implements RuntimeResultUser {
 		super(true, false);
 		this.commonSeries = commonSeries;
 		logic = new RuntimeChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(), commonSeries, locked);
+				chartFrame.getSeriesVisible(), commonSeries, locked, existingColors);
 
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();

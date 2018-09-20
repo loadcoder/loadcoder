@@ -21,7 +21,10 @@ package com.loadcoder.load.chart.utilities;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class ColorUtils {
@@ -30,10 +33,9 @@ public class ColorUtils {
 
 	public static final List<Color> defaultBlacklistColors = Arrays.asList(Color.YELLOW, Color.WHITE);
 	
-	public static Color getNewContrastfulColor(List<Color> alreadyExistingColors, List<Color> blacklistedColors){
-		
+	public static Color getNewContrastfulColor(Set<Color> colors, List<Color> blacklistedColors){
 		List<Color> colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible = new ArrayList<>();
-		colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.addAll(alreadyExistingColors);
+		colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.addAll(colors);
 		colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible.addAll(blacklistedColors);
 		List<Color> newColors = getNewPotentialColors(colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible);
 		

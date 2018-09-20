@@ -66,9 +66,9 @@ public class XYSeriesExtension extends XYSeries {
 		return hash;
 	}
 	
-	public Paint getColorInTheChart() {
-		return colorInTheChart;
-	}
+//	public Paint getColorInTheChart() {
+//		return colorInTheChart;
+//	}
 
 	public void setColorInTheChart(Paint paint) {
 		this.colorInTheChart = paint;

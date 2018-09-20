@@ -128,12 +128,12 @@ public class ChartFrame extends ApplicationFrame {
 		return plot;
 	}
 
-	public ChartFrame(boolean linesVisible, boolean shapesVisible) {
+	public ChartFrame(boolean linesVisible, boolean shapesVisible, Map<String, Color> existingColors) {
 		super("");
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/polarbear.png"));
 		image.getScaledInstance(200, 200, Image.SCALE_FAST);
 		setIconImage(image);
-		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection);
+		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection, existingColors);
 
 		plot = createXYPlotExtension("X", "Y", seriesCollection, renderer);
 		plot.setRenderer(renderer);

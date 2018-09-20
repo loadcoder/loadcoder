@@ -57,9 +57,7 @@ public class ResultChartLogic extends ChartLogic {
 
 	private static Logger logger = LoggerFactory.getLogger(ResultChartLogic.class);
 
-	private static final boolean allowDuplicateXValues_forDottedSeries = true;
-
-	private Result[] results;
+	private static final boolean ALLOW_DUPLICATE_X_VALUES_FOR_POINT_SERIES = true;
 
 	private List<DataSetUserType> removalFilters = new ArrayList<DataSetUserType>();
 
@@ -122,11 +120,10 @@ public class ResultChartLogic extends ChartLogic {
 
 	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
 			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, boolean defaultDottedMode,
-			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked, Result... results) {
-		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked);
+			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked, Map<String, Color> existingColors, Result... results) {
+		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
 
 		this.dottedMode = defaultDottedMode;
-		this.results = results;
 		populateRemovalFilters();
 
 		originalFromFile = populateResultLists(results);
@@ -149,18 +146,10 @@ public class ResultChartLogic extends ChartLogic {
 
 		defaultIndex = 4;
 		int minorTickLengthInAmountOfSeconds = getMinorTickLength();
-		if (minorTickLengthInAmountOfSeconds <= 4) {
-			defaultIndex = 3;
+		if(minorTickLengthInAmountOfSeconds <= 4) {
+			defaultIndex = minorTickLengthInAmountOfSeconds -1;
 		}
-		if (minorTickLengthInAmountOfSeconds <= 3) {
-			defaultIndex = 2;
-		}
-		if (minorTickLengthInAmountOfSeconds <= 2) {
-			defaultIndex = 1;
-		}
-		if (minorTickLengthInAmountOfSeconds <= 1) {
-			defaultIndex = 0;
-		}
+
 
 		long sampleLength = calculateSampleLengthWith(defaultIndex);
 		setSampleLengthToUse(sampleLength);
@@ -521,7 +510,7 @@ public class ResultChartLogic extends ChartLogic {
 			String dataSetName = dataSet.getName();
 			Paint seriesColor = getSeriesColor(dataSetName);
 			XYSeriesExtension serie = new XYDottedSeriesExtension(dataSetName, false,
-					allowDuplicateXValues_forDottedSeries, seriesColor);
+					ALLOW_DUPLICATE_X_VALUES_FOR_POINT_SERIES, seriesColor);
 			result.put(dataSetName, serie);
 		}
 		return result;

@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,11 +68,13 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 	@BeforeMethod
 	public void setup() {
+		Map<String, Color> existingColors = new HashMap<String, Color>();
+		
 		collection = new XYSeriesCollectionExtention();
-		renderer = new LoadcoderRenderer(true, false, collection);
+		renderer = new LoadcoderRenderer(true, false, collection, existingColors);
 		map = new HashMap<String, Boolean>();
 		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
-		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), false);
+		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), false, existingColors);
 	}
 
 	@Test

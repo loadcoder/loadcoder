@@ -91,8 +91,8 @@ public abstract class ChartLogic {
 
 	public YCalculator yCalculatorToUse = avg;
 
-	private List<Color> existingColors = new ArrayList<Color>();
-
+	private final Map<String, Color> existingColors;
+	
 	public final static int TARGET_AMOUNT_OF_POINTS_DEFAULT = 20_000;
 
 	protected static final long SAMPLELENGTH_DEFAULT = 1000;
@@ -135,7 +135,7 @@ public abstract class ChartLogic {
 		return seriesCollection;
 	}
 
-	public List<Color> getExistingColors() {
+	public Map<String, Color>  getExistingColors() {
 		return existingColors;
 	}
 
@@ -207,21 +207,25 @@ public abstract class ChartLogic {
 
 	public ChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
 			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
-			boolean locked) {
+			boolean locked, Map<String, Color> existingColors) {
 		this.locked = locked;
 		this.seriesCollection = seriesCollection;
 		this.plot = plot;
 		this.renderer = renderer;
 		this.seriesVisible = seriesVisible;
 		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
-
+		this.existingColors = existingColors;
+		for(CommonSeries s : commonsToBeUsed) {
+			existingColors.put(s.getName(), s.getColor());
+		}
+		
 		yCalculators.add(avg);
 		yCalculators.add(max);
 
 		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
 			blacklistColors.add(blackListed);
 		});
-		populateColorArray();
+//		populateColorArray();
 	}
 
 	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart,
@@ -277,7 +281,11 @@ public abstract class ChartLogic {
 		seriesCommonMap.clear();
 
 		Arrays.stream(commonsToBeUsed).forEach((common) -> {
-			XYSeriesExtension xySeries = new XYSeriesExtension(common.getName(), true, false, common.getColor());
+			Color c = existingColors.get(common.getName());
+			if(c == null) {
+				c = common.getColor();
+			}
+			XYSeriesExtension xySeries = new XYSeriesExtension(common.getName(), true, false, c);
 			seriesCommonMap.put(common.getName(), xySeries);
 			commonSeriesCalculators.add(new CommonSeriesCalculator(xySeries, common.getCommonYCalculator()));
 			commonSeries.add(xySeries);
@@ -291,8 +299,10 @@ public abstract class ChartLogic {
 		LegendItem legend = legends.get(serie.getKey());
 		if (legend == null) {
 			legend = plot.getRenderer().getLegendItem(0, indexOfSeries);
-
-			legend.setFillPaint(serie.getColorInTheChart());
+			Color c = existingColors.get(serie.getKey());
+//			legend.setFillPaint(serie.getColorInTheChart());
+			legend.setFillPaint(c);
+			
 			legend.setShapeVisible(true);
 			legend.setLineVisible(false);
 
@@ -497,28 +507,30 @@ public abstract class ChartLogic {
 		return null;
 	}
 
-	void populateColorArray() {
-		if (customizedColors != null) {
-			Iterator<Entry<String, Color>> i = customizedColors.entrySet().iterator();
-			while (i.hasNext()) {
-				Entry<String, Color> e = i.next();
-				existingColors.add(e.getValue());
-			}
-		}
-		for (CommonSeries commonSerie : commonsToBeUsed) {
-			Color c = commonSerie.getColor();
-			existingColors.add(c);
-		}
-	}
+//	void populateColorArray() {
+//		if (customizedColors != null) {
+//			Iterator<Entry<String, Color>> i = customizedColors.entrySet().iterator();
+//			while (i.hasNext()) {
+//				Entry<String, Color> e = i.next();
+//				existingColors.add(e.getValue());
+//			}
+//		}
+//		for (CommonSeries commonSerie : commonsToBeUsed) {
+//			Color c = commonSerie.getColor();
+//			existingColors.add(c);
+//		}
+//	}
 
 	public synchronized Color getNewColor(String seriesKey) {
 
-		if (customizedColors != null) {
-			Color color = customizedColors.get(seriesKey);
-			return color;
-		}
-		Color newColor = ColorUtils.getNewContrastfulColor(existingColors, blacklistColors);
-		existingColors.add(newColor);
+//		if (customizedColors != null) {
+//			Color color = customizedColors.get(seriesKey);
+//			return color;
+//		}
+		Set<Color> set = new HashSet<Color>(existingColors.values());
+		Color newColor = ColorUtils.getNewContrastfulColor(set, blacklistColors);
+		existingColors.put(seriesKey, newColor);
+//		existingColors.add(newColor);
 		return newColor;
 	}
 

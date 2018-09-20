@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ public class ResultChartLogicTest extends TestNGBase {
 
 	Map<String, Boolean> map;
 
+	Map<String, Color> existingColors;
+	
 	XYPlotExtension plot;
 
 	RuntimeChartLogic logic;
@@ -55,7 +58,8 @@ public class ResultChartLogicTest extends TestNGBase {
 	@BeforeMethod
 	public void setup() {
 		collection = new XYSeriesCollectionExtention();
-		renderer = new LoadcoderRenderer(true, false, collection);
+		existingColors = new HashMap<String, Color>();
+		renderer = new LoadcoderRenderer(true, false, collection, existingColors);
 		map = new HashMap<String, Boolean>();
 		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
 	}
@@ -100,9 +104,10 @@ public class ResultChartLogicTest extends TestNGBase {
 	@Test
 	public void testPoints() {
 		int amountOfTransaction = 10;
+		
 		Result r = new ResultExtention(ResultChartTestUtility.getTranses(amountOfTransaction));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
-				null, false, r);
+				null, false, existingColors, r);
 		Map<String, XYSeriesExtension> dottedSerieses = logic.getDottedSeries();
 
 		Assert.assertEquals(dottedSerieses.size(), 1);
@@ -114,7 +119,7 @@ public class ResultChartLogicTest extends TestNGBase {
 	public void testCommons() {
 		Result r = new ResultExtention(ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 10, 10 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
-				null, false, r);
+				null, false, existingColors, r);
 		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
 
 		// Check that the sampleLength is what it should be, since the assertions below
@@ -144,7 +149,7 @@ public class ResultChartLogicTest extends TestNGBase {
 		Result r = new ResultExtention(
 				ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 3000, 10 }, { 6000, 13 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, false, CommonSeries.values(),
-				null, false, r);
+				null, false, existingColors, r);
 		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
 
 		// Check that the sampleLength is what it should be, since the assertions below
