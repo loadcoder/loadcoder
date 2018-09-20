@@ -27,23 +27,4 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class TransactionExecutionResultTest extends TestNGBase{
 
-	/**
-	 * TODO: not sure what was the purpose of this test..
-	 */
-	@Test
-	public void testHashEfficiency(){
-		
-		long ts1 = System.currentTimeMillis();
-		HashSet<TransactionExecutionResult> l= new HashSet<TransactionExecutionResult>();
-
-		TransactionExecutionResult fifth =null;
-		for(int i=0; i<10;i++){
-			TransactionExecutionResult transactionExecutionResult = new TransactionExecutionResult("foo", ts1 +i*1000 , 50, true, "");
-			if(i==5)
-				fifth = transactionExecutionResult;
-			l.add(transactionExecutionResult);
-		}
-		
-		l.contains(fifth);
-	}
 }

@@ -19,6 +19,8 @@
 package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.logic.ResultChartTestUtility.getTranses;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -232,19 +234,28 @@ public class ResultChartTest extends TestNGBase {
 
 	@Test
 	public void amountOfSeriesesFactorTest() {
+		
 		double factor = ResultChartLogic.amountOfSeriesesFactor(1);
 		log.info("factor: {}", factor);
-		factor = ResultChartLogic.amountOfSeriesesFactor(5);
+		double factor2 = ResultChartLogic.amountOfSeriesesFactor(5);
 		log.info("factor: {}", factor);
+		
+		double diff1 = (factor2 - factor) / (5-1);
+		log.info("factor/series: {}", diff1);
+		
 		factor = ResultChartLogic.amountOfSeriesesFactor(10);
 		log.info("factor: {}", factor);
 		factor = ResultChartLogic.amountOfSeriesesFactor(30);
 		log.info("factor: {}", factor);
 		factor = ResultChartLogic.amountOfSeriesesFactor(50);
 		log.info("factor: {}", factor);
-		factor = ResultChartLogic.amountOfSeriesesFactor(150);
+		factor2 = ResultChartLogic.amountOfSeriesesFactor(150);
 		log.info("factor: {}", factor);
-
+		
+		double diff2 = (factor2 - factor) / (150 - 50);
+		log.info("factor/series: {}", diff2);
+		assertTrue(diff1 > diff2);
+		
 	}
 
 	@Test

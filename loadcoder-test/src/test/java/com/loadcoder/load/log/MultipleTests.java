@@ -18,17 +18,47 @@
  ******************************************************************************/
 package com.loadcoder.load.log;
 
+import static org.testng.Assert.assertEquals;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.statics.LogbackLogging;
 
+/**
+ * test that it is possible to run two test in the same execution. logging and result should be verified
+ */
 public class MultipleTests extends TestNGBase{
 
-	/**
-	 * TODO. test that it is possible to run two test in the same execution. logging and result should be verified
-	 */
-	@Test(enabled=false)
-	public void testTwo(){
+	Logger log = LoggerFactory.getLogger(com.loadcoder.result.Logs.class);
+	
+	@Test
+	public void testOne(Method method){
+		File dir = LogbackLogging.getNewLogDir("target", method.getName() );
+		File resultFile = new File(dir, "result.log");
+		LogbackLogging.setResultDestination(dir);
+		log.info(method.getName());
+		List<String> lines = TestUtility.readFile(resultFile);
+		assertEquals(lines.size(), 1);
+		assertEquals(lines.get(0), "testOne");
+	}
+	
+	@Test
+	public void testTwo(Method method){
+		File dir = LogbackLogging.getNewLogDir("target", method.getName() );
+		File resultFile = new File(dir, "result.log");
+		LogbackLogging.setResultDestination(dir);
+		log.info(method.getName());
+		List<String> lines = TestUtility.readFile(resultFile);
+		assertEquals(lines.size(), 1);
+		assertEquals(lines.get(0), "testTwo");
 	}
 	
 }

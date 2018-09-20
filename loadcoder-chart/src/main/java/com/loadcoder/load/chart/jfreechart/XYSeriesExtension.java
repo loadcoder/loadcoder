@@ -41,7 +41,7 @@ public class XYSeriesExtension extends XYSeries {
 	
 	
 	private boolean visible = true;
-	Paint colorInTheChart;
+	private Paint colorInTheChart;
 	
 	private final int hash;
 	

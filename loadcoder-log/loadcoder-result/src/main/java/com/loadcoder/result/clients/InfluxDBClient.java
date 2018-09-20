@@ -36,7 +36,6 @@ public class InfluxDBClient extends HttpClient{
 	private final String WRITE_URL;
 	private final String QUERY_URL;
 	 
-	private String executionId = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis());
 	public InfluxDBClient(String host, int port, boolean https, String db) {
 		String protocol = protocolAsString(https);
 		WRITE_URL = String.format(WRITE_URL_TEMPLATE, protocol, host, port);
@@ -48,37 +47,55 @@ public class InfluxDBClient extends HttpClient{
 		return dbName;
 	}
 
-	public void newExecution() {
-		this.executionId = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis());
-	}
-
 	protected int createDB(String dbName) {
 		String body = String.format("q=CREATE DATABASE %s", dbName);
 		return sendPost(body, QUERY_URL, Arrays.asList());
 	}
 
-	public int writeTransactions(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
-		long start = System.currentTimeMillis();
-		String body = convertTransactionsToWriteBody(listOfListOfList, executionId);
-		int responseCode = writeEntries(body);
-		return responseCode;
-	}
-	
-	public String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
-		String entireBody = "";
-		
-		for (String key : listOfListOfList.keySet()) {
-			List<TransactionExecutionResult> list = listOfListOfList.get(key);
-			for (TransactionExecutionResult t : list) {
-				String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getRt(), t.getTs());
-				entireBody = entireBody + urlParameters + "\n";
-			}
-		}
-		return entireBody;
-	}
-	
 	private int writeEntries(String body) {
 		return sendPost(body, WRITE_URL + dbName, Arrays.asList());
+	}
+	
+	public InfluxDBTestExecution createTestExecution() {
+		return new InfluxDBTestExecution(this);
+	}
+
+	public InfluxDBTestExecution createTestExecution(String executionId) {
+		return new InfluxDBTestExecution(executionId, this);
+	}
+	
+	public static class InfluxDBTestExecution{
+		final String executionId;
+		final InfluxDBClient client;
+		
+		private InfluxDBTestExecution(String executionId, InfluxDBClient client){
+			this.client = client;
+			this.executionId = executionId;
+		}
+		
+		private InfluxDBTestExecution(InfluxDBClient client){
+			this.client = client;
+			this.executionId = null;
+		}
+		
+		public int writeTransactions(Map<String, List<TransactionExecutionResult>> listOfListOfList) {
+			String body = convertTransactionsToWriteBody(listOfListOfList, executionId);
+			int responseCode = client.writeEntries(body);
+			return responseCode;
+		}
+		
+		protected String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
+			String entireBody = "";
+			
+			for (String key : listOfListOfList.keySet()) {
+				List<TransactionExecutionResult> list = listOfListOfList.get(key);
+				for (TransactionExecutionResult t : list) {
+					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getRt(), t.getTs());
+					entireBody = entireBody + urlParameters + "\n";
+				}
+			}
+			return entireBody;
+		}
 	}
 
 }

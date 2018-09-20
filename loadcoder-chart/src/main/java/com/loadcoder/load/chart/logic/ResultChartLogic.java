@@ -162,8 +162,7 @@ public class ResultChartLogic extends ChartLogic {
 			defaultIndex = 0;
 		}
 
-		long sampleLength = calculateSampleLengthWith(defaultIndex, minorTickLengthInAmountOfSeconds,
-				getsliderCompensation());
+		long sampleLength = calculateSampleLengthWith(defaultIndex);
 		setSampleLengthToUse(sampleLength);
 
 		doSafeUpdate();
@@ -248,7 +247,7 @@ public class ResultChartLogic extends ChartLogic {
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 	}
 
-	public long calculateSampleLengthWith(int indexOfSlider, int minorTickLength, int sliderCompensation) {
+	public long calculateSampleLengthWith(int indexOfSlider) {
 		long newSampleLength = 1000;
 		if (indexOfSlider != 0) {
 			long valueOfSlider = indexOfSlider * minorTickLength + sliderCompensation;
@@ -417,7 +416,7 @@ public class ResultChartLogic extends ChartLogic {
 		return percentile;
 	}
 
-	public static double amountOfSeriesesFactor(int amountOfThreads) {
+	protected static double amountOfSeriesesFactor(int amountOfThreads) {
 		double factor = 1 + Math.log(1 + amountOfThreads * 0.1);
 		return factor;
 	}
@@ -498,7 +497,6 @@ public class ResultChartLogic extends ChartLogic {
 	public void clearChart() {
 		commonSeriesCalculators.clear();
 		seriesCollection.removeAllSeries();
-		plot.getLegends();
 		ranges.clear();
 		earliestX = null;
 	}

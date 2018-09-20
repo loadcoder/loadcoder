@@ -44,10 +44,10 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "nullPointMode": "connected",
       "percentage": false,
-      "pointradius": 5,
+      "pointradius": 1,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -98,7 +98,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": ${refresh},
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],

@@ -38,8 +38,6 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	private final RuntimeResultUser runtimeDataUser;
 
-	private final Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-
 	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
@@ -64,7 +62,7 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 				}
 			}
 
-			swapOutDataAndCallUser(map);
+			swapOutDataAndCallUser();
 
 			if (!oneLoadStillNotTerminated) {
 				break;
@@ -72,7 +70,11 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 		}
 	}
 
-	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
+//	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
+	protected void swapOutDataAndCallUser() {
+		
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+		
 		List<TransactionExecutionResult> switchDestination;
 
 		/*
@@ -94,7 +96,6 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 			List<TransactionExecutionResult> listToAddTo = map.get(name);
 			if (listToAddTo == null) {
 				listToAddTo = new ArrayList<TransactionExecutionResult>();
-				// runtimeResultList.add(listToAddTo);
 				map.put(name, listToAddTo);
 			}
 			listToAddTo.add(transactionExecutionResult);

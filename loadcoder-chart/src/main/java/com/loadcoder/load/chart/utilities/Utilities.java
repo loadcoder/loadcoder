@@ -28,12 +28,17 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class Utilities {
 
-	public static long[] findMinMaxTimestamp(Map<String, List<TransactionExecutionResult>> resultLists, List<String> keys) {
+	public static long[] findMinMaxTimestamp(Map<String, List<TransactionExecutionResult>> resultLists,
+			List<String> keys) {
 		long min = Long.MAX_VALUE;
 		long max = Long.MIN_VALUE;
 
 		for (String key : keys) {
 			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			if (resultList == null) {
+				continue;
+			}
+
 			for (TransactionExecutionResult result : resultList) {
 				if (result.getTs() < min) {
 					min = result.getTs();
@@ -48,10 +53,13 @@ public class Utilities {
 	public static List<DataSet> convert(Map<String, List<TransactionExecutionResult>> resultLists, long earliestTs,
 			boolean convertToRelativeTime, List<String> keys) {
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		if(resultLists.isEmpty())
+		if (resultLists.isEmpty())
 			return dataSets;
 		for (String key : keys) {
 			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			if(resultList == null) {
+				continue;
+			}
 			DataSet dataSet = new DataSet(key, new ArrayList<Point>());
 			dataSets.add(dataSet);
 			for (TransactionExecutionResult result : resultList) {

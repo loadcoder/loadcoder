@@ -26,8 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.result.Summary.SummaryWithResultActions.Table.SummaryWithTable;
@@ -37,7 +36,6 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryTest extends TestNGBase {
 
-	@Test
 	public Map<String, List<TransactionExecutionResult>> getResultList() {
 
 		Map<String, List<TransactionExecutionResult>> resultLists = new HashMap<String, List<TransactionExecutionResult>>();
@@ -81,17 +79,20 @@ public class SummaryTest extends TestNGBase {
 	}
 
 	@Test
-	public void testLogSummaryRow() {
+	public void seriesSummaryTest() {
 		Result result = new ResultExtention(getResultList());
 		Summary summary = new Summary(result);
-		summary.log(a -> "Foo").log(a -> "Bar").print();
+		String summaryString = summary.log(a -> "Foo").log(a -> "Bar").getAsString();
+		assertTrue(summaryString.contains("Foo"));
+		assertTrue(summaryString.contains("Bar"));
+
 	}
 
 	@Test
-	public void test(Method m) {
+	public void commonSummaryTest(Method m) {
 		Result result = new ResultExtention(getResultList());
 		SummaryWithTable summaryWithTable = fullSummary(result, m);
-		Assert.assertTrue(summaryWithTable.getAsString(),
+		assertTrue(
 				summaryWithTable.getAsString().contains("Throughput: 2.0TPS"));
 	}
 }

@@ -43,8 +43,9 @@ public class DetailsSettingsTest {
 		
 		SteppingSlider s;
 		ResultChartLogic chartLogic = Mockito.mock(ResultChartLogic.class);
-		s = DetailsSettings.createSlider(chartLogic, sampleLengthToUse, (int)tickSize, defaultIndex);
-
+		
+		DetailsSettings settings = new DetailsSettings(chartLogic);
+		s = settings.createSlider(chartLogic, sampleLengthToUse, (int)tickSize, defaultIndex);
 		
 		printArray(s.getValues());
 		Assert.assertTrue(Arrays.asList(s.getValues()).contains((int)(sampleLengthToUse / 1000)));

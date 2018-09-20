@@ -282,6 +282,7 @@ public class ChartFrame extends ApplicationFrame {
 
 		synchronized (plot) {
 
+			//if clicked in the graph area
 			if (clickedObject instanceof PlotEntity) {
 				chart.setNotify(false);
 				if (button == 1) {
@@ -290,7 +291,9 @@ public class ChartFrame extends ApplicationFrame {
 				}
 				chart.setNotify(true);
 				serieses.fireChange();
-			} else if (clickedObject instanceof LegendItemEntity) {
+			}
+			//else is clicked on a legend
+			else if (clickedObject instanceof LegendItemEntity) {
 				chart.setNotify(false);
 				LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
 				Comparable pushedLegend = legendItemEntity.getSeriesKey();

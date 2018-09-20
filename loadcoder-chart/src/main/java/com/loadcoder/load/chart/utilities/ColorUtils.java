@@ -30,10 +30,6 @@ public class ColorUtils {
 
 	public static final List<Color> defaultBlacklistColors = Arrays.asList(Color.YELLOW, Color.WHITE);
 	
-	public static Color getNewContrastfulColor(List<Color> alreadyExistingColors){
-		return getNewContrastfulColor(alreadyExistingColors, new ArrayList<Color>());
-	}
-	
 	public static Color getNewContrastfulColor(List<Color> alreadyExistingColors, List<Color> blacklistedColors){
 		
 		List<Color> colorsThatShouldBeAsFarAwayAsTheNewColorAsPossible = new ArrayList<>();

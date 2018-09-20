@@ -53,8 +53,9 @@ public class GrafanaClientTest {
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
 		GrafanaClient cli = new GrafanaClient("localhost", 3000, false, authorizationValue);
-		int responseCode = cli.createNewDashboardFromResult(r, method.getName());
+		int responseCode = cli.createNewDashboardFromResult(method.getName(), r);
 		assertEquals(responseCode, 200);
+		responseCode = cli.createNewDashboard(method.getName(), Arrays.asList("foo"));
 	}
 
 	@Test

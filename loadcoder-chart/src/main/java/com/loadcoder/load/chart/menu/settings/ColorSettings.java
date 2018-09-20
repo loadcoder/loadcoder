@@ -24,6 +24,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -187,14 +188,12 @@ public class ColorSettings extends Settings {
 	@Override
 	JPanel getWindow() {
 		JPanel colorChooserPanel = new JPanel(new BorderLayout());
-
 		JPanel jp1 = new JPanel(new GridBagLayout());
 		colorChooserPanel.add(jp1, BorderLayout.WEST);
 
 		addSeriesOptions(list, jp1);
 		addColorChooser(colorChooserPanel);
 
-		// TODO Auto-generated method stub
 		return colorChooserPanel;
 	}
 }

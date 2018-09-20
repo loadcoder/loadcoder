@@ -286,7 +286,7 @@ public abstract class ChartLogic {
 	}
 
 	public void addSeries(XYSeriesExtension serie) {
-		seriesCollection.addSeries(serie); // TODO. bug this fires render
+		seriesCollection.addSeries(serie);
 		int indexOfSeries = seriesCollection.indexOf(serie);
 		LegendItem legend = legends.get(serie.getKey());
 		if (legend == null) {

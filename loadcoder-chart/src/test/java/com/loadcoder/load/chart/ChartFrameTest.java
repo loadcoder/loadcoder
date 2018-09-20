@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.chart;
 
+import static org.testng.Assert.assertTrue;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +45,24 @@ public class ChartFrameTest {
 		List<XYSeries> list = new ArrayList<XYSeries>();
 		XYSeriesExtension xySeriesExtension = new XYSeriesExtension("foo", true, false, Color.BLACK);
 		xySeriesExtension.setLegend(new LegendItem("foo"));
+		XYSeriesExtension xySeriesExtension2 = new XYSeriesExtension("bar", true, false, Color.WHITE);
+		xySeriesExtension2.setLegend(new LegendItem("bar"));
+		
 		list.add(xySeriesExtension);
+		list.add(xySeriesExtension2);
+		
  		Mockito.when(xySeriesCollectionExtention.getSeries()).thenReturn(list);
 		frame.handleClick(1, e, xySeriesCollectionExtention);
 		frame.handleClick(2, e, xySeriesCollectionExtention);
 		LegendItemEntity e2 = Mockito.mock(LegendItemEntity.class);
 		Mockito.when(e2.getSeriesKey()).thenReturn("foo");
 		frame.handleClick(1, e2, xySeriesCollectionExtention);
+		assertTrue(! xySeriesExtension.isVisible()); //not visible when left clicking on series legend
+		assertTrue(xySeriesExtension2.isVisible()); //visible default
+
 		frame.handleClick(2, e2, xySeriesCollectionExtention);
+		assertTrue( xySeriesExtension.isVisible()); //visible when right clicking on series legend
+		assertTrue(! xySeriesExtension2.isVisible()); //not visible hence right click of another series
+		
 	}
 }

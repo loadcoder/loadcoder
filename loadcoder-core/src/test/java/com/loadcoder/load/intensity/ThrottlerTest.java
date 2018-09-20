@@ -29,15 +29,29 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.statics.ThrottleMode;
 
 import static com.loadcoder.statics.Time.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 public class ThrottlerTest extends TestNGBase{
 	
 	@Test
-	public void testRateLimiter2(){
+	public void sharedPerThreadModeTest(){
 
 		List<Thread> threads = new ArrayList<Thread>();
-		threads.add(Thread.currentThread());
-		new Throttler(new Intensity(1, PER_SECOND, ThrottleMode.SHARED), threads);
+		Thread t1 = Thread.currentThread();
+		threads.add(t1);
+		Thread t2 = new Thread();
+		threads.add(t2);
+		
+		Throttler t = new Throttler(new Intensity(1, PER_SECOND, ThrottleMode.SHARED), threads);
+		RateLimiter r = t.getRateLimiter(t1);	
+		RateLimiter r2 = t.getRateLimiter(t2);	
+		assertEquals(r, r2);
+		t = new Throttler(new Intensity(1, PER_SECOND, ThrottleMode.PER_THREAD), threads);
+		r = t.getRateLimiter(t1);	
+		r2 = t.getRateLimiter(t2);	
+		assertNotEquals(r, r2);
+	
 	}
 	
 	@Test(groups = "timeconsuming")

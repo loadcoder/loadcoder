@@ -113,22 +113,6 @@ public class ChartUtils {
 		}
 	}
 
-	/**
-	 * calculates and returns the amount of points to skip. factorToKeep: 0.1 gives
-	 * 10, which means that 10 points will be skipped when one is added
-	 * 
-	 * @param factorToKeep
-	 *            shall be a value between 0 and 1.
-	 * @return an integer equal to the amount of points to skip in order to have the
-	 *         desired factor of points to keep
-	 */
-	protected static int calculateStepping(double factorToKeep) {
-		double step = 1 / factorToKeep;
-		if (step < 1)
-			step = 1;
-		return (int) step;
-	}
-
 	public static double calculateKeepFactor(int totalAmountOfPoints, int targetItemsInChart) {
 		if (totalAmountOfPoints <= targetItemsInChart) {
 			return 1;

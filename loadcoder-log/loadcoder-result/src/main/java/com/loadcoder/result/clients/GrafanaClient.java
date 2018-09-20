@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +47,8 @@ public class GrafanaClient extends HttpClient {
 	private final String DB_URL_TEMPLATE = "%s://%s:%s/api/dashboards/db";
 	private final String DB_URL;
 
+	private static final long TIMESPAN_MILLIS_PRECREATED_DASHBOARD = 50_000;
+	
 	final String authorizationValue;
 
 	public GrafanaClient(String host, int port, boolean https, String authorizationValue) {
@@ -83,10 +86,18 @@ public class GrafanaClient extends HttpClient {
 		}
 	}
 
-	String getTargets(Set<String> measurementNames) {
+	String getTargets(Set<String> measurementNames, String executionId) {
 
+		String targetTagTemplate = "";
+		if(executionId != null) {
+			targetTagTemplate = getFileAsString("grafana_5.2.4/grafana_target_tag_body_template.json");
+			targetTagTemplate = targetTagTemplate.replace("${executionid}", executionId);
+			
+		}
 		String targetTemplate = getFileAsString("grafana_5.2.4/grafana_target_body_template.json");
-
+		
+		targetTemplate = targetTemplate.replace("${tags}", targetTagTemplate);
+		
 		List<String> targetsList = new ArrayList<String>();
 		for (String name : measurementNames) {
 			for (Type t : types) {
@@ -103,24 +114,57 @@ public class GrafanaClient extends HttpClient {
 		return result;
 	}
 
-	public int createNewDashboardFromResult(Result result, String name) {
-		String startTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getStart(), TIMESPAN_FORMAT);
-		String endTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getEnd(), TIMESPAN_FORMAT);
+	private int createNewDashboardBase(long start, long end, String name, String executionId, Set<String> transactionNamesSet, boolean refresh) {
+
+		long usedEnd = (end - start) < TIMESPAN_MILLIS_PRECREATED_DASHBOARD ? start + TIMESPAN_MILLIS_PRECREATED_DASHBOARD : end; 
+		String startTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(start, TIMESPAN_FORMAT);
+		String endTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(usedEnd, TIMESPAN_FORMAT);
+		
 		log.debug("panel will have timespan: " + startTimespan + " - " + endTimespan);
-		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(result.getStart());
+		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(start);
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template.json");
 
 		fileAsString = fileAsString.replace("${time_from}", startTimespan);
 		fileAsString = fileAsString.replace("${time_to}", endTimespan);
 		fileAsString = fileAsString.replace("${title}", name + "_" + dateTimeLabel);
+		
+		fileAsString = fileAsString.replace("${refresh}", refresh ? "\"5s\"" : "false");
 
-		String targets = getTargets(result.getResultLists().keySet());
+		String targets = getTargets(transactionNamesSet, executionId);
 		fileAsString = fileAsString.replace("${targets}", targets);
 		fileAsString = fileAsString.replace("${requestid}", "" + System.currentTimeMillis());
 
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
 				new Header("Authorization", authorizationValue));
 		return sendPost(fileAsString, DB_URL, headers);
+	}
+	
+	public int createNewDashboard(String name, List<String> transactionNames) {
 
+		Set<String> transactionNamesSet = new HashSet<String>();
+		for(String transactionName : transactionNames) {
+			transactionNamesSet.add(transactionName);
+		}
+		long now = System.currentTimeMillis();
+		return createNewDashboardBase(now, now, name, null, transactionNamesSet, true);
+	}
+	
+	public int createNewDashboard(String name, String executionId, List<String> transactionNames) {
+
+		Set<String> transactionNamesSet = new HashSet<String>();
+		for(String transactionName : transactionNames) {
+			transactionNamesSet.add(transactionName);
+		}
+		long now = System.currentTimeMillis();
+		return createNewDashboardBase(now, now, name, executionId, transactionNamesSet, true);
+	}
+	
+	public int createNewDashboardFromResult(String name, Result result) {
+		long now = System.currentTimeMillis();
+		return createNewDashboardBase(result.getStart(), result.getEnd(), name, null, result.getResultLists().keySet(), false);
+	}
+	
+	public int createNewDashboardFromResult(String name, String executionId, Result result) {
+		return createNewDashboardBase(result.getStart(), result.getEnd(), name, executionId, result.getResultLists().keySet(), false);
 	}
 }

@@ -47,6 +47,8 @@ public class DetailsSettings extends Settings {
 
 	private double keepFactorSelection = -1;
 
+	private long newSampleLengthSelection = -1;
+	
 	JRadioButtonMenuItem points;
 
 	private final ResultChartLogic chartLogic;
@@ -88,14 +90,17 @@ public class DetailsSettings extends Settings {
 	@Override
 	public void apply(ChartSettingsActionsModel chartSettingsActionsModel) {
 
-		if (keepFactorSelection != -1) {
+		if (getKeepFactorSelection() != -1) {
 			ResultChartLogic resultChartLogic = (ResultChartLogic) chartLogic;
 
 			resultChartLogic.setKeepFactorChosen(keepFactorSelection);
 			String keepFactorAsProcentString = keepFactorToProcentString(keepFactorSelection);
 			resultChartLogic.getPointsRadioButton().setText(String.format("Points (%s)", keepFactorAsProcentString));
-			// resultChartLogic.recreateDottedSeries();
 			chartSettingsActionsModel.setRecreatePoints(true);
+		}
+		
+		if(getNewSampleLengthSelection() != -1) {
+			chartLogic.chartSliderAjustment(getNewSampleLengthSelection());
 		}
 	}
 
@@ -107,6 +112,14 @@ public class DetailsSettings extends Settings {
 		this.keepFactorSelection = keepFactorSelection;
 	}
 
+	public long getNewSampleLengthSelection() {
+		return newSampleLengthSelection;
+	}
+
+	public void setNewSampleLengthSelection(long newSampleLengthSelection) {
+		this.newSampleLengthSelection = newSampleLengthSelection;
+	}	
+	
 	JPanel getWindow() {
 
 		labelTable.put(0, new JLabel("" + (doubles[0] * 100) + "%"));
@@ -188,7 +201,7 @@ public class DetailsSettings extends Settings {
 		return detailsLeftArea;
 	}
 
-	static protected SteppingSlider createSlider(ResultChartLogic chartLogic, long initialSampleLength, int minorTickPacing, int defaultIndex) {
+	protected SteppingSlider createSlider(ResultChartLogic chartLogic, long initialSampleLength, int minorTickPacing, int defaultIndex) {
 
 		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
 		labelTable.put(1, new JLabel("1"));
@@ -216,8 +229,8 @@ public class DetailsSettings extends Settings {
 			if (!source.getValueIsAdjusting()) {
 				int indexOfSlider = (int) source.getValue();
 
-				long newSampleLength = chartLogic.calculateSampleLengthWith(indexOfSlider, chartLogic.getMinorTickLength(), chartLogic.getsliderCompensation());
-				chartLogic.chartSliderAjustment(newSampleLength);
+				long newSampleLength = chartLogic.calculateSampleLengthWith(indexOfSlider);
+				setNewSampleLengthSelection(newSampleLength);
 			}
 		});
 		return slider;

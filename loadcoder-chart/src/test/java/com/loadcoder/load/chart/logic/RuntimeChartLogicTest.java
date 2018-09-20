@@ -176,6 +176,26 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		assertEquals(a, b); // assert concaternation
 		assertEquals(10, b.getY());
 	}
+	
+	/**
+	 * Tests that the runtime functionality works even though all transaction types are'nt represented
+	 * in all batches of incoming data. Test will fail if exception is thrown
+	 */
+	@Test
+	public void testDifferntAmountsAndTypesOfTransactions() {
+		long startTs = System.currentTimeMillis();
+		String transactionKey = "foo";
+
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
+		logic.update(listOfListOfList, new HashSet<Long>());
+
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey +"2", startTs, 10, true, null));
+		logic.update(listOfListOfList, new HashSet<Long>());
+
+	}
+	
 
 	@Test
 	public void testRuntimeChartUnorderedData() {

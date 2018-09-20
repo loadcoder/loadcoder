@@ -29,146 +29,145 @@ import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.statics.TimeUnit;
 
-public abstract class LoadScenario{
-	
+public abstract class LoadScenario {
+
 	private final List<Thread> threads = new ArrayList<Thread>();
 
 	public abstract void loadScenario();
-	
-	private Load l;	
-	
+
+	private Load l;
+
 	Execution e;
-	
-	protected void setLoad(Load l){
+
+	protected void setLoad(Load l) {
 		this.l = l;
 	}
-	
-	protected Load getLoad(){
+
+	protected Load getLoad() {
 		return l;
 	}
-	//TODO: why synchronized ? 
-	public synchronized void pre(){
+
+	/**
+	 * synchronized since multiple ThreadRunner potentially could invoke this method
+	 * simultaneously and they probably will be used to update ThreadLocal storages,
+	 * which is not thread safe.
+	 */
+	protected synchronized void pre() {
 		Executable pre = l.getPreExecution();
-		if(pre!= null) {
+		if (pre != null) {
 			pre.execute();
 		}
-	}	
-	//TODO: why synchronized ? 
-	public synchronized void post(){
+	}
+
+	/**
+	 * synchronized since multiple ThreadRunner potentially could invoke this method
+	 * simultaneously and they probably will be used to update ThreadLocal storages,
+	 * which is not thread safe.
+	 */
+	protected synchronized void post() {
 		Executable post = l.getPostExecution();
-		if(post!= null) {
+		if (post != null) {
 			post.execute();
 		}
-	}	
-	
-	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer(){
+	}
+
+	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
 		return l.getExecution().getTransactionExecutionResultBuffer();
 	}
-	
-	public int getAmountOfThreads(){
+
+	public int getAmountOfThreads() {
 		return l.getAmountOfThreads();
 	}
-	
+
 	/**
-	 * @param defaultName 
-	 * is the name of the transaction you are about to state. 
-	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
-	 * @param transaction
-	 * is the transaction, done with implementing functional interface Transaction
+	 * @param defaultName is the name of the transaction you are about to state. The
+	 *                    name of the transaction can be changed after the
+	 *                    transaction is made, in the handleResult method
+	 * @param transaction is the transaction, done with implementing functional
+	 *                    interface Transaction
 	 * @return the builder instance
 	 */
-	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction){
+	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		RateLimiter limiterToBeUsed = null;
-		
-		if(l.getThrottler() != null){
+
+		if (l.getThrottler() != null) {
 			limiterToBeUsed = l.getThrottler().getRateLimiter(Thread.currentThread());
 		}
-		
-		ResultHandlerBuilder<T> resultHandlerBuilder = 
-				new ResultHandlerBuilder<T>(
-						defaultName,
-						transaction,
-						this,
-						limiterToBeUsed);
+
+		ResultHandlerBuilder<T> resultHandlerBuilder = new ResultHandlerBuilder<T>(defaultName, transaction, this,
+				limiterToBeUsed);
 
 		return resultHandlerBuilder;
-	} 
+	}
 
-	
 	/**
-	 * @param defaultName 
-	 * is the name of the transaction you are about to state. 
-	 * The name of the transaction can be changed after the transaction is made, in the handleResult method
-	 * @param transaction
-	 * is the transaction, done with implementing functional interface TransactionVoid
+	 * @param defaultName is the name of the transaction you are about to state. The
+	 *                    name of the transaction can be changed after the
+	 *                    transaction is made, in the handleResult method
+	 * @param transaction is the transaction, done with implementing functional
+	 *                    interface TransactionVoid
 	 * @return the builder instance
 	 */
-	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction){
+	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
 		RateLimiter limiterToBeUsed = null;
-		
-		if(l.getThrottler() != null){
+
+		if (l.getThrottler() != null) {
 			limiterToBeUsed = l.getThrottler().getRateLimiter(Thread.currentThread());
 		}
-		
-		ResultHandlerVoidBuilder resultHandlerBuilder = 
-				new ResultHandlerVoidBuilder(
-						defaultName,
-						transaction,
-						this,
-						limiterToBeUsed);
+
+		ResultHandlerVoidBuilder resultHandlerBuilder = new ResultHandlerVoidBuilder(defaultName, transaction, this,
+				limiterToBeUsed);
 
 		return resultHandlerBuilder;
-	} 
-	
-	public static double getAmountPerSecond(Intensity i){
+	}
+
+	public static double getAmountPerSecond(Intensity i) {
 		return getAmountPerSecond(i.getAmount(), i.getPerTimeUnit());
 	}
 
-	public static long getMillis(long amount, TimeUnit unit){
+	public static long getMillis(long amount, TimeUnit unit) {
 		long secondsForOneUnit = getTimeMultiplyer(unit);
 		long amountInMillis = amount * secondsForOneUnit * 1000;
 		return amountInMillis;
 	}
 
 	/**
-	 * 1, minute:
-	 * divider = 60
-	 * amountPerSecond = 1 /60
+	 * 1, minute: divider = 60 amountPerSecond = 1 /60
 	 */
-	public static double getAmountPerSecond(long amount, TimeUnit unit){
+	public static double getAmountPerSecond(long amount, TimeUnit unit) {
 		long divider = getTimeMultiplyer(unit);
-		double amountPerSecond = ((double)amount) / divider;
-		return amountPerSecond; 
+		double amountPerSecond = ((double) amount) / divider;
+		return amountPerSecond;
 	}
-	
-	private static long getTimeMultiplyer(TimeUnit unit){
+
+	private static long getTimeMultiplyer(TimeUnit unit) {
 		long multiplyer = 0;
-		if(unit == TimeUnit.SECOND){
+		if (unit == TimeUnit.SECOND) {
 			multiplyer = 1;
-		}else if(unit == TimeUnit.MINUTE){
+		} else if (unit == TimeUnit.MINUTE) {
 			multiplyer = 60;
-		}else if(unit == TimeUnit.HOUR){
+		} else if (unit == TimeUnit.HOUR) {
 			multiplyer = 60 * 60;
 		}
 		return multiplyer;
 	}
-	
-	public interface ResultHandler <R>{
+
+	public interface ResultHandler<R> {
 		public void handle(ResultModel<R> resultModel);
 	}
 
 	public interface ResultHandlerVoid {
 		public void handle(ResultModelVoid resultModel);
 	}
-	
+
 	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
 		long rampUpSleepTime = 0;
 		if (amountOfThreads > 1)
 			rampUpSleepTime = rampup / (amountOfThreads - 1);
 		return rampUpSleepTime;
 	}
-	
-	public List<Thread> getThreads(){
+
+	public List<Thread> getThreads() {
 		return this.threads;
 	}
 

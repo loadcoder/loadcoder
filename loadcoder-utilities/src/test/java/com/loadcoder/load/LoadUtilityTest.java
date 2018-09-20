@@ -41,7 +41,6 @@ public class LoadUtilityTest {
 		String result = LoadUtility.rightpad("foo", size);
 		log.info(String.format("<%s>", result));
 		Assert.assertEquals(result.length(), size);
-		new LoadUtility();
 	}
 	
 }

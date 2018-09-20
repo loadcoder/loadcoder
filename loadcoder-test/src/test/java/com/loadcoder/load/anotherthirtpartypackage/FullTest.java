@@ -52,6 +52,7 @@ import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.clients.GrafanaClient;
 import com.loadcoder.result.clients.InfluxDBClient;
+import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.statics.SummaryUtils;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.Time;
@@ -80,16 +81,17 @@ public class FullTest extends TestNGBase {
 		String authenticationValue = "Basic YWRtaW46YWRtaW4=";
 
 		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		InfluxDBTestExecution exe = influxClient.createTestExecution();
 		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authenticationValue);
 		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND))
 				.rampup(6 * SECOND)
 				.throttle(3, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(20).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l)
-				.runtimeResultUser((result) -> influxClient.writeTransactions(result, dir.getName())).build().execute()
+				.runtimeResultUser((result) -> exe.writeTransactions(result)).build().execute()
 				.andWait();
 		Result result = finished.getReportedResultFromResultFile();
-		grafanaClient.createNewDashboardFromResult(result, method.getName());
+		grafanaClient.createNewDashboardFromResult(method.getName(), result);
 	}
 
 	@Test(groups = "manual")
@@ -436,7 +438,7 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(60 * SECOND)).amountOfThreads(10).rampup(30 * SECOND).build();
+		Load l = new LoadBuilder(s).stopDecision(duration(20 * SECOND)).amountOfThreads(10).rampup(10 * SECOND).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(runtimeChart).build().execute()
 				.andWait();

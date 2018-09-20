@@ -395,7 +395,6 @@ public class RuntimeChartLogic extends ChartLogic {
 
 	@Override
 	protected void doUpdate() {
-		// TODO Auto-generated method stub
 		performUpdate();
 	}
 

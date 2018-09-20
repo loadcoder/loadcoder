@@ -214,7 +214,6 @@ public class ApplicationFrameTest extends ApplicationFrame{
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				// TODO Auto-generated method stub
 				scrolling(e);
 				plot.panDomainAxes(30, null, null);
 			}

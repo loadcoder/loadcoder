@@ -29,18 +29,20 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.InfluxDBClient;
+import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 
 public class InfluxDBClientTest {
 
 	@Test(groups = "manual")
 	public void createEntry() {
 		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		InfluxDBTestExecution exe = cli.createTestExecution("foo" +System.currentTimeMillis());
 		int responseCode = -1;
 		Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
 		transactions.put("hej",
 				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
 
-		responseCode = cli.writeTransactions(transactions, "hello");
+		responseCode = exe.writeTransactions(transactions);
 		assertEquals(responseCode, 204);
 	}
 }
