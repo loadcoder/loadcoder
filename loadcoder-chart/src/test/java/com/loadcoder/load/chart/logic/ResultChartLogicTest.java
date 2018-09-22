@@ -120,14 +120,14 @@ public class ResultChartLogicTest extends TestNGBase {
 		Result r = new ResultExtention(ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 10, 10 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
 				null, false, existingColors, r);
-		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
-
+//		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
+		Map<String, XYSeriesExtension> commonSerieses = logic.getCommonSeriesMap();
 		// Check that the sampleLength is what it should be, since the assertions below
 		// is dependant of this
 		long sampleLengthMillis = logic.getSampleLengthToUse();
 		Assert.assertEquals(sampleLengthMillis, 1000);
 
-		for (XYSeriesExtension commonSeries : commonSerieses) {
+		for (XYSeriesExtension commonSeries : commonSerieses.values()) {
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 				List<XYDataItem> items = commonSeries.getItems();
 
@@ -150,14 +150,14 @@ public class ResultChartLogicTest extends TestNGBase {
 				ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 3000, 10 }, { 6000, 13 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, false, CommonSeries.values(),
 				null, false, existingColors, r);
-		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
+		Map<String, XYSeriesExtension> commonSerieses = logic.getCommonSeriesMap();
 
 		// Check that the sampleLength is what it should be, since the assertions below
 		// is dependant of this
 		long sampleLengthMillis = logic.getSampleLengthToUse();
 		Assert.assertEquals(sampleLengthMillis, 1000);
 
-		for (XYSeriesExtension commonSeries : commonSerieses) {
+		for (XYSeriesExtension commonSeries : commonSerieses.values()) {
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 				List<XYDataItem> items = commonSeries.getItems();
 

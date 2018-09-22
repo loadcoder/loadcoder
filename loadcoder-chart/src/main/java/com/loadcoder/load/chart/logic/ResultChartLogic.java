@@ -120,7 +120,8 @@ public class ResultChartLogic extends ChartLogic {
 
 	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
 			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, boolean defaultDottedMode,
-			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked, Map<String, Color> existingColors, Result... results) {
+			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked,
+			Map<String, Color> existingColors, Result... results) {
 		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
 
 		this.dottedMode = defaultDottedMode;
@@ -146,10 +147,9 @@ public class ResultChartLogic extends ChartLogic {
 
 		defaultIndex = 4;
 		int minorTickLengthInAmountOfSeconds = getMinorTickLength();
-		if(minorTickLengthInAmountOfSeconds <= 4) {
-			defaultIndex = minorTickLengthInAmountOfSeconds -1;
+		if (minorTickLengthInAmountOfSeconds <= 4) {
+			defaultIndex = minorTickLengthInAmountOfSeconds - 1;
 		}
-
 
 		long sampleLength = calculateSampleLengthWith(defaultIndex);
 		setSampleLengthToUse(sampleLength);
@@ -197,7 +197,7 @@ public class ResultChartLogic extends ChartLogic {
 
 		adjustVisibility(seriesMap);
 
-		for (XYSeriesExtension commonSerie : getCommonSeries()) {
+		for (XYSeriesExtension commonSerie : getCommonSeriesMap().values()) {
 			adjustVisibilityOfSeries(commonSerie);
 		}
 

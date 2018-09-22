@@ -28,10 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jfree.chart.LegendItem;
@@ -60,8 +58,6 @@ import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public abstract class ChartLogic {
-
-	private List<XYSeriesExtension> commonSeries = new ArrayList<XYSeriesExtension>();
 
 	private Map<String, XYSeriesExtension> seriesCommonMap = new HashMap<String, XYSeriesExtension>();
 
@@ -92,7 +88,7 @@ public abstract class ChartLogic {
 	public YCalculator yCalculatorToUse = avg;
 
 	private final Map<String, Color> existingColors;
-	
+
 	public final static int TARGET_AMOUNT_OF_POINTS_DEFAULT = 20_000;
 
 	protected static final long SAMPLELENGTH_DEFAULT = 1000;
@@ -104,6 +100,14 @@ public abstract class ChartLogic {
 
 	private final List<String> seriesKeys = new ArrayList<String>();
 
+	protected final Map<String, LegendItem> legends = new HashMap<String, LegendItem>();
+
+	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
+
+	protected final List<Range> ranges = new ArrayList<Range>();
+
+	public final List<Color> blacklistColors = new ArrayList<Color>();
+
 	protected List<String> getSeriesKeys() {
 		return seriesKeys;
 	}
@@ -114,13 +118,9 @@ public abstract class ChartLogic {
 		}
 	}
 
-	protected final Map<String, LegendItem> legends = new HashMap<String, LegendItem>();
-
-	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
-
-	protected final List<Range> ranges = new ArrayList<Range>();
-
-	public final List<Color> blacklistColors = new ArrayList<Color>();
+	protected Map<String, XYSeriesExtension> getCommonSeriesMap() {
+		return seriesCommonMap;
+	}
 
 	protected abstract void update(Map<String, List<TransactionExecutionResult>> listOfListOfList,
 			HashSet<Long> hashesGettingUpdated);
@@ -135,7 +135,7 @@ public abstract class ChartLogic {
 		return seriesCollection;
 	}
 
-	public Map<String, Color>  getExistingColors() {
+	public Map<String, Color> getExistingColors() {
 		return existingColors;
 	}
 
@@ -143,9 +143,9 @@ public abstract class ChartLogic {
 		return plot;
 	}
 
-	protected List<XYSeriesExtension> getCommonSeries() {
-		return commonSeries;
-	}
+//	protected List<XYSeriesExtension> getCommonSeries() {
+//		return commonSeries;
+//	}
 
 	protected long getXDiff() {
 		if (earliestX == null)
@@ -215,10 +215,10 @@ public abstract class ChartLogic {
 		this.seriesVisible = seriesVisible;
 		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
 		this.existingColors = existingColors;
-		for(CommonSeries s : commonsToBeUsed) {
+		for (CommonSeries s : commonsToBeUsed) {
 			existingColors.put(s.getName(), s.getColor());
 		}
-		
+
 		yCalculators.add(avg);
 		yCalculators.add(max);
 
@@ -275,20 +275,20 @@ public abstract class ChartLogic {
 
 	public void createCommons() {
 
-		commonSeries = new ArrayList<XYSeriesExtension>();
+//		commonSeries = new ArrayList<XYSeriesExtension>();
 		commonSeriesCalculators.clear();
-		commonSeries.clear();
+//		commonSeries.clear();
 		seriesCommonMap.clear();
 
 		Arrays.stream(commonsToBeUsed).forEach((common) -> {
 			Color c = existingColors.get(common.getName());
-			if(c == null) {
+			if (c == null) {
 				c = common.getColor();
 			}
 			XYSeriesExtension xySeries = new XYSeriesExtension(common.getName(), true, false, c);
 			seriesCommonMap.put(common.getName(), xySeries);
 			commonSeriesCalculators.add(new CommonSeriesCalculator(xySeries, common.getCommonYCalculator()));
-			commonSeries.add(xySeries);
+//			commonSeries.add(xySeries);
 		});
 
 	}
@@ -302,7 +302,7 @@ public abstract class ChartLogic {
 			Color c = existingColors.get(serie.getKey());
 //			legend.setFillPaint(serie.getColorInTheChart());
 			legend.setFillPaint(c);
-			
+
 			legend.setShapeVisible(true);
 			legend.setLineVisible(false);
 
@@ -484,7 +484,7 @@ public abstract class ChartLogic {
 	}
 
 	public void addAllCommonSeriesToTheChart() {
-		for (XYSeriesExtension series : commonSeries) {
+		for (XYSeriesExtension series : getCommonSeriesMap().values()) {
 			addSeries(series);
 			int indexOfSeries = seriesCollection.indexOf(series);
 

@@ -86,10 +86,10 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		logic.update(listOfListOfList, hashesGettingUpdated);
 
-		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
+		Map<String, XYSeriesExtension> commonSerieses = logic.getCommonSeriesMap();
 		assertEquals(2, commonSerieses.size());
 
-		for (XYSeriesExtension commonSeries : commonSerieses) {
+		for (XYSeriesExtension commonSeries : commonSerieses.values()) {
 			assertTrue(commonSeries.isVisible());
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 			}
@@ -136,8 +136,8 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.update(listOfListOfList, new HashSet<Long>());
 
 		// verify that the surroundingTimestamps functionality are working as expected
-		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
-		for (XYSeriesExtension commonSeries : commonSerieses) {
+		Map<String, XYSeriesExtension> commonSerieses = logic.getCommonSeriesMap();
+		for (XYSeriesExtension commonSeries : commonSerieses.values()) {
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 				List<XYDataItem> items = commonSeries.getItems();
 

@@ -146,13 +146,11 @@ public class ResultChart extends Chart {
 		sampling.add(sampleMethod);
 		resultMenu.add(sampling);
 
-		ButtonGroup group = new ButtonGroup();
 		List<YCalculator> yCalculators = logic.getyCalculators();
 		for (YCalculator calc : yCalculators) {
 
 			boolean selected = calc.equals(logic.getYCalculatorToUse());
 			JRadioButtonMenuItem sampleMethodMenuIten = new JRadioButtonMenuItem(calc.getName(), selected);
-			group.add(sampleMethodMenuIten);
 
 			sampleMethod.add(sampleMethodMenuIten);
 
