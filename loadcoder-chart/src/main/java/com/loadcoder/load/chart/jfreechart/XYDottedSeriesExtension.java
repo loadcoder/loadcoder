@@ -21,9 +21,6 @@ package com.loadcoder.load.chart.jfreechart;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 public class XYDottedSeriesExtension extends XYSeriesExtension {
@@ -48,7 +45,7 @@ public class XYDottedSeriesExtension extends XYSeriesExtension {
 		this.visible = visible;
 	}
 
-	public XYDottedSeriesExtension(Comparable key, boolean autoSort, boolean allowDuplicateXValues, Paint color) {
+	public XYDottedSeriesExtension(String key, boolean autoSort, boolean allowDuplicateXValues, Paint color) {
 		super(key, autoSort, allowDuplicateXValues, color);
 	}
 

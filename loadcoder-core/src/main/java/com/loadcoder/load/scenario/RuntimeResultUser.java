@@ -19,10 +19,11 @@
 package com.loadcoder.load.scenario;
 
 import java.util.List;
+import java.util.Map;
 
 import com.loadcoder.result.TransactionExecutionResult;
 
 @FunctionalInterface
 public interface RuntimeResultUser {
-	void useData(List<List<TransactionExecutionResult>> listOfListOfList);
+	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);
 }

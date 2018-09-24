@@ -18,11 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
@@ -38,12 +37,16 @@ public class RuntimeResultUpdaterRunnerTest {
 
 		TransactionExecutionResultBuffer buffer = new TransactionExecutionResultBuffer();
 		buffer.getBuffer().add(new TransactionExecutionResult("a1", System.currentTimeMillis(), 10, true, null));
-
 		when(e.getTransactionExecutionResultBuffer()).thenReturn(buffer);
-		RuntimeResultUser user = Mockito.mock(RuntimeResultUser.class);
+		
+		RuntimeResultUser user = (a)->{
+			assertNotNull(a.get("a1"));
+			assertEquals(a.get("a1").size(), 1);
+		};
+		
 		RuntimeResultUpdaterRunner runtimeResultUpdaterRunner = new RuntimeResultUpdaterRunner(e, user);
-		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-		runtimeResultUpdaterRunner.swapOutDataAndCallUser(map);
-
+		runtimeResultUpdaterRunner.swapOutDataAndCallUser();
+		assertEquals(buffer.getBuffer().size(), 0);
+		
 	}
 }

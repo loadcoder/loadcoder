@@ -71,9 +71,9 @@ public class LogbackLogging extends Logs {
 	 */
 	public static void setResultDestination(File sharedDirForLogs) {
 		Logger initiateLogging = LoggerFactory.getLogger(LogbackLogging.class);
-		initiateLogging.info("New Result destination:{}", sharedDirForLogs.getAbsolutePath());
 		try {
 			Logs.changeToSharedDir(sharedDirForLogs);
+			initiateLogging.info("New Result destination:{}", sharedDirForLogs.getAbsolutePath());
 		} catch (IOException ioe) {
 			throw new RuntimeException(
 					String.format("Could not use the file %s in dir as a result destination", sharedDirForLogs), ioe);
@@ -105,7 +105,7 @@ public class LogbackLogging extends Logs {
 	 *            is the directory for all your logs
 	 * 
 	 * @return a File that will have a path according to following pattern:
-	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
+	 *         {@code dirForAllLogs/<date and time>(-<unique modifier>)}
 	 */
 	public static File getNewLogDir(String dirForAllLogs) {
 		LocalDateTime timePoint = LocalDateTime.now();

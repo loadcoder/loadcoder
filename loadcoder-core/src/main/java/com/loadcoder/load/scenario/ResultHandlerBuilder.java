@@ -140,4 +140,13 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 		}
 	return resultModel;
 	}
+
+	public void performAsync() {
+		Thread t = new Thread() {
+			public void run() {
+				perform();
+			}
+		};
+		t.start();
+	}
 }

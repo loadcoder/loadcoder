@@ -24,35 +24,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeResultUpdaterRunner implements Runnable{
-	
-	Execution execution;
-	
-	RuntimeResultUser runtimeDataUser;
-	
-	Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-	
-	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser){
+public class RuntimeResultUpdaterRunner implements Runnable {
+
+	private final Logger logger = LoggerFactory.getLogger(RuntimeResultUpdaterRunner.class);
+
+	private final Execution execution;
+
+	private final RuntimeResultUser runtimeDataUser;
+
+	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}
-	
-	protected void useResult(Result r, List<List<TransactionExecutionResult>> listOfListOfList) {
-		List<List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
-		synchronized (transactionExecutionResults) {
 
-			for (List<TransactionExecutionResult> listToBeCopiedAndCleared : transactionExecutionResults) {
-				List<TransactionExecutionResult> newList = new ArrayList<TransactionExecutionResult>();
-				listOfListOfList.add(newList);
-				newList.addAll(listToBeCopiedAndCleared);
-				listToBeCopiedAndCleared.clear(); // todo?
-			}
-		}
-	}
-	
 	public void run() {
 
 		while (true) {
@@ -61,59 +51,63 @@ public class RuntimeResultUpdaterRunner implements Runnable{
 				Thread.sleep(3_000);
 			} catch (InterruptedException ie) {
 			}
-			
+
 			boolean oneLoadStillNotTerminated = false;
-			
-			for(Load load : execution.getLoads()) {
+
+			for (Load load : execution.getLoads()) {
 				State scenarioStateManagerState = load.getLoadStateThread().getState();
 				if (scenarioStateManagerState != State.TERMINATED) {
 					oneLoadStillNotTerminated = true;
 					break;
 				}
 			}
-			
-			swapOutDataAndCallUser(map);
-			
-			if (! oneLoadStillNotTerminated) {
+
+			swapOutDataAndCallUser();
+
+			if (!oneLoadStillNotTerminated) {
 				break;
 			}
 		}
 	}
 
-	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
+//	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
+	protected void swapOutDataAndCallUser() {
+		
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+		
 		List<TransactionExecutionResult> switchDestination;
 
-		//swap the bucket. The running load threads will after this add results to the new list
+		/*
+		 * swap the bucket. The running load threads will after this add results to the
+		 * new list listForComingTransactions This is synchronized with
+		 * ResultHandlerBuilder:performResultHandeled and
+		 * ResultHandlerVoidBuilder:performResultHandeled where the transactions are added to the list
+		 */
 		synchronized (execution.getTransactionExecutionResultBuffer()) {
 			switchDestination = execution.getTransactionExecutionResultBuffer().getBuffer();
-			execution.getTransactionExecutionResultBuffer().setBuffer(new ArrayList<TransactionExecutionResult>());
+
+			List<TransactionExecutionResult> listForComingTransactions = new ArrayList<TransactionExecutionResult>();
+			execution.getTransactionExecutionResultBuffer().setBuffer(listForComingTransactions);
 		}
 
-		//add all the swaped out results to the runtimeResultList
-		synchronized (execution.getRuntimeResultList()) {
-			List<List<TransactionExecutionResult>> runtimeResultList = execution.getRuntimeResultList();
-			for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
-				String name = transactionExecutionResult.getName();
-				List<TransactionExecutionResult> listToAddTo = map.get(name);
-				if (listToAddTo == null) {
-					listToAddTo = new ArrayListExtension<TransactionExecutionResult>();
-					runtimeResultList.add(listToAddTo);
-					map.put(name, listToAddTo);
-				}
-				listToAddTo.add(transactionExecutionResult);
+		// add all the swaped out results to the runtimeResultList
+		for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
+			String name = transactionExecutionResult.getName();
+			List<TransactionExecutionResult> listToAddTo = map.get(name);
+			if (listToAddTo == null) {
+				listToAddTo = new ArrayList<TransactionExecutionResult>();
+				map.put(name, listToAddTo);
 			}
+			listToAddTo.add(transactionExecutionResult);
 		}
 
-		runtimeDataUser.useData(execution.getRuntimeResultList());
-		execution.getRuntimeResultList().clear();
+		try {
+			runtimeDataUser.useData(map);
+		} catch (RuntimeException rte) {
+			logger.error("An exception occured when trying to use the runtime result data", rte);
+		}
+
+		// runtimeResultList.clear();
 		map.clear();
-	}
-
-	public static class ArrayListExtension <E> extends ArrayList <E>{
-		private static final long serialVersionUID = 1L;
-		
-		public boolean add(E e) {
-			return super.add(e);
-		}
 	}
 }

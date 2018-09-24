@@ -18,7 +18,9 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.jfreechart;
 
+import java.awt.Color;
 import java.awt.Paint;
+import java.util.Map;
 
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -29,40 +31,38 @@ public class LoadcoderRenderer extends XYLineAndShapeRendererExtention {
 
 	private static final long serialVersionUID = 1L;
 
-	public LoadcoderRenderer(boolean lines, boolean shapes, XYSeriesCollection seriesCollection) {
+	private final Map<String, Color> existingColors;
+
+	public LoadcoderRenderer(boolean lines, boolean shapes, XYSeriesCollection seriesCollection,
+			Map<String, Color> existingColors) {
 		super(lines, shapes, seriesCollection);
+		this.existingColors = existingColors;
 	}
-	
-	/* 
+
+	/*
 	 * Visibility is redefined in loadcoder. A series can be invisible even though
-	 * the legend is still visble (and clickable). This becomes important when visibility
-	 * of a series is toggled (by clicking at corresponding legend)
+	 * the legend is still visble (and clickable). This becomes important when
+	 * visibility of a series is toggled (by clicking at corresponding legend)
 	 */
 	@Override
 	public boolean isSeriesVisible(int series) {
 		XYSeriesExtension serie = (XYSeriesExtension) seriesCollection.getSeries(series);
 		return serie.isVisible();
 	}
-	
-	/* 
+
+	/*
 	 * Overridden in order to get the same color for the same series name
 	 */
 	@Override
-    public Paint getItemPaint(int row, int column) {
+	public Paint getItemPaint(int row, int column) {
 		return getLinePaint(row);
-    }
-    
+	}
+
 	@Override
-	public Paint getLinePaint(int seriesIndex){
+	public Paint getLinePaint(int seriesIndex) {
 		Paint result = null;
 		XYSeries serie = seriesCollection.getSeries(seriesIndex);
-		if(serie instanceof XYSeriesExtension){
-			XYSeriesExtension seriesExtension = (XYSeriesExtension)serie;
-			result = seriesExtension.getColorInTheChart();
-		}
-		if(result == null){
-			result = lookupSeriesPaint(seriesIndex);
-		}
-		return result;
+		Color c = existingColors.get(serie.getKey());
+		return c;
 	}
 }

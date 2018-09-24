@@ -21,27 +21,84 @@ package com.loadcoder.result;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.loadcoder.statics.Formatter;
 
 public class Result {
 
-	List<List<TransactionExecutionResult>> resultLists;
+	Map<String, List<TransactionExecutionResult>> resultLists;
 
 	long start;
 	long end;
 	long duration;
 
-	int noOfFails;
-	int noOfTransactions;
+	int amountOfFails;
+	int amountOfTransactions;
 
 	File resultFile;
-	
+
+	public Result(File fileToGenerateResultFrom) {
+		this(fileToGenerateResultFrom, Formatter.SIMPLE_RESULT_FORMATTER);
+	}
+
+	protected Result(Map<String, List<TransactionExecutionResult>> resultLists) {
+		init(resultLists);
+	}
+
+	public Result(File fileToGenerateResultFrom, ResultFormatter resultFormatter) {
+
+		this.resultFile = fileToGenerateResultFrom;
+
+		Map<String, List<TransactionExecutionResult>> result;
+		try {
+			result = resultFormatter.toResultLists(fileToGenerateResultFrom);
+		} catch (IOException ioe) {
+			throw new RuntimeException(
+					String.format("Could not generate a Result from the file %s and given ResultFormatter",
+							fileToGenerateResultFrom.getAbsolutePath()),
+					ioe);
+		}
+		init(result);
+	}
+
+	private void init(Map<String, List<TransactionExecutionResult>> resultLists) {
+
+		this.resultLists = resultLists;
+
+		long start = Long.MAX_VALUE;
+		long end = Long.MIN_VALUE;
+
+		int fails = 0;
+		int transactions = 0;
+
+		for (String key : resultLists.keySet()) {
+			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			transactions += resultList.size();
+			for (TransactionExecutionResult transactionExecutionResult : resultList) {
+				long ts = transactionExecutionResult.getTs();
+				if (ts < start)
+					start = ts;
+				if (ts > end)
+					end = ts;
+
+				if (!transactionExecutionResult.isStatus())
+					fails++;
+			}
+		}
+
+		setStart(start);
+		setEnd(end);
+		setDuration(end - start);
+		setAmountOfFails(fails);
+		setAmountOfTransactions(transactions);
+	}
+
 	public File getResultFile() {
 		return resultFile;
 	}
 
-	public void setResultLists(List<List<TransactionExecutionResult>> resultLists) {
+	public void setResultLists(Map<String, List<TransactionExecutionResult>> resultLists) {
 		this.resultLists = resultLists;
 	}
 
@@ -57,103 +114,48 @@ public class Result {
 		this.duration = duration;
 	}
 
-	public void setNoOfFails(int noOfFails) {
-		this.noOfFails = noOfFails;
+	protected void setAmountOfFails(int noOfFails) {
+		this.amountOfFails = noOfFails;
 	}
 
-	public void setNoOfTransactions(int noOfTransactions) {
-		this.noOfTransactions = noOfTransactions;
+	protected void setAmountOfTransactions(int noOfTransactions) {
+		this.amountOfTransactions = noOfTransactions;
 	}
 
 	public long getDuration() {
 		return duration;
 	}
 
-	public int getNoOfTransactions() {
-		return noOfTransactions;
+	public int getAmountOfTransactions() {
+		return amountOfTransactions;
 	}
 
-	public Result(File fileToGenerateResultFrom){
-		this(fileToGenerateResultFrom, Formatter.SIMPLE_RESULT_FORMATTER);
-	}
-	public Result(File fileToGenerateResultFrom, ResultFormatter resultFormatter){
-		
-		List<List<TransactionExecutionResult>> result;
-		try{	
-			result = resultFormatter.toResultLists(fileToGenerateResultFrom);
-		}catch(IOException ioe){
-			throw new RuntimeException(
-					String.format("Could not generate a Result from the file %s and given ResultFormatter",
-					fileToGenerateResultFrom.getAbsolutePath()), ioe);
-		}
-		init(result);
-	}
-
-	public Result(	List<List<TransactionExecutionResult>> resultLists){
-		init(resultLists);
-	}
-	
-	public void init(List<List<TransactionExecutionResult>> resultLists){
-
-		this.resultLists = resultLists;
-		long start =0;
-		long end = 0;
-
-		int fails = 0;
-		int transactions = 0;
-		if(resultLists.size() >0 && resultLists.get(0).size() > 0)
-			start = resultLists.get(0).get(0).getTs();
-
-		/*
-		 * resultLists here needs to be synchronized with the usage of the same instace in 
-		 * RuntimeResultUpdaterRunner:run, where new elements are added to this list
-		 */
-		synchronized (resultLists) {
-			
-			for(List<TransactionExecutionResult> resultList : resultLists){
-				transactions += resultList.size();
-				for(TransactionExecutionResult transactionExecutionResult : resultList){
-					long ts = transactionExecutionResult.getTs();
-					if(ts < start)
-						start = ts;
-					if(ts > end)
-						end = ts;
-	
-					if(!transactionExecutionResult.isStatus())
-						fails++;
-				}
-			}
-		}
-		setStart(start);
-		setEnd(end);
-		setDuration(end - start);
-		setNoOfFails(fails);
-		setNoOfTransactions(transactions);
-	}
-
-	public List<List<TransactionExecutionResult>> getResultLists() {
+	public Map<String, List<TransactionExecutionResult>> getResultLists() {
 		return resultLists;
 	}
+
 	public long getStart() {
 		return start;
 	}
+
 	public long getEnd() {
 		return end;
 	}
-	public int getNoOfFails() {
-		return noOfFails;
+
+	public int getAmountOfFails() {
+		return amountOfFails;
 	}
 
-	public void mergeResult(Result resultToBeMerged){
+	public void mergeResult(Result resultToBeMerged) {
 
-		if(this.equals(resultToBeMerged))
+		if (this.equals(resultToBeMerged))
 			return;
-		if(resultToBeMerged.getStart() < start){
+		if (resultToBeMerged.getStart() < start) {
 			start = resultToBeMerged.getStart();
 		}
 		resultToBeMerged.setStart(-1);
 
-		if(resultToBeMerged.getStart() > end){
+		if (resultToBeMerged.getStart() > end) {
 			end = resultToBeMerged.getEnd();
 		}
 		resultToBeMerged.setEnd(-1);
@@ -161,8 +163,8 @@ public class Result {
 		duration = end - start;
 		resultToBeMerged.setDuration(-1);
 
-		noOfFails += resultToBeMerged.getNoOfFails();
-		noOfTransactions += resultToBeMerged.getNoOfTransactions();
+		amountOfFails += resultToBeMerged.getAmountOfFails();
+		amountOfTransactions += resultToBeMerged.getAmountOfTransactions();
 	}
 
 }

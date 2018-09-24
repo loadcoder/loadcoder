@@ -23,8 +23,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.SimpleDateFormat;
@@ -36,9 +34,6 @@ import java.util.TimeZone;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
@@ -68,8 +63,6 @@ import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
-import com.loadcoder.load.chart.logic.Chart;
-import com.loadcoder.load.chart.menu.settings.SettingsWindow;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public class ChartFrame extends ApplicationFrame {
@@ -92,7 +85,7 @@ public class ChartFrame extends ApplicationFrame {
 
 	XYLineAndShapeRendererExtention renderer;
 
-	Map<Comparable, Boolean> seriesVisible = new HashMap<Comparable, Boolean>();
+	Map<String, Boolean> seriesVisible = new HashMap<String, Boolean>();
 
 	XYSeriesCollectionExtention seriesCollection = new XYSeriesCollectionExtention();
 
@@ -112,7 +105,7 @@ public class ChartFrame extends ApplicationFrame {
 		return renderer;
 	}
 
-	public Map<Comparable, Boolean> getSeriesVisible() {
+	public Map<String, Boolean> getSeriesVisible() {
 		return seriesVisible;
 	}
 
@@ -135,12 +128,12 @@ public class ChartFrame extends ApplicationFrame {
 		return plot;
 	}
 
-	public ChartFrame(boolean linesVisible, boolean shapesVisible) {
+	public ChartFrame(boolean linesVisible, boolean shapesVisible, Map<String, Color> existingColors) {
 		super("");
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/polarbear.png"));
 		image.getScaledInstance(200, 200, Image.SCALE_FAST);
 		setIconImage(image);
-		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection);
+		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection, existingColors);
 
 		plot = createXYPlotExtension("X", "Y", seriesCollection, renderer);
 		plot.setRenderer(renderer);
@@ -289,6 +282,7 @@ public class ChartFrame extends ApplicationFrame {
 
 		synchronized (plot) {
 
+			//if clicked in the graph area
 			if (clickedObject instanceof PlotEntity) {
 				chart.setNotify(false);
 				if (button == 1) {
@@ -297,7 +291,9 @@ public class ChartFrame extends ApplicationFrame {
 				}
 				chart.setNotify(true);
 				serieses.fireChange();
-			} else if (clickedObject instanceof LegendItemEntity) {
+			}
+			//else is clicked on a legend
+			else if (clickedObject instanceof LegendItemEntity) {
 				chart.setNotify(false);
 				LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
 				Comparable pushedLegend = legendItemEntity.getSeriesKey();
@@ -306,7 +302,7 @@ public class ChartFrame extends ApplicationFrame {
 				XYSeriesExtension clickedSeries = null;
 
 				for (XYSeriesExtension xy : lista) {
-					Comparable c = xy.getKey();
+					String c = xy.getKey();
 					if (pushedLegend.compareTo(c) == 0) {
 						clickedSeries = xy;
 						break;

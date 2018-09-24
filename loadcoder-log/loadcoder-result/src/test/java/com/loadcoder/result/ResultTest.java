@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.measure;
+package com.loadcoder.result;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -27,35 +29,35 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 public class ResultTest extends TestNGBase{
 
 	@Test
 	public void testToMerge(){
-		List<List<TransactionExecutionResult>> resultList = new ArrayList<List<TransactionExecutionResult>>();
+		Map<String, List<TransactionExecutionResult>> resultList = new HashMap<String, List<TransactionExecutionResult>>();
 
 		List<TransactionExecutionResult> result = new ArrayList<TransactionExecutionResult>();
-		resultList.add(result);
+		resultList.put("a", result);
 		for(int i =0; i<10; i++)
-			result.add(new TransactionExecutionResult("a", 10 + i *1000, 10, i==2 ? false : true, ""));
+			result.add(new TransactionExecutionResult(10 + i *1000, 10, i==2 ? false : true, ""));
 		
 		List<TransactionExecutionResult> result2 = new ArrayList<TransactionExecutionResult>();
-		resultList.add(result2);
+		resultList.put("b", result2);
 		for(int i =0; i<10; i++)
-			result2.add(new TransactionExecutionResult("b",70 +  i *1000, 20, i==2 ? false : true, ""));
+			result2.add(new TransactionExecutionResult(70 +  i *1000, 20, i==2 ? false : true, ""));
 		
 		Result r = new Result(resultList);
 		
-		List<List<TransactionExecutionResult>> resultList2 = new ArrayList<List<TransactionExecutionResult>>();
+		Map<String, List<TransactionExecutionResult>> resultList2 = new HashMap<String, List<TransactionExecutionResult>>();
 
 		List<TransactionExecutionResult> result3 = new ArrayList<TransactionExecutionResult>();
-		resultList2.add(result3);
+		resultList2.put("a", result3);
 		for(int i =0; i<10; i++)
 			result3.add(new TransactionExecutionResult("a",20 +  i *1000, 30, i==2 ? false : true, ""));
 		
 		List<TransactionExecutionResult> result4 = new ArrayList<TransactionExecutionResult>();
-		resultList2.add(result4);
+		resultList2.put("b", result4);
 		for(int i =0; i<10; i++)
 			result4.add(new TransactionExecutionResult("b",50 +  i *1000, 40, i==2 ? false : true, ""));
 		
@@ -63,12 +65,11 @@ public class ResultTest extends TestNGBase{
 	
 		r.mergeResult(r2);
 	
-		Assert.assertEquals(40, r.getNoOfTransactions());
-		Assert.assertEquals(4, r.getNoOfFails());
-		Assert.assertEquals(10, r.getStart());
-		Assert.assertEquals(9070, r.getEnd());
-		
-		Assert.assertEquals(9060, r.getDuration());
+		assertEquals(40, r.getAmountOfTransactions());
+		assertEquals(4, r.getAmountOfFails());
+		assertEquals(10, r.getStart());
+		assertEquals(9070, r.getEnd());
+		assertEquals(9060, r.getDuration());
 		
 	}
 }

@@ -18,7 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.sut;
 
-
 import static com.loadcoder.load.LoadUtility.sleep;
 import static com.loadcoder.load.TestUtility.random;
 
@@ -32,98 +31,116 @@ import org.slf4j.LoggerFactory;
 import com.loadcoder.load.LoadUtility;
 
 public class SUT {
-	
-	 Logger log = LoggerFactory.getLogger(this.getClass());
-		
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
+
 	long referenseResponseTime = 100;
-	
+
 	Map<Object, Long> lastResponseTimePerTracker = new HashMap<Object, Long>();
-	void sleepWithDeviationFromLast(Object tracker){
+
+	void sleepWithDeviationFromLast(Object tracker, long min, long max) {
 		Long last = lastResponseTimePerTracker.get(tracker);
-		if(last == null){
+		if (last == null) {
 			last = referenseResponseTime;
-		}else{
-			last =last + random(-20, 20);
+		} else {
+			last = last + random(-20, 20);
 		}
-		if(last < 3)
+		if (last < 3)
 			last = 3L;
+		if (last > max) {
+			last = max;
+		}
+		if (last < min) {
+			last = min;
+		}
 		lastResponseTimePerTracker.put(tracker, last);
-		
-		sleep( last); 
+
+		sleep(last);
 	}
-	
-	double cosCounter =0;
-	long getCosRt(long xBase){
+
+	double cosCounter = 0;
+
+	long getCosRt(long xBase) {
 		cosCounter = cosCounter + 0.01;
-		double modifier = 100*Math.cos(cosCounter);
-		return (long)( xBase + modifier);
+		double modifier = 100 * Math.cos(cosCounter);
+		return (long) (xBase + modifier);
 	}
-	
-	public void sleepCos(){
+
+	public void sleepCos() {
 		sleepCos(200);
 	}
-	
-	public void sleepCos(long xBase){
+
+	public void sleepCos(long xBase) {
 		LoadUtility.sleep(getCosRt(xBase));
 	}
-	
+
 	Object trackerObject = new Object();
-	public void methodWhereResponseTimeFollowSomeKindOfPattern(){
-		sleepWithDeviationFromLast(trackerObject);
+
+	public void methodWhereResponseTimeFollowSomeKindOfPattern() {
+		methodWhereResponseTimeFollowSomeKindOfPattern(trackerObject);
 	}
-	
-	public void methodWhereResponseTimeFollowSomeKindOfPattern(Object o){
-		sleepWithDeviationFromLast(o);
+
+	public void methodWhereResponseTimeFollowSomeKindOfPattern(Object o) {
+		sleepWithDeviationFromLast(o, 0, 1000);
 	}
-	
+
+	public void methodWhereResponseTimeFollowSomeKindOfPattern(Object o, long min, long max) {
+		sleepWithDeviationFromLast(o, min, max);
+	}
+
+	public void methodWhereResponseTimeFollowSomeKindOfPattern(long min, long max) {
+		sleepWithDeviationFromLast(trackerObject, min, max);
+	}
+
 	long trackerObject2 = 100;
-	public void methodWhereResponseTimeIncreases(){
+
+	public void methodWhereResponseTimeIncreases() {
 		LoadUtility.sleep(trackerObject2 += 50);
 	}
-	
-	void sleepWithDeviation(long sleepTime){
-		sleep( sleepTime + random(0, (int) sleepTime/4)); 
+
+	void sleepWithDeviation(long sleepTime) {
+		sleep(sleepTime + random(0, (int) sleepTime / 4));
 	}
-	
-	public void methodThatTakesLongerTime(){
-		sleepWithDeviation(referenseResponseTime*2); 
+
+	public void methodThatTakesLongerTime() {
+		sleepWithDeviation(referenseResponseTime * 2);
 	}
-	
-	
-	public DomainDto getDomainDto(){
+
+	public DomainDto getDomainDto() {
 		return new DomainDto();
 	}
-	
-	public void methodThatTakesBetweenTheseResponseTimes(long min, long max){
-		sleep( random((int)min, (int)max)); 
+
+	public void methodThatTakesBetweenTheseResponseTimes(long min, long max) {
+		sleep(random((int) min, (int) max));
 	}
-	
-	public void methodThatTakesShorterTime(){
-		sleepWithDeviation(referenseResponseTime /4); 
+
+	public void methodThatTakesShorterTime() {
+		sleepWithDeviation(referenseResponseTime / 4);
 	}
-	
-	public void methodThatTakesNoTime(){
+
+	public void methodThatTakesNoTime() {
 		sleep(1000);
 		return;
 	}
-	
-	public void loggingMethod(){
-		log.info("logged by SUT in method loggingMethod");
+
+	public void loggingMethod(String toLog) {
+		log.info(toLog);
 		return;
 	}
-	
+
 	Object methodThatSomeTimesThrowsRuntimeExceptionTrackerObject = new Object();
-	public void methodThatSomeTimesThrowsRuntimeException(int percent){
-		if(random(1, 100) <= percent )
+
+	public void methodThatSomeTimesThrowsRuntimeException(int percent) {
+		if (random(1, 100) <= percent)
 			throw new RuntimeException("a RuntimeException occured in SUT");
-		sleepWithDeviationFromLast(methodThatSomeTimesThrowsRuntimeExceptionTrackerObject);
-		
+		sleepWithDeviationFromLast(methodThatSomeTimesThrowsRuntimeExceptionTrackerObject, 0, 1000);
+
 	}
-	
-	public void methodThatSomeTimesThrowsCheckedException() throws IOException{
+
+	public void methodThatSomeTimesThrowsCheckedException() throws IOException {
 		sleep(random(40, 100));
-		if(random(0, 100) == 5)
+		if (random(0, 10) == 5)
 			throw new IOException("a RuntimeException occured in SUT");
 	}
-	
+
 }

@@ -28,9 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
-import com.loadcoder.load.exceptions.NoResultOrFormatterException;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
-import com.loadcoder.result.Result;
 import com.loadcoder.result.ResultFormatter;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.statics.Formatter;
@@ -48,93 +46,75 @@ public class Execution {
 	List<Load> loads;
 
 	private long startTime;
-	
-	TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
-	
-	List<List<TransactionExecutionResult>> runtimeResultList = new ArrayList<List<TransactionExecutionResult>>();
 
-	protected ResultFormatter getResultFormatter(){
+	private TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
+
+	protected ResultFormatter getResultFormatter() {
 		return resultFormatter;
 	}
-	
+
 	public List<Load> getLoads() {
 		return loads;
 	}
 
-	protected Thread getRuntimeResultUpdaterThread(){
+	protected Thread getRuntimeResultUpdaterThread() {
 		return runtimeResultUpdaterThread;
 	}
-	
-	protected List<List<TransactionExecutionResult>> getRuntimeResultList() {
-		return runtimeResultList;
-	}
-	
+
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
 		return transactionExecutionResultBuffer;
 	}
-	
-	public Execution(ResultFormatter resultFormatter, RuntimeResultUser user, List<Load> loads) {
+
+	public Execution(ResultFormatter resultFormatter, RuntimeResultUser resultUser, List<Load> loads) {
 		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
-		this.user = user;
+		this.user = resultUser;
 		this.loads = loads;
-		loads.stream().forEach((load)->{load.setExecution(this);});
-		if(user != null) {
+		loads.stream().forEach((load) -> {
+			load.setExecution(this);
+		});
+		if (user != null) {
 			runtimeResultUpdaterThread = new Thread(new RuntimeResultUpdaterRunner(this, user));
-		}	
+		}
 	}
-	
-//	public StartedExecution execute() {
-//		if(runtimeResultUpdaterThread != null) {
-//			runtimeResultUpdaterThread.start();
-//		}
-//		
-//	}
-	
-	
+
 	/**
 	 * Start the load
 	 * 
-	 * @return
-	 * a StartedLoad instance
+	 * @return a StartedLoad instance
 	 */
 	public synchronized StartedExecution execute() {
-		
-		for(Load load : loads) {
+
+		for (Load load : loads) {
 			if (load.getStartedLoad() != null) {
 				throw new InvalidLoadStateException(LoadAlreadyStarted.toString());
 			}
-			
+
 			Load setLoad = load.getLoadScenario().getLoad();
-			if(! setLoad.equals(load)) {
+			if (!setLoad.equals(load)) {
 				throw new InvalidLoadStateException(ScenarioConnectedToOtherLoad.toString());
 			}
 		}
 
 		start();
 
-		if(runtimeResultUpdaterThread != null) {
+		if (runtimeResultUpdaterThread != null) {
 			runtimeResultUpdaterThread.start();
 		}
-		
-		for(Load l : loads) {
+
+		for (Load l : loads) {
 			l.runLoad();
 		}
 
 		startedExecution = new StartedExecution(this);
 		return startedExecution;
 	}
-	
-	protected void start(){
+
+	protected void start() {
 		this.startTime = System.currentTimeMillis();
-	}
-	
-	protected Result getRuntimeResult() throws NoResultOrFormatterException{
-		Result r = new Result(getRuntimeResultList());
-		return r;
 	}
 
 	public long getStartTime() {
 		return startTime;
 	}
-	
+
 }

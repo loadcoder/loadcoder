@@ -31,8 +31,8 @@ public class LogbackLoggingTest extends TestNGBase{
 		infoLog.info("{} info", method.getName());
 		
 		List<String> content = TestUtility.readFile(new File(sharedDirForLogsPath + "/info-logback.log"));
-		Assert.assertEquals(1, content.size());
-		Assert.assertEquals(content.get(0), method.getName()+ " info");
+		Assert.assertEquals(2, content.size());
+		Assert.assertEquals(content.get(1), method.getName()+ " info");
 	}
 	
 	@Test

@@ -21,6 +21,7 @@ package com.loadcoder.load.chart.logic;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.jfree.data.xy.XYDataItem;
 import org.testng.annotations.Test;
@@ -114,7 +115,7 @@ public class ChartTest extends TestNGBase{
 	@Test(groups = "manual")
 	public void addAndRemoveXYDataItems() throws IOException{
 
-		ChartFrame frame = new ChartFrame(false, true);
+		ChartFrame frame = new ChartFrame(false, true, new HashMap<String, Color>());
 		
 		XYSeriesExtension series = new XYSeriesExtension("foo", true, false, Color.BLUE);
 		

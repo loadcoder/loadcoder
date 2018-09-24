@@ -91,16 +91,10 @@ public class Load {
 		public void execute();
 	}
 
-	// protected ResultFormatter getResultFormatter(){
-	// return resultFormatter;
-	// }
 	protected long getRampup() {
 		return rampup;
 	}
 
-	// protected long getStartTime(){
-	// return startTime;
-	// }
 	protected StopDecision getStopDecision() {
 		return stopDecision;
 	}

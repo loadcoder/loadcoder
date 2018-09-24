@@ -72,6 +72,15 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 		performAndGetModel();
 	}
 	
+	public void performAsync() {
+		Thread t = new Thread() {
+			public void run() {
+				perform();
+			}
+		};
+		t.start();
+	}
+	
 	/**
 	 * Performs the transaction you just stated
 	 * @return

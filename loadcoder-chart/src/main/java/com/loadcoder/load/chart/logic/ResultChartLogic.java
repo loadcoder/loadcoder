@@ -55,25 +55,21 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartLogic extends ChartLogic {
 
-	static Logger logger = LoggerFactory.getLogger(ResultChartLogic.class);
+	private static Logger logger = LoggerFactory.getLogger(ResultChartLogic.class);
 
-	private static final boolean allowDuplicateXValues_forDottedSeries = true;
+	private static final boolean ALLOW_DUPLICATE_X_VALUES_FOR_POINT_SERIES = true;
 
-	Result[] results;
+	private List<DataSetUserType> removalFilters = new ArrayList<DataSetUserType>();
 
-	List<DataSetUserType> removalFilters = new ArrayList<DataSetUserType>();
+	private boolean dottedMode;
 
-	boolean dottedMode;
+	private final Map<String, List<TransactionExecutionResult>> originalFromFile;
 
-	List<List<TransactionExecutionResult>> originalFromFile = new ArrayList<List<TransactionExecutionResult>>();
-
-	Map<Comparable, XYSeriesExtension> dottedSeries = null;
-
-	Map<Comparable, XYSeriesExtension> series;
+	private Map<String, XYSeriesExtension> dottedSeries = null;
 
 	private double keepFactorChosen = -1;
 
-	JRadioButtonMenuItem pointsRadioButton;
+	private JRadioButtonMenuItem pointsRadioButton;
 
 	public double getCurrentKeepFactor() {
 		if (getKeepFactorChosen() != -1) {
@@ -82,6 +78,7 @@ public class ResultChartLogic extends ChartLogic {
 			return getKeepFactorDefault();
 		}
 	}
+
 	public JRadioButtonMenuItem getPointsRadioButton() {
 		return pointsRadioButton;
 	}
@@ -113,176 +110,94 @@ public class ResultChartLogic extends ChartLogic {
 		return removalFilters;
 	}
 
-	public void setDottedSeries(Map<Comparable, XYSeriesExtension> dottedSeries) {
+	public void setDottedSeries(Map<String, XYSeriesExtension> dottedSeries) {
 		this.dottedSeries = dottedSeries;
 	}
 
-	public Map<Comparable, XYSeriesExtension> getDottedSeries() {
+	public Map<String, XYSeriesExtension> getDottedSeries() {
 		return dottedSeries;
 	}
 
 	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<Comparable, Boolean> seriesVisible, boolean defaultDottedMode,
-			CommonSeries[] commonSeries, Map<Comparable, Color> customizedColors, boolean locked, Result... results) {
-		super(seriesCollection, plot, renderer, seriesVisible, locked);
+			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, boolean defaultDottedMode,
+			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked,
+			Map<String, Color> existingColors, Result... results) {
+		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
 
 		this.dottedMode = defaultDottedMode;
-		this.results = results;
-		commonsToBeUsed = commonSeries;
 		populateRemovalFilters();
 
-		populateResultLists(originalFromFile);
-		originalFromFile = TransactionExecutionResult.mergeList(originalFromFile);
+		originalFromFile = populateResultLists(results);
+		originalFromFile.keySet().stream().forEach(key -> addSeriesKey(key));
 
-		filteredData = generateDataSets(originalFromFile);
+		setFilteredData(generateDataSets(originalFromFile));
 
 		int totalAmountOfPoints = 0;
 		if (keepFactorDefault == -1) {
-			for (DataSet set : filteredData.getDataSets()) {
+			for (DataSet set : getFilteredData().getDataSets()) {
 				totalAmountOfPoints = totalAmountOfPoints + set.getPoints().size();
 			}
 
 			keepFactorDefault = ChartUtils.calculateKeepFactor(totalAmountOfPoints, TARGET_AMOUNT_OF_POINTS_DEFAULT);
 		}
 
-		long tickSize = calculateSliderTickSize(filteredData);
+		long tickSize = calculateSliderTickSize(getFilteredData());
 		minorTickLength = (int) tickSize;
 		calculateSliderValueCompensation(minorTickLength);
 
 		defaultIndex = 4;
-		sampleLengthToUse = calculateSampleLengthWith(defaultIndex);
+		int minorTickLengthInAmountOfSeconds = getMinorTickLength();
+		if (minorTickLengthInAmountOfSeconds <= 4) {
+			defaultIndex = minorTickLengthInAmountOfSeconds - 1;
+		}
 
-		calculateDefaultIndex(sampleLengthToUse, minorTickLength);
+		long sampleLength = calculateSampleLengthWith(defaultIndex);
+		setSampleLengthToUse(sampleLength);
 
 		doSafeUpdate();
 	}
 
-	public long calculateSampleLengthWith(int indexOfSlider) {
-		long newSampleLength = 1000;
-		if (indexOfSlider != 0) {
-			long valueOfSlider = indexOfSlider * getMinorTickLength() + getsliderCompensation();
-			newSampleLength = valueOfSlider * 1000;
-		}
-		return newSampleLength;
-	}
-
-	public int getDefaultSliderIndex() {
-		return defaultIndex;
-	}
-
-	public int getsliderCompensation() {
-		return sliderCompensation;
-	}
-
-	void calculateSliderValueCompensation(int minorTickPacing) {
-		int sliderCompensation = 0;
-		if (minorTickPacing == 1)
-			sliderCompensation = 1;
-
-		this.sliderCompensation = sliderCompensation;
-	}
-
-	public int getMinorTickLength() {
-		return minorTickLength;
-	}
-
-	protected void doUpdate() {
-		createHashesAndUpdate(true);
-	}
-
-	public void recreateDottedSeries() {
-		setFilteredData(null);
-		setDottedSeries(null);
-		clearChart();
-		createCommons();
-		addAllCommonSeriesToTheChart();
-		createHashesAndUpdate(false);
-	}
-
-	public void createHashesAndUpdate(boolean updateSamples) {
-		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
-		long start = System.currentTimeMillis();
-		getDataAndUpdate(hashesGettingUpdated, updateSamples);
-		long diff = System.currentTimeMillis() - start;
-		logger.debug("update time: {}", diff);
-		forceRerender();
-	}
-
-	protected void getDataAndUpdate(HashSet<Long> hashesGettingUpdated, boolean updateSamples) {
-		update(originalFromFile, hashesGettingUpdated, updateSamples);
-	}
-
-	public void addSerieseToChart(Map<Comparable, XYSeriesExtension> seriesMap) {
-		for (Comparable key : seriesKeys) {
-			XYSeriesExtension series = seriesMap.get(key);
-			addSeries(series);
-		}
-	}
-
-	public void adjustVisibility(Map<Comparable, XYSeriesExtension> seriesMap) {
-		for (Comparable key : seriesKeys) {
-			XYSeriesExtension series = seriesMap.get(key);
-			adjustVisibilityOfSeries(series);
-		}
-	}
-
-	private void sleep() {
-		try {
-			Thread.sleep(150);
-		} catch (Exception e) {
-		}
-	}
-
-	void setCorrectColorsForDottedSerieses(Map<Comparable, XYSeriesExtension> dottedSerieses) {
-		dottedSerieses.entrySet().stream().forEach((entry) -> {
-			XYSeriesExtension dottedSeries = entry.getValue();
-			Comparable dataSetName = dottedSeries.getKey();
-			Paint seriesColor = getSeriesColor(dataSetName);
-			dottedSeries.setColorInTheChart(seriesColor);
-		});
-	}
-
 	@Override
-	protected void update(List<List<TransactionExecutionResult>> listOfListOfList, HashSet<Long> hashesGettingUpdated,
-			boolean updateSamples) {
+	protected void update(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+			HashSet<Long> hashesGettingUpdated) {
 
 		seriesCollection.removeAllSeries();
 		ranges.clear();
 
 		earliestX = null;
 
+		FilteredData filteredData = getFilteredData();
 		if (filteredData == null) {
 			filteredData = generateDataSets(listOfListOfList);
+			setFilteredData(filteredData);
 		}
-
-		addToSeriesKeys(filteredData, seriesKeys);
 
 		HashSet<Long> sampleTimestamps = new HashSet<Long>();
 
-		Map<Comparable, CommonSampleGroup> samplesCommonMap = new HashMap<Comparable, CommonSampleGroup>();
+		Map<String, CommonSampleGroup> samplesCommonMap = new HashMap<String, CommonSampleGroup>();
 		List<CommonSampleGroup> sampleGroupCommonList = new ArrayList<CommonSampleGroup>();
 
-		Map<Comparable, XYSeriesExtension> seriesMap = new HashMap<Comparable, XYSeriesExtension>();
+		Map<String, XYSeriesExtension> seriesMap = new HashMap<String, XYSeriesExtension>();
 		if (dottedMode) {
 			if (dottedSeries == null) {
-				dottedSeries = createDottedSeries(filteredData.getDataSets());
+				setDottedSeries(createDottedSeries(filteredData.getDataSets()));
 			}
 			seriesMap = dottedSeries;
 		} else {
 			getSerieses(filteredData.getDataSets(), dottedMode, seriesMap);
 		}
 
-		Map<Comparable, SampleGroup> sampleGroups = new HashMap<Comparable, SampleGroup>();
+		Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
 		createSamplesGroups(seriesMap, sampleGroups);
+
+		createCommons();
+		addAllCommonSeriesToTheChart();
 
 		addSerieseToChart(seriesMap);
 
 		adjustVisibility(seriesMap);
 
-		createCommons();
-		addAllCommonSeriesToTheChart();
-
-		for (XYSeriesExtension commonSerie : commonSeries) {
+		for (XYSeriesExtension commonSerie : getCommonSeriesMap().values()) {
 			adjustVisibilityOfSeries(commonSerie);
 		}
 
@@ -311,6 +226,7 @@ public class ResultChartLogic extends ChartLogic {
 			for (DataSet set : filteredData.getDataSets()) {
 				SampleGroup group = sampleGroups.get(set.getName());
 				XYSeriesExtension series = group.getSeries();
+
 				ChartUtils.populateSeriesWithPoints(set.getPoints(), series, keepFactor);
 			}
 		}
@@ -320,21 +236,100 @@ public class ResultChartLogic extends ChartLogic {
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 	}
 
+	public long calculateSampleLengthWith(int indexOfSlider) {
+		long newSampleLength = 1000;
+		if (indexOfSlider != 0) {
+			long valueOfSlider = indexOfSlider * minorTickLength + sliderCompensation;
+			newSampleLength = valueOfSlider * 1000;
+		}
+		return newSampleLength;
+	}
+
+	public int getDefaultSliderIndex() {
+		return defaultIndex;
+	}
+
+	public int getsliderCompensation() {
+		return sliderCompensation;
+	}
+
+	void calculateSliderValueCompensation(int minorTickPacing) {
+		int sliderCompensation = 0;
+		if (minorTickPacing == 1)
+			sliderCompensation = 1;
+
+		this.sliderCompensation = sliderCompensation;
+	}
+
+	public void chartSliderAjustment(long newSampleLength) {
+		long sampleLengthToUse = newSampleLength;
+		setSampleLengthToUse(sampleLengthToUse);
+		createHashesAndUpdate(true);
+	}
+
+	public int getMinorTickLength() {
+		return minorTickLength;
+	}
+
+	protected void doUpdate() {
+		createHashesAndUpdate(true);
+	}
+
+	public void recreateDottedSeries() {
+		setFilteredData(null);
+		setDottedSeries(null);
+		clearChart();
+		createCommons();
+		addAllCommonSeriesToTheChart();
+		createHashesAndUpdate(false);
+	}
+
+	public void createHashesAndUpdate(boolean updateSamples) {
+		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
+		long start = System.currentTimeMillis();
+		update(originalFromFile, hashesGettingUpdated);
+		long diff = System.currentTimeMillis() - start;
+		logger.debug("update time: {}", diff);
+		forceRerender();
+	}
+
+	public void addSerieseToChart(Map<String, XYSeriesExtension> seriesMap) {
+		for (String key : getSeriesKeys()) {
+			XYSeriesExtension series = seriesMap.get(key);
+			addSeries(series);
+		}
+	}
+
+	public void adjustVisibility(Map<String, XYSeriesExtension> seriesMap) {
+		for (String key : getSeriesKeys()) {
+			XYSeriesExtension series = seriesMap.get(key);
+			adjustVisibilityOfSeries(series);
+		}
+	}
+
+	void setCorrectColorsForDottedSerieses(Map<String, XYSeriesExtension> dottedSerieses) {
+		dottedSerieses.entrySet().stream().forEach((entry) -> {
+			XYSeriesExtension dottedSeries = entry.getValue();
+			String dataSetName = dottedSeries.getKey();
+			Paint seriesColor = getSeriesColor(dataSetName);
+			dottedSeries.setColorInTheChart(seriesColor);
+		});
+	}
+
 	/**
 	 * takes the list of resultlists and generates a list of DataSets from it along
 	 * with some metadata such as min and max timestamp.
 	 */
-	protected FilteredData generateDataSets(List<List<TransactionExecutionResult>> src) {
+	protected FilteredData generateDataSets(Map<String, List<TransactionExecutionResult>> src) {
 
-		List<List<TransactionExecutionResult>> inputToChart = new ArrayList<List<TransactionExecutionResult>>();
-		cloneTheOriginalResultList(inputToChart, src);
+		Map<String, List<TransactionExecutionResult>> inputToChart = cloneTheOriginalResultList(src);
 
-		long[] minmax = Utilities.findMinMaxTimestamp(inputToChart);
+		long[] minmax = Utilities.findMinMaxTimestamp(inputToChart, getSeriesKeys());
 
 		long[] minmaxPoints = { 0, minmax[1] - minmax[0] };
-		List<DataSet> generated = Utilities.convert(inputToChart, minmax[0], true);
+		List<DataSet> generated = Utilities.convert(inputToChart, minmax[0], true, getSeriesKeys());
 
-		for (DataSetUserType type : removalFiltersInUse) {
+		for (DataSetUserType type : getRemovalFiltersInUse()) {
 			type.getDataSetUser().useDataSet(generated);
 		}
 
@@ -353,9 +348,26 @@ public class ResultChartLogic extends ChartLogic {
 		createHashesAndUpdate(false);
 	}
 
-	protected void populateResultLists(List<List<TransactionExecutionResult>> listOfListOfList) {
+	protected Map<String, List<TransactionExecutionResult>> populateResultLists(Result... results) {
+		Map<String, List<TransactionExecutionResult>> listOfListOfTransactionResults = new HashMap<String, List<TransactionExecutionResult>>();
 		for (Result r : results) {
-			useResult(r, listOfListOfList);
+			useResult(r, listOfListOfTransactionResults);
+		}
+
+		return listOfListOfTransactionResults;
+	}
+
+	protected void useResult(Result r, Map<String, List<TransactionExecutionResult>> listOfListOfTransactionResults) {
+		Map<String, List<TransactionExecutionResult>> transactionExecutionResults = r.getResultLists();
+
+		for (String key : transactionExecutionResults.keySet()) {
+			List<TransactionExecutionResult> listToBeCopiedAndCleared = transactionExecutionResults.get(key);
+			List<TransactionExecutionResult> newList = listOfListOfTransactionResults.get(key);
+			if (newList == null) {
+				newList = new ArrayList<TransactionExecutionResult>();
+				listOfListOfTransactionResults.put(key, newList);
+			}
+			newList.addAll(listToBeCopiedAndCleared);
 		}
 	}
 
@@ -393,7 +405,7 @@ public class ResultChartLogic extends ChartLogic {
 		return percentile;
 	}
 
-	public static double amountOfSeriesesFactor(int amountOfThreads) {
+	protected static double amountOfSeriesesFactor(int amountOfThreads) {
 		double factor = 1 + Math.log(1 + amountOfThreads * 0.1);
 		return factor;
 	}
@@ -459,25 +471,27 @@ public class ResultChartLogic extends ChartLogic {
 
 	}
 
-	public void cloneTheOriginalResultList(List<List<TransactionExecutionResult>> dst,
-			List<List<TransactionExecutionResult>> original) {
-		for (List<TransactionExecutionResult> list : original) {
+	public Map<String, List<TransactionExecutionResult>> cloneTheOriginalResultList(
+			Map<String, List<TransactionExecutionResult>> original) {
+		Map<String, List<TransactionExecutionResult>> dst = new HashMap<String, List<TransactionExecutionResult>>();
+		for (String key : getSeriesKeys()) {
+			List<TransactionExecutionResult> list = original.get(key);
 			ArrayList<TransactionExecutionResult> casted = (ArrayList<TransactionExecutionResult>) list;
 			ArrayList<TransactionExecutionResult> clone = (ArrayList<TransactionExecutionResult>) casted.clone();
-			dst.add(clone);
+			dst.put(key, clone);
 		}
+		return dst;
 	}
 
 	public void clearChart() {
 		commonSeriesCalculators.clear();
 		seriesCollection.removeAllSeries();
-		plot.getLegends();
 		ranges.clear();
 		earliestX = null;
 	}
 
 	void populateChartWithSavedDottedSeries() {
-		for (Comparable key : seriesKeys) {
+		for (String key : getSeriesKeys()) {
 			XYSeriesExtension series = dottedSeries.get(key);
 			int indexOfSeries = seriesCollection.indexOf(series);
 			Boolean visible = seriesVisible.get(series.getKey());
@@ -490,13 +504,13 @@ public class ResultChartLogic extends ChartLogic {
 		}
 	}
 
-	Map<Comparable, XYSeriesExtension> createDottedSeries(List<DataSet> dataSets) {
-		Map<Comparable, XYSeriesExtension> result = new HashMap<Comparable, XYSeriesExtension>();
+	Map<String, XYSeriesExtension> createDottedSeries(List<DataSet> dataSets) {
+		Map<String, XYSeriesExtension> result = new HashMap<String, XYSeriesExtension>();
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 			Paint seriesColor = getSeriesColor(dataSetName);
 			XYSeriesExtension serie = new XYDottedSeriesExtension(dataSetName, false,
-					allowDuplicateXValues_forDottedSeries, seriesColor);
+					ALLOW_DUPLICATE_X_VALUES_FOR_POINT_SERIES, seriesColor);
 			result.put(dataSetName, serie);
 		}
 		return result;

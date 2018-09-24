@@ -96,7 +96,7 @@ public class CommonSampleGroup extends Group {
 
 	}
 
-	public CommonSample getAndCreateSample(long ts, Comparable name, long sampleLength) {
+	public CommonSample getAndCreateSample(long ts, String name, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		CommonSample s = getSample(first, name, sampleLength);
 		if (s == null) {
@@ -105,7 +105,7 @@ public class CommonSampleGroup extends Group {
 		return s;
 	}
 
-	public CommonSample getSample(long first, Comparable name, long sampleLength) {
+	public CommonSample getSample(long first, String name, long sampleLength) {
 		CommonSample s = fetch(first, sampleLength);
 		return s;
 	}

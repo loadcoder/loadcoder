@@ -22,10 +22,11 @@ import static com.loadcoder.statics.SummaryUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import junit.framework.Assert;
-
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.result.Summary.SummaryWithResultActions.Table.SummaryWithTable;
@@ -33,68 +34,65 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class SummaryTest extends TestNGBase{
+public class SummaryTest extends TestNGBase {
 
-	@Test
-	public List<List<TransactionExecutionResult>> getResultList(){
+	public Map<String, List<TransactionExecutionResult>> getResultList() {
 
-		List<List<TransactionExecutionResult>> resultLists = new ArrayList<List<TransactionExecutionResult>>();
+		Map<String, List<TransactionExecutionResult>> resultLists = new HashMap<String, List<TransactionExecutionResult>>();
 
 		List<TransactionExecutionResult> incrementalResponseTimes = new ArrayList<TransactionExecutionResult>();
-		resultLists.add(incrementalResponseTimes);
+		resultLists.put("0-100", incrementalResponseTimes);
 
 		List<TransactionExecutionResult> someErrors = new ArrayList<TransactionExecutionResult>();
-		resultLists.add(someErrors);
+		resultLists.put("sometimesError", someErrors);
 
-		for(int i = 0; i<100; i++){
-			TransactionExecutionResult result = new TransactionExecutionResult("0-100", (long)i * 1000, i, true, "" );
+		for (int i = 0; i < 100; i++) {
+			TransactionExecutionResult result = new TransactionExecutionResult((long) i * 1000, i, true, "");
 			incrementalResponseTimes.add(result);
-		
-			if(i == 0 || i == 50 || i ==90)
-				result = new TransactionExecutionResult("sometimesError", (long)i * 1000, i, false, "");
+
+			if (i == 0 || i == 50 || i == 90)
+				result = new TransactionExecutionResult((long) i * 1000, i, false, "");
 			else
-				result = new TransactionExecutionResult("sometimesError", (long)i * 1000, i, true, "");
+				result = new TransactionExecutionResult((long) i * 1000, i, true, "");
 			someErrors.add(result);
 		}
-		
-		return resultLists;
 
+		return resultLists;
 	}
-	
-	public SummaryWithTable fullSummary(Result result, Method method){
+
+	public SummaryWithTable fullSummary(Result result, Method method) {
 		Summary resultSummarizer = new Summary(result);
-		SummaryWithTable summaryWithTable = resultSummarizer.
-		firstDo((a)->{}).
-		log((a)->{return String.format("Summary for %s:%s", this.getClass().getSimpleName(), method.getName());}).
-		log(throughput()).
-		log(amountOfTransactions()).
-		log(amountOfFails()).
-		table().
-		column("Transaction", transactionNames()).
-		column("Amount", transactions()).
-		column("MAX", max()).
-		column("AVG", avg()).
-		column("80%", percentile(80)).
-		column("FAILS", fails());
+		SummaryWithTable summaryWithTable = resultSummarizer.firstDo((a) -> {
+		}).log((a) -> {
+			return String.format("Summary for %s:%s", this.getClass().getSimpleName(), method.getName());
+		}).log(throughput()).log(amountOfTransactions()).log(amountOfFails()).table()
+				.column("Transaction", transactionNames()).column("Amount", transactions()).column("MAX", max())
+				.column("AVG", avg()).column("80%", percentile(80)).column("FAILS", fails());
 
 		return summaryWithTable;
 	}
 
-	@Test
-	public void testLogSummaryRow() {
-		Result result = new Result(getResultList());
-		Summary summary = new Summary(result);
-		summary
-		.log(a -> "Foo")
-		.log(a -> "Bar")
-		.print();
+	class ResultExtention extends Result {
+		public ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
+			super(resultLists);
+		}
 	}
-	
+
 	@Test
-	public void test(Method m) {
-		Result result = new Result(getResultList());
+	public void seriesSummaryTest() {
+		Result result = new ResultExtention(getResultList());
+		Summary summary = new Summary(result);
+		String summaryString = summary.log(a -> "Foo").log(a -> "Bar").getAsString();
+		assertTrue(summaryString.contains("Foo"));
+		assertTrue(summaryString.contains("Bar"));
+
+	}
+
+	@Test
+	public void commonSummaryTest(Method m) {
+		Result result = new ResultExtention(getResultList());
 		SummaryWithTable summaryWithTable = fullSummary(result, m);
-		Assert.assertTrue(summaryWithTable.getAsString().contains("Throughput: 2.0TPS"));
-		
+		assertTrue(
+				summaryWithTable.getAsString().contains("Throughput: 2.0TPS"));
 	}
 }

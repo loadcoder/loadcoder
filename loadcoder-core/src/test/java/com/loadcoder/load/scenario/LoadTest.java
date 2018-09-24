@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load;
+package com.loadcoder.load.scenario;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
@@ -24,6 +24,10 @@ import static com.loadcoder.statics.StopDesisions.duration;
 import static com.loadcoder.statics.StopDesisions.iterations;
 import static com.loadcoder.statics.Time.PER_SECOND;
 import static com.loadcoder.statics.Time.SECOND;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
@@ -54,17 +59,11 @@ public class LoadTest extends TestNGBase{
 	@Test
 	public void testDefault(Method m){
 		
-		LoadScenario ls = new LoadScenario() {
-			
-			@Override
-			public void loadScenario() {
-				load("t1", () -> {return "";}).perform();
-			}
-		};
-		
+		LoadScenario ls = mock(LoadScenario.class);
 		Load l = new LoadBuilder(ls).build();
-
+		when(ls.getLoad()).thenReturn(l);
 		new ExecutionBuilder(l).build().execute().andWait();
+		verify(ls, times(1)).loadScenario();
 	}
 	
 	@Test
@@ -89,7 +88,7 @@ public class LoadTest extends TestNGBase{
 		FinishedExecution finishedExecution = new ExecutionBuilder(l, l2).build().execute().andWait();
 		Result result = finishedExecution.getReportedResultFromResultFile();
 		
-		Assert.assertEquals(result.getNoOfTransactions(), 4);
+		Assert.assertEquals(result.getAmountOfTransactions(), 4);
 	}
 	
 	@Test(groups = "timeconsuming")

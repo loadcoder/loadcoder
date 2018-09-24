@@ -19,16 +19,6 @@ public class ChartUtilsTest extends TestNGBase {
 	Logger log = LoggerFactory.getLogger(ChartUtilsTest.class);
 
 	@Test
-	public void calculateSteppingTest() {
-
-		ChartUtils.calculateStepping(1);
-
-		ChartUtils.calculateStepping(0.1);
-
-		ChartUtils.calculateStepping(0.001);
-	}
-
-	@Test
 	public void calculateKeepFactorTest() {
 		double test = 0.51;
 		System.out.println(Math.round(test));

@@ -26,11 +26,11 @@ public abstract class YCalculator {
 	
 	public abstract String getName();
 
-	public abstract double calculateCommonY(List<Point> points);
+	public abstract double calculateY(List<Point> points);
 
 	public static final YCalculator avg = new YCalculator() {
 
-		public double calculateCommonY(List<Point> points) {
+		public double calculateY(List<Point> points) {
 			double y = 0;
 			int amountUsed = 0;
 			for (Point point : points) {
@@ -53,7 +53,7 @@ public abstract class YCalculator {
 	
 	public static final YCalculator max = new YCalculator() {
 
-		public double calculateCommonY(List<Point> points) {
+		public double calculateY(List<Point> points) {
 			long max = -1;
 
 			for (Point point : points) {

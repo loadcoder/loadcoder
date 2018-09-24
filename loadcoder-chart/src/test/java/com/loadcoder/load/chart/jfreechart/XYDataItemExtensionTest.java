@@ -16,14 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.exceptions;
+package com.loadcoder.load.chart.jfreechart;
 
+import java.awt.Color;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class NoResultOrFormatterExceptionTest {
+public class XYDataItemExtensionTest {
 
+	
+	/**
+	 * This test verifies that when adding a XYDataItemExtension to as series, it really is
+	 * that specific item that is added, and not a clone.
+	 * JFreeChart's XYDataItem are clone the item that is trying to be added. However, loadcoder
+	 * needs the reference to that specific item, since we want to update already added items.
+	 */
 	@Test
-	public void create() {
-		new NoResultOrFormatterException("");
+	public void addToSeriesTest() {
+		XYSeriesExtension series = new XYSeriesExtension("s", false, true, Color.BLACK);
+		XYDataItemExtension addedItem = new XYDataItemExtension(0, 0);
+		series.add(addedItem);
+		addedItem.setY(1); // change added
+		XYDataItemExtension itemInSeries = (XYDataItemExtension)series.getItems().get(0);
+		Assert.assertEquals(itemInSeries, addedItem);
+		Assert.assertEquals(itemInSeries.getYValue(), 1.0D);
 	}
+	
 }

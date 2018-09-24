@@ -29,6 +29,6 @@ public class SUTTest extends TestNGBase{
 	@Test
 	public void testSUT(Method method){
 		SUT sut = new SUT();
-		sut.loggingMethod();
+		sut.loggingMethod("");
 	}
 }

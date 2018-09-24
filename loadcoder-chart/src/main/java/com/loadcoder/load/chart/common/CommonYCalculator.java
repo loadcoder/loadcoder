@@ -24,5 +24,5 @@ import java.util.Map;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 
 public interface CommonYCalculator {
-	public abstract double calculateCommonY(List<Comparable> keys, long timestamp, Map<Comparable, SampleGroup> sampleGroup, long sampleLength);
+	public abstract double calculateCommonY(List<String> keys, long timestamp, Map<String, SampleGroup> sampleGroup, long sampleLength);
 }

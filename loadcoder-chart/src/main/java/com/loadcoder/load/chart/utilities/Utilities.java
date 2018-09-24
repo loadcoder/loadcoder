@@ -20,8 +20,7 @@ package com.loadcoder.load.chart.utilities;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JTextArea;
+import java.util.Map;
 
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.Point;
@@ -29,11 +28,17 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class Utilities {
 
-	public static long[] findMinMaxTimestamp(List<List<TransactionExecutionResult>> resultLists) {
+	public static long[] findMinMaxTimestamp(Map<String, List<TransactionExecutionResult>> resultLists,
+			List<String> keys) {
 		long min = Long.MAX_VALUE;
 		long max = Long.MIN_VALUE;
 
-		for (List<TransactionExecutionResult> resultList : resultLists) {
+		for (String key : keys) {
+			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			if (resultList == null) {
+				continue;
+			}
+
 			for (TransactionExecutionResult result : resultList) {
 				if (result.getTs() < min) {
 					min = result.getTs();
@@ -45,21 +50,17 @@ public class Utilities {
 		return new long[] { min, max };
 	}
 
-	public static List<DataSet> convert(List<List<TransactionExecutionResult>> resultLists, long earliestTs,
-			boolean convertToRelativeTime) {
-		return convert(resultLists, earliestTs, convertToRelativeTime, null);
-	}
-
-	public static List<DataSet> convert(List<List<TransactionExecutionResult>> resultLists, long earliestTs,
-			boolean convertToRelativeTime, JTextArea message) {
-
+	public static List<DataSet> convert(Map<String, List<TransactionExecutionResult>> resultLists, long earliestTs,
+			boolean convertToRelativeTime, List<String> keys) {
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		if(resultLists.isEmpty())
+		if (resultLists.isEmpty())
 			return dataSets;
-		for (List<TransactionExecutionResult> resultList : resultLists) {
-			TransactionExecutionResult firstResult = resultList.get(0);
-
-			DataSet dataSet = new DataSet(firstResult.getName(), new ArrayList<Point>());
+		for (String key : keys) {
+			List<TransactionExecutionResult> resultList = resultLists.get(key);
+			if(resultList == null) {
+				continue;
+			}
+			DataSet dataSet = new DataSet(key, new ArrayList<Point>());
 			dataSets.add(dataSet);
 			for (TransactionExecutionResult result : resultList) {
 				if (convertToRelativeTime) {

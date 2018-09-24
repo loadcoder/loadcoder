@@ -1,0 +1,34 @@
+{
+	"groupBy": [{
+			"params": [
+				"$__interval"
+			],
+			"type": "time"
+		}, {
+			"params": [
+				"null"
+			],
+			"type": "fill"
+		}
+	],
+	"measurement": "${measurement_name}",
+	"orderByTime": "ASC",
+	"policy": "default",
+	"refId": "${refid}",
+	"resultFormat": "time_series",
+	"select": [
+		[{
+				"params": [
+					"value"
+				],
+				"type": "field"
+			}, {
+				"params": [],
+				"type": "${select_type}"
+			}
+		]
+	],
+          "tags": [
+			${tags}
+          ]
+}

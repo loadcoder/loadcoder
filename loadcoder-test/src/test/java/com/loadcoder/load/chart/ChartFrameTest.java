@@ -19,6 +19,7 @@
 package com.loadcoder.load.chart;
 
 import java.awt.Color;
+import java.util.HashMap;
 
 import org.testng.annotations.Test;
 
@@ -31,11 +32,11 @@ public class ChartFrameTest {
 
 	@Test(groups = "manual")
 	public void chartFrameExperiment() {
-		ChartFrame frame = new ChartFrame(true, false);
+		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>());
 		frame.setVisible(true);
 		frame.showChart();
 		
-		XYSeriesExtension series = new XYSeriesExtension("test", true, false, Color.GREEN);
+		XYSeriesExtension series = new XYSeriesExtension("foo", true, false, Color.GREEN);
 
 		frame.getSeriesCollection().addSeries(series);
 		series.add(new XYDataItemExtension(0, 0));

@@ -24,35 +24,41 @@ import static org.mockito.Mockito.when;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jfree.chart.LegendItem;
+import org.jfree.data.xy.XYSeries;
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ChartLogic;
 
-import junit.framework.Assert;
 
 public class SettingsLogicTest {
 
 	@Test
 	public void create() {
 		ChartLogic chartLogic = mock(ChartLogic.class);
-		SettingsLogic logic = new SettingsLogic(chartLogic);
-		Assert.assertEquals(false, logic.isColorChooserVisible());
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
+		assertEquals(logic.isColorChooserVisible(), false);
 	}
 
 	@Test
 	public void selectColorTest() {
 		ChartLogic chartLogic = mock(ChartLogic.class);
-		SettingsLogic logic = new SettingsLogic(chartLogic);
+
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
 
 		Color chosenColor = Color.PINK;
 		logic.changeSeriesColorSelection(chosenColor);
 		Color selectedColor = logic.getSeriesColorSelection();
-		Assert.assertEquals(chosenColor, selectedColor);
+		assertEquals(selectedColor, chosenColor);
 	}
 
 	@Test
@@ -61,22 +67,26 @@ public class SettingsLogicTest {
 		XYPlotExtension plot = mock(XYPlotExtension.class);
 		XYSeriesExtension series = mock(XYSeriesExtension.class);
 		LegendItem legend = mock(LegendItem.class);
-		List<Color> existingColors = new ArrayList<Color>();
+		Map<String, Color> existingColors = new HashMap<String, Color>();
 		when(chartLogic.getPlot()).thenReturn(plot);
 		when(series.getLegend()).thenReturn(legend);
+		when(series.getKey()).thenReturn("foo");
 		when(chartLogic.getExistingColors()).thenReturn(existingColors);
 
-		SettingsLogic logic = new SettingsLogic(chartLogic);
+		List<XYSeries> list = new ArrayList<XYSeries>();
+		ColorSettings logic = new ColorSettings(chartLogic, list);
 		logic.setChosenSeries(series);
 		Color chosenColor = Color.PINK;
 		logic.changeSeriesColorSelection(chosenColor);
-		logic.applyColorSelections();
+
+		ChartSettingsActionsModel chartSettingsActionsModel = new ChartSettingsActionsModel();
+		logic.apply(chartSettingsActionsModel);
 
 		verify(series).setColorInTheChart(Color.PINK);
 		verify(legend).setFillPaint(Color.PINK);
 		verify(legend).setOutlinePaint(Color.PINK);
-		Assert.assertEquals(1, existingColors.size());
-		Assert.assertEquals(Color.PINK, existingColors.get(0));
-		
+		assertEquals(existingColors.size(), 1);
+		assertEquals(existingColors.get("foo"), Color.PINK);
+
 	}
 }
