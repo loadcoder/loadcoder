@@ -34,7 +34,6 @@ public class HttpClient {
 		return https ? "https" : "http";
 	}
 
-	// HTTP POST request
 	protected int sendPost(String body, String url, List<Header> headers) {
 		try {
 			return sendPostChecked(body, url, headers);

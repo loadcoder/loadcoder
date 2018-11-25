@@ -25,17 +25,17 @@ import org.slf4j.LoggerFactory;
 
 public class StartedLoad {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	Load l;
+	private Load load;
 
 	public StartedLoad(Load l) {
-		this.l = l;
+		this.load = l;
 		l.getLoadStateThread().start();
 	}
 
 	protected boolean isScenarioTerminated() {
-		return l.getLoadStateThread().getState() == State.TERMINATED;
+		return load.getLoadStateThread().getState() == State.TERMINATED;
 	}
 
 }

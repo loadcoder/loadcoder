@@ -26,24 +26,17 @@ import com.loadcoder.result.SharedDirFileAppender;
 
 import ch.qos.logback.core.FileAppender;
 
-
+/**
+ * An extension of FileAppender. The purpose of this class is to have a fileappender with the ability
+ * to change the filepath for it and every other instances of its type at once.
+ * This is useful when executing multiple tests where the logs of each test must be separated
+ */
 public class SharedDirFileAppenderLogback extends FileAppender implements SharedDirFileAppender{
-	/**
-	 * An extension of FileAppender. The purpose of this class is to have a fileappender with the ability
-	 * to change the filepath for it and every other instances of its type at once.
-	 * This is useful when executing multiple tests where the logs of each test must be separated
-	 */
-
-	String nextFileName = null;
 	
 	public SharedDirFileAppenderLogback(){
 		synchronized(Logs.sharedDirFileAppenders) {
 			Logs.sharedDirFileAppenders.add(this);	
 		}
-	}
-	
-	public void setNextFileName(String nextFileName) {
-		this.nextFileName = nextFileName;
 	}
 
 	public void changeToDir(File newDir) throws IOException{
@@ -51,9 +44,6 @@ public class SharedDirFileAppenderLogback extends FileAppender implements Shared
 		File file = new File(filename);
 
 		String nameOfTheFile = file.getName();
-		if(nextFileName != null){
-			nameOfTheFile = nextFileName;
-		}
 		String newFile = newDir + "/" + nameOfTheFile;
 		openFile(newFile);
 	}

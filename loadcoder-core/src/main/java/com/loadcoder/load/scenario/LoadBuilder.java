@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.PreviousLoadStillRunning;
+import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STILL_RUNNING;
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
@@ -35,8 +35,14 @@ public class LoadBuilder {
 	private Executable postExecution;
 	private Intensity intensity;
 
-	public LoadBuilder(LoadScenario ls) {
-		this.ls = ls;
+	/**
+	 * Constructor for LoadBuilder
+	 * 
+	 * @param loadScenario is the LoadScenario that will be used for the Load about
+	 *                     to be built
+	 */
+	public LoadBuilder(LoadScenario loadScenario) {
+		this.ls = loadScenario;
 	}
 
 	/**
@@ -54,7 +60,7 @@ public class LoadBuilder {
 			 * didnt finish yet
 			 */
 			if (previouslyStartedLoad != null && !previouslyStartedLoad.isScenarioTerminated())
-				throw new InvalidLoadStateException(PreviousLoadStillRunning.toString());
+				throw new InvalidLoadStateException(PREVIOUS_LOAD_STILL_RUNNING.toString());
 		}
 
 		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, preExecution, postExecution, intensity);
@@ -71,9 +77,8 @@ public class LoadBuilder {
 	 * State the amount of threads for the load test.<br>
 	 * Default is 1 thread.
 	 * 
-	 * @param amountOfthreads
-	 *            is the target amount of threads that should be started and run the
-	 *            load
+	 * @param amountOfthreads is the target amount of threads that should be started
+	 *                        and run the load
 	 * @return The builder instance
 	 */
 	public LoadBuilder amountOfThreads(int amountOfthreads) {
@@ -95,9 +100,8 @@ public class LoadBuilder {
 	 * com.loadcoder.statics.StopDesisions.<br>
 	 * Default is a StopDecision that will stop the load after one iteration.
 	 * 
-	 * @param stopDecision
-	 *            is the target amount of threads that should be started and run the
-	 *            load
+	 * @param stopDecision is the target amount of threads that should be started
+	 *                     and run the load
 	 * @return The builder instance
 	 */
 	public LoadBuilder stopDecision(StopDecision stopDecision) {
@@ -129,8 +133,7 @@ public class LoadBuilder {
 	 * In the loadScenario() method, do:<br>
 	 * {@code  MyClient client = threadLocal.get();}<br>
 	 * 
-	 * @param preExecution
-	 *            is the pre execution implementation
+	 * @param preExecution is the pre execution implementation
 	 * @return The builder instance
 	 */
 	public LoadBuilder preExecution(Executable preExecution) {
@@ -151,8 +154,7 @@ public class LoadBuilder {
 	 * {@code  ThreadLocal<MyClient> threadLocal = new ThreadLocal<>();}<br>
 	 * {@code  new LoadBuilder(loadScenario).preExecution(()-> threadLocal.set(new MyClient())).postExecution(()-> threadLocal.get().teardown()).build();}<br>
 	 * 
-	 * @param postExecution
-	 *            is the post execution implementation
+	 * @param postExecution is the post execution implementation
 	 * @return The builder instance
 	 */
 	public LoadBuilder postExecution(Executable postExecution) {
@@ -164,24 +166,13 @@ public class LoadBuilder {
 		return rampupMillis;
 	}
 
-	public class Rampup {
-		long amount;
-		TimeUnit timeUnit;
-
-		Rampup(long amount, TimeUnit timeUnit) {
-			this.amount = amount;
-			this.timeUnit = timeUnit;
-		}
-	}
-
 	/**
 	 * rampup is the process of increasing the running amount of threads from 1 to
 	 * the stated amount of threads for the load test over rampupMillis
 	 * milliseconds.<br>
 	 * Default is no rampup.
 	 * 
-	 * @param rampupMillis
-	 *            is the duration of the rampup in milliseconds
+	 * @param rampupMillis is the duration of the rampup in milliseconds
 	 * @return the builder instance
 	 */
 	public LoadBuilder rampup(long rampupMillis) {
@@ -190,33 +181,23 @@ public class LoadBuilder {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param rampupMillis
-	 *            is the duration of the rampup in milliseconds
-	 * @return the builder instance
-	 */
-
-	/**
 	 * The intensity of the load can be throttled (limited) by using this method. So
 	 * if the throttle is set to 5 PER_SECOND with ThrottleMode SHARED, the total
 	 * throughput wont't be over 5 TPS.<br>
 	 * Default is no throttle.
 	 * 
 	 * 
-	 * @param amount
-	 *            of stated PerTimeUnit will be the throttle limit
-	 * @param perTimeUnit
-	 *            is the unit of which to throttle limit is defined by
-	 * @param throttleMode
-	 *            states whether the limit should be shared (SHARED) among the
-	 *            threads, or if the there should be a separate throttle per thread
-	 *            (PER_THREAD) The difference between these two is that if SHARED is
-	 *            used, the total throughput won't be higher than the defined limit,
-	 *            no matter the amount of threads. If PER_THREAD is used, the
-	 *            separate thread can't produce a higher throughput than the limit,
-	 *            but the total througput for all threads together will
-	 *            theoretically be limit * amountOfThreads
+	 * @param amount       of stated PerTimeUnit will be the throttle limit
+	 * @param perTimeUnit  is the unit of which to throttle limit is defined by
+	 * @param throttleMode states whether the limit should be shared (SHARED) among
+	 *                     the threads, or if the there should be a separate
+	 *                     throttle per thread (PER_THREAD) The difference between
+	 *                     these two is that if SHARED is used, the total throughput
+	 *                     won't be higher than the defined limit, no matter the
+	 *                     amount of threads. If PER_THREAD is used, the separate
+	 *                     thread can't produce a higher throughput than the limit,
+	 *                     but the total througput for all threads together will
+	 *                     theoretically be limit * amountOfThreads
 	 * 
 	 * @return the builder instance
 	 */

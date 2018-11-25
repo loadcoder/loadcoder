@@ -20,18 +20,18 @@ package com.loadcoder.load.exceptions;
 
 public enum ExceptionMessages {
 
-	LoadAlreadyStarted("E001", "This Load instance has already been started once. "
+	LOAD_ALREADY_STARTED("E001", "This Load instance has already been started once. "
 			+ "Build another Load instace and start that one instead"),
 
-	ScenarioConnectedToOtherLoad("E002", "There is another loadtest connected to the Scenario trying to be executed"),
+	SCENARIO_BELONGS_TO_OTHER_LOAD("E002", "There is another loadtest connected to the Scenario trying to be executed"),
 
-	PreviousLoadStillRunning("E003", "There is a previously started Load that is still execting this Scenario."
+	PREVIOUS_LOAD_STILL_RUNNING("E003", "There is a previously started Load that is still execting this Scenario."
 	+ "Wait until the loadtest is finished before starting another loadtest using the same Scenario");
 
-	String id;
-	String message;
+	private String id;
+	private String message;
 
-	ExceptionMessages(String id, String message){
+	private ExceptionMessages(String id, String message){
 		this.id = id;
 		this.message = message;
 	}

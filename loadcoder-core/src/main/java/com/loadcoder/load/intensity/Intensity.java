@@ -22,22 +22,43 @@ import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
 public class Intensity{
-	int amount;
-	TimeUnit perTimeUnit;
-	ThrottleMode throttleMode;
+	private final int amount;
+	private final TimeUnit perTimeUnit;
+	private final ThrottleMode throttleMode;
 
+	
+	/**
+	 * Constructor for the Intensity
+	 * amount = 1 and perTimeUnit = com.loadcoder.statics.Time.PER_SECOND will give
+	 * an intensity equivalent to 1 per second.
+	 * @param amount 
+	 * @param perTimeUnit
+	 * @param throttleMode
+	 */
 	public Intensity(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode){
 		this.amount = amount;
 		this.perTimeUnit = perTimeUnit;
 		this.throttleMode = throttleMode;
 	}
 
+	/**
+	 * @return the amount of the defined Intensity
+	 */
 	public long getAmount() {
 		return amount;
 	}
+	
+	/**
+	 * @return the TimeUnit of the defined Intensity
+	 */
 	public TimeUnit getPerTimeUnit() {
 		return perTimeUnit;
 	}
+	
+	
+	/**
+	 * @return the ThrottleMode of the defined Intensity
+	 */
 	public ThrottleMode getThrottleMode() {
 		return throttleMode;
 	}

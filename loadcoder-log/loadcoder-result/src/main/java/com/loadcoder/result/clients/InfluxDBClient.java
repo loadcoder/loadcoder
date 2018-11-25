@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.loadcoder.result.TransactionExecutionResult;
 
-
 public class InfluxDBClient extends HttpClient{
 
 	private final String dbName;
@@ -36,15 +35,18 @@ public class InfluxDBClient extends HttpClient{
 	private final String WRITE_URL;
 	private final String QUERY_URL;
 	 
+	/**
+	 * Constructor for the InfluxDBClient
+	 * @param host is the host for where the influx DB is hosted
+	 * @param port is the port where the influx DB exposes its API
+	 * @param https is boolean for whether or not the communication is encrypted or not.
+	 * @param db is the name of the database inside the influx db, containig the results
+	 */
 	public InfluxDBClient(String host, int port, boolean https, String db) {
 		String protocol = protocolAsString(https);
 		WRITE_URL = String.format(WRITE_URL_TEMPLATE, protocol, host, port);
 		QUERY_URL = String.format(QUERY_URL_TEMPLATE, protocol, host, port);
 		this.dbName = db;
-	}
-
-	public String getDbName() {
-		return dbName;
 	}
 
 	protected int createDB(String dbName) {
@@ -64,6 +66,11 @@ public class InfluxDBClient extends HttpClient{
 		return new InfluxDBTestExecution(executionId, this);
 	}
 	
+	
+	
+	/**
+	 * Class that keeps the influxDB connection together with the current execution
+	 */
 	public static class InfluxDBTestExecution{
 		final String executionId;
 		final InfluxDBClient client;
@@ -78,17 +85,23 @@ public class InfluxDBClient extends HttpClient{
 			this.executionId = null;
 		}
 		
-		public int writeTransactions(Map<String, List<TransactionExecutionResult>> listOfListOfList) {
-			String body = convertTransactionsToWriteBody(listOfListOfList, executionId);
+		
+		/**
+		 * Write a list of transaction results into the influx DB
+		 * @param transactionResults that is going be be written into the influx DB
+		 * @return the HTTP status code for the influx DB response
+		 */
+		public int writeTransactions(Map<String, List<TransactionExecutionResult>> transactionResults) {
+			String body = convertTransactionsToWriteBody(transactionResults, executionId);
 			int responseCode = client.writeEntries(body);
 			return responseCode;
 		}
 		
-		protected String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> listOfListOfList, String executionId) {
+		protected String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> transactionResults, String executionId) {
 			String entireBody = "";
 			
-			for (String key : listOfListOfList.keySet()) {
-				List<TransactionExecutionResult> list = listOfListOfList.get(key);
+			for (String key : transactionResults.keySet()) {
+				List<TransactionExecutionResult> list = transactionResults.get(key);
 				for (TransactionExecutionResult t : list) {
 					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getRt(), t.getTs());
 					entireBody = entireBody + urlParameters + "\n";

@@ -25,6 +25,10 @@ public class ResultModel <R> extends ResultModelBase {
 	public ResultModel(String transactionName) {
 		super(transactionName);
 	}
+	
+	/**
+	 * @return The response of the transaction
+	 */
 	public R getResponse(){
 		return resp;
 	}

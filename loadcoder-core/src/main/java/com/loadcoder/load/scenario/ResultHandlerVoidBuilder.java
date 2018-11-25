@@ -34,7 +34,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 	private ResultHandlerVoid resultHandler;
 	private ResultModelVoid resultModel;
 	
-	public ResultHandlerVoidBuilder(
+	protected ResultHandlerVoidBuilder(
 			String defaultName,
 			TransactionVoid trans, 
 			LoadScenario ls,
@@ -66,12 +66,16 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 	}
 
 	/**
-	 * Performs the transaction you just stated
+	 * Performs the transaction just stated
 	 */
 	public void perform(){
 		performAndGetModel();
 	}
 	
+	/**
+	 * This method will create a new Thread, start it and then return immediately. The created Thread will
+	 * execute the perform method. The result will be that the transaction is called asynchronously.
+	 */
 	public void performAsync() {
 		Thread t = new Thread() {
 			public void run() {

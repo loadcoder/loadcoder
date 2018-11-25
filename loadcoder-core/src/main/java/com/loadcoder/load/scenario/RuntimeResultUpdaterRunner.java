@@ -27,7 +27,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeResultUpdaterRunner implements Runnable {
@@ -38,7 +37,7 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	private final RuntimeResultUser runtimeDataUser;
 
-	public RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
+	protected RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}
@@ -70,7 +69,6 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 		}
 	}
 
-//	protected void swapOutDataAndCallUser(Map<String, List<TransactionExecutionResult>> map) {
 	protected void swapOutDataAndCallUser() {
 		
 		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();

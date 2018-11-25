@@ -34,7 +34,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 	private ResultHandler<R> resultHandler;
 	private ResultModel<R> resultModel;
 
-	public ResultHandlerBuilder(
+	protected ResultHandlerBuilder(
 			String defaultName,
 			Transaction<R> trans, 
 			LoadScenario ls,
@@ -65,7 +65,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 	}
 	
 	/**
-	 * Performs the transaction you just stated
+	 * Performs the transaction just stated
 	 * @return the return object from the transaction
 	 */
 	public R perform(){
@@ -141,6 +141,11 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 	return resultModel;
 	}
 
+	
+	/**
+	 * This method will create a new Thread, start it and then return immediately. The created Thread will
+	 * execute the perform method. The result will be that the transaction is called asynchronously.
+	 */
 	public void performAsync() {
 		Thread t = new Thread() {
 			public void run() {

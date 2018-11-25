@@ -29,9 +29,14 @@ import com.loadcoder.statics.ThrottleMode;
 
 public class Throttler {
 
-	final private Map<Thread, RateLimiter> limiters;
-	final private RateLimiter limiter;
+	private final Map<Thread, RateLimiter> limiters;
+	private final RateLimiter limiter;
 
+	/**
+	 * Constructor for Throttler
+	 * @param intensity is the limit for the maximum throughput through this Throttler
+	 * @param threads is the Threads that are going to be throttled
+	 */
 	public Throttler(Intensity intensity, List<Thread> threads){
 		if(intensity.getThrottleMode().equals(ThrottleMode.PER_THREAD)){
 			Map<Thread, RateLimiter> temporaryMap = new HashMap<Thread, RateLimiter>();
@@ -49,6 +54,10 @@ public class Throttler {
 		}
 	}
 	
+	/**
+	 * @param t is the thread that is going to be throttled
+	 * @return the RateLimiter instance that does the actual limitation of the throughput
+	 */
 	public RateLimiter getRateLimiter(Thread t){
 		if(limiter != null){
 			return limiter;

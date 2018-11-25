@@ -24,7 +24,8 @@ import java.util.List;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class TransactionExecutionResultBuffer{
-	List<TransactionExecutionResult> buffer = new ArrayList<TransactionExecutionResult>();
+	
+	private List<TransactionExecutionResult> buffer = new ArrayList<TransactionExecutionResult>();
 
 	public List<TransactionExecutionResult> getBuffer() {
 		return buffer;

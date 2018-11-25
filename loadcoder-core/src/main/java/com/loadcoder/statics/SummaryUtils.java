@@ -60,7 +60,7 @@ public class SummaryUtils {
 	 */
 	public static ResultSummarizer throughput(){
 		return (a)->{
-			int seconds = calculateDurationOfTest(a.getDuration());
+			int seconds = getDurationInSeconds(a.getDuration());
 			double throughput = a.getAmountOfTransactions() / seconds;
 			return String.format("Throughput: %sTPS", throughput);
 		};

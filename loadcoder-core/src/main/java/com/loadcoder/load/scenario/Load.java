@@ -27,24 +27,24 @@ import com.loadcoder.load.intensity.Throttler;
 
 public class Load {
 
-	final LoadScenario ls;
+	private final LoadScenario ls;
 
-	StartedLoad startedLoad;
+	private StartedLoad startedLoad;
 	private StopDecision stopDecision;
 	private int amountOfthreads;
 	private long rampup;
-
-	boolean continueRuntimeResultUpdaterThread = true;
-
+	private Executable preExecution;
+	private Executable postExecution;
+	
 	private Throttler throttler;
 
-	List<Thread> threads;
+	private List<Thread> threads;
 
-	Thread loadStateThread = new Thread(new LoadStateRunner(this));
+	private Thread loadStateThread = new Thread(new LoadStateRunner(this));
 
 	protected long timesExecuted = 0;
 
-	Execution e;
+	private Execution e;
 
 	protected Execution getExecution() {
 		return this.e;
@@ -62,10 +62,7 @@ public class Load {
 		return postExecution;
 	}
 
-	private Executable preExecution;
-	private Executable postExecution;
-
-	StopDecision defaultStopDecision = (a, b) -> {
+	private StopDecision defaultStopDecision = (a, b) -> {
 		if (b > 0)
 			return true;
 		return false;
@@ -107,16 +104,36 @@ public class Load {
 		return amountOfthreads;
 	}
 
-	Object continueDecisionSynchronizer = new Object();
-
+	
+	/**
+	 * Interface for defining a Transaction with return type T
+	 * @param <T> type of the Transaction, which will be the type
+	 * returned from the method transaction()
+	 */
+	@FunctionalInterface
 	public interface Transaction<T> {
+		
+		/**
+		 * Implementation of the Transaction with return type T
+		 * @return an instance of type T
+		 * @throws Exception
+		 */
 		T transaction() throws Exception;
 	}
 
+	/**
+	 * Interface for defining a Transaction with void return type
+	 */
+	@FunctionalInterface
 	public interface TransactionVoid {
+		/**
+		 * Implementation of the Transaction with return type void
+		 * @throws Exception
+		 */
 		void transaction() throws Exception;
 	}
 
+	
 	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup,
 			Executable preExecution, Executable postExecution, Intensity intensity) {
 		this.ls = ls;
@@ -136,18 +153,10 @@ public class Load {
 		if (intensity != null) {
 			this.throttler = new Throttler(intensity, threads);
 		}
-
 	}
 
-	List<Thread> getThreads() {
+	protected List<Thread> getThreads() {
 		return threads;
-	}
-
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
-		long rampUpSleepTime = 0;
-		if (amountOfThreads > 1)
-			rampUpSleepTime = rampup / (amountOfThreads - 1);
-		return rampUpSleepTime;
 	}
 
 	/**
@@ -163,7 +172,7 @@ public class Load {
 		return startedLoad;
 	}
 
-	Thread getLoadStateThread() {
+	protected Thread getLoadStateThread() {
 		return loadStateThread;
 	}
 

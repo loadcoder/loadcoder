@@ -62,8 +62,7 @@ public class SummaryTest extends TestNGBase {
 
 	public SummaryWithTable fullSummary(Result result, Method method) {
 		Summary resultSummarizer = new Summary(result);
-		SummaryWithTable summaryWithTable = resultSummarizer.firstDo((a) -> {
-		}).log((a) -> {
+		SummaryWithTable summaryWithTable = resultSummarizer.log((a) -> {
 			return String.format("Summary for %s:%s", this.getClass().getSimpleName(), method.getName());
 		}).log(throughput()).log(amountOfTransactions()).log(amountOfFails()).table()
 				.column("Transaction", transactionNames()).column("Amount", transactions()).column("MAX", max())
@@ -78,6 +77,15 @@ public class SummaryTest extends TestNGBase {
 		}
 	}
 
+	@Test
+	public void SummaryGetDurationInSecondsTest(Method m) {
+		int seconds = Summary.getDurationInSeconds(2000);
+		assertEquals(seconds, 2);
+		
+		seconds = Summary.getDurationInSeconds(0);
+		assertEquals(seconds, 1);
+	}
+	
 	@Test
 	public void seriesSummaryTest() {
 		Result result = new ResultExtention(getResultList());

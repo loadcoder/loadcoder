@@ -62,23 +62,39 @@ public class TransactionExecutionResult {
 		return name;
 	}
 
+	
+	/**
+	 * @return the timestamp for when the transaction was executed (started)
+	 */
 	public long getTs() {
 		return ts;
 	}
 
+	/**
+	 * @return the execution time of the transaction
+	 */
 	public long getRt() {
 		return rt;
 	}
 
+	/**
+	 * @return the status of the executed transaction
+	 */
 	public boolean isStatus() {
 		return status;
 	}
 
+	/**
+	 * @return the message of the re
+	 */
 	public String getMessage() {
 		return message;
 	}
 
-	public String getThread() {
+	/**
+	 * @return the Id for the thread that initiated the transaction to be performed
+	 */
+	public String getThreadId() {
 		return threadId;
 	}
 }

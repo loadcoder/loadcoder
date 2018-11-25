@@ -36,29 +36,35 @@ public class Formatter {
 
 	public static final ResultFormatter SIMPLE_RESULT_FORMATTER = new ResultFormatter() {
 
-		public String getValueOfParameter(String line, String parameter) {
+		private String getValueOfParameter(String line, String parameter) {
 			String[] splitted = line.split(parameter + "=\"");
 			String value = splitted[1].split("\"")[0];
 			return value;
 		}
 
-		public TransactionExecutionResult toTransactionExecutionResult(String string) {
+		
+		/**
+		 * Generate TransactionExecutionResult from the provided String
+		 * @param transactionResult is the String used to generate the TransactionExecutionResult
+		 * @return the generated TransactionExecutionResult
+		 */
+		private TransactionExecutionResult toTransactionExecutionResult(String transactionResult) {
 
-			String name = getValueOfParameter(string, "name");
-			String ts = getValueOfParameter(string, "ts");
-			String status = getValueOfParameter(string, "status");
-			String rt = getValueOfParameter(string, "rt");
+			String name = getValueOfParameter(transactionResult, "name");
+			String ts = getValueOfParameter(transactionResult, "ts");
+			String status = getValueOfParameter(transactionResult, "status");
+			String rt = getValueOfParameter(transactionResult, "rt");
 			String message = null;
 			String threadId = null;
 
 			try{
-				threadId = getValueOfParameter(string, "thread");
+				threadId = getValueOfParameter(transactionResult, "thread");
 			}catch(RuntimeException rte){
 				//message is optional. OK with silent rte
 			}
 
 			try{
-				message = getValueOfParameter(string, "message");
+				message = getValueOfParameter(transactionResult, "message");
 			}catch(RuntimeException rte){
 				//message is optional. OK with silent rte
 			}
@@ -68,7 +74,7 @@ public class Formatter {
 		@Override
 		public String toString(TransactionExecutionResult transactionExecutionResult) {
 			String msg = transactionExecutionResult.getMessage() == null ? "" : String.format("message=\"%s\"", transactionExecutionResult.getMessage()) + " ";
-			String thread = transactionExecutionResult.getThread() == null ? "" : String.format("thread=\"%s\"", transactionExecutionResult.getThread()) + " ";
+			String thread = transactionExecutionResult.getThreadId() == null ? "" : String.format("thread=\"%s\"", transactionExecutionResult.getThreadId()) + " ";
 			String asString = String.format("<t name=\"%s\" ts=\"%s\" rt=\"%s\" status=\"%s\" " + msg + thread + "/>",
 					transactionExecutionResult.getName(), transactionExecutionResult.getTs(),
 					transactionExecutionResult.getRt(), transactionExecutionResult.isStatus());

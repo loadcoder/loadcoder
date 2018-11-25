@@ -21,16 +21,16 @@ package com.loadcoder.result.clients;
 public class Header {
 	String name;
 	String value;
-	Header(String name, String value){
+	protected Header(String name, String value){
 		this.name = name;
 		this.value = value;
 	}
 	
-	String getName() {
+	protected String getName() {
 		return name;
 	}
 	
-	String getValue() {
+	protected String getValue() {
 		return value;
 	}
 }

@@ -27,17 +27,21 @@ import com.loadcoder.statics.Formatter;
 
 public class Result {
 
-	Map<String, List<TransactionExecutionResult>> resultLists;
+	private Map<String, List<TransactionExecutionResult>> resultLists;
 
-	long start;
-	long end;
-	long duration;
+	private long start;
+	private long end;
+	private long duration;
 
-	int amountOfFails;
-	int amountOfTransactions;
+	private int amountOfFails;
+	private int amountOfTransactions;
 
-	File resultFile;
+	private File resultFile;
 
+	/**
+	 * Constructor for the Result
+	 * @param fileToGenerateResultFrom is the File from where the Result shall be generated
+	 */
 	public Result(File fileToGenerateResultFrom) {
 		this(fileToGenerateResultFrom, Formatter.SIMPLE_RESULT_FORMATTER);
 	}
@@ -46,6 +50,13 @@ public class Result {
 		init(resultLists);
 	}
 
+	/**
+	 * Constructor for the Result
+	 * @param fileToGenerateResultFrom is the File from where the Result shall be generated
+	 * @param resultFormatter is the ResultFormatter that will parse the fileToGenerateResultFrom
+	 * to a Result
+	 * 
+	 */
 	public Result(File fileToGenerateResultFrom, ResultFormatter resultFormatter) {
 
 		this.resultFile = fileToGenerateResultFrom;
@@ -94,31 +105,32 @@ public class Result {
 		setAmountOfTransactions(transactions);
 	}
 
+	
+	/**
+	 * Get the Result file used to generate the Result
+	 * @return the file of the result
+	 */
 	public File getResultFile() {
 		return resultFile;
 	}
 
-	public void setResultLists(Map<String, List<TransactionExecutionResult>> resultLists) {
-		this.resultLists = resultLists;
-	}
-
-	public void setStart(long start) {
+	private void setStart(long start) {
 		this.start = start;
 	}
 
-	public void setEnd(long end) {
+	private void setEnd(long end) {
 		this.end = end;
 	}
 
-	public void setDuration(long duration) {
+	private void setDuration(long duration) {
 		this.duration = duration;
 	}
 
-	protected void setAmountOfFails(int noOfFails) {
+	private void setAmountOfFails(int noOfFails) {
 		this.amountOfFails = noOfFails;
 	}
 
-	protected void setAmountOfTransactions(int noOfTransactions) {
+	private void setAmountOfTransactions(int noOfTransactions) {
 		this.amountOfTransactions = noOfTransactions;
 	}
 
@@ -146,6 +158,10 @@ public class Result {
 		return amountOfFails;
 	}
 
+	/**
+	 * Merges the provided resultToBeMerged into the Result
+	 * @param resultToBeMerged the Result about to be merged into this
+	 */
 	public void mergeResult(Result resultToBeMerged) {
 
 		if (this.equals(resultToBeMerged))
