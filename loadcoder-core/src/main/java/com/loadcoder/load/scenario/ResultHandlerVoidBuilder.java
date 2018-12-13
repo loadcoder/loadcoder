@@ -26,41 +26,36 @@ import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
 import com.loadcoder.result.ResultLogger;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
+public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 
 	public static Logger resultLogger = ResultLogger.resultLogger;
 
 	private TransactionVoid trans;
 	private ResultHandlerVoid resultHandler;
 	private ResultModelVoid resultModel;
-	
-	protected ResultHandlerVoidBuilder(
-			String defaultName,
-			TransactionVoid trans, 
-			LoadScenario ls,
-			RateLimiter limiter){
+	private String thisThreadName;
+
+	protected ResultHandlerVoidBuilder(String defaultName, TransactionVoid trans, LoadScenario ls,
+			RateLimiter limiter) {
 		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(), limiter);
 		this.transactionName = defaultName;
 		this.trans = trans;
 	}
-	
-	
+
 	/**
-	 * By using this method, the result of the transaction (received in the ResultModelVoid instance) can be used to take
-	 * transaction related actions. For example, if the transaction threw an Exception, the ResultHandlerVoid can be
-	 * used to set the status of the transaction to false
-	 * {@code
+	 * By using this method, the result of the transaction (received in the
+	 * ResultModelVoid instance) can be used to take transaction related actions.
+	 * For example, if the transaction threw an Exception, the ResultHandlerVoid can
+	 * be used to set the status of the transaction to false {@code
 	 * (resultModelVoid)->{
 	 * 	if(resultModelVoid.getException() != null)
-	 * 		resultModelVoid.setStatus(false);
-	 * }
-	 * }
+	 * 		resultModelVoid.setStatus(false); } }
 	 * 
-	 * @param resultHandler
-	 * is the implementation of the functional interface ResultHandlerVoid 
+	 * @param resultHandler is the implementation of the functional interface
+	 *                      ResultHandlerVoid
 	 * @return the builder instance
 	 */
-	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler){
+	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler) {
 		this.resultHandler = resultHandler;
 		return this;
 	}
@@ -68,15 +63,17 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 	/**
 	 * Performs the transaction just stated
 	 */
-	public void perform(){
+	public void perform() {
 		performAndGetModel();
 	}
-	
+
 	/**
-	 * This method will create a new Thread, start it and then return immediately. The created Thread will
-	 * execute the perform method. The result will be that the transaction is called asynchronously.
+	 * This method will create a new Thread, start it and then return immediately.
+	 * The created Thread will execute the perform method. The result will be that
+	 * the transaction is called asynchronously.
 	 */
 	public void performAsync() {
+		thisThreadName = Thread.currentThread().getName();
 		Thread t = new Thread() {
 			public void run() {
 				perform();
@@ -84,71 +81,74 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase{
 		};
 		t.start();
 	}
-	
+
 	/**
 	 * Performs the transaction you just stated
-	 * @return
-	 * the result model of the transaction
+	 * 
+	 * @return the result model of the transaction
 	 */
-	public ResultModelVoid performAndGetModel(){
-		if(limiter != null){
+	public ResultModelVoid performAndGetModel() {
+		if (limiter != null) {
 			limiter.acquire();
+		}
+		if (thisThreadName == null) {
+			thisThreadName = Thread.currentThread().getName();
 		}
 		resultModel = new ResultModelVoid(transactionName);
 		performResultHandeled();
 		return resultModel;
 	}
-	
-	private ResultModelVoid performResultHandeled(){
+
+	private ResultModelVoid performResultHandeled() {
 		long start = System.currentTimeMillis();
 		long end = 0;
 		long rt = 0;
-		
-		try{
+
+		try {
 			trans.transaction();
 			end = System.currentTimeMillis();
 			rt = end - start;
-		}catch(Exception e){
+		} catch (Exception e) {
 			end = System.currentTimeMillis();
 			rt = end - start;
 			resultModel.setException(e);
-			//status will be default false if an exception is thrown
+			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
-			
-		}finally{
+
+		} finally {
 			resultModel.setResponseTime(rt);
 			String name;
 			boolean status;
 			String message;
 			try {
-				if(resultHandler != null){
+				if (resultHandler != null) {
 					resultHandler.handle(resultModel);
 				}
 
 				name = resultModel.getTransactionName();
 				status = resultModel.getStatus();
 				message = resultModel.getMessage();
-			}catch(Exception e) {
+			} catch (Exception e) {
 				name = this.transactionName;
 				status = false;
 				message = e.getClass().getSimpleName() + " when performing handleResult";
 				resultModel.reportTransaction(true);
 			}
-			
-			if(resultModel.reportTransaction()){
-				TransactionExecutionResult result = 
-						new TransactionExecutionResult(name, start, rt, status, message, Thread.currentThread().getName());
-				
+
+			if (resultModel.reportTransaction()) {
+				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
+						thisThreadName);
+
 				synchronized (transactionExecutionResultBuffer) {
 					transactionExecutionResultBuffer.getBuffer().add(result);
 				}
 
-				if(resultFormatter != null){
+				if (resultFormatter != null) {
 					String toBeLoggen = resultFormatter.toString(result);
 					resultLogger.info(toBeLoggen);
 				}
 			}
 		}
-	return resultModel;
+		return resultModel;
 	}
 }

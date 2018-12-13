@@ -33,6 +33,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 	private Transaction<R> trans;
 	private ResultHandler<R> resultHandler;
 	private ResultModel<R> resultModel;
+	private String thisThreadName;
 
 	protected ResultHandlerBuilder(
 			String defaultName,
@@ -72,6 +73,19 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 		return performAndGetModel().getResponse();
 	}
 	
+	/**
+	 * This method will create a new Thread, start it and then return immediately. The created Thread will
+	 * execute the perform method. The result will be that the transaction is called asynchronously.
+	 */
+	public void performAsync() {
+		thisThreadName = Thread.currentThread().getName();
+		Thread t = new Thread() {
+			public void run() {
+				perform();
+			}
+		};
+		t.start();
+	}
 	
 	/**
 	 * Performs the transaction you just stated
@@ -81,6 +95,9 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 	public ResultModel<R> performAndGetModel(){
 		if(limiter != null){
 			limiter.acquire();
+		}
+		if(thisThreadName==null) {
+			thisThreadName = Thread.currentThread().getName();
 		}
 		resultModel = new ResultModel<R>(transactionName);
 		performResultHandeled();
@@ -126,7 +143,7 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 			
 			if(resultModel.reportTransaction()){
 				TransactionExecutionResult result = 
-						new TransactionExecutionResult(name, start, rt, status, message, Thread.currentThread().getName());
+						new TransactionExecutionResult(name, start, rt, status, message, thisThreadName);
 				
 				synchronized (transactionExecutionResultBuffer) {
 					transactionExecutionResultBuffer.getBuffer().add(result);
@@ -138,20 +155,6 @@ public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
 				}
 			}
 		}
-	return resultModel;
-	}
-
-	
-	/**
-	 * This method will create a new Thread, start it and then return immediately. The created Thread will
-	 * execute the perform method. The result will be that the transaction is called asynchronously.
-	 */
-	public void performAsync() {
-		Thread t = new Thread() {
-			public void run() {
-				perform();
-			}
-		};
-		t.start();
+		return resultModel;
 	}
 }

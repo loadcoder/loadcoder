@@ -22,11 +22,15 @@ import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
@@ -64,5 +68,50 @@ public class LogTest extends TestNGBase {
 		Assert.assertEquals(sizeBeforeTest + 1, rowsAfterTest.size());
 		Assert.assertTrue(rowsAfterTest.get(rowsAfterTest.size() - 1).contains(uniqueTransactionId));
 
+	}
+
+	@Test
+	public void asyncThreadLogging(Method method) throws FileNotFoundException, IOException {
+
+		List<String> threadNames = new ArrayList<String>();
+		File resultDir = new File(rootResultDir + "/" + method.getName() + "/" + System.currentTimeMillis());
+		setResultDestination(resultDir);
+
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+
+				threadNames.add(Thread.currentThread().getName());
+
+				load("performAsync", () -> {
+				}).performAsync();
+
+				load("performAsync2", () -> {
+				}).performAsync();
+
+				load("perform", () -> {
+				}).perform();
+
+				load("performAsyncWithReturn", () -> {
+					return "";
+				}).performAsync();
+
+				load("performWithReturn", () -> {
+					return "";
+				}).perform();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).amountOfThreads(1).build();
+
+		new ExecutionBuilder(l).build().execute().andWait();
+
+		List<String> content2 = LoadUtility.readFile(new File(resultDir.getAbsolutePath() + "/result.log"));
+		Assert.assertEquals(content2.size(), 5);
+
+		content2.stream().forEach(row -> {
+			Assert.assertTrue(row.contains(threadNames.get(0)));
+		});
 	}
 }
