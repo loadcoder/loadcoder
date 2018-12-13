@@ -20,14 +20,40 @@ package com.loadcoder.load.chart.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.loadcoder.load.chart.logic.ResultChartTest.YGiver;
+import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartTestUtility {
 
+	public class RuntimeResultUserExtension implements RuntimeResultUser{
+		Map<String, List<TransactionExecutionResult>> transactionsMap = new HashMap<String, List<TransactionExecutionResult>>();
+
+		public Map<String, List<TransactionExecutionResult>> getTransactionsMap() {
+			return transactionsMap;
+		}
+
+		public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
+			Iterator<Entry<String, List<TransactionExecutionResult>>> i = transactionsMap.entrySet().iterator();
+			while(i.hasNext()) {
+				Entry<String, List<TransactionExecutionResult>> e = i.next();
+				String key = e.getKey();
+				List<TransactionExecutionResult> t = this.transactionsMap.get(key);
+				if(t == null) {
+					t = new ArrayList<TransactionExecutionResult>();
+					this.transactionsMap.put(key, t);
+				}
+				t.addAll(e.getValue());
+			}
+		}
+		
+	}
+	
 	public static Map<String, List<TransactionExecutionResult>> getTranses(int amount) {
 		return getTranses(amount, 1000);
 	}

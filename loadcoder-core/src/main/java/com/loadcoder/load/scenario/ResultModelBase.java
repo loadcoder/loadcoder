@@ -118,7 +118,7 @@ public class ResultModelBase {
 	/**
 	 * Use setReportTransaction instead
 	 */
-	@Deprecated(since="1.0.1")
+	@Deprecated
 	public void reportTransaction(boolean reportTransaction) {
 		this.reportTransaction = reportTransaction;
 	}
@@ -132,7 +132,7 @@ public class ResultModelBase {
 	 * 
 	 * @param transactionName
 	 */
-	@Deprecated(since = "1.0.1")
+	@Deprecated
 	public void transactionName(String transactionName) {
 		setTransactionName(transactionName);
 	}

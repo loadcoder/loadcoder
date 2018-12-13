@@ -36,7 +36,7 @@ import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ResultChartLogic;
-import com.loadcoder.load.chart.logic.ResultChartTest.ResultExtention;
+import com.loadcoder.load.chart.logic.ResultChartTest.ResultExtension;
 import com.loadcoder.load.chart.logic.RuntimeChartLogic;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
@@ -105,7 +105,7 @@ public class ResultChartLogicTest extends TestNGBase {
 	public void testPoints() {
 		int amountOfTransaction = 10;
 		
-		Result r = new ResultExtention(ResultChartTestUtility.getTranses(amountOfTransaction));
+		Result r = new ResultExtension(ResultChartTestUtility.getTranses(amountOfTransaction));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
 				null, false, existingColors, r);
 		Map<String, XYSeriesExtension> dottedSerieses = logic.getDottedSeries();
@@ -117,7 +117,7 @@ public class ResultChartLogicTest extends TestNGBase {
 
 	@Test
 	public void testCommons() {
-		Result r = new ResultExtention(ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 10, 10 } }));
+		Result r = new ResultExtension(ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 10, 10 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, true, CommonSeries.values(),
 				null, false, existingColors, r);
 //		List<XYSeriesExtension> commonSerieses = logic.getCommonSeries();
@@ -146,7 +146,7 @@ public class ResultChartLogicTest extends TestNGBase {
 
 	@Test
 	public void testSurroundingTimestampsForCommons() {
-		Result r = new ResultExtention(
+		Result r = new ResultExtension(
 				ResultChartTestUtility.getTranses2(new long[][] { { 0, 0 }, { 3000, 10 }, { 6000, 13 } }));
 		ResultChartLogic logic = new ResultChartLogic(collection, plot, renderer, map, false, CommonSeries.values(),
 				null, false, existingColors, r);

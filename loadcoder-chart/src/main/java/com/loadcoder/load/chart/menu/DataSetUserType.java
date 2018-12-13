@@ -24,7 +24,7 @@ import com.loadcoder.load.chart.logic.ResultChartLogic;
 public class DataSetUserType {
 	
 	public static final DataSetUserType PERCENTREMOVALFILTER = new DataSetUserType("Highest 5%", ResultChartLogic.removePercentile(5));
-	public static final DataSetUserType FAILSREMOVALFILTER = new DataSetUserType("Fails%", ResultChartLogic.removeFails());
+	public static final DataSetUserType FAILSREMOVALFILTER = new DataSetUserType("Fails", ResultChartLogic.removeFails());
 
 	private String name;
 	
