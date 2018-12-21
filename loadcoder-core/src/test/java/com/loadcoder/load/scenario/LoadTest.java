@@ -199,18 +199,24 @@ public class LoadTest extends TestNGBase{
 	@Test(groups = "timeconsuming")
 	public void testOneThrottle(Method m){
 
-		int iterationsPerThread = 5;
+		int transactionsToBeMade = 3;
 		LoadScenario ls = new LoadScenario() {
 			
 			@Override
 			public void loadScenario() {
-				load("t1", () -> {return "";}).perform();
+				load("t1", () -> "").perform();
+				logger.info("after 1st");
+				load("asyncVoid", () -> {}).performAsync();
+				logger.info("after 3rd");
+				load("async", () -> "").performAsync();
+				logger.info("after 2nd");
+
 			}
 		};
 		
 		Load l = new LoadBuilder(ls)
 				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD)
-				.stopDecision(iterations(iterationsPerThread))
+				.stopDecision(iterations(1))
 				.build();
 		
 		Execution e = new ExecutionBuilder(l).build();
@@ -221,12 +227,13 @@ public class LoadTest extends TestNGBase{
 		//set to a high value since it's affected by the asyncronous wait in Scenarion andWait
 		long faultMargin = 1000;
 
-		long target = (5-1 )*1000;
+		long target = (transactionsToBeMade -1 )*1000;
 		long diff = end - start;
 		//assert that the iterations divided at multiple threads don't take too less or too long time
 		Assert.assertTrue(diff > target - faultMargin && diff < target + faultMargin,
 				"diff was:" +diff + " ms. Target is " + target);
 	}
+
 	
 	@Test(groups = "timeconsuming")
 	public void testMultipleThreadsWithThrottleModePerThread(Method m){

@@ -48,8 +48,8 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	 * For example, if the transaction threw an Exception, the ResultHandlerVoid can
 	 * be used to set the status of the transaction to false {@code
 	 * (resultModelVoid)->{
-	 * 	if(resultModelVoid.getException() != null)
-	 * 		resultModelVoid.setStatus(false); } }
+	 * 	if(resultModelVoid.getException() != null) resultModelVoid.setStatus(false);
+	 * } }
 	 * 
 	 * @param resultHandler is the implementation of the functional interface
 	 *                      ResultHandlerVoid
@@ -74,6 +74,13 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	 */
 	public void performAsync() {
 		thisThreadName = Thread.currentThread().getName();
+
+		if (limiter != null) {
+			limiter.acquire();
+			// set limiter to null in order to prohibit this transaction to be throttled
+			// both here and in performAndGetModel
+			limiter = null;
+		}
 		Thread t = new Thread() {
 			public void run() {
 				perform();
