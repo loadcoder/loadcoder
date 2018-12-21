@@ -165,7 +165,7 @@ public class Load {
 	 * @return a StartedLoad instance
 	 */
 	protected synchronized StartedLoad runLoad() {
-		Thread scenarioStarter = new Thread(new ScenarioRunner(this));
+		Thread scenarioStarter = new Thread(new LoadRunner(this));
 		scenarioStarter.start();
 
 		startedLoad = new StartedLoad(this);

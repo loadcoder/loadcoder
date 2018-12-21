@@ -20,10 +20,10 @@ package com.loadcoder.load.scenario;
 
 import static com.loadcoder.load.LoadUtility.sleep;
 
-public class ScenarioRunner implements Runnable{
+public class LoadRunner implements Runnable{
 	
 	private Load load;
-	public ScenarioRunner(Load load){
+	public LoadRunner(Load load){
 		this.load = load;
 	}
 	public void run(){
