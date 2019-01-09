@@ -50,8 +50,8 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase {
 			a.changeTransactionName("t2");
 		}).perform();
 
-		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
-		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
+		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBufferForTesting().size());
+		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals("t2", result.getName());
 		Assert.assertEquals(true, result.isStatus());
 		Assert.assertTrue(result.getRt() >= 100);
@@ -78,8 +78,8 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase {
 			throw new RuntimeException("unexpected exception");
 		}).perform();
 
-		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
-		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
+		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBufferForTesting().size());
+		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals("t1", result.getName());
 		Assert.assertEquals(false, result.isStatus());
 	}

@@ -70,26 +70,15 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 	}
 
 	protected void swapOutDataAndCallUser() {
-		
+
 		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-		
-		List<TransactionExecutionResult> switchDestination;
 
-		/*
-		 * swap the bucket. The running load threads will after this add results to the
-		 * new list listForComingTransactions This is synchronized with
-		 * ResultHandlerBuilder:performResultHandeled and
-		 * ResultHandlerVoidBuilder:performResultHandeled where the transactions are added to the list
-		 */
-		synchronized (execution.getTransactionExecutionResultBuffer()) {
-			switchDestination = execution.getTransactionExecutionResultBuffer().getBuffer();
+		// Swap bucket. The filled bucket is switched out and a new one is replaced
+		// inside the TransactionExecutionResultBuffer
+		List<TransactionExecutionResult> filledBucket = execution.getTransactionExecutionResultBuffer().swap();
 
-			List<TransactionExecutionResult> listForComingTransactions = new ArrayList<TransactionExecutionResult>();
-			execution.getTransactionExecutionResultBuffer().setBuffer(listForComingTransactions);
-		}
-
-		// add all the swaped out results to the runtimeResultList
-		for (TransactionExecutionResult transactionExecutionResult : switchDestination) {
+		// Add all the swaped out results to the runtimeResultList
+		for (TransactionExecutionResult transactionExecutionResult : filledBucket) {
 			String name = transactionExecutionResult.getName();
 			List<TransactionExecutionResult> listToAddTo = map.get(name);
 			if (listToAddTo == null) {
@@ -105,7 +94,6 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 			logger.error("An exception occured when trying to use the runtime result data", rte);
 		}
 
-		// runtimeResultList.clear();
 		map.clear();
 	}
 }

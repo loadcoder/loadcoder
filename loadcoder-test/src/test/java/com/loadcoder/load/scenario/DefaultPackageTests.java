@@ -52,7 +52,7 @@ public class DefaultPackageTests extends TestNGBase {
 		Load l = new LoadBuilder(s).stopDecision(duration(500_000)).build();
 
 		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
-		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBuffer(), 500_000, 1);
+		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBufferForTesting(), 500_000, 1);
 
 		execution.execute().andWait();
 	}
@@ -75,7 +75,7 @@ public class DefaultPackageTests extends TestNGBase {
 		Load l = new LoadBuilder(s).stopDecision(duration(300_000)).build();
 		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
 
-		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBuffer(), 20000_000, 2);
+		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBufferForTesting(), 20000_000, 2);
 
 		execution.execute().andWait();
 	}

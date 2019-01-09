@@ -146,9 +146,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
 						thisThreadName);
 
-				synchronized (transactionExecutionResultBuffer) {
-					transactionExecutionResultBuffer.getBuffer().add(result);
-				}
+				transactionExecutionResultBuffer.addResult(result);;
 
 				if (resultFormatter != null) {
 					String toBeLoggen = resultFormatter.toString(result);
