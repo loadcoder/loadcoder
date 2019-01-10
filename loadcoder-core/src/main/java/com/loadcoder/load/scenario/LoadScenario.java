@@ -74,6 +74,7 @@ public abstract class LoadScenario {
 	}
 
 	/**
+	 * @param <T> is the generic type for the return type ResultHandlerBuilder and the provided Transaction
 	 * @param defaultName is the name of the transaction you are about to state. The
 	 *                    name of the transaction can be changed after the
 	 *                    transaction is made, in the handleResult method
@@ -102,7 +103,7 @@ public abstract class LoadScenario {
 	 *                    interface TransactionVoid
 	 * @return the builder instance
 	 */
-	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
+	public ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
 		RateLimiter limiterToBeUsed = null;
 
 		if (load.getThrottler() != null) {
@@ -118,7 +119,7 @@ public abstract class LoadScenario {
 	/**
 	 * Get the amount per second equivalent to the provided Intensity
 	 * 
-	 * @param intensity
+	 * @param intensity is the Intensity to get equivalent amount per second out of
 	 * @return a double value for the amount / second equivalent to intensity
 	 */
 	public static double getAmountPerSecond(Intensity intensity) {
@@ -128,8 +129,8 @@ public abstract class LoadScenario {
 	/**
 	 * Get the amount of milliseconds equivalent to the provided amount and timeUnit
 	 * 
-	 * @param amount
-	 * @param unit
+	 * @param amount is the amount of the time to be converted
+	 * @param unit is the TimeUnit of the time to be converted
 	 * @return amount of millis
 	 */
 	public static long getMillis(long amount, TimeUnit unit) {
@@ -139,11 +140,11 @@ public abstract class LoadScenario {
 	}
 
 	/**
-	 * Get the equivalent amount of seconds equivalen to amount of timeUnit
+	 * Get the amount per second equivalent to the amount per TimeUnit
 	 * 
-	 * @param amount
-	 * @param timeUnit
-	 * @return
+	 * @param amount to be converted to seconds
+	 * @param timeUnit of the amount to be converted
+	 * @return a double value for the amount / second equivalent to intensity
 	 */
 	private static double getAmountPerSecond(long amount, TimeUnit timeUnit) {
 

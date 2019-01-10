@@ -319,6 +319,8 @@ public class ResultChartLogic extends ChartLogic {
 	/**
 	 * takes the list of resultlists and generates a list of DataSets from it along
 	 * with some metadata such as min and max timestamp.
+	 * @param src the Map of lists of results that will be used to generate a FilteredData instance from
+	 * @return the generated FilteredData
 	 */
 	protected FilteredData generateDataSets(Map<String, List<TransactionExecutionResult>> src) {
 

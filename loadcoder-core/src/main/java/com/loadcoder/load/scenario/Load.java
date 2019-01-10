@@ -116,7 +116,9 @@ public class Load {
 		/**
 		 * Implementation of the Transaction with return type T
 		 * @return an instance of type T
-		 * @throws Exception
+		 * @throws Exception whatever {@code java.lang.Exception} that a transaction might throw. Theses
+		 * exceptions will be caught in the the {@code ResultHandlerBuilder} and provided as a part of 
+		 * the {@code ResultModel} that comes as the parameter for the {@code handleResult} call 
 		 */
 		T transaction() throws Exception;
 	}
@@ -128,7 +130,9 @@ public class Load {
 	public interface TransactionVoid {
 		/**
 		 * Implementation of the Transaction with return type void
-		 * @throws Exception
+		 * @throws Exception whatever {@code java.lang.Exception} that a transaction might throw. Theses
+		 * exceptions will be caught in the the {@code ResultHandlerVoidBuilder} and provided as a part of 
+		 * the {@code ResultModel} that comes as the parameter for the {@code handleResult} call 
 		 */
 		void transaction() throws Exception;
 	}

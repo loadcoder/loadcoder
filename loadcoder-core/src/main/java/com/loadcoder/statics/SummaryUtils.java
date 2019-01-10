@@ -34,7 +34,7 @@ public class SummaryUtils {
 	/**
 	 * Logging a simple summary of the provided result
 	 * @param result for the test to be summarized
-	 * @param resultName
+	 * @param resultName is the name of the summary that will be a printed at the top
 	 */
 	public static void printSimpleSummary(Result result, String resultName) {
 
@@ -117,8 +117,8 @@ public class SummaryUtils {
 
 	/**
 	 * ValueCalculator that calculates the given responsetime percentile for a particular transaction
-	 * @param percentile
-	 * @return
+	 * @param percentile is the percentile value.
+	 * @return a ValueCalculator that will calculate the percentile for results
 	 */
 	public static ValueCalculator percentile(int percentile){
 		ValueCalculator percentileCalculator = (name, rr)->{

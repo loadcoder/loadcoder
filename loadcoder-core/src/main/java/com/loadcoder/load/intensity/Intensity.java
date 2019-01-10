@@ -31,9 +31,9 @@ public class Intensity{
 	 * Constructor for the Intensity
 	 * amount = 1 and perTimeUnit = com.loadcoder.statics.Time.PER_SECOND will give
 	 * an intensity equivalent to 1 per second.
-	 * @param amount 
-	 * @param perTimeUnit
-	 * @param throttleMode
+	 * @param amount is the value part the expressed intensity
+	 * @param perTimeUnit is the unit part of the expressed intensity
+	 * @param throttleMode is mode the Intensity should be applied for
 	 */
 	public Intensity(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode){
 		this.amount = amount;

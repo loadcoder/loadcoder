@@ -33,10 +33,10 @@ public class LogbackLogging extends Logs {
 	private static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
 
 	/**
-	 * Change the date and time format of the directory that the method
+	 * Changes the static date and time format of the directory that the method
 	 * {@code getNewLogDir} creates
 	 * 
-	 * @param dateTimeFormatter
+	 * @param dateTimeFormatter is the format to be changed to
 	 */
 	public static void setDateTimeFormatter(DateTimeFormatter dateTimeFormatter) {
 		format = dateTimeFormatter;
@@ -45,7 +45,7 @@ public class LogbackLogging extends Logs {
 	/**
 	 * This method will be called from the test to set the result dir
 	 * 
-	 * @param sharedDirForLogsPath
+	 * @param sharedDirForLogsPath is the path to the new directory 
 	 */
 	public static void setResultDirectory(String sharedDirForLogsPath) {
 		setResultDestination(new File(sharedDirForLogsPath));
@@ -67,7 +67,7 @@ public class LogbackLogging extends Logs {
 	 * framework. A logback implementation is provided in loadcoder-logback module.
 	 * 
 	 * 
-	 * @param sharedDirForLogs
+	 * @param sharedDirForLogs is the path to the new directory 
 	 */
 	public static void setResultDestination(File sharedDirForLogs) {
 		Logger initiateLogging = LoggerFactory.getLogger(LogbackLogging.class);

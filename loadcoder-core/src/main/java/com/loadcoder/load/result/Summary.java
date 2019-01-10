@@ -43,15 +43,14 @@ public class Summary {
 
 	/**
 	 * Get the Result as a string formatted with the provided ResultActions
-	 * 
-	 * @param resultActions
-	 * @param result
+	 * @param resultSummarizers is the summarizers that will be used to summarize the provided result
+	 * @param result is the Result to be summarized as a String
 	 * @return the Result as a String
 	 */
-	public static String asString(List<ResultSummarizer> resultActions, Result result) {
+	public static String asString(List<ResultSummarizer> resultSummarizers, Result result) {
 
 		String res = "";
-		for (ResultSummarizer resultAction : resultActions) {
+		for (ResultSummarizer resultAction : resultSummarizers) {
 			ResultSummarizer resultSummarizer = (ResultSummarizer) resultAction;
 			res = res + resultSummarizer.summarize(result) + "\n";
 		}
@@ -72,11 +71,12 @@ public class Summary {
 	/**
 	 * converts duration in milliseconds to seconds
 	 * 
-	 * @param durationMillis
-	 * @return
+	 * @param durationMillis is the amount of milliseconds that will be converted to seconds
+	 * @return the amount of seconds equivalent to the amount of milliseconds provided in {@code durationMillis}
+	 * Since the returned value is the duration of the execution, this value will never be 0. The minimum value
+	 * should always be 1. Negative values shall is out of scope.
 	 */
 	public static int getDurationInSeconds(long durationMillis) {
-
 		int sec = (int) durationMillis / 1000;
 		sec = sec == 0 ? 1 : sec;
 		return sec;
@@ -126,7 +126,7 @@ public class Summary {
 			 * @param valueCalculator is the implementation of the way the value for the
 			 *                        column will be calculated for each of the lines
 			 *                        (transactions)
-			 * @return
+			 * @return a SummaryWithTable possible to extend with additional columns
 			 */
 			public SummaryWithTable column(String name, ValueCalculator valueCalculator) {
 				SummaryWithTable table = new SummaryWithTable().column(name, valueCalculator);

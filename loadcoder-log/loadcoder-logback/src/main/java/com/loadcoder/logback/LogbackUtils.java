@@ -34,8 +34,8 @@ public class LogbackUtils {
 	 * if no specific logger are defined the root logger will be picked up which results in that
 	 * the results will be logged out to all the root appenders
 	 * 
-	 * @param resultFile
-	 * @return
+	 * @param resultFile is the file that the appender will log to
+	 * @return a new instance of SharedDirFileAppenderLogback
 	 */
 	@Deprecated
 	public static SharedDirFileAppenderLogback getSharedDirFileAppender(File resultFile){

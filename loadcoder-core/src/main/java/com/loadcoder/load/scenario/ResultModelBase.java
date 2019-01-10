@@ -117,6 +117,7 @@ public class ResultModelBase {
 	
 	/**
 	 * Use setReportTransaction instead
+	 * @param reportTransaction if the transaction shall be reported (logged and send to the runtime user) or not.
 	 */
 	@Deprecated
 	public void reportTransaction(boolean reportTransaction) {
@@ -130,7 +131,7 @@ public class ResultModelBase {
 	/**
 	 * Use setTransactionName instead
 	 * 
-	 * @param transactionName
+	 * @param transactionName is the value of the new transaction name
 	 */
 	@Deprecated
 	public void transactionName(String transactionName) {
@@ -141,7 +142,7 @@ public class ResultModelBase {
 	 * Changes the name of the executed transaction from the default one stated in
 	 * the load method, to {@code transactionName}
 	 * 
-	 * @param transactionName
+	 * @param transactionName is the value for the new transaction name
 	 */
 	public void setTransactionName(String transactionName) {
 		this.transactionName = transactionName;
