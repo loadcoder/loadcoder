@@ -148,12 +148,10 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
 						thisThreadName);
 
-				transactionExecutionResultBuffer.addResult(result);;
+				if(transactionExecutionResultBuffer != null) {
+					transactionExecutionResultBuffer.addResult(result);;
+				}
 				
-//				synchronized (transactionExecutionResultBuffer) {
-//					transactionExecutionResultBuffer.getBuffer().add(result);
-//				}
-
 				if (resultFormatter != null) {
 					String toBeLogged = resultFormatter.toString(result);
 					resultLogger.info(toBeLogged);
