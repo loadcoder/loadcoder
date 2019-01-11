@@ -26,11 +26,10 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
-
-import junit.framework.Assert;
 
 public class ResultGeneratorTest {
 

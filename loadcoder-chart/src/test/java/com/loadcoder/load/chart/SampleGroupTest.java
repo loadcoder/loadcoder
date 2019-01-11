@@ -20,8 +20,7 @@ package com.loadcoder.load.chart;
 
 import java.awt.Color;
 
-import junit.framework.Assert;
-
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.data.Point;

@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -37,8 +38,6 @@ import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.testng.TestNGBase;
-
-import junit.framework.Assert;
 
 public class LogTest extends TestNGBase {
 
@@ -65,7 +64,7 @@ public class LogTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).build();
 		new ExecutionBuilder(l).build().execute().andWait();
 		List<String> rowsAfterTest = TestUtility.readFile(resultFile);
-		Assert.assertEquals(sizeBeforeTest + 1, rowsAfterTest.size());
+		Assert.assertEquals(rowsAfterTest.size(), sizeBeforeTest + 1);
 		Assert.assertTrue(rowsAfterTest.get(rowsAfterTest.size() - 1).contains(uniqueTransactionId));
 
 	}
