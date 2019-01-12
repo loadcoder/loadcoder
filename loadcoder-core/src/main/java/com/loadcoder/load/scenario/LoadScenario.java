@@ -35,16 +35,14 @@ public abstract class LoadScenario {
 
 	public abstract void loadScenario();
 
-	private Load l;
+	private Load load;
 
-	Execution e;
-
-	protected void setLoad(Load l) {
-		this.l = l;
+	protected void setLoad(Load load) {
+		this.load = load;
 	}
 
 	protected Load getLoad() {
-		return l;
+		return load;
 	}
 
 	/**
@@ -53,7 +51,7 @@ public abstract class LoadScenario {
 	 * which is not thread safe.
 	 */
 	protected synchronized void pre() {
-		Executable pre = l.getPreExecution();
+		Executable pre = load.getPreExecution();
 		if (pre != null) {
 			pre.execute();
 		}
@@ -65,21 +63,18 @@ public abstract class LoadScenario {
 	 * which is not thread safe.
 	 */
 	protected synchronized void post() {
-		Executable post = l.getPostExecution();
+		Executable post = load.getPostExecution();
 		if (post != null) {
 			post.execute();
 		}
 	}
 
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
-		return l.getExecution().getTransactionExecutionResultBuffer();
-	}
-
-	public int getAmountOfThreads() {
-		return l.getAmountOfThreads();
+		return load.getExecution().getTransactionExecutionResultBuffer();
 	}
 
 	/**
+	 * @param <T> is the generic type for the return type ResultHandlerBuilder and the provided Transaction
 	 * @param defaultName is the name of the transaction you are about to state. The
 	 *                    name of the transaction can be changed after the
 	 *                    transaction is made, in the handleResult method
@@ -90,8 +85,8 @@ public abstract class LoadScenario {
 	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		RateLimiter limiterToBeUsed = null;
 
-		if (l.getThrottler() != null) {
-			limiterToBeUsed = l.getThrottler().getRateLimiter(Thread.currentThread());
+		if (load.getThrottler() != null) {
+			limiterToBeUsed = load.getThrottler().getRateLimiter(Thread.currentThread());
 		}
 
 		ResultHandlerBuilder<T> resultHandlerBuilder = new ResultHandlerBuilder<T>(defaultName, transaction, this,
@@ -108,11 +103,11 @@ public abstract class LoadScenario {
 	 *                    interface TransactionVoid
 	 * @return the builder instance
 	 */
-	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
+	public ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
 		RateLimiter limiterToBeUsed = null;
 
-		if (l.getThrottler() != null) {
-			limiterToBeUsed = l.getThrottler().getRateLimiter(Thread.currentThread());
+		if (load.getThrottler() != null) {
+			limiterToBeUsed = load.getThrottler().getRateLimiter(Thread.currentThread());
 		}
 
 		ResultHandlerVoidBuilder resultHandlerBuilder = new ResultHandlerVoidBuilder(defaultName, transaction, this,
@@ -121,10 +116,23 @@ public abstract class LoadScenario {
 		return resultHandlerBuilder;
 	}
 
-	public static double getAmountPerSecond(Intensity i) {
-		return getAmountPerSecond(i.getAmount(), i.getPerTimeUnit());
+	/**
+	 * Get the amount per second equivalent to the provided Intensity
+	 * 
+	 * @param intensity is the Intensity to get equivalent amount per second out of
+	 * @return a double value for the amount / second equivalent to intensity
+	 */
+	public static double getAmountPerSecond(Intensity intensity) {
+		return getAmountPerSecond(intensity.getAmount(), intensity.getPerTimeUnit());
 	}
 
+	/**
+	 * Get the amount of milliseconds equivalent to the provided amount and timeUnit
+	 * 
+	 * @param amount is the amount of the time to be converted
+	 * @param unit is the TimeUnit of the time to be converted
+	 * @return amount of millis
+	 */
 	public static long getMillis(long amount, TimeUnit unit) {
 		long secondsForOneUnit = getTimeMultiplyer(unit);
 		long amountInMillis = amount * secondsForOneUnit * 1000;
@@ -132,10 +140,16 @@ public abstract class LoadScenario {
 	}
 
 	/**
-	 * 1, minute: divider = 60 amountPerSecond = 1 /60
+	 * Get the amount per second equivalent to the amount per TimeUnit
+	 * 
+	 * @param amount to be converted to seconds
+	 * @param timeUnit of the amount to be converted
+	 * @return a double value for the amount / second equivalent to intensity
 	 */
-	public static double getAmountPerSecond(long amount, TimeUnit unit) {
-		long divider = getTimeMultiplyer(unit);
+	private static double getAmountPerSecond(long amount, TimeUnit timeUnit) {
+
+		// 1, minute: divider = 60, amountPerSecond = 1 /60
+		long divider = getTimeMultiplyer(timeUnit);
 		double amountPerSecond = ((double) amount) / divider;
 		return amountPerSecond;
 	}
@@ -152,23 +166,35 @@ public abstract class LoadScenario {
 		return multiplyer;
 	}
 
+	/**
+	 * Interface to handle the results of a performed Transaction
+	 * 
+	 * @param <R> type R will be the same type as for the Transaction
+	 */
+	@FunctionalInterface
 	public interface ResultHandler<R> {
+
+		/**
+		 * Implementation of the handling of the Transaction's result
+		 * 
+		 * @param resultModel is the ResultModel of type R that consists of the result
+		 *                    of the Transaction
+		 */
 		public void handle(ResultModel<R> resultModel);
 	}
 
+	/**
+	 * Interface to handle the results of a performed Transaction
+	 */
+	@FunctionalInterface
 	public interface ResultHandlerVoid {
+
+		/**
+		 * Implementation of the handling of the Transaction's result
+		 * 
+		 * @param resultModel is the ResultModel that consists of the result of the
+		 *                    Transaction
+		 */
 		public void handle(ResultModelVoid resultModel);
 	}
-
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
-		long rampUpSleepTime = 0;
-		if (amountOfThreads > 1)
-			rampUpSleepTime = rampup / (amountOfThreads - 1);
-		return rampUpSleepTime;
-	}
-
-	public List<Thread> getThreads() {
-		return this.threads;
-	}
-
 }

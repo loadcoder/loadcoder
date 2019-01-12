@@ -25,21 +25,21 @@ import java.util.List;
 
 public class LoadStateRunner implements Runnable {
 
-	Load l;
+	private final Load load;
 
 	public LoadStateRunner(Load l) {
-		this.l = l;
+		this.load = l;
 	}
 
 	public void run() {
 		// wait until there are some threads and the amount is equal to the target
-		while (l.getThreads() == null || l.getThreads().size() != l.getAmountOfThreads()) {
+		while (load.getThreads() == null || load.getThreads().size() != load.getAmountOfThreads()) {
 			sleep(200);
 		}
 
 		// Wait until all threads are in State TERMINATED
 		whileloop: while (true) {
-			List<Thread> threads = l.getThreads();
+			List<Thread> threads = load.getThreads();
 			for (Thread t : threads) {
 				if (t.getState() != State.TERMINATED) {
 					try {

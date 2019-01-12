@@ -20,11 +20,11 @@ package com.loadcoder.load.scenario;
 
 import static com.loadcoder.load.LoadUtility.sleep;
 
-public class ScenarioRunner implements Runnable{
+public class LoadRunner implements Runnable{
 	
-	Load load;
-	public ScenarioRunner(Load l){
-		this.load = l;
+	private Load load;
+	public LoadRunner(Load load){
+		this.load = load;
 	}
 	public void run(){
 
@@ -42,7 +42,7 @@ public class ScenarioRunner implements Runnable{
 		}
 	}
 	
-	long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
+	private long calculateRampUpSleepTime(long rampup, int amountOfThreads) {
 		long rampUpSleepTime = 0;
 		if (amountOfThreads > 1)
 			rampUpSleepTime = rampup / (amountOfThreads - 1);

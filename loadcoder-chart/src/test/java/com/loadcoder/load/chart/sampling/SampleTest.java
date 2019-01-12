@@ -18,12 +18,11 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.sampling;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.data.Point;
-
-import junit.framework.Assert;
 
 public class SampleTest {
 

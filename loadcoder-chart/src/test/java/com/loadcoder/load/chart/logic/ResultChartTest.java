@@ -81,15 +81,15 @@ public class ResultChartTest extends TestNGBase {
 		return result;
 	}
 
-	public static class ResultExtention extends Result {
-		public ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
+	public static class ResultExtension extends Result {
+		public ResultExtension(Map<String, List<TransactionExecutionResult>> resultLists) {
 			super(resultLists);
 		}
 	}
 
 	@Test(groups = "manual")
 	public void testManyTransactions(Method method) {
-		Result result = new ResultExtention(getTranses(1000, 20, 20, (i) -> {
+		Result result = new ResultExtension(getTranses(1000, 20, 20, (i) -> {
 			return TestUtility.random(5, 9);
 		}));
 		ResultChart c = new ResultChart(result);
@@ -99,7 +99,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void testHighIntensity(Method method) {
 
-		Result result = new ResultExtention(getTranses(1000, 10, 20, (i) -> {
+		Result result = new ResultExtension(getTranses(1000, 10, 20, (i) -> {
 			return TestUtility.random(5, 9);
 		}));
 		ResultChart c = new ResultChart(result);
@@ -109,7 +109,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void startResultChart(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
@@ -117,7 +117,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void oneSlide(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart f = new ResultChart(result);
 		ResultChartLogic c = (ResultChartLogic) f.getLogic();
 		c.chartSliderAjustment(2000);
@@ -127,7 +127,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void twoSlide(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart f = new ResultChart(result);
 		ResultChartLogic c = (ResultChartLogic) f.getLogic();
 		c.chartSliderAjustment(2000);
@@ -138,7 +138,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void dotting(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart c = new ResultChart(result);
 		c.ajustDottedMode(true);
 		c.waitUntilClosed();
@@ -147,7 +147,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void dottingAndSample(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart c = new ResultChart(result);
 		c.ajustDottedMode(true);
 		c.ajustDottedMode(false);
@@ -157,7 +157,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void dottingSampleDotting(Method method) {
 
-		Result result = new ResultExtention(getTranses(10));
+		Result result = new ResultExtension(getTranses(10));
 		ResultChart c = new ResultChart(result);
 		c.ajustDottedMode(true);
 		c.ajustDottedMode(false);
@@ -168,7 +168,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void removeHighest(Method method) {
 
-		Result result = new ResultExtention(getTranses(100));
+		Result result = new ResultExtension(getTranses(100));
 		ResultChart c = new ResultChart(result);
 		c.ajustDottedMode(true);
 		c.ajustDottedMode(false);

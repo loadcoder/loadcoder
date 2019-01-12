@@ -49,8 +49,8 @@ public class LoadScenarioTest extends TestNGBase {
 		};
 
 		Load l = mockLoad(s);
-		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 1);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(res.isStatus(), true);
 		Assert.assertNull(res.getMessage());
 		Assert.assertEquals(res.getName(), "t1");
@@ -81,7 +81,7 @@ public class LoadScenarioTest extends TestNGBase {
 		};
 
 		Load l = mockLoad(s);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 
 		Assert.assertEquals(res.getName(), "newTransactionName");
 		Assert.assertEquals(res.isStatus(), false);
@@ -110,8 +110,8 @@ public class LoadScenarioTest extends TestNGBase {
 
 		Load l = mockLoad(s);
 		s.loadScenario(); // run scenario one more time
-		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 2);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBuffer().get(0);
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 2);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 
 		Assert.assertEquals(res.getMessage(), toBeThrown.getClass().getSimpleName());
 		Assert.assertEquals(res.isStatus(), false);
@@ -132,7 +132,7 @@ public class LoadScenarioTest extends TestNGBase {
 		};
 
 		Load l = mockLoad(s);
-		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBuffer().size(), 0);
+		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 0);
 	}
 
 	private Load mockLoad(LoadScenario s) {

@@ -19,108 +19,136 @@
 package com.loadcoder.load.scenario;
 
 public class ResultModelBase {
-	
+
 	private String transactionName;
 	private long rt;
 	private boolean reportTransaction = true;
 	private boolean status = true;
 	private Exception e;
 	private String message;
-	
+
 	/**
 	 * Set a message for the transaction
-	 * @param message is a {@code String} message that can be logged
-	 * as a part of the transaction in the result log
+	 * 
+	 * @param message is a {@code String} message that can be logged as a part of
+	 *                the transaction in the result log
 	 */
-	public void setMessage(String message){
+	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	protected String getMessage(){
+
+	protected String getMessage() {
 		return message;
 	}
-	
+
 	/**
 	 * Change the name of the transaction to {@code newTransactionName}
-	 * @param newTransactionName is the new transaction name
-	 * Default value is the name set in the load method
+	 * 
+	 * @param newTransactionName is the new transaction name Default value is the
+	 *                           name set in the load method
 	 */
-	public void changeTransactionName(String newTransactionName){
+	public void changeTransactionName(String newTransactionName) {
 		this.transactionName = newTransactionName;
 	}
-	
-	protected ResultModelBase(String transactionName){
+
+	protected ResultModelBase(String transactionName) {
 		this.transactionName = transactionName;
 	}
-	
-	protected boolean getStatus(){
+
+	protected boolean getStatus() {
 		return status;
 	}
-	
+
 	/**
 	 * If the transaction throws an Exception, that Exception will be returned here
-	 * @return the potentially thrown Exception.
-	 * Returns null if no exception was thrown
+	 * 
+	 * @return the potentially thrown Exception. Returns null if no exception was
+	 *         thrown
 	 */
-	public Exception getException(){
+	public Exception getException() {
 		return e;
 	}
-	
-	
+
 	/**
 	 * @return the name of the transaction
 	 */
-	protected String getTransactionName(){
+	protected String getTransactionName() {
 		return transactionName;
 	}
-	
-	
+
 	/**
 	 * Set the status for the transaction
-	 * @param status is the status that should be set for the transaction.
-	 * Default is true
+	 * 
+	 * @param status is the status that should be set for the transaction. Default
+	 *               is true
 	 */
-	public void setStatus(boolean status){
+	public void setStatus(boolean status) {
 		this.status = status;
 	}
-	
-	protected void setResponseTime(long rt){
+
+	protected void setResponseTime(long rt) {
 		this.rt = rt;
 	}
-	
-	
+
 	/**
 	 * Get the response time of the transaction
+	 * 
 	 * @return the response time in milliseconds
 	 */
-	public long getResponseTime(){
+	public long getResponseTime() {
 		return rt;
 	}
-	
-	
+
 	/**
-	 * Set whether the transaction should be reported of not.
-	 * Being reported, this means that the transaction will both be logged
-	 * and that it will be a part of the list of transactions that will
-	 * be handled by the potential resultUser (for example RuntimeChart)
+	 * Set whether the transaction should be reported of not. Being reported, this
+	 * means that the transaction will both be logged and that it will be a part of
+	 * the list of transactions that will be handled by the potential resultUser
+	 * (for example RuntimeChart)
 	 * 
-	 * @param reportTransaction If true, the transaction will be reported.
-	 * If false, the transaction will not be reported.
-	 * Default value is true
+	 * @param reportTransaction If true, the transaction will be reported. If false,
+	 *                          the transaction will not be reported. Default value
+	 *                          is true
 	 * 
 	 */
-	public void reportTransaction(boolean reportTransaction){
+	public void setReportTransaction(boolean reportTransaction) {
 		this.reportTransaction = reportTransaction;
 	}
 	
-	public boolean reportTransaction(){
+	
+	/**
+	 * Use setReportTransaction instead
+	 * @param reportTransaction if the transaction shall be reported (logged and send to the runtime user) or not.
+	 */
+	@Deprecated
+	public void reportTransaction(boolean reportTransaction) {
+		this.reportTransaction = reportTransaction;
+	}
+
+	protected boolean reportTransaction() {
 		return reportTransaction;
 	}
-	public void transactionName(String transactionName){
+
+	/**
+	 * Use setTransactionName instead
+	 * 
+	 * @param transactionName is the value of the new transaction name
+	 */
+	@Deprecated
+	public void transactionName(String transactionName) {
+		setTransactionName(transactionName);
+	}
+
+	/**
+	 * Changes the name of the executed transaction from the default one stated in
+	 * the load method, to {@code transactionName}
+	 * 
+	 * @param transactionName is the value for the new transaction name
+	 */
+	public void setTransactionName(String transactionName) {
 		this.transactionName = transactionName;
 	}
-	
-	protected void setException(Exception e){
+
+	protected void setException(Exception e) {
 		this.e = e;
 	}
 }

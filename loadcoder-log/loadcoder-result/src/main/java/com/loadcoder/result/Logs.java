@@ -51,6 +51,10 @@ public class Logs {
 		return dirProvider.getFile();
 	}
 
+	/**
+	 * 
+	 * @return the current result file assuming the files name is result.log
+	 */
 	public static File getResultFileInLogDir() {
 		File resultFile = new File(logDir, "result.log");
 		return resultFile;

@@ -22,11 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FinishedLoad {
+	
 	Load s;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	FinishedLoad(Load s) {
+	protected FinishedLoad(Load s) {
 		this.s = s;
 	}
 }

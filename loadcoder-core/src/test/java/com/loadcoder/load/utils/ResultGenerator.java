@@ -18,10 +18,9 @@
  ******************************************************************************/
 package com.loadcoder.load.utils;
 
-import java.util.Random;
-
 import org.slf4j.Logger;
 
+import com.loadcoder.load.TestUtility;
 import com.loadcoder.result.ResultFormatter;
 import com.loadcoder.result.ResultLogger;
 import com.loadcoder.result.TransactionExecutionResult;
@@ -31,13 +30,12 @@ public class ResultGenerator {
 
 	final static Logger log = ResultLogger.resultLogger;
 	
-	static Random rn = new Random();
-	private static int random(int min, int max){
-		int result = rn.nextInt(max - min + 1) + min;
-		return result;
-	}
-	
-	public static void generateResult(long duration, int amountOfTypes){
+	/**
+	 * The purpose of this method is only to 
+	 * @param duration
+	 * @param amountOfTypes
+	 */
+	protected static void generateResult(long duration, int amountOfTypes){
 		
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		
@@ -53,9 +51,9 @@ public class ResultGenerator {
 			for(int i=0; i<amountOfTypes; i++){
 				boolean status = true;
 				if(i==0){
-					status = ! ( random(1, 10) == 5); // false is match
+					status = ! ( TestUtility.random(1, 10) == 5); // false is match
 				}
-				long rt = i * 50 + random(1, 100);
+				long rt = i * 50 + TestUtility.random(1, 100);
 				
 				if(!status)
 					rt = 0;

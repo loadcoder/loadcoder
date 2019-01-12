@@ -23,5 +23,12 @@ import java.io.IOException;
 
 @FunctionalInterface
 public interface SharedDirFileAppender{
+	
+	
+	/**
+	 * Method to change to directory for which this appender writes its logfiles to
+	 * @param newDir is the new directory where the log file should be written from here on.
+	 * @throws IOException is thrown if there is some problem to use the new log directory
+	 */
 	public void changeToDir(File newDir) throws IOException;
 }

@@ -8,13 +8,13 @@ import static com.loadcoder.statics.LogbackLogging.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 
-import junit.framework.Assert;
 
 
 public class LogbackLoggingTest extends TestNGBase{
@@ -31,7 +31,7 @@ public class LogbackLoggingTest extends TestNGBase{
 		infoLog.info("{} info", method.getName());
 		
 		List<String> content = TestUtility.readFile(new File(sharedDirForLogsPath + "/info-logback.log"));
-		Assert.assertEquals(2, content.size());
+		Assert.assertEquals(content.size(), 2);
 		Assert.assertEquals(content.get(1), method.getName()+ " info");
 	}
 	

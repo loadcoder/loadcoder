@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 public class StartedExecution {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	Execution execution;
+	private Execution execution;
 
 	protected StartedExecution(Execution exeuction) {
 		this.execution = exeuction;

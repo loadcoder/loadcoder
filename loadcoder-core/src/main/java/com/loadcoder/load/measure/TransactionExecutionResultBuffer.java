@@ -23,15 +23,47 @@ import java.util.List;
 
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class TransactionExecutionResultBuffer{
-	List<TransactionExecutionResult> buffer = new ArrayList<TransactionExecutionResult>();
+public class TransactionExecutionResultBuffer {
 
-	public List<TransactionExecutionResult> getBuffer() {
+	private List<TransactionExecutionResult> buffer = new ArrayList<TransactionExecutionResult>();
+
+	/**
+	 * CAUTION. This method shall only be used for tests of Loadcoder. Do not use
+	 * this method if you are building load tests. The reason for this is becasue
+	 * the use of the buffer needs to be synchrnoized as it invoked by parallell
+	 * threads
+	 * 
+	 * @return the {@code List<TransactionExecutionResult> buffer} 
+	 */
+	public List<TransactionExecutionResult> getBufferForTesting() {
 		return buffer;
 	}
 
-	public void setBuffer(List<TransactionExecutionResult> buffer) {
-		this.buffer = buffer;
-	};
+	/**
+	 * 
+	 * Add a TransactionExecutionResult into the buffer
+	 * 
+	 * @param transactionExecutionResult to be added into the buffer
+	 */
+	public void addResult(TransactionExecutionResult transactionExecutionResult) {
+		synchronized (this) {
+			buffer.add(transactionExecutionResult);
+		}
+	}
+
+	/**
+	 * Swapping out the used buffer List with a new one.
+	 * 
+	 * @return the used buffer List that will contain all made
+	 *         TransactionExecutionResult from when the buffer was swapped last time
+	 */
+	public List<TransactionExecutionResult> swap() {
+		List<TransactionExecutionResult> swappedOut;
+		synchronized (this) {
+			swappedOut = buffer;
+			buffer = new ArrayList<TransactionExecutionResult>();
+		}
+		return swappedOut;
+	}
 
 }

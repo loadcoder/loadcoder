@@ -36,7 +36,7 @@ public class RuntimeResultUpdaterRunnerTest {
 		Execution e = Mockito.mock(Execution.class);
 
 		TransactionExecutionResultBuffer buffer = new TransactionExecutionResultBuffer();
-		buffer.getBuffer().add(new TransactionExecutionResult("a1", System.currentTimeMillis(), 10, true, null));
+		buffer.getBufferForTesting().add(new TransactionExecutionResult("a1", System.currentTimeMillis(), 10, true, null));
 		when(e.getTransactionExecutionResultBuffer()).thenReturn(buffer);
 		
 		RuntimeResultUser user = (a)->{
@@ -46,7 +46,7 @@ public class RuntimeResultUpdaterRunnerTest {
 		
 		RuntimeResultUpdaterRunner runtimeResultUpdaterRunner = new RuntimeResultUpdaterRunner(e, user);
 		runtimeResultUpdaterRunner.swapOutDataAndCallUser();
-		assertEquals(buffer.getBuffer().size(), 0);
+		assertEquals(buffer.getBufferForTesting().size(), 0);
 		
 	}
 }

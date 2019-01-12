@@ -27,7 +27,7 @@ public class ResultHandlerBuilderBase {
 	protected String transactionName;
 	protected final TransactionExecutionResultBuffer transactionExecutionResultBuffer;
 	protected final ResultFormatter resultFormatter;
-	protected final RateLimiter limiter;
+	protected RateLimiter limiter;
 	
 	protected ResultHandlerBuilderBase( TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter, RateLimiter limiter) {
 		this.transactionExecutionResultBuffer = transactionExecutionResultBuffer;

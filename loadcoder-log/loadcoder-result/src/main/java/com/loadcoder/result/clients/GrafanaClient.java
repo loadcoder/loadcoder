@@ -39,7 +39,7 @@ import com.loadcoder.result.Result;
  */
 public class GrafanaClient extends HttpClient {
 
-	Logger log = LoggerFactory.getLogger(GrafanaClient.class);
+	private Logger log = LoggerFactory.getLogger(GrafanaClient.class);
 
 	protected static final String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.000";
 	protected static final SimpleDateFormat TIMESPAN_FORMAT = new SimpleDateFormat(
@@ -48,9 +48,18 @@ public class GrafanaClient extends HttpClient {
 	private final String DB_URL;
 
 	private static final long TIMESPAN_MILLIS_PRECREATED_DASHBOARD = 50_000;
-	
-	final String authorizationValue;
 
+	private final String authorizationValue;
+
+	/**
+	 * Constructor for the GrafanaClient
+	 * 
+	 * @param host is the hostname of where Grafana is hosted
+	 * @param port is the port where Grafana exposes is API
+	 * @param https is boolean if the communcation is encrypted or not. 
+	 * @param authorizationValue the value for the HTTP header Authorization used in the request towards
+	 * Grafana in order to authenticate the client
+	 */
 	public GrafanaClient(String host, int port, boolean https, String authorizationValue) {
 		String protocol = protocolAsString(https);
 		DB_URL = String.format(DB_URL_TEMPLATE, protocol, host, port);
@@ -67,9 +76,9 @@ public class GrafanaClient extends HttpClient {
 		}
 	}
 
-	List<Type> types = Arrays.asList(new Type("mean", "A"));
+	private List<Type> types = Arrays.asList(new Type("mean", "A"));
 
-	String getFileAsString(String filename) {
+	private String getFileAsString(String filename) {
 		InputStream in = getClass().getResourceAsStream("/" + filename);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
@@ -86,18 +95,18 @@ public class GrafanaClient extends HttpClient {
 		}
 	}
 
-	String getTargets(Set<String> measurementNames, String executionId) {
+	private String getTargets(Set<String> measurementNames, String executionId) {
 
 		String targetTagTemplate = "";
-		if(executionId != null) {
+		if (executionId != null) {
 			targetTagTemplate = getFileAsString("grafana_5.2.4/grafana_target_tag_body_template.json");
 			targetTagTemplate = targetTagTemplate.replace("${executionid}", executionId);
-			
+
 		}
 		String targetTemplate = getFileAsString("grafana_5.2.4/grafana_target_body_template.json");
-		
+
 		targetTemplate = targetTemplate.replace("${tags}", targetTagTemplate);
-		
+
 		List<String> targetsList = new ArrayList<String>();
 		for (String name : measurementNames) {
 			for (Type t : types) {
@@ -114,12 +123,15 @@ public class GrafanaClient extends HttpClient {
 		return result;
 	}
 
-	private int createNewDashboardBase(long start, long end, String name, String executionId, Set<String> transactionNamesSet, boolean refresh) {
+	private int createNewDashboardBase(long start, long end, String name, String executionId,
+			Set<String> transactionNamesSet, boolean refresh) {
 
-		long usedEnd = (end - start) < TIMESPAN_MILLIS_PRECREATED_DASHBOARD ? start + TIMESPAN_MILLIS_PRECREATED_DASHBOARD : end; 
+		long usedEnd = (end - start) < TIMESPAN_MILLIS_PRECREATED_DASHBOARD
+				? start + TIMESPAN_MILLIS_PRECREATED_DASHBOARD
+				: end;
 		String startTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(start, TIMESPAN_FORMAT);
 		String endTimespan = DateTimeUtil.convertMilliSecondsToFormattedDate(usedEnd, TIMESPAN_FORMAT);
-		
+
 		log.debug("panel will have timespan: " + startTimespan + " - " + endTimespan);
 		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(start);
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template.json");
@@ -127,7 +139,7 @@ public class GrafanaClient extends HttpClient {
 		fileAsString = fileAsString.replace("${time_from}", startTimespan);
 		fileAsString = fileAsString.replace("${time_to}", endTimespan);
 		fileAsString = fileAsString.replace("${title}", name + "_" + dateTimeLabel);
-		
+
 		fileAsString = fileAsString.replace("${refresh}", refresh ? "\"5s\"" : "false");
 
 		String targets = getTargets(transactionNamesSet, executionId);
@@ -138,33 +150,68 @@ public class GrafanaClient extends HttpClient {
 				new Header("Authorization", authorizationValue));
 		return sendPost(fileAsString, DB_URL, headers);
 	}
+
 	
+	/**
+	 * Create a new Grafana Dashboard.
+	 *  
+	 * @param name is the name of the Dashboard
+	 * @param transactionNames is a list of the transaction names
+	 * @return the http status code for the Grafana request
+	 */
 	public int createNewDashboard(String name, List<String> transactionNames) {
 
 		Set<String> transactionNamesSet = new HashSet<String>();
-		for(String transactionName : transactionNames) {
+		for (String transactionName : transactionNames) {
 			transactionNamesSet.add(transactionName);
 		}
 		long now = System.currentTimeMillis();
 		return createNewDashboardBase(now, now, name, null, transactionNamesSet, true);
 	}
-	
+
+	/**
+	 * Create a new Grafana Dashboard.
+	 *  
+	 * @param name is the name of the Dashboard
+	 * @param executionId is the id for a specific set of results, for instance all results for
+	 * a particular test execution
+	 * @param transactionNames is a list of the transaction names
+	 * @return the http status code for the Grafana request
+	 */
 	public int createNewDashboard(String name, String executionId, List<String> transactionNames) {
 
 		Set<String> transactionNamesSet = new HashSet<String>();
-		for(String transactionName : transactionNames) {
+		for (String transactionName : transactionNames) {
 			transactionNamesSet.add(transactionName);
 		}
 		long now = System.currentTimeMillis();
 		return createNewDashboardBase(now, now, name, executionId, transactionNamesSet, true);
 	}
-	
+
+	/**
+	 * Create a new Grafana Dashboard.
+	 * 
+	 * @param name is the name of the Dashboard
+	 * @param result is the Result of an already executed test
+	 * @return the http status code for the Grafana request
+	 */
 	public int createNewDashboardFromResult(String name, Result result) {
 		long now = System.currentTimeMillis();
-		return createNewDashboardBase(result.getStart(), result.getEnd(), name, null, result.getResultLists().keySet(), false);
+		return createNewDashboardBase(result.getStart(), result.getEnd(), name, null, result.getResultLists().keySet(),
+				false);
 	}
-	
+
+	/**
+	 * Create a new Grafana Dashboard.
+	 * 
+	 * @param name is the name of the Dashboard
+	 * @param executionId is the id for a specific set of results, for instance all results for
+	 * a particular test execution
+	 * @param result is the Result of an already executed test
+	 * @return the http status code for the Grafana request
+	 */
 	public int createNewDashboardFromResult(String name, String executionId, Result result) {
-		return createNewDashboardBase(result.getStart(), result.getEnd(), name, executionId, result.getResultLists().keySet(), false);
+		return createNewDashboardBase(result.getStart(), result.getEnd(), name, executionId,
+				result.getResultLists().keySet(), false);
 	}
 }

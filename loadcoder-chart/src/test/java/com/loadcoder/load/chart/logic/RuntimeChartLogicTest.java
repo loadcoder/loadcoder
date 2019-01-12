@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataItem;
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,8 +42,6 @@ import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
-
-import static junit.framework.Assert.*;
 
 public class RuntimeChartLogicTest extends TestNGBase {
 
@@ -87,7 +86,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.update(listOfListOfList, hashesGettingUpdated);
 
 		Map<String, XYSeriesExtension> commonSerieses = logic.getCommonSeriesMap();
-		assertEquals(2, commonSerieses.size());
+		assertEquals(commonSerieses.size(), 2);
 
 		for (XYSeriesExtension commonSeries : commonSerieses.values()) {
 			assertTrue(commonSeries.isVisible());

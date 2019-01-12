@@ -18,14 +18,13 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
-
-import junit.framework.Assert;
 
 public class ResultHandlerBuilderTest extends TestNGBase {
 
@@ -51,10 +50,10 @@ public class ResultHandlerBuilderTest extends TestNGBase {
 			a.changeTransactionName("t2");
 		}).perform();
 
-		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
-		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
-		Assert.assertEquals("t2", result.getName());
-		Assert.assertEquals(true, result.isStatus());
+		Assert.assertEquals( ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
+		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
+		Assert.assertEquals(result.getName(), "t2");
+		Assert.assertTrue(result.isStatus());
 		Assert.assertTrue(result.getRt() >= 100);
 	}
 
@@ -80,9 +79,9 @@ public class ResultHandlerBuilderTest extends TestNGBase {
 			throw new RuntimeException("unexpected exception");
 		}).perform();
 
-		Assert.assertEquals(1, ls.getTransactionExecutionResultBuffer().getBuffer().size());
-		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBuffer().get(0);
-		Assert.assertEquals("t1", result.getName());
-		Assert.assertEquals(false, result.isStatus());
+		Assert.assertEquals(ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
+		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
+		Assert.assertEquals(result.getName(), "t1");
+		Assert.assertFalse(result.isStatus());
 	}
 }

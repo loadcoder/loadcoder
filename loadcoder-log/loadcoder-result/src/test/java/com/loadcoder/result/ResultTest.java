@@ -23,13 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
-
-import static junit.framework.Assert.*;
 
 public class ResultTest extends TestNGBase{
 
@@ -64,12 +63,11 @@ public class ResultTest extends TestNGBase{
 		Result r2 = new Result(resultList2);
 	
 		r.mergeResult(r2);
-	
-		assertEquals(40, r.getAmountOfTransactions());
-		assertEquals(4, r.getAmountOfFails());
-		assertEquals(10, r.getStart());
-		assertEquals(9070, r.getEnd());
-		assertEquals(9060, r.getDuration());
+		assertEquals(r.getAmountOfTransactions(), 40);
+		assertEquals(r.getAmountOfFails(), 4);
+		assertEquals(r.getStart(), 10);
+		assertEquals(r.getEnd(), 9070);
+		assertEquals(r.getDuration(), 9060);
 		
 	}
 }

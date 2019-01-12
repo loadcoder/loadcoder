@@ -1,7 +1,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Chart Tests Suite" verbose="1">
-	<test name="Chart Test">>
+	<test name="Chart Test">
 		<groups>
 			<run>
 				<exclude name="manual"></exclude>

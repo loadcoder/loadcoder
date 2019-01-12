@@ -18,32 +18,25 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.LoadAlreadyStarted;
-import static com.loadcoder.load.exceptions.ExceptionMessages.ScenarioConnectedToOtherLoad;
+import static com.loadcoder.load.exceptions.ExceptionMessages.LOAD_ALREADY_STARTED;
+import static com.loadcoder.load.exceptions.ExceptionMessages.SCENARIO_BELONGS_TO_OTHER_LOAD;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.result.ResultFormatter;
-import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.statics.Formatter;
 
 public class Execution {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private Thread runtimeResultUpdaterThread;
 
-	Thread runtimeResultUpdaterThread;
+	private final RuntimeResultUser user;
+	private final ResultFormatter resultFormatter;
 
-	final RuntimeResultUser user;
-	final ResultFormatter resultFormatter;
-
-	StartedExecution startedExecution;
-	List<Load> loads;
+	private StartedExecution startedExecution;
+	private List<Load> loads;
 
 	private long startTime;
 
@@ -53,7 +46,7 @@ public class Execution {
 		return resultFormatter;
 	}
 
-	public List<Load> getLoads() {
+	protected List<Load> getLoads() {
 		return loads;
 	}
 
@@ -65,7 +58,7 @@ public class Execution {
 		return transactionExecutionResultBuffer;
 	}
 
-	public Execution(ResultFormatter resultFormatter, RuntimeResultUser resultUser, List<Load> loads) {
+	protected Execution(ResultFormatter resultFormatter, RuntimeResultUser resultUser, List<Load> loads) {
 		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
 		this.user = resultUser;
 		this.loads = loads;
@@ -86,12 +79,12 @@ public class Execution {
 
 		for (Load load : loads) {
 			if (load.getStartedLoad() != null) {
-				throw new InvalidLoadStateException(LoadAlreadyStarted.toString());
+				throw new InvalidLoadStateException(LOAD_ALREADY_STARTED.toString());
 			}
 
 			Load setLoad = load.getLoadScenario().getLoad();
 			if (!setLoad.equals(load)) {
-				throw new InvalidLoadStateException(ScenarioConnectedToOtherLoad.toString());
+				throw new InvalidLoadStateException(SCENARIO_BELONGS_TO_OTHER_LOAD.toString());
 			}
 		}
 

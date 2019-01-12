@@ -29,12 +29,13 @@ import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 
 public class FinishedExecution {
-	Execution s;
+	
+	private Execution s;
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private final static String RESULTFILE_DEFAULT = "result.log";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	public final static String RESULTFILE_DEFAULT = "result.log";
-
-	FinishedExecution(Execution s) {
+	
+	protected FinishedExecution(Execution s) {
 		this.s = s;
 	}
 
@@ -51,11 +52,12 @@ public class FinishedExecution {
 	}
 
 	/**
+	 * Returns a Result
 	 * @param fileName
 	 *            is the name of the file. So if fileName is result.log and the
 	 *            directory for the result is set to /foo/bar, the the Result will
 	 *            be generated from the file /foo/bar/result.log
-	 * @return a new Result instance from the finished exeuction
+	 * @return a new Result instance from the result file
 	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
 	 */
 	public Result getReportedResultFromResultFile(String fileName) throws NoResultOrFormatterException {
@@ -64,6 +66,14 @@ public class FinishedExecution {
 		return getReportedResultFromResultFile(resultFile);
 	}
 
+	/**
+	 * Returns a Result
+	 * @param resultFile
+	 *            is the file where the result is stored, that will be used to
+	 *            generate the Result
+	 * @return a new Result instance from the result file
+	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
+	 */	
 	public Result getReportedResultFromResultFile(File resultFile) throws NoResultOrFormatterException {
 		if (s.getResultFormatter() != null) {
 			try {

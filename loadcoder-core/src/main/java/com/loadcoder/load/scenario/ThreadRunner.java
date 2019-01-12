@@ -27,10 +27,11 @@ public class ThreadRunner implements Runnable{
 	
 	private final Load load;
 	private long loadStartTime;
-	ThreadRunner(Load load){
+	
+	protected ThreadRunner(Load load){
 		this.load = load;
 	}
-	ThreadLocal<?> ls = new ThreadLocal<Object>();
+	
 	public void run(){
 		log.debug("Thread {} started" + Thread.currentThread());
 		LoadScenario ls = load.getLoadScenario();
@@ -48,7 +49,7 @@ public class ThreadRunner implements Runnable{
 		ls.post();
 	}
 	
-	protected boolean decideIfContinue() {
+	private boolean decideIfContinue() {
 		boolean continueExecution = false;
 		synchronized (load) {
 			continueExecution = ! load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted());

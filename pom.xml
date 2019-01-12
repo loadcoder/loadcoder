@@ -25,13 +25,13 @@
 	<properties>
 		<testng>full</testng>
 		<sonar.jacoco.reportPath>${basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
-		<logback.version>1.0.1</logback.version>
-		<slf4j.version>1.6.4</slf4j.version>
-		<testng.version>6.1.1</testng.version>
+		<logback.version>1.2.3</logback.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<testng.version>6.14.3</testng.version>
 		<mockito.version>1.9.5</mockito.version>
 		<chart-extensions.version>1.0.19</chart-extensions.version>
-		<guava.version>19.0</guava.version>
-
+		<guava.version>27.0-jre</guava.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencyManagement>
@@ -127,7 +127,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.0</version>
+				<version>0.8.2</version>
 				<configuration>
 					<destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
 					<dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
@@ -163,6 +163,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -176,7 +177,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9.1</version>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -185,6 +186,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<detectOfflineLinks>false</detectOfflineLinks>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -200,6 +204,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -210,7 +215,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 		</plugins>
 
 	</build>

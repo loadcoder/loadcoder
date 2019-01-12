@@ -26,127 +26,138 @@ import com.loadcoder.load.scenario.LoadScenario.ResultHandler;
 import com.loadcoder.result.ResultLogger;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class ResultHandlerBuilder <R> extends ResultHandlerBuilderBase{
+public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 
 	public static Logger resultLogger = ResultLogger.resultLogger;
 
 	private Transaction<R> trans;
 	private ResultHandler<R> resultHandler;
 	private ResultModel<R> resultModel;
+	private String thisThreadName;
 
-	public ResultHandlerBuilder(
-			String defaultName,
-			Transaction<R> trans, 
-			LoadScenario ls,
-			RateLimiter limiter){
+	protected ResultHandlerBuilder(String defaultName, Transaction<R> trans, LoadScenario ls, RateLimiter limiter) {
 		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(), limiter);
 		this.transactionName = defaultName;
 		this.trans = trans;
 	}
-	
+
 	/**
-	 * By using this method, the result of the transaction (received in the ResultModel instance) can be used to take
-	 * transaction related actions. For example, if the transaction threw an Exception, the ResultHandler can be
-	 * used to set the status of the transaction to false
-	 * {@code
+	 * By using this method, the result of the transaction (received in the
+	 * ResultModel instance) can be used to take transaction related actions. For
+	 * example, if the transaction threw an Exception, the ResultHandler can be used
+	 * to set the status of the transaction to false {@code
 	 * (resultModel)->{
 	 * 	if(resultModel.getException() != null)
-	 * 		resultModel.setStatus(false);
-	 * }
-	 * }
+	 * 		resultModel.setStatus(false); } }
 	 * 
-	 * @param resultHandler
-	 * is the implementation of the functional interface ResultHandler
+	 * @param resultHandler is the implementation of the functional interface
+	 *                      ResultHandler
 	 * @return the builder instance
 	 */
-	public ResultHandlerBuilder <R> handleResult(ResultHandler<R> resultHandler){
+	public ResultHandlerBuilder<R> handleResult(ResultHandler<R> resultHandler) {
 		this.resultHandler = resultHandler;
 		return this;
 	}
-	
+
 	/**
-	 * Performs the transaction you just stated
+	 * Performs the transaction just stated
+	 * 
 	 * @return the return object from the transaction
 	 */
-	public R perform(){
+	public R perform() {
 		return performAndGetModel().getResponse();
 	}
-	
-	
+
 	/**
-	 * Performs the transaction you just stated
-	 * @return
-	 * the result model of the transaction
+	 * This method will create a new Thread, start it and then return immediately.
+	 * The created Thread will execute the perform method. The result will be that
+	 * the transaction is called asynchronously.
 	 */
-	public ResultModel<R> performAndGetModel(){
-		if(limiter != null){
-			limiter.acquire();
-		}
-		resultModel = new ResultModel<R>(transactionName);
-		performResultHandeled();
-		return resultModel;
-	}
-
-	private ResultModel<R> performResultHandeled(){
-		
-		long start = System.currentTimeMillis();
-		long end = 0;
-		long rt = 0;
-		
-		try{
-			R r = trans.transaction();
-			end = System.currentTimeMillis();
-			rt = end - start;
-			resultModel.setResp(r);
-		}catch(Exception e){
-			end = System.currentTimeMillis();
-			rt = end - start;
-			resultModel.setException(e);
-			//status will be default false if an exception is thrown
-			resultModel.setStatus(false);
-			
-		}finally{
-			resultModel.setResponseTime(rt);
-			String name;
-			boolean status;
-			String message;
-			try {
-				if(resultHandler != null){
-					resultHandler.handle(resultModel);
-				}
-				name = resultModel.getTransactionName();
-				status = resultModel.getStatus();
-				message = resultModel.getMessage();
-			}catch(Exception e) {
-				name = this.transactionName;
-				status = false;
-				message = e.getClass().getSimpleName() + " when performing handleResult";
-				resultModel.reportTransaction(true);
-			}
-			
-			if(resultModel.reportTransaction()){
-				TransactionExecutionResult result = 
-						new TransactionExecutionResult(name, start, rt, status, message, Thread.currentThread().getName());
-				
-				synchronized (transactionExecutionResultBuffer) {
-					transactionExecutionResultBuffer.getBuffer().add(result);
-				}
-
-				if(resultFormatter != null){
-					String toBeLogged = resultFormatter.toString(result);
-					resultLogger.info(toBeLogged);
-				}
-			}
-		}
-	return resultModel;
-	}
-
 	public void performAsync() {
+		thisThreadName = Thread.currentThread().getName();
+
+		if (limiter != null) {
+			limiter.acquire();
+			// set limiter to null in order to prohibit this transaction to be throttled
+			// both here and in performAndGetModel
+			limiter = null;
+		}
 		Thread t = new Thread() {
 			public void run() {
 				perform();
 			}
 		};
 		t.start();
+	}
+
+	/**
+	 * Performs the transaction you just stated
+	 * 
+	 * @return the result model of the transaction
+	 */
+	public ResultModel<R> performAndGetModel() {
+		if (limiter != null) {
+			limiter.acquire();
+		}
+		if (thisThreadName == null) {
+			thisThreadName = Thread.currentThread().getName();
+		}
+		resultModel = new ResultModel<R>(transactionName);
+		performResultHandeled();
+		return resultModel;
+	}
+
+	private ResultModel<R> performResultHandeled() {
+
+		long start = System.currentTimeMillis();
+		long end = 0;
+		long rt = 0;
+
+		try {
+			R r = trans.transaction();
+			end = System.currentTimeMillis();
+			rt = end - start;
+			resultModel.setResp(r);
+		} catch (Exception e) {
+			end = System.currentTimeMillis();
+			rt = end - start;
+			resultModel.setException(e);
+			// status will be default false if an exception is thrown
+			resultModel.setStatus(false);
+
+		} finally {
+			resultModel.setResponseTime(rt);
+			String name;
+			boolean status;
+			String message;
+			try {
+				if (resultHandler != null) {
+					resultHandler.handle(resultModel);
+				}
+				name = resultModel.getTransactionName();
+				status = resultModel.getStatus();
+				message = resultModel.getMessage();
+			} catch (Exception e) {
+				name = this.transactionName;
+				status = false;
+				message = e.getClass().getSimpleName() + " when performing handleResult";
+				resultModel.reportTransaction(true);
+			}
+
+			if (resultModel.reportTransaction()) {
+				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
+						thisThreadName);
+
+				if(transactionExecutionResultBuffer != null) {
+					transactionExecutionResultBuffer.addResult(result);;
+				}
+				
+				if (resultFormatter != null) {
+					String toBeLogged = resultFormatter.toString(result);
+					resultLogger.info(toBeLogged);
+				}
+			}
+		}
+		return resultModel;
 	}
 }

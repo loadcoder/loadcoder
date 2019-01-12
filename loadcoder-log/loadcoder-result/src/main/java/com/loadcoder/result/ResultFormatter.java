@@ -42,7 +42,7 @@ public abstract class ResultFormatter{
 	 * and then all lists with the TransactionExecutionResult are added to a list of lists
 	 * @param file to read and parse the TransactionExecutionResults from
 	 * @return a list of list of TransactionExecutionResults
-	 * @throws IOException
+	 * @throws IOException is thrown if there is some problem to read the input file
 	 */
 	protected abstract Map<String, List<TransactionExecutionResult>> toResultLists(File file) throws IOException;
 	
