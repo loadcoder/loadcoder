@@ -34,6 +34,8 @@ public class LoadBuilder {
 	private Executable preExecution;
 	private Executable postExecution;
 	private Intensity intensity;
+	private Intensity intensityIterations;
+
 
 	/**
 	 * Constructor for LoadBuilder
@@ -63,7 +65,7 @@ public class LoadBuilder {
 				throw new InvalidLoadStateException(PREVIOUS_LOAD_STILL_RUNNING.toString());
 		}
 
-		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, preExecution, postExecution, intensity);
+		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, preExecution, postExecution, intensity,intensityIterations);
 
 		ls.setLoad(l);
 		return l;
@@ -203,6 +205,11 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder throttle(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
 		this.intensity = new Intensity(amount, perTimeUnit, throttleMode);
+		return this;
+	}
+
+	public LoadBuilder throttleIterations(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
+		this.intensityIterations = new Intensity(amount, perTimeUnit, throttleMode);
 		return this;
 	}
 

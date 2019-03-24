@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
+import com.loadcoder.load.jfreechartfixes.DateAxisExtension;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public class ChartFrame extends ApplicationFrame {
@@ -218,7 +219,7 @@ public class ChartFrame extends ApplicationFrame {
 
 		setJMenuBar(menuBar);
 
-		DateAxis dateAxis = new DateAxis();
+		DateAxis dateAxis = new DateAxisExtension();
 
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 

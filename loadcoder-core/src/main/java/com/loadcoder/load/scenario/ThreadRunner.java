@@ -21,25 +21,35 @@ package com.loadcoder.load.scenario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThreadRunner implements Runnable{
+import com.google.common.util.concurrent.RateLimiter;
+
+public class ThreadRunner implements Runnable {
 
 	private static Logger log = LoggerFactory.getLogger(ThreadRunner.class);
-	
+
 	private final Load load;
 	private long loadStartTime;
-	
-	protected ThreadRunner(Load load){
+
+	protected ThreadRunner(Load load) {
 		this.load = load;
 	}
-	
-	public void run(){
+
+	public void run() {
+
+		RateLimiter iterationRateLimiter = null;
+		if (load.getThrottlerIterations() != null) {
+			iterationRateLimiter = load.getThrottlerIterations().getRateLimiter(Thread.currentThread());
+		}
 		log.debug("Thread {} started" + Thread.currentThread());
 		LoadScenario ls = load.getLoadScenario();
-		
+
 		loadStartTime = load.getExecution().getStartTime();
 		ls.pre();
 		while (decideIfContinue()) {
 			try {
+				if (iterationRateLimiter != null) {
+					iterationRateLimiter.acquire();
+				}
 				ls.loadScenario();
 			} catch (RuntimeException rte) {
 				log.info("LoadScenario threw exception {}. Test thread will continue!", rte);
@@ -48,15 +58,15 @@ public class ThreadRunner implements Runnable{
 		}
 		ls.post();
 	}
-	
+
 	private boolean decideIfContinue() {
 		boolean continueExecution = false;
 		synchronized (load) {
-			continueExecution = ! load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted());
+			continueExecution = !load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted());
 			if (continueExecution)
 				load.increaseTimesExecuted();
 		}
 		return continueExecution;
 	}
-	
+
 }
