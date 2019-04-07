@@ -21,7 +21,7 @@ package com.loadcoder.load.scenario;
 public class ResultModelBase {
 
 	private String transactionName;
-	private long rt;
+	private long rt = -1;
 	private boolean reportTransaction = true;
 	private boolean status = true;
 	private Exception e;
@@ -113,11 +113,12 @@ public class ResultModelBase {
 	public void setReportTransaction(boolean reportTransaction) {
 		this.reportTransaction = reportTransaction;
 	}
-	
-	
+
 	/**
 	 * Use setReportTransaction instead
-	 * @param reportTransaction if the transaction shall be reported (logged and send to the runtime user) or not.
+	 * 
+	 * @param reportTransaction if the transaction shall be reported (logged and
+	 *                          send to the runtime user) or not.
 	 */
 	@Deprecated
 	public void reportTransaction(boolean reportTransaction) {

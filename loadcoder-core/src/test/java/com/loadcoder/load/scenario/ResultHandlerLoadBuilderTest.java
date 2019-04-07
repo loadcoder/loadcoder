@@ -26,7 +26,7 @@ import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class ResultHandlerVoidBuilderTest extends TestNGBase {
+public class ResultHandlerLoadBuilderTest extends TestNGBase {
 
 	@Test
 	public void create() {
@@ -42,10 +42,11 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase {
 		new ExecutionBuilder(l).build();
 
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", () -> {
+		ResultHandlerLoadBuilder<String> resultHandlerBuilder = new ResultHandlerLoadBuilder<String>("t1", () -> {
 			LoadUtility.sleep(100);
+			return "";
 		}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a) -> {
+		resultHandlerBuilder.handleResult((a) -> {
 			a.changeTransactionName("t2");
 		}).perform();
 
@@ -70,9 +71,10 @@ public class ResultHandlerVoidBuilderTest extends TestNGBase {
 		new ExecutionBuilder(l).build();
 
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerVoidBuilder resultHandlerVoidBuilder = new ResultHandlerVoidBuilder("t1", () -> {
+		ResultHandlerLoadBuilder<String> resultHandlerBuilder = new ResultHandlerLoadBuilder<String>("t1", () -> {
+			return "";
 		}, ls, rl);
-		resultHandlerVoidBuilder.handleResult((a) -> {
+		resultHandlerBuilder.handleResult((a) -> {
 			a.changeTransactionName("t2");
 			throw new RuntimeException("unexpected exception");
 		}).perform();

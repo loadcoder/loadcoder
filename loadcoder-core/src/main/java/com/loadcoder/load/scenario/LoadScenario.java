@@ -18,20 +18,14 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.util.concurrent.RateLimiter;
 import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
-import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.statics.TimeUnit;
 
-public abstract class LoadScenario {
-
-	private final List<Thread> threads = new ArrayList<Thread>();
+public abstract class LoadScenario extends Scenario {
 
 	public abstract void loadScenario();
 
@@ -45,28 +39,10 @@ public abstract class LoadScenario {
 		return load;
 	}
 
-	/**
-	 * synchronized since multiple ThreadRunner potentially could invoke this method
-	 * simultaneously and they probably will be used to update ThreadLocal storages,
-	 * which is not thread safe.
-	 */
-	protected synchronized void pre() {
-		Executable pre = load.getPreExecution();
-		if (pre != null) {
-			pre.execute();
-		}
+	public void preThreadExecution() {
 	}
 
-	/**
-	 * synchronized since multiple ThreadRunner potentially could invoke this method
-	 * simultaneously and they probably will be used to update ThreadLocal storages,
-	 * which is not thread safe.
-	 */
-	protected synchronized void post() {
-		Executable post = load.getPostExecution();
-		if (post != null) {
-			post.execute();
-		}
+	public void postThreadExecution() {
 	}
 
 	protected TransactionExecutionResultBuffer getTransactionExecutionResultBuffer() {
@@ -74,7 +50,8 @@ public abstract class LoadScenario {
 	}
 
 	/**
-	 * @param <T> is the generic type for the return type ResultHandlerBuilder and the provided Transaction
+	 * @param             <T> is the generic type for the return type
+	 *                    ResultHandlerBuilder and the provided Transaction
 	 * @param defaultName is the name of the transaction you are about to state. The
 	 *                    name of the transaction can be changed after the
 	 *                    transaction is made, in the handleResult method
@@ -82,15 +59,15 @@ public abstract class LoadScenario {
 	 *                    interface Transaction
 	 * @return the builder instance
 	 */
-	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
+	public <T> ResultHandlerLoadBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		RateLimiter limiterToBeUsed = null;
 
 		if (load.getThrottler() != null) {
 			limiterToBeUsed = load.getThrottler().getRateLimiter(Thread.currentThread());
 		}
 
-		ResultHandlerBuilder<T> resultHandlerBuilder = new ResultHandlerBuilder<T>(defaultName, transaction, this,
-				limiterToBeUsed);
+		ResultHandlerLoadBuilder<T> resultHandlerBuilder = new ResultHandlerLoadBuilder<T>(defaultName, transaction,
+				this, limiterToBeUsed);
 
 		return resultHandlerBuilder;
 	}
@@ -103,15 +80,15 @@ public abstract class LoadScenario {
 	 *                    interface TransactionVoid
 	 * @return the builder instance
 	 */
-	public ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
+	public ResultHandlerVoidLoadBuilder load(String defaultName, TransactionVoid transaction) {
 		RateLimiter limiterToBeUsed = null;
 
 		if (load.getThrottler() != null) {
 			limiterToBeUsed = load.getThrottler().getRateLimiter(Thread.currentThread());
 		}
 
-		ResultHandlerVoidBuilder resultHandlerBuilder = new ResultHandlerVoidBuilder(defaultName, transaction, this,
-				limiterToBeUsed);
+		ResultHandlerVoidLoadBuilder resultHandlerBuilder = new ResultHandlerVoidLoadBuilder(defaultName, transaction,
+				this, limiterToBeUsed);
 
 		return resultHandlerBuilder;
 	}
@@ -130,7 +107,7 @@ public abstract class LoadScenario {
 	 * Get the amount of milliseconds equivalent to the provided amount and timeUnit
 	 * 
 	 * @param amount is the amount of the time to be converted
-	 * @param unit is the TimeUnit of the time to be converted
+	 * @param unit   is the TimeUnit of the time to be converted
 	 * @return amount of millis
 	 */
 	public static long getMillis(long amount, TimeUnit unit) {
@@ -142,7 +119,7 @@ public abstract class LoadScenario {
 	/**
 	 * Get the amount per second equivalent to the amount per TimeUnit
 	 * 
-	 * @param amount to be converted to seconds
+	 * @param amount   to be converted to seconds
 	 * @param timeUnit of the amount to be converted
 	 * @return a double value for the amount / second equivalent to intensity
 	 */

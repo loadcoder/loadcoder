@@ -33,8 +33,6 @@ public class Load {
 	private StopDecision stopDecision;
 	private int amountOfthreads;
 	private long rampup;
-	private Executable preExecution;
-	private Executable postExecution;
 
 	private Throttler throttler;
 	private Throttler throttlerIterations;
@@ -53,14 +51,6 @@ public class Load {
 
 	protected void setExecution(Execution e) {
 		this.e = e;
-	}
-
-	protected Executable getPreExecution() {
-		return preExecution;
-	}
-
-	protected Executable getPostExecution() {
-		return postExecution;
 	}
 
 	private StopDecision defaultStopDecision = (a, b) -> {
@@ -148,14 +138,12 @@ public class Load {
 		void transaction() throws Exception;
 	}
 
-	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup,
-			Executable preExecution, Executable postExecution, Intensity intensity, Intensity intensityIterations) {
+	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup, Intensity intensity,
+			Intensity intensityIterations) {
 		this.ls = ls;
 		this.stopDecision = stopDecision == null ? defaultStopDecision : stopDecision;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
-		this.preExecution = preExecution;
-		this.postExecution = postExecution;
 
 		List<Thread> temporaryThreadList = new ArrayList<Thread>();
 		for (int i = 0; i < amountOfthreads; i++) {

@@ -31,11 +31,8 @@ public class LoadBuilder {
 	private StopDecision stopDecision;
 	private int amountOfthreads = 1;
 	private long rampupMillis;
-	private Executable preExecution;
-	private Executable postExecution;
 	private Intensity intensity;
 	private Intensity intensityIterations;
-
 
 	/**
 	 * Constructor for LoadBuilder
@@ -65,7 +62,7 @@ public class LoadBuilder {
 				throw new InvalidLoadStateException(PREVIOUS_LOAD_STILL_RUNNING.toString());
 		}
 
-		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, preExecution, postExecution, intensity,intensityIterations);
+		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, intensity, intensityIterations);
 
 		ls.setLoad(l);
 		return l;
@@ -108,59 +105,6 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder stopDecision(StopDecision stopDecision) {
 		this.stopDecision = stopDecision;
-		return this;
-	}
-
-	protected Executable getPreExecution() {
-		return preExecution;
-	}
-
-	protected Executable getPostExecution() {
-		return postExecution;
-	}
-
-	/**
-	 * State an action that will be done for each Thread prior to running the
-	 * thread. This is done by implementing
-	 * {@code com.loadcoder.load.scenario.Load.Executable}
-	 * 
-	 * An example of a use case for this method is if the load requires that each
-	 * Thread has it's own client, this client can be created here. In order to
-	 * reach it is the loadscenario, a mapping from the running thread to the
-	 * particular client is needed. This can be done using Java's ThreadLocal.<br>
-	 * <br>
-	 * 
-	 * {@code  ThreadLocal<MyClient> threadLocal = new ThreadLocal<>();}<br>
-	 * {@code  new LoadBuilder(loadScenario).preExecution(()->threadLocal.set(new MyClient())).build();}<br>
-	 * In the loadScenario() method, do:<br>
-	 * {@code  MyClient client = threadLocal.get();}<br>
-	 * 
-	 * @param preExecution is the pre execution implementation
-	 * @return The builder instance
-	 */
-	public LoadBuilder preExecution(Executable preExecution) {
-		this.preExecution = preExecution;
-		return this;
-	}
-
-	/**
-	 * State an action that will be done for each Thread after the thread has
-	 * finished. This is done by implementing
-	 * {@code com.loadcoder.load.scenario.Load.Executable}
-	 * 
-	 * If something thread specific was done/created in the {@code preExecution}
-	 * method, and it needs to be tore down before closing the test, that can be
-	 * done here.<br>
-	 * <br>
-	 * 
-	 * {@code  ThreadLocal<MyClient> threadLocal = new ThreadLocal<>();}<br>
-	 * {@code  new LoadBuilder(loadScenario).preExecution(()-> threadLocal.set(new MyClient())).postExecution(()-> threadLocal.get().teardown()).build();}<br>
-	 * 
-	 * @param postExecution is the post execution implementation
-	 * @return The builder instance
-	 */
-	public LoadBuilder postExecution(Executable postExecution) {
-		this.postExecution = postExecution;
 		return this;
 	}
 

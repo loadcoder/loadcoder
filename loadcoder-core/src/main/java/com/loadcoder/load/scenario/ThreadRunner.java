@@ -44,7 +44,9 @@ public class ThreadRunner implements Runnable {
 		LoadScenario ls = load.getLoadScenario();
 
 		loadStartTime = load.getExecution().getStartTime();
-		ls.pre();
+		synchronized (ls) {
+			ls.preThreadExecution();
+		}
 		while (decideIfContinue()) {
 			try {
 				if (iterationRateLimiter != null) {
@@ -56,7 +58,9 @@ public class ThreadRunner implements Runnable {
 				continue;
 			}
 		}
-		ls.post();
+		synchronized (ls) {
+			ls.postThreadExecution();
+		}
 	}
 
 	private boolean decideIfContinue() {

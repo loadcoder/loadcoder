@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,43 +18,25 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import org.slf4j.Logger;
-
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
-import com.loadcoder.result.ResultLogger;
-import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.result.ResultFormatter;
 
 public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 
-	public static Logger resultLogger = ResultLogger.resultLogger;
+	protected final TransactionVoid trans;
+	protected ResultModelVoid resultModel;
+	protected ResultHandlerVoid resultHandler;
 
-	private TransactionVoid trans;
-	private ResultHandlerVoid resultHandler;
-	private ResultModelVoid resultModel;
-	private String thisThreadName;
-
-	protected ResultHandlerVoidBuilder(String defaultName, TransactionVoid trans, LoadScenario ls,
+	protected ResultHandlerVoidBuilder(TransactionVoid trans,
+			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
 			RateLimiter limiter) {
-		super(ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(), limiter);
-		this.transactionName = defaultName;
+		super(transactionExecutionResultBuffer, resultFormatter, limiter);
 		this.trans = trans;
 	}
 
-	/**
-	 * By using this method, the result of the transaction (received in the
-	 * ResultModelVoid instance) can be used to take transaction related actions.
-	 * For example, if the transaction threw an Exception, the ResultHandlerVoid can
-	 * be used to set the status of the transaction to false {@code
-	 * (resultModelVoid)->{
-	 * 	if(resultModelVoid.getException() != null) resultModelVoid.setStatus(false);
-	 * } }
-	 * 
-	 * @param resultHandler is the implementation of the functional interface
-	 *                      ResultHandlerVoid
-	 * @return the builder instance
-	 */
 	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler) {
 		this.resultHandler = resultHandler;
 		return this;
@@ -63,6 +45,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	/**
 	 * Performs the transaction just stated
 	 */
+
 	public void perform() {
 		performAndGetModel();
 	}
@@ -73,14 +56,7 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	 * the transaction is called asynchronously.
 	 */
 	public void performAsync() {
-		thisThreadName = Thread.currentThread().getName();
 
-		if (limiter != null) {
-			limiter.acquire();
-			// set limiter to null in order to prohibit this transaction to be throttled
-			// both here and in performAndGetModel
-			limiter = null;
-		}
 		Thread t = new Thread() {
 			public void run() {
 				perform();
@@ -95,12 +71,6 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	 * @return the result model of the transaction
 	 */
 	public ResultModelVoid performAndGetModel() {
-		if (limiter != null) {
-			limiter.acquire();
-		}
-		if (thisThreadName == null) {
-			thisThreadName = Thread.currentThread().getName();
-		}
 		resultModel = new ResultModelVoid(transactionName);
 		performResultHandeled();
 		return resultModel;
@@ -124,38 +94,16 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 
 		} finally {
 			resultModel.setResponseTime(rt);
-			String name;
-			boolean status;
-			String message;
 			try {
 				if (resultHandler != null) {
 					resultHandler.handle(resultModel);
 				}
-
-				name = resultModel.getTransactionName();
-				status = resultModel.getStatus();
-				message = resultModel.getMessage();
 			} catch (Exception e) {
-				name = this.transactionName;
-				status = false;
-				message = e.getClass().getSimpleName() + " when performing handleResult";
-				resultModel.reportTransaction(true);
+
 			}
 
-			if (resultModel.reportTransaction()) {
-				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
-						thisThreadName);
-
-				if(transactionExecutionResultBuffer != null) {
-					transactionExecutionResultBuffer.addResult(result);;
-				}
-				
-				if (resultFormatter != null) {
-					String toBeLoggen = resultFormatter.toString(result);
-					resultLogger.info(toBeLoggen);
-				}
-			}
 		}
 		return resultModel;
 	}
+
 }

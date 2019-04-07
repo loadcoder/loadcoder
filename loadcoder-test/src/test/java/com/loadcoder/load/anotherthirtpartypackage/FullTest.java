@@ -83,13 +83,11 @@ public class FullTest extends TestNGBase {
 		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
 		InfluxDBTestExecution exe = influxClient.createTestExecution();
 		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authenticationValue);
-		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND))
-				.rampup(6 * SECOND)
+		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND)).rampup(6 * SECOND)
 				.throttle(3, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(20).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l)
-				.runtimeResultUser((result) -> exe.writeTransactions(result)).build().execute()
-				.andWait();
+				.runtimeResultUser((result) -> exe.writeTransactions(result)).build().execute().andWait();
 		Result result = finished.getReportedResultFromResultFile();
 		grafanaClient.createNewDashboardFromResult(method.getName(), result);
 	}
@@ -146,22 +144,11 @@ public class FullTest extends TestNGBase {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 		List<?> list = new ArrayList<Exception>();
 
-		ThreadLocal<Exception> threadLocal = new ThreadLocal<Exception>();
 		LoadScenario s = new LoadScenario() {
-
-			@Override
-			public void pre() {
-				threadLocal.set(new Exception());
-			}
-
-			@Override
-			public void post() {
-			}
 
 			@Override
 			public void loadScenario() {
 
-				threadLocal.get();
 				load("t1", () -> {
 					return new NullPointerException();
 				}).handleResult((a) -> {

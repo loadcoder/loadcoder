@@ -26,7 +26,7 @@ import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class ResultHandlerBuilderTest extends TestNGBase {
+public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 
 	@Test
 	public void create() {
@@ -42,15 +42,14 @@ public class ResultHandlerBuilderTest extends TestNGBase {
 		new ExecutionBuilder(l).build();
 
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerBuilder<String> resultHandlerBuilder = new ResultHandlerBuilder<String>("t1", () -> {
+		ResultHandlerVoidLoadBuilder resultHandlerVoidBuilder = new ResultHandlerVoidLoadBuilder("t1", () -> {
 			LoadUtility.sleep(100);
-			return "";
 		}, ls, rl);
-		resultHandlerBuilder.handleResult((a) -> {
+		resultHandlerVoidBuilder.handleResult((a) -> {
 			a.changeTransactionName("t2");
 		}).perform();
 
-		Assert.assertEquals( ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
+		Assert.assertEquals(ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(result.getName(), "t2");
 		Assert.assertTrue(result.isStatus());
@@ -71,10 +70,9 @@ public class ResultHandlerBuilderTest extends TestNGBase {
 		new ExecutionBuilder(l).build();
 
 		RateLimiter rl = RateLimiter.create(1);
-		ResultHandlerBuilder<String> resultHandlerBuilder = new ResultHandlerBuilder<String>("t1", () -> {
-			return "";
+		ResultHandlerVoidLoadBuilder resultHandlerVoidBuilder = new ResultHandlerVoidLoadBuilder("t1", () -> {
 		}, ls, rl);
-		resultHandlerBuilder.handleResult((a) -> {
+		resultHandlerVoidBuilder.handleResult((a) -> {
 			a.changeTransactionName("t2");
 			throw new RuntimeException("unexpected exception");
 		}).perform();
