@@ -82,4 +82,66 @@ public class TypedLoadScenarioTest {
 			System.out.println("foo" + Thread.currentThread());
 		}).perform();
 	}
+
+	class CustomStopDecision implements StopDecision {
+
+		boolean stop = false;
+
+		@Override
+		public boolean stopLoad(long startTime, long timesExecuted) {
+			// TODO Auto-generated method stub
+			return stop;
+		}
+
+		public void stop() {
+			this.stop = true;
+		}
+
+	}
+
+	class ThreadInstanceStopper {
+
+		final CustomStopDecision customStopDecision;
+		LoadScenario ls;
+
+		ThreadInstanceStopper(LoadScenario ls, CustomStopDecision stop) {
+			this.ls = ls;
+			this.customStopDecision = stop;
+		}
+
+		public CustomStopDecision getCustomStopDecision() {
+			return customStopDecision;
+		}
+
+		public LoadScenario getLs() {
+			return ls;
+		}
+	}
+
+	@Test
+	public void testToPassTheLoadInstanceThroughTheThreadInstance() {
+
+		CustomStopDecision customStopDecision = new CustomStopDecision();
+		TypedLoadScenario<ThreadInstanceStopper> ls = new TypedLoadScenario<ThreadInstanceStopper>() {
+
+			@Override
+			public ThreadInstanceStopper createInstance() {
+				return new ThreadInstanceStopper(this, customStopDecision);
+			}
+
+			@Override
+			public void loadScenario(ThreadInstanceStopper t) {
+				testLogic(t);
+			}
+		};
+
+		new ExecutionBuilder(new LoadBuilder(ls).stopDecision(customStopDecision).build()).build().execute().andWait();
+	}
+
+	void testLogic(ThreadInstanceStopper threadInstanceStopper) {
+
+		if (1 == 1) {
+			threadInstanceStopper.getCustomStopDecision().stop();
+		}
+	}
 }
