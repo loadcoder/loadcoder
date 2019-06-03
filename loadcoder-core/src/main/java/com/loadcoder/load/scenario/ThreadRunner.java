@@ -61,6 +61,8 @@ public class ThreadRunner implements Runnable {
 		synchronized (ls) {
 			ls.postThreadExecution();
 		}
+
+		ls.getLoad().tearDownLoad();
 	}
 
 	private boolean decideIfContinue() {

@@ -202,6 +202,30 @@ public class FullTest extends TestNGBase {
 	}
 
 	@Test(groups = "manual")
+	public void testPeakMethod(Method method) {
+
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+
+		RuntimeChart chart = new RuntimeChart();
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+				load("t2", () -> {
+					LoadUtility.sleep(TestUtility.random(50, 70));
+				}).peak(15, 0.03).perform();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
+				.throttle(2, PER_SECOND, SHARED).build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+
+		chart.waitUntilClosed();
+	}
+
+	@Test(groups = "manual")
 	public void benchmarkOnlyLog(Method method) {
 
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
@@ -225,6 +249,7 @@ public class FullTest extends TestNGBase {
 			public void loadScenario() {
 				load("fast", () -> {
 				}).perform();
+				load("fast", () -> "").perform();
 			}
 		};
 
@@ -345,6 +370,27 @@ public class FullTest extends TestNGBase {
 	}
 
 	@Test(groups = "manual")
+	public void testLowIntensity(Method method) {
+		LoadScenario ls = new LoadScenario() {
+			SUT sut = new SUT();
+
+			@Override
+			public void loadScenario() {
+				load("t2", () -> {
+					LoadUtility.sleep(TestUtility.random(1000, 15_000));
+				}).perform();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
+				.build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute()
+				.andWait();
+
+	}
+
+	@Test(groups = "manual")
 	public void testRuntimeChart(Method method) {
 		LoadScenario ls = new LoadScenario() {
 			SUT sut = new SUT();
@@ -425,7 +471,8 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(20 * SECOND)).amountOfThreads(10).rampup(10 * SECOND).build();
+		Load l = new LoadBuilder(s).stopDecision(duration(900 * SECOND)).amountOfThreads(10).rampup(10 * SECOND)
+				.build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(runtimeChart).build().execute()
 				.andWait();

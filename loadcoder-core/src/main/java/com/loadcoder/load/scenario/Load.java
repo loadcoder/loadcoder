@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.loadcoder.load.intensity.Intensity;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.intensity.Throttler;
 
 public class Load {
@@ -44,6 +45,24 @@ public class Load {
 	protected long timesExecuted = 0;
 
 	private Execution e;
+
+	LoadThreadsSynchronizer loadThreadsSynchronizer = new LoadThreadsSynchronizer();
+
+	boolean tearDownPerformed = false;
+
+	void tearDownLoad() {
+		synchronized (this) {
+			if (!tearDownPerformed) {
+				loadThreadsSynchronizer.releaseAllThreadSynchronizers();
+				tearDownPerformed = true;
+			}
+		}
+
+	}
+
+	public LoadThreadsSynchronizer getLoadThreadsSynchronizer() {
+		return loadThreadsSynchronizer;
+	}
 
 	protected Execution getExecution() {
 		return this.e;

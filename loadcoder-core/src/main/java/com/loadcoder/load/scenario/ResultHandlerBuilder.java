@@ -19,6 +19,7 @@
 package com.loadcoder.load.scenario;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandler;
@@ -32,8 +33,8 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 
 	protected ResultHandlerBuilder(Transaction<R> trans,
 			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
-			RateLimiter limiter) {
-		super(transactionExecutionResultBuffer, resultFormatter, limiter);
+			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer) {
+		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
 	}
 
@@ -108,4 +109,9 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 		return resultModel;
 	}
 
+	public ResultHandlerBuilder<R> peak(int amountToPeak, double chanceOfPeakOccuring) {
+		this.amountToPeak = amountToPeak;
+		this.chanceOfPeakOccuring = chanceOfPeakOccuring;
+		return this;
+	}
 }

@@ -18,14 +18,115 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
+import static org.testng.Assert.assertEquals;
+import static com.loadcoder.statics.StopDesisions.*;
+import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.ThrottleMode.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 public class ScenarioTest {
 
+	Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Test 
+	public void testPeak() {
+		Scenario s = new Scenario();
+		List<String> result = new ArrayList<String>();
+		s.load("peakMe", ()->{result.add(""); return "";}).peak(2, 1.0).perform();
+		s.load("peakMeVoid", ()->{result.add("");}).peak(2, 1.0).perform();
+		
+		s.load("peakMe2", ()->{result.add(""); return "";}).peak(2, 0.0).perform();
+		s.load("peakMeVoid2", ()->{result.add("");}).peak(2, 0.0).perform();
+		assertEquals(result.size(), 4);
+		
+		LoadScenario ls = new LoadScenario() {
+			
+			@Override
+			public void loadScenario() {
+				load("peakMe", ()->{result.add(""); return "";}).peak(2, 1.0).perform();
+				load("peakMeVoid", ()->{result.add("");}).peak(2, 1.0).perform();
+				
+				load("peakMe2", ()->{result.add(""); return "";}).peak(2, 0.0).perform();
+				load("peakMeVoid2", ()->{result.add("");}).peak(2, 0.0).perform();
+						
+			}
+		};
+		new ExecutionBuilder(new LoadBuilder(ls)
+				.amountOfThreads(2)
+				.stopDecision(iterations(2))
+				.build()).build().execute().andWait();
+		assertEquals(result.size(), 12);
+		
+	}
+	
+	@Test(groups = "timeconsuming")
+	public void testPeak2() {
+
+		LoadScenario ls = new LoadScenario() {
+			
+			@Override
+			public void loadScenario() {
+				load("peak", ()->{}).peak(5, 0.5).perform();
+			}
+		};
+			
+		long start = System.currentTimeMillis();
+		Result r = new ExecutionBuilder(new LoadBuilder(ls)
+				.amountOfThreads(5)
+				.throttle(10, PER_SECOND, SHARED)
+				.stopDecision(iterations(50))
+				.build()).build().execute().andWait().getReportedResultFromResultFile();
+		long executionTime = System.currentTimeMillis() - start;
+		
+		assertThat(executionTime, greaterThan(4000L));
+		assertThat(executionTime, lessThan(6000L));
+		
+		List<TransactionExecutionResult> results = r.getResultLists().get("peak");
+		int peaksOccured = 0;
+		int transactionsWithSimilareExecutionTimeWithinPeak = 1;
+		long executionTimeForFirstTransactionWithingPeak = -1;
+		
+		for(TransactionExecutionResult transaction : results) {
+			if(executionTimeForFirstTransactionWithingPeak == -1) {
+				executionTimeForFirstTransactionWithingPeak = transaction.getTs();
+				transactionsWithSimilareExecutionTimeWithinPeak = 1;
+			}else {
+				double diff = transaction.getTs() - executionTimeForFirstTransactionWithingPeak;
+				diff = (diff * 2) / 2;
+				if(diff < 100) {
+					transactionsWithSimilareExecutionTimeWithinPeak++;
+					if(transactionsWithSimilareExecutionTimeWithinPeak == 5) {
+						peaksOccured++;
+					}
+				}else {
+					executionTimeForFirstTransactionWithingPeak = transaction.getTs();
+					transactionsWithSimilareExecutionTimeWithinPeak = 1;
+				}
+				
+			}
+		}
+		
+		logger.info("peaks occured was:{}", peaksOccured);
+		logger.info("execution time was:{}", executionTime);
+		assertThat(peaksOccured, greaterThan(3));
+		assertThat(peaksOccured, lessThan(15));
+		
+	}
+	
+	
 	@Test
 	public void testScenarioAndLoadScenarioForSameTestLogic() {
 		Scenario s = new Scenario();

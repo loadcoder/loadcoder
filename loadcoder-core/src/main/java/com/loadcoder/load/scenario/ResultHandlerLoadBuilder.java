@@ -21,6 +21,7 @@ package com.loadcoder.load.scenario;
 import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandler;
 import com.loadcoder.result.ResultLogger;
@@ -34,7 +35,7 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 
 	protected ResultHandlerLoadBuilder(String defaultName, Transaction<R> trans, LoadScenario ls, RateLimiter limiter) {
 		super(trans, ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(),
-				limiter);
+				limiter, ls.getLoad().getLoadThreadsSynchronizer());
 		this.transactionName = defaultName;
 	}
 
@@ -43,8 +44,8 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 	 * ResultModel instance) can be used to take transaction related actions. For
 	 * example, if the transaction threw an Exception, the ResultHandler can be used
 	 * to set the status of the transaction to false {@code
-	 * (resultModel)->{
-	 * 	if(resultModel.getException() != null) resultModel.setStatus(false); } }
+	 * (resultModel)->{ if(resultModel.getException() != null)
+	 * resultModel.setStatus(false); } }
 	 * 
 	 * @param resultHandler is the implementation of the functional interface
 	 *                      ResultHandler
@@ -97,9 +98,13 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 
 	private ResultModel<R> performResultHandeled() {
 
-		long start = System.currentTimeMillis();
+		if (amountToPeak > 1) {
+			loadThreadsSynchronizer.peakMe(transactionName, amountToPeak, chanceOfPeakOccuring);
+		}
+
 		long end = 0;
 		long rt = 0;
+		long start = System.currentTimeMillis();
 
 		try {
 			R r = trans.transaction();
@@ -149,4 +154,5 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 		}
 		return resultModel;
 	}
+
 }

@@ -21,6 +21,7 @@ package com.loadcoder.load.scenario;
 import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
 import com.loadcoder.result.ResultLogger;
@@ -35,7 +36,7 @@ public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 	protected ResultHandlerVoidLoadBuilder(String defaultName, TransactionVoid trans, LoadScenario ls,
 			RateLimiter limiter) {
 		super(trans, ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(),
-				limiter);
+				limiter, ls.getLoad().getLoadThreadsSynchronizer());
 		this.transactionName = defaultName;
 	}
 
@@ -98,9 +99,14 @@ public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 	}
 
 	private ResultModelVoid performResultHandeled() {
-		long start = System.currentTimeMillis();
+
+		if (amountToPeak > 1) {
+			loadThreadsSynchronizer.peakMe(transactionName, amountToPeak, chanceOfPeakOccuring);
+		}
+
 		long end = 0;
 		long rt = 0;
+		long start = System.currentTimeMillis();
 
 		try {
 			trans.transaction();
@@ -150,4 +156,5 @@ public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 		}
 		return resultModel;
 	}
+
 }
