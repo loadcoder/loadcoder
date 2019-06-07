@@ -22,6 +22,7 @@ public class ResultModelBase {
 
 	private String transactionName;
 	private long rt = -1;
+	private long val = -1;
 	private boolean reportTransaction = true;
 	private boolean status = true;
 	private Exception e;
@@ -55,10 +56,6 @@ public class ResultModelBase {
 		this.transactionName = transactionName;
 	}
 
-	protected boolean getStatus() {
-		return status;
-	}
-
 	/**
 	 * If the transaction throws an Exception, that Exception will be returned here
 	 * 
@@ -86,8 +83,13 @@ public class ResultModelBase {
 		this.status = status;
 	}
 
-	protected void setResponseTime(long rt) {
+	protected boolean getStatus() {
+		return status;
+	}
+
+	protected void setResponseTimeAndValue(long rt) {
 		this.rt = rt;
+		this.val = rt;
 	}
 
 	/**
@@ -97,6 +99,19 @@ public class ResultModelBase {
 	 */
 	public long getResponseTime() {
 		return rt;
+	}
+
+	public void setValue(long val) {
+		this.val = val;
+	}
+
+	/**
+	 * Get the response time of the transaction
+	 * 
+	 * @return the response time in milliseconds
+	 */
+	protected long getValue() {
+		return val;
 	}
 
 	/**

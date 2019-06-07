@@ -105,7 +105,7 @@ public class SummaryUtils {
 		ValueCalculator avgCalculator = (name, rr)->{
 			long totalSum = 0;
 			for(TransactionExecutionResult transactionExecutionResult : rr){
-				totalSum += transactionExecutionResult.getRt();
+				totalSum += transactionExecutionResult.getValue();
 			}
 			long avgValue = totalSum / rr.size();
 
@@ -125,7 +125,7 @@ public class SummaryUtils {
 
 			List<Long> allResponseTimes = new ArrayList<Long>();
 			for(TransactionExecutionResult r : rr){
-				allResponseTimes.add(r.getRt());
+				allResponseTimes.add(r.getValue());
 			}
 			allResponseTimes.sort((a,b)->{return (int)(a-b); });
 			int percentileIndex = (int)(allResponseTimes.size() * (0.01 * percentile));
@@ -143,8 +143,8 @@ public class SummaryUtils {
 		ValueCalculator max = (name, rr)->{
 			long maxValue = 0;
 			for(TransactionExecutionResult transactionExecutionResult : rr){
-				if(transactionExecutionResult.getRt() > maxValue)
-					maxValue = transactionExecutionResult.getRt();
+				if(transactionExecutionResult.getValue() > maxValue)
+					maxValue = transactionExecutionResult.getValue();
 			}
 			return "" +maxValue;
 		};

@@ -81,7 +81,6 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 		long start = System.currentTimeMillis();
 		long end = 0;
 		long rt = 0;
-
 		try {
 			trans.transaction();
 			end = System.currentTimeMillis();
@@ -94,13 +93,12 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 			resultModel.setStatus(false);
 
 		} finally {
-			resultModel.setResponseTime(rt);
+			resultModel.setResponseTimeAndValue(rt);
 			try {
 				if (resultHandler != null) {
 					resultHandler.handle(resultModel);
 				}
 			} catch (Exception e) {
-
 			}
 
 		}
@@ -112,5 +110,4 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 		this.chanceOfPeakOccuring = chanceOfPeakOccuring;
 		return this;
 	}
-
 }

@@ -1,8 +1,8 @@
-<t name="t1" ts="100" rt="0" status="true"/>
-<t name="t1" ts="200" rt="101" status="true"/>
-<t name="t1" ts="-500" rt="80" status="true"/>
-<t name="t1" ts="1500" rt="0" status="true"/>
-<t name="t1" ts="1700" rt="101" status="true"/>
-<t name="t1" ts="2700" rt="101" status="true"/>
-<t name="t1" ts="3700" rt="101" status="true"/>
-<t name="t1" ts="4700" rt="101" status="true"/>
+<t id="t1" ts="100" vl="0" st="true"/>
+<t id="t1" ts="200" vl="101" st="true"/>
+<t id="t1" ts="-500" vl="80" st="true"/>
+<t id="t1" ts="1500" vl="0" st="true"/>
+<t id="t1" ts="1700" vl="101" st="true"/>
+<t id="t1" ts="2700" vl="101" st="true"/>
+<t id="t1" ts="3700" vl="101" st="true"/>
+<t id="t1" ts="4700" vl="101" st="true"/>

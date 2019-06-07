@@ -53,7 +53,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(result.getName(), "t2");
 		Assert.assertTrue(result.isStatus());
-		Assert.assertTrue(result.getRt() >= 100);
+		Assert.assertTrue(result.getValue() >= 100);
 	}
 
 	@Test

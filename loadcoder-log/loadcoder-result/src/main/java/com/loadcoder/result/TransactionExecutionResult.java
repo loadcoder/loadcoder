@@ -18,16 +18,11 @@
  ******************************************************************************/
 package com.loadcoder.result;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class TransactionExecutionResult {
 
 	private final String name;
 	private final long ts;
-	private final long rt;
+	private final long val;
 	private final boolean status;
 	private final String message;
 	private final String threadId;
@@ -37,7 +32,7 @@ public class TransactionExecutionResult {
 	}
 
 	public String toString() {
-		return String.format("name:%s, ts:%s, rt:%s)", name, ts, rt);
+		return String.format("name:%s, ts:%s, val:%s)", name, ts, val);
 	}
 
 	public TransactionExecutionResult(long ts, long rt, boolean status, String message) {
@@ -48,11 +43,11 @@ public class TransactionExecutionResult {
 		this(name, ts, rt, status, message, Thread.currentThread().getName());
 	}
 
-	public TransactionExecutionResult(String name, long ts, long rt, boolean status, String message, String threadId) {
+	public TransactionExecutionResult(String name, long ts, long val, boolean status, String message, String threadId) {
 
 		this.name = name;
 		this.ts = ts;
-		this.rt = rt;
+		this.val = val;
 		this.status = status;
 		this.message = message;
 		this.threadId = threadId;
@@ -73,8 +68,8 @@ public class TransactionExecutionResult {
 	/**
 	 * @return the execution time of the transaction
 	 */
-	public long getRt() {
-		return rt;
+	public long getValue() {
+		return val;
 	}
 
 	/**

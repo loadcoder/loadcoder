@@ -83,7 +83,6 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 		long start = System.currentTimeMillis();
 		long end = 0;
 		long rt = 0;
-
 		try {
 			R r = trans.transaction();
 			end = System.currentTimeMillis();
@@ -97,7 +96,7 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 			resultModel.setStatus(false);
 
 		} finally {
-			resultModel.setResponseTime(rt);
+			resultModel.setResponseTimeAndValue(rt);
 			try {
 				if (resultHandler != null) {
 					resultHandler.handle(resultModel);

@@ -104,6 +104,7 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 
 		long end = 0;
 		long rt = 0;
+		long value = 0;
 		long start = System.currentTimeMillis();
 
 		try {
@@ -119,7 +120,7 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 			resultModel.setStatus(false);
 
 		} finally {
-			resultModel.setResponseTime(rt);
+			resultModel.setResponseTimeAndValue(rt);
 			String name;
 			boolean status;
 			String message;
@@ -130,15 +131,18 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 				name = resultModel.getTransactionName();
 				status = resultModel.getStatus();
 				message = resultModel.getMessage();
+				value = resultModel.getValue();
 			} catch (Exception e) {
 				name = this.transactionName;
 				status = false;
 				message = e.getClass().getSimpleName() + " when performing handleResult";
+				value = rt;
 				resultModel.reportTransaction(true);
+
 			}
 
 			if (resultModel.reportTransaction()) {
-				TransactionExecutionResult result = new TransactionExecutionResult(name, start, rt, status, message,
+				TransactionExecutionResult result = new TransactionExecutionResult(name, start, value, status, message,
 						thisThreadName);
 
 				if (transactionExecutionResultBuffer != null) {
