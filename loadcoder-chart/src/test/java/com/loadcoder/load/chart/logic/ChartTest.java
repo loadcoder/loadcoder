@@ -22,119 +22,149 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.CommonDataSource;
 
 import org.jfree.data.xy.XYDataItem;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
+import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.statics.Formatter;
 
-public class ChartTest extends TestNGBase{
+public class ChartTest extends TestNGBase {
 
 	/**
 	 * Test that generates chart with 2 short graph
+	 * 
 	 * @throws IOException
 	 */
 	@Test(groups = "manual")
-	public void doSimpleChart() throws IOException{
+	public void doSimpleChart() throws IOException {
 		File f = new File("src/test/resources/testresults/small_result.log");
-		
+
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
-		
+
 		ResultChart c = new ResultChart(result);
 		ChartLogic logic = c.getLogic();
 		XYSeriesExtension series = new XYSeriesExtension("hello", true, false, Color.RED);
-		series.add(0,0);
-		series.add(140,140);
+		series.add(0, 0);
+		series.add(140, 140);
 		logic.addSeries(series);
-		
+
 		c.waitUntilClosed();
 	}
 
 	/**
 	 * Test that generates a chart from a file containing negative values.
+	 * 
 	 * @throws IOException
 	 */
 	@Test(groups = "manual")
-	public void lotsOfTransactionTypes() throws IOException{
+	public void lotsOfTransactionTypes() throws IOException {
 		File f = new File("src/test/resources/testresults/a_lot_of_transactiontypes.log");
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
-		
+
 		Chart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
+
 	/**
 	 * Test that generates a chart from a file containing negative values.
+	 * 
 	 * @throws IOException
 	 */
 	@Test(groups = "manual")
-	public void testNegative() throws IOException{
+	public void testNegative() throws IOException {
 		File f = new File("src/test/resources/testresults/negative_timevalue.log");
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
-		
+
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
+
 	/**
-	 * Test that generates a chart from a file where the results are unordered.
-	 * The chart should still look correct. 
+	 * Test that generates a chart from a file where the results are unordered. The
+	 * chart should still look correct.
+	 * 
 	 * @throws IOException
 	 */
 	@Test(groups = "manual")
-	public void unordered_results() throws IOException{
+	public void unordered_results() throws IOException {
 		File f = new File("src/test/resources/testresults/unordered_timevalue.log");
 
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
-		
+
 		Chart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
+
 	@Test(groups = "manual")
-	public void temp() throws IOException{
+	public void temp() throws IOException {
 		File f = new File("../loadcoder-test/target/testDynamicChart/2017-01-30_195731/result.log");
 
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		Result result = formatter.toResultList(f);
-		
+
 		Chart c = new ResultChart(result);
 		c.waitUntilClosed();
 	}
-	
-	@Test(groups = "manual")
-	public void addAndRemoveXYDataItems() throws IOException{
 
-		ChartFrame frame = new ChartFrame(false, true, new HashMap<String, Color>());
-		
+	@Test(groups = "manual")
+	public void addAndRemoveXYDataItems() throws IOException {
+
+		ChartLogic logic = getNewLogic();
+		ChartFrame frame = new ChartFrame(false, true, new HashMap<String, Color>(), logic);
+
 		XYSeriesExtension series = new XYSeriesExtension("foo", true, false, Color.BLUE);
-		
+
 		XYDataItem toBeRemoved = new XYDataItem(1000, 20);
 		series.add(new XYDataItem(0, 10));
 		series.add(new XYDataItem(2000, 10));
-		
-		frame.getSeriesCollection().addSeries(series);
+
+		logic.getSeriesCollection().addSeries(series);
 		frame.showChart();
-		
-		for(int i =0; i<5; i++){
+		frame.setVisible(true);
+		for (int i = 0; i < 5; i++) {
 			series.add(toBeRemoved);
-			LoadUtility.sleep(1000);		
+			LoadUtility.sleep(1000);
 
 			series.getXYDataItems().remove(toBeRemoved);
 			frame.getChart().setNotify(true);
+			logic.forceRerender();
 			LoadUtility.sleep(1000);
 		}
 		frame.waitUntilClosed();
 	}
-	
+
+	public static ChartLogic getNewLogic() {
+		ChartLogic l = new ChartLogic(CommonSeries.values(), true) {
+
+			@Override
+			protected void update(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+					HashSet<Long> hashesGettingUpdated) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			protected void doUpdate() {
+				// TODO Auto-generated method stub
+			}
+		};
+		return l;
+	}
+
 }

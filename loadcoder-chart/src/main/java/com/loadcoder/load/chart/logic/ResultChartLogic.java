@@ -118,11 +118,9 @@ public class ResultChartLogic extends ChartLogic {
 		return dottedSeries;
 	}
 
-	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, boolean defaultDottedMode,
-			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked,
-			Map<String, Color> existingColors, Result... results) {
-		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
+	public ResultChartLogic(boolean defaultDottedMode, CommonSeries[] commonSeries,
+			boolean locked, Result... results) {
+		super(commonSeries, locked);
 
 		this.dottedMode = defaultDottedMode;
 		populateRemovalFilters();
@@ -163,7 +161,12 @@ public class ResultChartLogic extends ChartLogic {
 
 		seriesCollection.removeAllSeries();
 		ranges.clear();
+		initCommonSeries();
+		handleData(listOfListOfList, hashesGettingUpdated);
+	}
 
+	private void handleData(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+			HashSet<Long> hashesGettingUpdated) {
 		earliestX = null;
 
 		FilteredData filteredData = getFilteredData();
@@ -189,9 +192,6 @@ public class ResultChartLogic extends ChartLogic {
 
 		Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
 		createSamplesGroups(seriesMap, sampleGroups);
-
-		createCommons();
-		addAllCommonSeriesToTheChart();
 
 		addSerieseToChart(seriesMap);
 
@@ -234,6 +234,7 @@ public class ResultChartLogic extends ChartLogic {
 		updateSeriesWithSamples(hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps,
 				dottedMode);
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
+
 	}
 
 	public long calculateSampleLengthWith(int indexOfSlider) {
@@ -264,6 +265,8 @@ public class ResultChartLogic extends ChartLogic {
 	public void chartSliderAjustment(long newSampleLength) {
 		long sampleLengthToUse = newSampleLength;
 		setSampleLengthToUse(sampleLengthToUse);
+
+		clearChart();
 		createHashesAndUpdate(true);
 	}
 
@@ -319,7 +322,9 @@ public class ResultChartLogic extends ChartLogic {
 	/**
 	 * takes the list of resultlists and generates a list of DataSets from it along
 	 * with some metadata such as min and max timestamp.
-	 * @param src the Map of lists of results that will be used to generate a FilteredData instance from
+	 * 
+	 * @param src the Map of lists of results that will be used to generate a
+	 *            FilteredData instance from
 	 * @return the generated FilteredData
 	 */
 	protected FilteredData generateDataSets(Map<String, List<TransactionExecutionResult>> src) {

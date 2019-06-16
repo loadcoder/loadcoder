@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jfree.chart.LegendItem;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.data.xy.XYDataset;
 
 import com.loadcoder.load.chart.common.CommonSample;
 import com.loadcoder.load.chart.common.CommonSampleGroup;
@@ -44,6 +46,7 @@ import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
@@ -81,7 +84,7 @@ public abstract class ChartLogic {
 
 	protected final XYLineAndShapeRendererExtention renderer;
 
-	protected final Map<String, Boolean> seriesVisible;
+	protected final Map<String, Boolean> seriesVisible = new HashMap<String, Boolean>();
 
 	protected final List<YCalculator> yCalculators = new ArrayList<YCalculator>();
 
@@ -108,6 +111,44 @@ public abstract class ChartLogic {
 
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
+	public ChartLogic(CommonSeries[] commonSeries, boolean locked) {
+		this.locked = locked;
+		this.seriesCollection = new XYSeriesCollectionExtention();
+
+		Map<String, Color> existingColors = new HashMap<String, Color>();
+		renderer = new LoadcoderRenderer(true, false, seriesCollection, existingColors);
+
+		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
+		this.existingColors = existingColors;
+		for (CommonSeries s : commonsToBeUsed) {
+			existingColors.put(s.getName(), s.getColor());
+		}
+
+		plot = RuntimeChartLogic.createXYPlotExtension("y", "x", seriesCollection, renderer);
+
+		initCommonSeries();
+
+		yCalculators.add(avg);
+		yCalculators.add(max);
+
+		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
+			blacklistColors.add(blackListed);
+		});
+	}
+
+	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset,
+			XYLineAndShapeRendererExtention renderer) {
+		NumberAxis yAxis = new NumberAxis(yAxisLabel);
+		NumberAxis xAxis = new NumberAxis(xAxisLabel);
+		xAxis.setAutoRangeIncludesZero(false);
+		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
+
+		plot.setRenderer(renderer);
+		plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);
+		return plot;
+	}
+
 	protected List<String> getSeriesKeys() {
 		return seriesKeys;
 	}
@@ -131,7 +172,7 @@ public abstract class ChartLogic {
 		return yCalculatorToUse;
 	}
 
-	protected XYSeriesCollectionExtention getSeriesCollection() {
+	public XYSeriesCollectionExtention getSeriesCollection() {
 		return seriesCollection;
 	}
 
@@ -142,10 +183,6 @@ public abstract class ChartLogic {
 	public XYPlotExtension getPlot() {
 		return plot;
 	}
-
-//	protected List<XYSeriesExtension> getCommonSeries() {
-//		return commonSeries;
-//	}
 
 	protected long getXDiff() {
 		if (earliestX == null)
@@ -205,27 +242,21 @@ public abstract class ChartLogic {
 		}
 	}
 
-	public ChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
-			boolean locked, Map<String, Color> existingColors) {
-		this.locked = locked;
-		this.seriesCollection = seriesCollection;
-		this.plot = plot;
-		this.renderer = renderer;
-		this.seriesVisible = seriesVisible;
-		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
-		this.existingColors = existingColors;
-		for (CommonSeries s : commonsToBeUsed) {
-			existingColors.put(s.getName(), s.getColor());
+	public void initCommonSeries() {
+		createCommons();
+		addAllCommonSeriesToTheChart();
+	}
+
+	public void setVisibility(XYSeriesExtension clickedSeries, int iterator, LegendItem legend, boolean visible) {
+
+		if (clickedSeries instanceof XYDottedSeriesExtension) {
+			renderer.setSeriesShapesVisible(iterator, visible);
+		} else {
+			renderer.setSeriesLinesVisible(iterator, visible);
 		}
-
-		yCalculators.add(avg);
-		yCalculators.add(max);
-
-		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
-			blacklistColors.add(blackListed);
-		});
-//		populateColorArray();
+		seriesVisible.put(clickedSeries.getKey(), visible);
+		clickedSeries.setVisible(visible);
+		legend.setShapeVisible(visible);
 	}
 
 	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart,
@@ -410,7 +441,6 @@ public abstract class ChartLogic {
 	}
 
 	void addPoints(List<DataSet> dataSets, Map<String, SampleGroup> sampleGroups, Set<Long> sampleTimestamps) {
-		long start = System.currentTimeMillis();
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 			SampleGroup sampleGroup = sampleGroups.get(dataSetName);
@@ -507,30 +537,22 @@ public abstract class ChartLogic {
 		return null;
 	}
 
-//	void populateColorArray() {
-//		if (customizedColors != null) {
-//			Iterator<Entry<String, Color>> i = customizedColors.entrySet().iterator();
-//			while (i.hasNext()) {
-//				Entry<String, Color> e = i.next();
-//				existingColors.add(e.getValue());
-//			}
-//		}
-//		for (CommonSeries commonSerie : commonsToBeUsed) {
-//			Color c = commonSerie.getColor();
-//			existingColors.add(c);
-//		}
-//	}
+	public int getTotalSize() {
+		List l = seriesCollection.getSeries();
+		int totalSize = 0;
+		for (Object o : l) {
+			XYSeriesExtension series = (XYSeriesExtension) o;
+			int seriesSize = series.getItemCount();
+			totalSize = totalSize + seriesSize;
+		}
+		return totalSize;
+	}
 
 	public synchronized Color getNewColor(String seriesKey) {
 
-//		if (customizedColors != null) {
-//			Color color = customizedColors.get(seriesKey);
-//			return color;
-//		}
 		Set<Color> set = new HashSet<Color>(existingColors.values());
 		Color newColor = ColorUtils.getNewContrastfulColor(set, blacklistColors);
 		existingColors.put(seriesKey, newColor);
-//		existingColors.add(newColor);
 		return newColor;
 	}
 

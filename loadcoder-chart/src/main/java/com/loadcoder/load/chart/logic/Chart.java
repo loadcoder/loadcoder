@@ -35,7 +35,9 @@ import javax.swing.JMenu;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
+import org.jfree.chart.util.ParamChecks;
 
+import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
@@ -48,30 +50,32 @@ import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 public abstract class Chart {
 
 	ChartFrame chartFrame;
-	
+
 	protected final Map<String, Color> existingColors = new HashMap<String, Color>();
-	
-	//only for test purposes, in order to create a chart, without the actual ChartFrame
-	protected Chart() {}
-	
-	public Chart(boolean linesVisible, boolean shapesVisible) {
-		
+
+	final ChartLogic logic;
+
+	public Chart(boolean linesVisible, boolean shapesVisible, ChartLogic logic) {
+
+		this.logic = logic;
+
 		/*
-		 * This is done to inactivate automatic rerendering of the chart when resizing it.
-		 * Without this, the whole chart will be rerendered when the size changes just one pixel
+		 * This is done to inactivate automatic rerendering of the chart when resizing
+		 * it. Without this, the whole chart will be rerendered when the size changes
+		 * just one pixel
 		 */
 		Toolkit.getDefaultToolkit().setDynamicLayout(false);
-		
-		this.chartFrame = new ChartFrame(linesVisible, shapesVisible, existingColors);
-		
+
+		this.chartFrame = new ChartFrame(linesVisible, shapesVisible, existingColors, logic);
+
 		Stroke[] strokes = new Stroke[] { new BasicStroke() };
-		
-		//this is done in order to set the size of the dots shown in dotted mode.
-		DrawingSupplier newSup = new DefaultDrawingSupplier(null, new Paint[] { }, strokes,
-				strokes, new Shape[] { new Rectangle(new Dimension(8, 8)) });
-		chartFrame.getPlot().setDrawingSupplier(newSup);
+
+		// this is done in order to set the size of the dots shown in dotted mode.
+		DrawingSupplier newSup = new DefaultDrawingSupplier(null, new Paint[] {}, strokes, strokes,
+				new Shape[] { new Rectangle(new Dimension(8, 8)) });
+		logic.getPlot().setDrawingSupplier(newSup);
 	}
-	
+
 	/**
 	 * Wait here until the chart is closed
 	 */
@@ -79,36 +83,40 @@ public abstract class Chart {
 		chartFrame.waitUntilClosed();
 	}
 
-	JMenu createAboutMenu(){
+	JMenu createAboutMenu() {
 
 		JMenu about = new JMenu("About");
 		about.addMouseListener(new MouseListener() {
-			
+
 			@Override
-			public void mouseReleased(MouseEvent e) {}
-			
+			public void mouseReleased(MouseEvent e) {
+			}
+
 			@Override
-			public void mousePressed(MouseEvent e) {}
-			
+			public void mousePressed(MouseEvent e) {
+			}
+
 			@Override
-			public void mouseExited(MouseEvent e) {}
-			
+			public void mouseExited(MouseEvent e) {
+			}
+
 			@Override
-			public void mouseEntered(MouseEvent e) {}
-			
+			public void mouseEntered(MouseEvent e) {
+			}
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				AboutPopup.showAboutPopup(chartFrame);
 			}
 		});
-		
+
 		return about;
 	}
-	
-	JMenu createSettingsMenu(ChartLogic logic){
+
+	JMenu createSettingsMenu(ChartLogic logic) {
 		JMenu settings = new JMenu("Settings");
 		settings.addMouseListener(new MouseClickedListener() {
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				new SettingsWindow(chartFrame, "Settings", logic);
@@ -116,20 +124,13 @@ public abstract class Chart {
 		});
 		return settings;
 	}
+
 	protected Chart use(DataSetUser dataSetUser) {
 		chartFrame.use(dataSetUser);
 		return this;
 	}
-	
-	protected XYSeriesCollectionExtention getSeriesCollection(){
-		return chartFrame.getSeriesCollection();
-	}
-	
-	protected XYPlotExtension getPlot(){
+
+	protected XYPlotExtension getPlot() {
 		return chartFrame.getPlot();
-	}
-	
-	protected XYLineAndShapeRendererExtention getRenderer(){
-		return chartFrame.getRenderer();
 	}
 }

@@ -22,7 +22,6 @@ import static com.loadcoder.statics.Time.DAY;
 import static com.loadcoder.statics.Time.HOUR;
 import static com.loadcoder.statics.Time.MINUTE;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,8 +38,6 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Range;
-import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
-import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
@@ -49,10 +46,10 @@ import com.loadcoder.load.chart.sampling.SampleConcaternatorSpec;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
 import com.loadcoder.load.chart.utilities.Utilities;
-import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
+import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChartLogic extends ChartLogic {
+public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -92,25 +89,24 @@ public class RuntimeChartLogic extends ChartLogic {
 		return sampleGroups;
 	}
 
-	public RuntimeChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
-			boolean locked, Map<String, Color> existingColors) {
-		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
+	public RuntimeChartLogic(CommonSeries[] commonSeries, boolean locked) {
+		super(commonSeries, locked);
 
 		setSampleLengthToUse(SAMPLELENGTH_DEFAULT);
 		concaterSpecList = getSampleConcaternatorSpecs();
-
-		createCommons();
-		addAllCommonSeriesToTheChart();
 
 		// Init the first ranges
 		ranges.add(new Range(Long.MIN_VALUE, -1, getSampleLengthToUse()));
 		ranges.add(new Range(0, Long.MAX_VALUE, getSampleLengthToUse()));
 	}
 
-	public int getIncomingSize(Map<String, List<TransactionExecutionResult>> listOfListOfList) {
+	public int getIncomingSize(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+			List<String> seriesKeys) {
 		int size = 0;
-		for (String key : getSeriesKeys()) {
+		if (listOfListOfList == null) {
+			return 0;
+		}
+		for (String key : seriesKeys) {
 			List<TransactionExecutionResult> list = listOfListOfList.get(key);
 			if (list == null) {
 				continue;
@@ -167,7 +163,7 @@ public class RuntimeChartLogic extends ChartLogic {
 		updateRangesForSampleConcaternatorAfterConcaternation(concater);
 	}
 
-	public void concat(HashSet<Long> hashesGettingUpdated) {
+	protected void concat(HashSet<Long> hashesGettingUpdated) {
 		long start = System.currentTimeMillis();
 		int mostConcatsAtOnce = 1000;
 
@@ -191,25 +187,26 @@ public class RuntimeChartLogic extends ChartLogic {
 	}
 
 	public void update(Map<String, List<TransactionExecutionResult>> incomingData, HashSet<Long> hashesGettingUpdated) {
-		updateTimestamp = System.currentTimeMillis();
 
+		List<String> seriesKeys = getSeriesKeys();
 		incomingData.keySet().stream().forEach(key -> addSeriesKey(key));
-
-		int incomingSize = getIncomingSize(incomingData);
+		int incomingSize = getIncomingSize(incomingData, seriesKeys);
 		if (incomingSize == 0) {
 			updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 			return;
 		}
+		long[] minmaxNew = Utilities.findMinMaxTimestamp(incomingData, getSeriesKeys());
+		updateTimestamp = minmaxNew[1];
 
 		/*
 		 * tsForFirstUpdateContainingData is needed in order to determine when to add
 		 * new concatenators as samples. this variable is only set once, which is the
 		 * first time data arrives to the chart.
 		 */
-		if (tsForFirstUpdateContainingData == Long.MAX_VALUE)
-			tsForFirstUpdateContainingData = updateTimestamp;
+		if (tsForFirstUpdateContainingData == Long.MAX_VALUE) {
+			tsForFirstUpdateContainingData = minmaxNew[0];
 
-		long[] minmaxNew = Utilities.findMinMaxTimestamp(incomingData, getSeriesKeys());
+		}
 		if (minmaxNew[0] < minmax[0]) {
 			minmax[0] = minmaxNew[0];
 		}
@@ -239,6 +236,7 @@ public class RuntimeChartLogic extends ChartLogic {
 
 		updateSeriesWithSamples(hashesGettingUpdated, getFilteredData().getDataSets(), sampleGroups, sampleTimestamps,
 				false);
+
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
 
 		forceRerender();
@@ -315,19 +313,6 @@ public class RuntimeChartLogic extends ChartLogic {
 		return firstConcater;
 	}
 
-	/*
-	 * 1st: width for the unconcatenated samples 2nd: width of the 1st range of
-	 * concatenated samples 3rd: width of the 2nd range of concatenated samples
-	 */
-	protected static final ConcatenationDefinition[] concatenationDefinitions = new ConcatenationDefinition[] {
-			new ConcatenationDefinition(2 * MINUTE, 4), // 4
-			new ConcatenationDefinition(10 * MINUTE, 4), // 16
-			new ConcatenationDefinition(40 * MINUTE, 4), // 64
-			new ConcatenationDefinition(5 * HOUR, 4), // 256
-			new ConcatenationDefinition(2 * DAY, 4), // 1024
-			new ConcatenationDefinition(10 * DAY, 8) // 8192 ~ 2.3h
-	};
-
 	protected static class ConcatenationDefinition {
 		long width;
 		int amountToConcatenate;
@@ -345,58 +330,31 @@ public class RuntimeChartLogic extends ChartLogic {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		concaterSpecs.add(new SampleConcaternatorSpec(concatenationDefinitions[0].width,
-				concatenationDefinitions[0].amountToConcatenate,
-				getFirstConcaterRunDecider(concatenationDefinitions[0].width)));
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
+		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
+				firstConcatenationDefinition.amountToConcatenate,
+				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));
 
-		concaterSpecs.add(getNewSpec(concatenationDefinitions[1]));
-		concaterSpecs.add(getNewSpec(concatenationDefinitions[2]));
-		concaterSpecs.add(getNewSpec(concatenationDefinitions[3]));
-		concaterSpecs.add(getNewSpec(concatenationDefinitions[4]));
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(10 * MINUTE, 4))); // 16
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(40 * MINUTE, 4))); // 64
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 512
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 4096
+
 		return concaterSpecs;
-	}
-
-	public void calculateAmountOfPoints() {
-		int amountOfSerieses = 10;
-		int amountOfPointsPerSamples = 2;
-		long testExecution = 30 * DAY;
-		long sampleLengthDefault = 1000;
-
-		int totalAmountOfPoints = 0;
-		long executionTimeLeft = testExecution;
-		long sampleLengthUsedForThisWidth = sampleLengthDefault;
-		for (ConcatenationDefinition d : RuntimeChartLogic.concatenationDefinitions) {
-			if (executionTimeLeft < 1)
-				break;
-			long widthForThis = 0;
-			if (executionTimeLeft < d.width) {
-				widthForThis = executionTimeLeft;
-			} else {
-				if (d.equals(
-						RuntimeChartLogic.concatenationDefinitions[RuntimeChartLogic.concatenationDefinitions.length
-								- 1]))
-					widthForThis = executionTimeLeft;
-				else {
-					widthForThis = d.width;
-				}
-			}
-			executionTimeLeft = executionTimeLeft - widthForThis;
-
-			int amountOfSamplesForOneSeries = (int) (widthForThis / (sampleLengthUsedForThisWidth));
-
-			int amountOfSamplesTotal = amountOfSamplesForOneSeries * amountOfSerieses;
-
-			int pointsForThisRange = amountOfSamplesTotal * amountOfPointsPerSamples;
-			totalAmountOfPoints = totalAmountOfPoints + pointsForThisRange;
-
-			sampleLengthUsedForThisWidth = sampleLengthUsedForThisWidth * d.amountToConcatenate;
-		}
-		logger.trace(String.format("total points:%s", totalAmountOfPoints));
 	}
 
 	@Override
 	protected void doUpdate() {
 		performUpdate();
+	}
+
+	@Override
+	public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
+		setIncomingData(transactionsMap);
+		long start = System.currentTimeMillis();
+		doSafeUpdate();
+		long diff = System.currentTimeMillis() - start;
+		logger.debug("update time: {}", diff);
 	}
 
 }

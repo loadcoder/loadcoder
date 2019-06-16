@@ -29,6 +29,7 @@ import static com.loadcoder.statics.Formatter.*;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.GrafanaClient;
 import com.loadcoder.result.clients.InfluxDBClient;
 import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
@@ -583,4 +585,16 @@ public class FullTest extends TestNGBase {
 		c.waitUntilClosed();
 	}
 
+	@Test(groups = "manual")
+	public void resultChartAndRuntimeChartWithConstructedData() {
+		Result r = new Result(new File("src/test/resources/testresults/result15min.log"));
+		Chart c = new ResultChart(r);
+
+		RuntimeChart runtimeChart = new RuntimeChart();
+		runtimeChart.useData(r.getResultLists());
+		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
+		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
+
+		runtimeChart.waitUntilClosed();
+	}
 }

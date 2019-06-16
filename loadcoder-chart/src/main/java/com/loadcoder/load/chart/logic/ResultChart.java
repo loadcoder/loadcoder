@@ -40,21 +40,16 @@ public class ResultChart extends Chart {
 
 	private static final boolean defaultPointsMode = false;
 
-	final ResultChartLogic logic;
+	final ResultChartLogic resultChartLogic;
 
 	Result[] results;
 
-	final CommonSeries[] commonSeries;
+	public ResultChart(CommonSeries[] commonSeries, Result... results) {
+		super(true, false, new ResultChartLogic(false, commonSeries, false, results));
 
-	private final boolean locked = false;
-
-	public ResultChart(Map<String, Color> customizedColors, CommonSeries[] commonSeries, Result... results) {
-		super(true, false);
-		logic = new ResultChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(), defaultPointsMode, commonSeries, customizedColors, locked, existingColors, results);
-
+		resultChartLogic = (ResultChartLogic) this.logic;
 		long sampleLengthToUse = logic.getSampleLengthToUse();
-		int defaultIndex = logic.getDefaultSliderIndex();
+		int defaultIndex = resultChartLogic.getDefaultSliderIndex();
 
 		JMenu resultMenu = addResultMenu(sampleLengthToUse, defaultIndex);
 		JMenu settingsMenu = createSettingsMenu(logic);
@@ -67,11 +62,6 @@ public class ResultChart extends Chart {
 		chartFrame.setVisible(true);
 
 		this.results = results;
-		this.commonSeries = commonSeries;
-	}
-
-	public ResultChart(CommonSeries[] commonSeries, Result... results) {
-		this(null, commonSeries, results);
 	}
 
 	public ResultChart(Result... results) {
@@ -84,9 +74,9 @@ public class ResultChart extends Chart {
 	}
 
 	private void toggleRemoveFilterCheckBox(DataSetUserType dataSetUserType, boolean selected) {
-		logic.setFilteredData(null);
-		logic.setDottedSeries(null);
-		logic.clearChart();
+		resultChartLogic.setFilteredData(null);
+		resultChartLogic.setDottedSeries(null);
+		resultChartLogic.clearChart();
 		logic.createCommons();
 		logic.addAllCommonSeriesToTheChart();
 		if (selected) {
@@ -94,7 +84,7 @@ public class ResultChart extends Chart {
 		} else {// checkbox has been deselected
 			logic.getRemovalFiltersInUse().remove(dataSetUserType);
 		}
-		logic.createHashesAndUpdate(false);
+		resultChartLogic.createHashesAndUpdate(false);
 	}
 
 	private JMenu addResultMenu(long initialSampleLength, int defaultIndex) {
@@ -103,7 +93,7 @@ public class ResultChart extends Chart {
 
 		JMenu removalFiltersMenu = new JMenu("Removal filters");
 		resultMenu.add(removalFiltersMenu);
-		for (DataSetUserType dataSetUserType : logic.getRemovalFilters()) {
+		for (DataSetUserType dataSetUserType : resultChartLogic.getRemovalFilters()) {
 			JCheckBox checkbox = new JCheckBox(dataSetUserType.getName());
 
 			checkbox.addItemListener(new ItemListener() {
@@ -120,22 +110,22 @@ public class ResultChart extends Chart {
 		JMenu sampling = new JMenu("Sampling");
 
 		JMenu graphType = new JMenu("Graph type");
-		double keepFactor = logic.getCurrentKeepFactor();
+		double keepFactor = resultChartLogic.getCurrentKeepFactor();
 		String pointsRadioButtonText = "Points";
 		if (keepFactor != 1.0) {
 			pointsRadioButtonText = String.format("Points (%s)", DetailsSettings.keepFactorToProcentString(keepFactor));
 		}
-		logic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
+		resultChartLogic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
 
 		JRadioButtonMenuItem lines = new JRadioButtonMenuItem("Samples", !defaultPointsMode);
 		ButtonGroup graphTypeGroup = new ButtonGroup();
-		graphTypeGroup.add(logic.getPointsRadioButton());
+		graphTypeGroup.add(resultChartLogic.getPointsRadioButton());
 		graphTypeGroup.add(lines);
-		graphType.add(logic.getPointsRadioButton());
+		graphType.add(resultChartLogic.getPointsRadioButton());
 		graphType.add(lines);
 		resultMenu.add(graphType);
 
-		logic.getPointsRadioButton().addActionListener((a) -> {
+		resultChartLogic.getPointsRadioButton().addActionListener((a) -> {
 			ajustDottedMode(true);
 		});
 		lines.addActionListener((a) -> {
@@ -155,17 +145,17 @@ public class ResultChart extends Chart {
 			sampleMethod.add(sampleMethodMenuIten);
 
 			sampleMethodMenuIten.addActionListener((a) -> {
-				logic.clearChart();
+				resultChartLogic.clearChart();
 				logic.addAllCommonSeriesToTheChart();
 				logic.yCalculatorToUse = calc;
-				logic.createHashesAndUpdate(false);
+				resultChartLogic.createHashesAndUpdate(false);
 			});
 		}
 		return resultMenu;
 	}
 
 	void ajustDottedMode(boolean dottedMode) {
-		logic.useDottedModeValue(dottedMode);
+		resultChartLogic.useDottedModeValue(dottedMode);
 	}
 
 }

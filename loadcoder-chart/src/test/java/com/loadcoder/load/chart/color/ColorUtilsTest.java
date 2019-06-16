@@ -39,7 +39,7 @@ import com.loadcoder.load.testng.TestNGBase;
 public class ColorUtilsTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Test
 	public void testBlackListCloseToExtreme() {
 
@@ -98,7 +98,7 @@ public class ColorUtilsTest extends TestNGBase {
 		Set<Color> set = new HashSet<Color>(colors);
 		Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		blacklisted = Arrays.asList(c);
-		
+
 		set = new HashSet<Color>(colors);
 		Color c2 = ColorUtils.getNewContrastfulColor(set, blacklisted);
 		assertNotSame(c, c2);
@@ -194,12 +194,12 @@ public class ColorUtilsTest extends TestNGBase {
 		List<Color> blacklisted = Arrays.asList();
 		List<Color> colorList = Arrays.asList(Color.BLACK, Color.WHITE, new Color(255, 0, 0), new Color(255, 255, 0),
 				new Color(255, 0, 255), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255));
-		
+
 		Set<Color> set = new HashSet<Color>(colorList);
 		Color newColor = ColorUtils.getNewContrastfulColor(set, blacklisted);
-		
+
 		assertFalse(set.contains(newColor));
-		
+
 	}
 
 }

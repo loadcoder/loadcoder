@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
+import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ChartLogic;
 import com.loadcoder.load.chart.logic.ResultChartLogic;
@@ -60,7 +61,8 @@ public class SettingsWindow extends JDialog {
 		setPreferredSize(new Dimension(1000, 500));
 
 		this.chartLogic = chartLogic;
-		settings.add(new ColorSettings(chartLogic, parent.getSeriesCollection().getSeries()));
+		settings.add(new ColorSettings(chartLogic,
+				((XYSeriesCollectionExtention) chartLogic.getPlot().getDataset()).getSeries()));
 
 		// DetailsSettings shall only be added for the ResultChart
 		if (chartLogic instanceof ResultChartLogic) {

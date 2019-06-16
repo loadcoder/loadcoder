@@ -32,15 +32,22 @@ import org.jfree.data.xy.XYSeries;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
+import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
+import com.loadcoder.load.chart.logic.ChartLogic;
+import com.loadcoder.load.chart.logic.ChartTest;
+import com.loadcoder.load.chart.logic.RuntimeChart;
+import com.loadcoder.load.chart.logic.RuntimeChartLogic;
 
 public class ChartFrameTest {
 
 	@Test
 	public void testHandleClick() {
-		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>());
+		RuntimeChartLogic logic = RuntimeChart.createNewRuntimeChartLogic();
+		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>(), logic);
 		PlotEntity e = Mockito.mock(PlotEntity.class);
 		XYSeriesCollectionExtention xySeriesCollectionExtention = Mockito.mock(XYSeriesCollectionExtention.class);
 		List<XYSeries> list = new ArrayList<XYSeries>();
@@ -48,22 +55,58 @@ public class ChartFrameTest {
 		xySeriesExtension.setLegend(new LegendItem("foo"));
 		XYSeriesExtension xySeriesExtension2 = new XYSeriesExtension("bar", true, false, Color.WHITE);
 		xySeriesExtension2.setLegend(new LegendItem("bar"));
-		
+
 		list.add(xySeriesExtension);
 		list.add(xySeriesExtension2);
-		
- 		Mockito.when(xySeriesCollectionExtention.getSeries()).thenReturn(list);
+
+		Mockito.when(xySeriesCollectionExtention.getSeries()).thenReturn(list);
 		frame.handleClick(1, e, xySeriesCollectionExtention);
 		frame.handleClick(2, e, xySeriesCollectionExtention);
 		LegendItemEntity e2 = Mockito.mock(LegendItemEntity.class);
 		Mockito.when(e2.getSeriesKey()).thenReturn("foo");
 		frame.handleClick(1, e2, xySeriesCollectionExtention);
-		assertTrue(! xySeriesExtension.isVisible()); //not visible when left clicking on series legend
-		assertTrue(xySeriesExtension2.isVisible()); //visible default
+		assertTrue(!xySeriesExtension.isVisible()); // not visible when left clicking on series legend
+		assertTrue(xySeriesExtension2.isVisible()); // visible default
 
 		frame.handleClick(2, e2, xySeriesCollectionExtention);
-		assertTrue( xySeriesExtension.isVisible()); //visible when right clicking on series legend
-		assertTrue(! xySeriesExtension2.isVisible()); //not visible hence right click of another series
-		
+		assertTrue(xySeriesExtension.isVisible()); // visible when right clicking on series legend
+		assertTrue(!xySeriesExtension2.isVisible()); // not visible hence right click of another series
+
+	}
+
+	@Test(groups = "manual")
+	public void chartFrameExperiment() {
+		ChartLogic logic = ChartTest.getNewLogic();
+		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>(), logic);
+		frame.setVisible(true);
+		frame.showChart();
+
+		XYSeriesExtension series = new XYSeriesExtension("foo", true, false, Color.GREEN);
+
+		logic.getSeriesCollection().addSeries(series);
+		series.add(new XYDataItemExtension(0, 0));
+		series.add(new XYDataItemExtension(10, 10));
+
+		XYDataItemExtension item = new XYDataItemExtension(12, 5);
+		series.add(item);
+
+		series.remove(item.getX());
+
+		series.add(item);
+
+		logic.getSeriesCollection().fireChange();
+
+		series.remove(item.getX());
+		logic.getSeriesCollection().fireChange();
+
+		series.add(item);
+
+		logic.getSeriesCollection().fireChange();
+
+		LoadUtility.sleep(5_000);
+		series.setColorInTheChart(Color.BLUE);
+		logic.getSeriesCollection().fireChange();
+
+		LoadUtility.sleep(600_000);
 	}
 }

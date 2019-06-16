@@ -22,9 +22,16 @@ import static com.loadcoder.statics.StopDesisions.iterations;
 import static com.loadcoder.statics.ThrottleMode.*;
 import static com.loadcoder.statics.Time.*;
 import static com.loadcoder.statics.Time.SECOND;
+import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
@@ -33,7 +40,9 @@ import com.loadcoder.load.scenario.TypedLoadScenario;
 
 public class TypedLoadScenarioTest {
 
-	public static class ThreadInstance {
+	Logger log = LoggerFactory.getLogger(this.getClass());
+
+	public class ThreadInstance {
 		private LoadScenario ls;
 
 		public LoadScenario getLs() {
@@ -41,14 +50,14 @@ public class TypedLoadScenarioTest {
 		}
 
 		public ThreadInstance(LoadScenario ls) {
-			System.out.println("created a new ThreadInstance");
+			log.info("created a new ThreadInstance");
 			this.ls = ls;
 		}
 	}
 
 	@Test
 	public void testThreadInstance() {
-
+		List<ThreadInstance> instances = new ArrayList<ThreadInstance>();
 		TypedLoadScenario<ThreadInstance> ls = new TypedLoadScenario<ThreadInstance>() {
 
 			public void loadScenario(ThreadInstance t) {
@@ -57,7 +66,9 @@ public class TypedLoadScenarioTest {
 
 			@Override
 			public ThreadInstance createInstance() {
-				return new ThreadInstance(this);
+				ThreadInstance t = new ThreadInstance(this);
+				TestUtility.addValueToList(instances, t);
+				return t;
 			}
 
 			@Override
@@ -70,16 +81,16 @@ public class TypedLoadScenarioTest {
 
 		};
 
-		Load l = new LoadBuilder(ls).amountOfThreads(10).stopDecision(iterations(10))
-				.throttleIterations(1, PER_SECOND, SHARED).rampup(10 * SECOND).build();
+		Load l = new LoadBuilder(ls).amountOfThreads(10).stopDecision(iterations(10)).build();
 
 		new ExecutionBuilder(l).build().execute().andWait();
+		assertEquals(instances.size(), 10);
 
 	}
 
 	void testLogic(ThreadInstance t) {
 		t.getLs().load("foo", () -> {
-			System.out.println("foo" + Thread.currentThread());
+			log.info("foo" + Thread.currentThread());
 		}).perform();
 	}
 

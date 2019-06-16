@@ -25,7 +25,6 @@ import java.util.Random;
 
 import org.testng.Assert;
 
-
 public class TestUtility {
 
 	public static List<String> readFile(File file){
@@ -41,7 +40,7 @@ public class TestUtility {
 		list.add(new Object());
 	}
 	
-	public static synchronized void addValueToList(List<Object> list, Object value){
+	public static synchronized <T> void  addValueToList(List<T> list, T value){
 		list.add(value);
 	}
 	

@@ -63,6 +63,8 @@ import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
+import com.loadcoder.load.chart.logic.ChartLogic;
+import com.loadcoder.load.chart.logic.RuntimeChartLogic;
 import com.loadcoder.load.jfreechartfixes.DateAxisExtension;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
@@ -84,15 +86,11 @@ public class ChartFrame extends ApplicationFrame {
 
 	XYPlotExtension plot;
 
-	XYLineAndShapeRendererExtention renderer;
-
-	Map<String, Boolean> seriesVisible = new HashMap<String, Boolean>();
-
-	XYSeriesCollectionExtention seriesCollection = new XYSeriesCollectionExtention();
-
 	List<DataSetUser> dataSetUsers = new ArrayList<DataSetUser>();
 
 	JPanel panelForButtons;
+
+	private final ChartLogic logic;
 
 	public JFreeChart getChart() {
 		return chart;
@@ -100,14 +98,6 @@ public class ChartFrame extends ApplicationFrame {
 
 	public XYPlotExtension getPlot() {
 		return plot;
-	}
-
-	public XYLineAndShapeRendererExtention getRenderer() {
-		return renderer;
-	}
-
-	public Map<String, Boolean> getSeriesVisible() {
-		return seriesVisible;
 	}
 
 	public interface DataSetUser {
@@ -119,27 +109,14 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
-	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset,
-			XYLineAndShapeRendererExtention renderer) {
-		NumberAxis yAxis = new NumberAxis(yAxisLabel);
-		NumberAxis xAxis = new NumberAxis(xAxisLabel);
-		xAxis.setAutoRangeIncludesZero(false);
-		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
-
-		return plot;
-	}
-
-	public ChartFrame(boolean linesVisible, boolean shapesVisible, Map<String, Color> existingColors) {
+	public ChartFrame(boolean linesVisible, boolean shapesVisible, Map<String, Color> existingColors,
+			ChartLogic logic) {
 		super("");
+		this.logic = logic;
+		plot = logic.getPlot();
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/polarbear.png"));
 		image.getScaledInstance(200, 200, Image.SCALE_FAST);
 		setIconImage(image);
-		renderer = new LoadcoderRenderer(linesVisible, shapesVisible, seriesCollection, existingColors);
-
-		plot = createXYPlotExtension("X", "Y", seriesCollection, renderer);
-		plot.setRenderer(renderer);
-		plot.getDomainAxis().setAutoRange(true);
-		plot.getRangeAxis().setAutoRange(true);
 
 		showChart();
 
@@ -168,27 +145,9 @@ public class ChartFrame extends ApplicationFrame {
 		return existing;
 	}
 
-	public XYSeriesCollectionExtention getSeriesCollection() {
-		return seriesCollection;
-	}
+	public static JFreeChart createXYLineChart(String title, boolean legend, boolean tooltips, boolean urls,
+			XYPlot plot) {
 
-	public int getTotalSize() {
-		List l = seriesCollection.getSeries();
-		int totalSize = 0;
-		for (Object o : l) {
-			XYSeriesExtension series = (XYSeriesExtension) o;
-			int seriesSize = series.getItemCount();
-			totalSize = totalSize + seriesSize;
-		}
-		return totalSize;
-	}
-
-	public static JFreeChart createXYLineChart(String title, PlotOrientation orientation, boolean legend,
-			boolean tooltips, boolean urls, XYPlot plot) {
-
-		ParamChecks.nullNotPermitted(orientation, "orientation");
-
-		plot.setOrientation(orientation);
 		XYItemRenderer renderer = plot.getRenderer();
 		if (tooltips) {
 			renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
@@ -204,12 +163,16 @@ public class ChartFrame extends ApplicationFrame {
 
 	public ChartFrame showChart() {
 
+		PlotOrientation orientation = PlotOrientation.VERTICAL;
+		ParamChecks.nullNotPermitted(orientation, "orientation");
+		plot.setOrientation(orientation);
+
 		panelForButtons = new JPanel();
 
 		panelForButtons.setBackground(Color.WHITE);
 		panelForButtons.setLayout(new BoxLayout(panelForButtons, BoxLayout.PAGE_AXIS));
 
-		chart = createXYLineChart(null, PlotOrientation.VERTICAL, true, true, false, plot);
+		chart = createXYLineChart(null, true, true, false, plot);
 
 		// using this constructor in order to get rid of jcharts right click popup menu
 		chartPanel = new ChartPanelExtension(chart, ChartPanel.DEFAULT_WIDTH, ChartPanel.DEFAULT_HEIGHT,
@@ -233,7 +196,8 @@ public class ChartFrame extends ApplicationFrame {
 			public void chartMouseClicked(ChartMouseEvent e) {
 				int button = e.getTrigger().getButton();
 				Object entity = e.getEntity();
-				handleClick(button, entity, seriesCollection);
+				XYSeriesCollectionExtention collection = (XYSeriesCollectionExtention) plot.getDataset();
+				handleClick(button, entity, collection);
 			}
 
 			public void chartMouseMoved(ChartMouseEvent e) {
@@ -266,24 +230,11 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
-	void setVisibility(XYSeriesExtension clickedSeries, int iterator, LegendItem legend, boolean visible) {
-
-		if (clickedSeries instanceof XYDottedSeriesExtension) {
-			renderer.setSeriesShapesVisible(iterator, visible);
-		} else {
-			renderer.setSeriesLinesVisible(iterator, visible);
-		}
-		seriesVisible.put(clickedSeries.getKey(), visible);
-		clickedSeries.setVisible(visible);
-		// legend.setLineVisible(visible);
-		legend.setShapeVisible(visible);
-	}
-
 	public void handleClick(int button, Object clickedObject, XYSeriesCollectionExtention serieses) {
 
 		synchronized (plot) {
 
-			//if clicked in the graph area
+			// if clicked in the graph area
 			if (clickedObject instanceof PlotEntity) {
 				chart.setNotify(false);
 				if (button == 1) {
@@ -293,7 +244,7 @@ public class ChartFrame extends ApplicationFrame {
 				chart.setNotify(true);
 				serieses.fireChange();
 			}
-			//else is clicked on a legend
+			// else is clicked on a legend
 			else if (clickedObject instanceof LegendItemEntity) {
 				chart.setNotify(false);
 				LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
@@ -314,7 +265,8 @@ public class ChartFrame extends ApplicationFrame {
 				LegendItem clickedLegend = clickedSeries.getLegend();
 				if (button == 1) {
 					boolean visible = !clickedSeries.isVisible();
-					setVisibility(clickedSeries, iterator, clickedLegend, visible);
+
+					logic.setVisibility(clickedSeries, iterator, clickedLegend, visible);
 				} else {
 					int iterator2 = 0;
 					for (XYSeriesExtension xy : lista) {
@@ -323,7 +275,7 @@ public class ChartFrame extends ApplicationFrame {
 						boolean visible = false;
 						if (xy.equals(clickedSeries))
 							visible = true;
-						setVisibility(xy, iterator2, legend, visible);
+						logic.setVisibility(xy, iterator2, legend, visible);
 						iterator2++;
 					}
 				}
