@@ -16,22 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario;
+package com.loadcoder.load.exceptions;
 
-import com.loadcoder.load.scenario.Load.Transaction;
-import com.loadcoder.load.scenario.Load.TransactionVoid;
+public class FailedTransactionException extends RuntimeException {
 
-public class Scenario {
+	private static final long serialVersionUID = 1L;
 
-	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
-		ResultHandlerVoidBuilder resultHandlerBuilder = new ResultHandlerVoidBuilder(transaction, null, null, null,
-				null, defaultName);
-		return resultHandlerBuilder;
-	}
-
-	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
-		ResultHandlerBuilder<T> resultHandlerBuilder = new ResultHandlerBuilder<T>(transaction, null, null, null, null,
-				defaultName);
-		return resultHandlerBuilder;
+	public FailedTransactionException(String transactionName) {
+		super("Transaction " + transactionName + " failed");
 	}
 }

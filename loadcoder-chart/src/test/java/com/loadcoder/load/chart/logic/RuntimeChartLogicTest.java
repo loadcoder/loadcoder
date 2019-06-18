@@ -258,7 +258,6 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		XYSeriesExtension c = (XYSeriesExtension) logic.getSeriesCollection().getSeries(2);
 		XYDataItem firstPoint = c.getDataItem(0);
 		assertEquals(firstPoint.getY().longValue(), 15L);
-		System.out.println("done");
 
 		XYDataItem firstThroughputPoint = throughput.getDataItem(0);
 		assertEquals(firstThroughputPoint.getY().longValue(), 2L);

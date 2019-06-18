@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
@@ -91,8 +92,12 @@ public class ScenarioTest {
 
 	}
 
-	@Test(groups = "timeconsuming")
-	public void testPeak2() {
+	/**
+	 * This test takes too long time to have in every build, hence the "manual"
+	 * group
+	 */
+	@Test(groups = "manual")
+	public void testPeaksWith50PercentChange() {
 
 		LoadScenario ls = new LoadScenario() {
 
@@ -112,6 +117,16 @@ public class ScenarioTest {
 		assertThat(executionTime, lessThan(6000L));
 
 		List<TransactionExecutionResult> results = r.getResultLists().get("peak");
+
+		int peaksOccured = calculatePeaksOccured(results, 5);
+		logger.info("peaks occured was:{}", peaksOccured);
+		logger.info("execution time was:{}", executionTime);
+		assertThat(peaksOccured, greaterThan(3));
+		assertThat(peaksOccured, lessThan(15));
+
+	}
+
+	int calculatePeaksOccured(List<TransactionExecutionResult> results, int sizeOfPeaks) {
 		int peaksOccured = 0;
 		int transactionsWithSimilareExecutionTimeWithinPeak = 1;
 		long executionTimeForFirstTransactionWithingPeak = -1;
@@ -125,7 +140,7 @@ public class ScenarioTest {
 				diff = (diff * 2) / 2;
 				if (diff < 100) {
 					transactionsWithSimilareExecutionTimeWithinPeak++;
-					if (transactionsWithSimilareExecutionTimeWithinPeak == 5) {
+					if (transactionsWithSimilareExecutionTimeWithinPeak == sizeOfPeaks) {
 						peaksOccured++;
 					}
 				} else {
@@ -135,12 +150,36 @@ public class ScenarioTest {
 
 			}
 		}
+		return peaksOccured;
+	}
 
-		logger.info("peaks occured was:{}", peaksOccured);
-		logger.info("execution time was:{}", executionTime);
-		assertThat(peaksOccured, greaterThan(3));
-		assertThat(peaksOccured, lessThan(15));
+	@Test
+	public void testToPeakAsyncTransactions() {
 
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+				load("async", () -> {
+				}).peak(5, 1.0).performAsync();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).amountOfThreads(1).stopDecision(iterations(5))
+				.throttleIterations(10, PER_SECOND, PER_THREAD).build();
+
+		long start = System.currentTimeMillis();
+		FinishedExecution finished = new ExecutionBuilder(l).build().execute().andWait();
+		LoadUtility.sleep(100);
+		Result r = finished.getReportedResultFromResultFile();
+
+		long diff = System.currentTimeMillis() - start;
+		assertThat(diff, greaterThan(300L));
+
+		List<TransactionExecutionResult> results = r.getResultLists().get("async");
+
+		int amountOfPeaks = calculatePeaksOccured(results, 5);
+		assertThat(amountOfPeaks, equalTo(1));
 	}
 
 	@Test

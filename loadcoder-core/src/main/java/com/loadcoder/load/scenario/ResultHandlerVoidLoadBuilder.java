@@ -18,26 +18,17 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import org.slf4j.Logger;
-
 import com.google.common.util.concurrent.RateLimiter;
-import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
-import com.loadcoder.result.ResultLogger;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 
-	public static Logger resultLogger = ResultLogger.resultLogger;
-
-	private String thisThreadName;
-
 	protected ResultHandlerVoidLoadBuilder(String defaultName, TransactionVoid trans, LoadScenario ls,
 			RateLimiter limiter) {
 		super(trans, ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(),
-				limiter, ls.getLoad().getLoadThreadsSynchronizer());
-		this.transactionName = defaultName;
+				limiter, ls.getLoad().getLoadThreadsSynchronizer(), defaultName);
 	}
 
 	/**
@@ -93,70 +84,23 @@ public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 		if (thisThreadName == null) {
 			thisThreadName = Thread.currentThread().getName();
 		}
-		resultModel = new ResultModelVoid(transactionName);
 		performResultHandeled();
 		return resultModel;
 	}
 
-	private ResultModelVoid performResultHandeled() {
+	@Override
+	protected ResultModelVoid performResultHandeled() {
 
 		if (amountToPeak > 1) {
-			loadThreadsSynchronizer.peakMe(transactionName, amountToPeak, chanceOfPeakOccuring);
+			loadThreadsSynchronizer.peakMe(resultModel.getTransactionName(), amountToPeak, chanceOfPeakOccuring);
 		}
+		ResultModelVoid r = super.performResultHandeled();
+		return r;
+	}
 
-		long end = 0;
-		long rt = 0;
-		long value = 0;
-		long start = System.currentTimeMillis();
-
-		try {
-			trans.transaction();
-			end = System.currentTimeMillis();
-			rt = end - start;
-		} catch (Exception e) {
-			end = System.currentTimeMillis();
-			rt = end - start;
-			resultModel.setException(e);
-			// status will be default false if an exception is thrown
-			resultModel.setStatus(false);
-
-		} finally {
-			resultModel.setResponseTimeAndValue(rt);
-			String name;
-			boolean status;
-			String message;
-			try {
-				if (resultHandler != null) {
-					resultHandler.handle(resultModel);
-				}
-
-				name = resultModel.getTransactionName();
-				status = resultModel.getStatus();
-				message = resultModel.getMessage();
-				value = resultModel.getValue();
-			} catch (Exception e) {
-				name = this.transactionName;
-				status = false;
-				message = e.getClass().getSimpleName() + " when performing handleResult";
-				value = rt;
-				resultModel.reportTransaction(true);
-			}
-
-			if (resultModel.reportTransaction()) {
-				TransactionExecutionResult result = new TransactionExecutionResult(name, start, value, status, message,
-						thisThreadName);
-
-				if (transactionExecutionResultBuffer != null) {
-					transactionExecutionResultBuffer.addResult(result);
-				}
-
-				if (resultFormatter != null) {
-					String toBeLoggen = resultFormatter.toString(result);
-					resultLogger.info(toBeLoggen);
-				}
-			}
-		}
-		return resultModel;
+	@Override
+	protected void useTransactionExecutionResult(TransactionExecutionResult transactionExecutionResult) {
+		bufferAndLogTransactionExecutionResult(transactionExecutionResult);
 	}
 
 }

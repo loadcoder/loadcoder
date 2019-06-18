@@ -19,11 +19,14 @@
 package com.loadcoder.load.scenario;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.exceptions.FailedTransactionException;
+import com.loadcoder.load.exceptions.ResultHandlerException;
 import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandlerVoid;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 
@@ -33,9 +36,10 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 
 	protected ResultHandlerVoidBuilder(TransactionVoid trans,
 			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
-			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer) {
+			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName) {
 		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
+		this.resultModel = new ResultModelVoid(defaultName);
 	}
 
 	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler) {
@@ -46,7 +50,6 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	/**
 	 * Performs the transaction just stated
 	 */
-
 	public void perform() {
 		performAndGetModel();
 	}
@@ -72,15 +75,16 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	 * @return the result model of the transaction
 	 */
 	public ResultModelVoid performAndGetModel() {
-		resultModel = new ResultModelVoid(transactionName);
 		performResultHandeled();
 		return resultModel;
 	}
 
-	private ResultModelVoid performResultHandeled() {
-		long start = System.currentTimeMillis();
+	protected ResultModelVoid performResultHandeled() {
+
 		long end = 0;
 		long rt = 0;
+		long start = System.currentTimeMillis();
+
 		try {
 			trans.transaction();
 			end = System.currentTimeMillis();
@@ -91,23 +95,42 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 			resultModel.setException(e);
 			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
-
-		} finally {
-			resultModel.setResponseTimeAndValue(rt);
-			try {
-				if (resultHandler != null) {
-					resultHandler.handle(resultModel);
-				}
-			} catch (Exception e) {
-			}
-
 		}
+
+		resultModel.setResponseTimeAndValue(rt);
+		try {
+			if (resultHandler != null) {
+				resultHandler.handle(resultModel);
+			}
+		} catch (Exception e) {
+			log.error("Caught exception the resultHandler for transaction " + resultModel.getTransactionName(), e);
+			resultModel.setStatus(false);
+			resultModel.reportTransaction(true);
+			throw new ResultHandlerException(resultModel.getTransactionName(), e);
+		} finally {
+			if (resultModel.reportTransaction()) {
+				TransactionExecutionResult result = new TransactionExecutionResult(resultModel.getTransactionName(),
+						start, resultModel.getValue(), resultModel.getStatus(), resultModel.getMessage(),
+						thisThreadName);
+				useTransactionExecutionResult(result);
+			}
+		}
+
+		if (throwIfFailed && !resultModel.getStatus()) {
+			throw new FailedTransactionException(resultModel.getTransactionName());
+		}
+
 		return resultModel;
 	}
 
 	public ResultHandlerVoidBuilder peak(int amountToPeak, double chanceOfPeakOccuring) {
 		this.amountToPeak = amountToPeak;
 		this.chanceOfPeakOccuring = chanceOfPeakOccuring;
+		return this;
+	}
+
+	public ResultHandlerVoidBuilder throwIfFailed() {
+		super.throwIfFailed = true;
 		return this;
 	}
 }

@@ -18,24 +18,36 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.exceptions.FailedTransactionException;
+import com.loadcoder.load.exceptions.ResultHandlerException;
 import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.LoadScenario.ResultHandler;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.ResultLogger;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	public Logger resultLogger = ResultLogger.resultLogger;
+
 	protected Transaction<R> trans;
 	protected ResultHandler<R> resultHandler;
-	protected ResultModel<R> resultModel;
+	protected final ResultModel<R> resultModel;// = new ResultModel<R>(transactionName);
 
 	protected ResultHandlerBuilder(Transaction<R> trans,
 			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
-			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer) {
+			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName) {
 		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
+		this.resultModel = new ResultModel<R>(defaultName);
+
 	}
 
 	public ResultHandlerBuilder<R> handleResult(ResultHandler<R> resultHandler) {
@@ -73,16 +85,16 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 	 * @return the result model of the transaction
 	 */
 	public ResultModel<R> performAndGetModel() {
-		resultModel = new ResultModel<R>(transactionName);
 		performResultHandeled();
 		return resultModel;
 	}
 
-	private ResultModel<R> performResultHandeled() {
+	protected ResultModel<R> performResultHandeled() {
 
-		long start = System.currentTimeMillis();
 		long end = 0;
 		long rt = 0;
+		long start = System.currentTimeMillis();
+
 		try {
 			R r = trans.transaction();
 			end = System.currentTimeMillis();
@@ -95,22 +107,42 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
 
-		} finally {
-			resultModel.setResponseTimeAndValue(rt);
-			try {
-				if (resultHandler != null) {
-					resultHandler.handle(resultModel);
-				}
-			} catch (Exception e) {
-			}
-
 		}
+		resultModel.setResponseTimeAndValue(rt);
+		try {
+			if (resultHandler != null) {
+				resultHandler.handle(resultModel);
+			}
+		} catch (Exception e) {
+			log.error("Caught exception the resultHandler for transaction " + resultModel.getTransactionName(), e);
+			resultModel.setStatus(false);
+			resultModel.reportTransaction(true);
+			throw new ResultHandlerException(resultModel.getTransactionName(), e);
+		} finally {
+
+			if (resultModel.reportTransaction()) {
+				TransactionExecutionResult result = new TransactionExecutionResult(resultModel.getTransactionName(),
+						start, resultModel.getValue(), resultModel.getStatus(), resultModel.getMessage(),
+						thisThreadName);
+				useTransactionExecutionResult(result);
+			}
+		}
+
+		if (throwIfFailed && !resultModel.getStatus()) {
+			throw new FailedTransactionException(resultModel.getTransactionName());
+		}
+
 		return resultModel;
 	}
 
 	public ResultHandlerBuilder<R> peak(int amountToPeak, double chanceOfPeakOccuring) {
 		this.amountToPeak = amountToPeak;
 		this.chanceOfPeakOccuring = chanceOfPeakOccuring;
+		return this;
+	}
+
+	public ResultHandlerBuilder<R> throwIfFailed() {
+		super.throwIfFailed = true;
 		return this;
 	}
 }
