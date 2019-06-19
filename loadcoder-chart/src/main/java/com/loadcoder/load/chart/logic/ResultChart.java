@@ -115,33 +115,35 @@ public class ResultChart extends Chart {
 		if (keepFactor != 1.0) {
 			pointsRadioButtonText = String.format("Points (%s)", DetailsSettings.keepFactorToProcentString(keepFactor));
 		}
-		resultChartLogic.setPointsRadioButton(new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode));
 
-		JRadioButtonMenuItem lines = new JRadioButtonMenuItem("Samples", !defaultPointsMode);
-		ButtonGroup graphTypeGroup = new ButtonGroup();
-		graphTypeGroup.add(resultChartLogic.getPointsRadioButton());
-		graphTypeGroup.add(lines);
+		JRadioButtonMenuItem pointsRadioButton = new JRadioButtonMenuItem(pointsRadioButtonText, defaultPointsMode);
+		resultChartLogic.setPointsRadioButton(pointsRadioButton);
+
+		JRadioButtonMenuItem samplesRadioButton = new JRadioButtonMenuItem("Samples", !defaultPointsMode);
+		ButtonGroup graphTypeRadioButtonGroupForOneExclusiveSelection = new ButtonGroup();
+		graphTypeRadioButtonGroupForOneExclusiveSelection.add(pointsRadioButton);
+		graphTypeRadioButtonGroupForOneExclusiveSelection.add(samplesRadioButton);
 		graphType.add(resultChartLogic.getPointsRadioButton());
-		graphType.add(lines);
+		graphType.add(samplesRadioButton);
 		resultMenu.add(graphType);
 
 		resultChartLogic.getPointsRadioButton().addActionListener((a) -> {
 			ajustDottedMode(true);
 		});
-		lines.addActionListener((a) -> {
+		samplesRadioButton.addActionListener((a) -> {
 			ajustDottedMode(false);
 		});
 		JMenu sampleMethod = new JMenu("Sample method");
 
 		sampling.add(sampleMethod);
 		resultMenu.add(sampling);
-
+		ButtonGroup sampleMethodradioButtonGroupForOneExclusiveSelection = new ButtonGroup();
 		List<YCalculator> yCalculators = logic.getyCalculators();
 		for (YCalculator calc : yCalculators) {
 
 			boolean selected = calc.equals(logic.getYCalculatorToUse());
 			JRadioButtonMenuItem sampleMethodMenuIten = new JRadioButtonMenuItem(calc.getName(), selected);
-
+			sampleMethodradioButtonGroupForOneExclusiveSelection.add(sampleMethodMenuIten);
 			sampleMethod.add(sampleMethodMenuIten);
 
 			sampleMethodMenuIten.addActionListener((a) -> {
