@@ -48,29 +48,58 @@ public class ChartFrameTest {
 	public void testHandleClick() {
 		RuntimeChartLogic logic = RuntimeChart.createNewRuntimeChartLogic();
 		ChartFrame frame = new ChartFrame(true, false, new HashMap<String, Color>(), logic);
-		PlotEntity e = Mockito.mock(PlotEntity.class);
+
 		XYSeriesCollectionExtention xySeriesCollectionExtention = Mockito.mock(XYSeriesCollectionExtention.class);
 		List<XYSeries> list = new ArrayList<XYSeries>();
-		XYSeriesExtension xySeriesExtension = new XYSeriesExtension("foo", true, false, Color.BLACK);
-		xySeriesExtension.setLegend(new LegendItem("foo"));
-		XYSeriesExtension xySeriesExtension2 = new XYSeriesExtension("bar", true, false, Color.WHITE);
-		xySeriesExtension2.setLegend(new LegendItem("bar"));
+		XYSeriesExtension seriesFoo = new XYSeriesExtension("foo", true, false, Color.BLACK);
+		seriesFoo.setLegend(new LegendItem("foo"));
+		XYSeriesExtension seriesBar = new XYSeriesExtension("bar", true, false, Color.WHITE);
+		seriesBar.setLegend(new LegendItem("bar"));
 
-		list.add(xySeriesExtension);
-		list.add(xySeriesExtension2);
+		list.add(seriesFoo);
+		list.add(seriesBar);
+
+		PlotEntity graphArea = Mockito.mock(PlotEntity.class);
+		LegendItemEntity legendArea = Mockito.mock(LegendItemEntity.class);
+
+		int anotherButtonThanTheLeftOne = ChartFrame.MOUSE_LEFT_CLICK_CODE + 1;
 
 		Mockito.when(xySeriesCollectionExtention.getSeries()).thenReturn(list);
-		frame.handleClick(1, e, xySeriesCollectionExtention);
-		frame.handleClick(2, e, xySeriesCollectionExtention);
-		LegendItemEntity e2 = Mockito.mock(LegendItemEntity.class);
-		Mockito.when(e2.getSeriesKey()).thenReturn("foo");
-		frame.handleClick(1, e2, xySeriesCollectionExtention);
-		assertTrue(!xySeriesExtension.isVisible()); // not visible when left clicking on series legend
-		assertTrue(xySeriesExtension2.isVisible()); // visible default
+		frame.handleClick(ChartFrame.MOUSE_LEFT_CLICK_CODE, graphArea, xySeriesCollectionExtention);
+		frame.handleClick(anotherButtonThanTheLeftOne, graphArea, xySeriesCollectionExtention);
 
-		frame.handleClick(2, e2, xySeriesCollectionExtention);
-		assertTrue(xySeriesExtension.isVisible()); // visible when right clicking on series legend
-		assertTrue(!xySeriesExtension2.isVisible()); // not visible hence right click of another series
+		/*
+		 * If a visible legend is left clicked, it will become invisible. Other legends
+		 * will be unaffected
+		 */
+		Mockito.when(legendArea.getSeriesKey()).thenReturn("foo");
+		frame.handleClick(ChartFrame.MOUSE_LEFT_CLICK_CODE, legendArea, xySeriesCollectionExtention);
+		assertTrue(!seriesFoo.isVisible());
+		assertTrue(seriesBar.isVisible());
+
+		/*
+		 * If an invisible legend is right clicked, it will become visible. Other
+		 * legends will become invisible
+		 */
+		frame.handleClick(anotherButtonThanTheLeftOne, legendArea, xySeriesCollectionExtention);
+		assertTrue(seriesFoo.isVisible());
+		assertTrue(!seriesBar.isVisible());
+
+		/*
+		 * if a visible legend is right clicked when at least on other legend is
+		 * invisible, this will lead to that all legends will become visible
+		 */
+		frame.handleClick(anotherButtonThanTheLeftOne, legendArea, xySeriesCollectionExtention);
+		assertTrue(seriesFoo.isVisible());
+		assertTrue(seriesBar.isVisible());
+
+		/*
+		 * If a legend is right clicked when all legends are visible, the clicked legend
+		 * will be the only one visible
+		 */
+		frame.handleClick(anotherButtonThanTheLeftOne, legendArea, xySeriesCollectionExtention);
+		assertTrue(seriesFoo.isVisible());
+		assertTrue(!seriesBar.isVisible());
 
 	}
 

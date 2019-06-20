@@ -230,6 +230,8 @@ public class ChartFrame extends ApplicationFrame {
 		return this;
 	}
 
+	public static final int MOUSE_LEFT_CLICK_CODE = 1;
+
 	public void handleClick(int button, Object clickedObject, XYSeriesCollectionExtention serieses) {
 
 		synchronized (plot) {
@@ -237,7 +239,7 @@ public class ChartFrame extends ApplicationFrame {
 			// if clicked in the graph area
 			if (clickedObject instanceof PlotEntity) {
 				chart.setNotify(false);
-				if (button == 1) {
+				if (button == MOUSE_LEFT_CLICK_CODE) {
 				} else {
 					chartPanel.restoreAutoBounds();
 				}
@@ -263,25 +265,52 @@ public class ChartFrame extends ApplicationFrame {
 				}
 
 				LegendItem clickedLegend = clickedSeries.getLegend();
-				if (button == 1) {
+				if (button == MOUSE_LEFT_CLICK_CODE) {
 					boolean visible = !clickedSeries.isVisible();
 
 					logic.setVisibility(clickedSeries, iterator, clickedLegend, visible);
 				} else {
-					int iterator2 = 0;
-					for (XYSeriesExtension xy : lista) {
-						LegendItem legend = xy.getLegend();
+					int legendIndexIterator = 0;
+					if (clickedSeries.isVisible()) {
+						boolean isAllSeriesVisible = true;
+						for (XYSeriesExtension xy : lista) {
+							if (!xy.isVisible()) {
+								isAllSeriesVisible = false;
+							}
+						}
 
-						boolean visible = false;
-						if (xy.equals(clickedSeries))
-							visible = true;
-						logic.setVisibility(xy, iterator2, legend, visible);
-						iterator2++;
+						if (isAllSeriesVisible) {
+							disableAllLegendsExceptOne(clickedSeries, lista);
+						} else {
+
+							for (XYSeriesExtension xy : lista) {
+								LegendItem legend = xy.getLegend();
+								boolean visible = true;
+								logic.setVisibility(xy, legendIndexIterator, legend, visible);
+								legendIndexIterator++;
+							}
+						}
+
+					} else {
+						disableAllLegendsExceptOne(clickedSeries, lista);
 					}
 				}
 				chart.setNotify(true);
 				serieses.fireChange();
 			}
+		}
+	}
+
+	private void disableAllLegendsExceptOne(XYSeriesExtension clickedSeries, List<XYSeriesExtension> lista) {
+		int legendIndexIterator = 0;
+		for (XYSeriesExtension xy : lista) {
+			LegendItem legend = xy.getLegend();
+			boolean visible = false;
+			if (xy.equals(clickedSeries)) {
+				visible = true;
+			}
+			logic.setVisibility(xy, legendIndexIterator, legend, visible);
+			legendIndexIterator++;
 		}
 	}
 
