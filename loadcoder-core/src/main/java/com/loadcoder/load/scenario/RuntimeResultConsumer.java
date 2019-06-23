@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,17 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.exceptions;
+package com.loadcoder.load.scenario;
 
-public class NoResultOrFormatterException extends RuntimeException {
+import java.util.List;
+import java.util.Map;
 
-	private static final long serialVersionUID = 1L;
+import com.loadcoder.result.TransactionExecutionResult;
 
-	public NoResultOrFormatterException(String message) {
-		super(message);
-	}
-
-	public NoResultOrFormatterException(String message, Exception cause) {
-		super(message, cause);
-	}
+@FunctionalInterface
+public interface RuntimeResultConsumer extends RuntimeResultUser {
+	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);
 }

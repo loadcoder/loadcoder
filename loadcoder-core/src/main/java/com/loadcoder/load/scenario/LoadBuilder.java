@@ -22,6 +22,7 @@ import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STIL
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
+import com.loadcoder.load.intensity.Throttler;
 import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
@@ -42,14 +43,7 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder(LoadScenario loadScenario) {
 		this.ls = loadScenario;
-	}
 
-	/**
-	 * Build the Load from the LoadBuilders load definition
-	 * 
-	 * @return a Load instance
-	 */
-	public Load build() {
 		Load previousLoad = ls.getLoad();
 		if (previousLoad != null) {
 			StartedLoad previouslyStartedLoad = previousLoad.getStartedLoad();
@@ -61,11 +55,21 @@ public class LoadBuilder {
 			if (previouslyStartedLoad != null && !previouslyStartedLoad.isScenarioTerminated())
 				throw new InvalidLoadStateException(PREVIOUS_LOAD_STILL_RUNNING.toString());
 		}
+	}
+
+	/**
+	 * Build the Load from the LoadBuilders load definition
+	 * 
+	 * @return a Load instance
+	 */
+	public Load build() {
 
 		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, intensity, intensityIterations);
-
-		ls.setLoad(l);
 		return l;
+	}
+
+	protected LoadScenario getLoadScenario() {
+		return ls;
 	}
 
 	protected int getAmountOfthreads() {
@@ -110,6 +114,10 @@ public class LoadBuilder {
 
 	protected long getRampup() {
 		return rampupMillis;
+	}
+
+	protected Intensity getThrottleIteration() {
+		return intensityIterations;
 	}
 
 	/**

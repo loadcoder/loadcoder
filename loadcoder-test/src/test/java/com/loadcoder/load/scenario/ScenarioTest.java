@@ -33,13 +33,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
+import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class ScenarioTest {
+public class ScenarioTest extends TestNGBase {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -86,8 +87,8 @@ public class ScenarioTest {
 
 			}
 		};
-		new ExecutionBuilder(new LoadBuilder(ls).amountOfThreads(2).stopDecision(iterations(2)).build()).build()
-				.execute().andWait();
+		new ExecutionBuilder(new LoadBuilder(ls).amountOfThreads(2).stopDecision(iterations(2)).build())
+				.resultFormatter(null).storeResultRuntime().build().execute().andWait();
 		assertEquals(result.size(), 12);
 
 	}
@@ -110,7 +111,8 @@ public class ScenarioTest {
 
 		long start = System.currentTimeMillis();
 		Result r = new ExecutionBuilder(new LoadBuilder(ls).amountOfThreads(5).throttle(10, PER_SECOND, SHARED)
-				.stopDecision(iterations(50)).build()).build().execute().andWait().getReportedResultFromResultFile();
+				.stopDecision(iterations(50)).build()).resultFormatter(null).storeResultRuntime().build().execute()
+						.andWait().getResultFromMemory();
 		long executionTime = System.currentTimeMillis() - start;
 
 		assertThat(executionTime, greaterThan(4000L));
@@ -169,9 +171,10 @@ public class ScenarioTest {
 				.throttleIterations(10, PER_SECOND, PER_THREAD).build();
 
 		long start = System.currentTimeMillis();
-		FinishedExecution finished = new ExecutionBuilder(l).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build()
+				.execute().andWait();
 		LoadUtility.sleep(100);
-		Result r = finished.getReportedResultFromResultFile();
+		Result r = finished.getResultFromMemory();
 
 		long diff = System.currentTimeMillis() - start;
 		assertThat(diff, greaterThan(300L));
@@ -194,7 +197,8 @@ public class ScenarioTest {
 				verifier.add("1");
 			}
 		};
-		new ExecutionBuilder(new LoadBuilder(ls).build()).build().execute().andWait();
+		new ExecutionBuilder(new LoadBuilder(ls).build()).resultFormatter(null).storeResultRuntime().build().execute()
+				.andWait();
 		Assert.assertEquals(verifier.remove(0), "1");
 
 		TypedLoadScenario<String> ls2 = new TypedLoadScenario<String>() {
@@ -211,7 +215,8 @@ public class ScenarioTest {
 				verifier.add("3");
 			}
 		};
-		new ExecutionBuilder(new LoadBuilder(ls2).build()).build().execute().andWait();
+		new ExecutionBuilder(new LoadBuilder(ls2).build()).resultFormatter(null).storeResultRuntime().build().execute()
+				.andWait();
 		Assert.assertTrue(verifier.contains("2"));
 		Assert.assertTrue(verifier.contains("3"));
 

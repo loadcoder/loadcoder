@@ -37,8 +37,9 @@ import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.scenario.TypedLoadScenario;
+import com.loadcoder.load.testng.TestNGBase;
 
-public class TypedLoadScenarioTest {
+public class TypedLoadScenarioTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -83,7 +84,7 @@ public class TypedLoadScenarioTest {
 
 		Load l = new LoadBuilder(ls).amountOfThreads(10).stopDecision(iterations(10)).build();
 
-		new ExecutionBuilder(l).build().execute().andWait();
+		new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build().execute().andWait();
 		assertEquals(instances.size(), 10);
 
 	}
@@ -146,7 +147,8 @@ public class TypedLoadScenarioTest {
 			}
 		};
 
-		new ExecutionBuilder(new LoadBuilder(ls).stopDecision(customStopDecision).build()).build().execute().andWait();
+		new ExecutionBuilder(new LoadBuilder(ls).stopDecision(customStopDecision).build()).resultFormatter(null)
+				.storeResultRuntime().build().execute().andWait();
 	}
 
 	void testLogic(ThreadInstanceStopper threadInstanceStopper) {

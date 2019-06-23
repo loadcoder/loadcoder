@@ -42,7 +42,7 @@ public class ResultHandlerLoadBuilderTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		new ExecutionBuilder(l).build();
+		new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
 
 		RateLimiter rl = RateLimiter.create(1);
 		ResultHandlerLoadBuilder<String> resultHandlerBuilder = new ResultHandlerLoadBuilder<String>("t1", () -> {
@@ -71,7 +71,7 @@ public class ResultHandlerLoadBuilderTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		new ExecutionBuilder(l).build();
+		new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
 
 		RateLimiter rl = RateLimiter.create(1);
 

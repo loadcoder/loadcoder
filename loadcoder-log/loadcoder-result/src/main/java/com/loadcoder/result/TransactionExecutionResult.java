@@ -18,6 +18,11 @@
  ******************************************************************************/
 package com.loadcoder.result;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class TransactionExecutionResult {
 
 	private final String name;
@@ -57,7 +62,6 @@ public class TransactionExecutionResult {
 		return name;
 	}
 
-	
 	/**
 	 * @return the timestamp for when the transaction was executed (started)
 	 */
@@ -91,5 +95,25 @@ public class TransactionExecutionResult {
 	 */
 	public String getThreadId() {
 		return threadId;
+	}
+
+	/**
+	 * Creates and returns a new Map with the TransactionExecutionResult grouped in Lists with the transaction id as key
+	 * @param filledBucket
+	 * @return the new Map
+	 */
+	public static Map<String, List<TransactionExecutionResult>> getResultListAsMap(
+			List<TransactionExecutionResult> filledBucket) {
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+		for (TransactionExecutionResult transactionExecutionResult : filledBucket) {
+			String name = transactionExecutionResult.getName();
+			List<TransactionExecutionResult> listToAddTo = map.get(name);
+			if (listToAddTo == null) {
+				listToAddTo = new ArrayList<TransactionExecutionResult>();
+				map.put(name, listToAddTo);
+			}
+			listToAddTo.add(transactionExecutionResult);
+		}
+		return map;
 	}
 }

@@ -42,7 +42,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		new ExecutionBuilder(l).build();
+		Execution e = new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
 
 		RateLimiter rl = RateLimiter.create(1);
 		ResultHandlerVoidLoadBuilder resultHandlerVoidBuilder = new ResultHandlerVoidLoadBuilder("t1", () -> {
@@ -53,6 +53,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		}).perform();
 
 		Assert.assertEquals(ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
+
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(result.getName(), "t2");
 		Assert.assertTrue(result.isStatus());
@@ -70,7 +71,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		new ExecutionBuilder(l).build();
+		new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
 
 		RateLimiter rl = RateLimiter.create(1);
 		ResultHandlerVoidLoadBuilder resultHandlerVoidBuilder = new ResultHandlerVoidLoadBuilder("t1", () -> {

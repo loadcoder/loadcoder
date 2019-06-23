@@ -23,6 +23,11 @@ import java.util.Map;
 
 import com.loadcoder.result.TransactionExecutionResult;
 
+/**
+ * This interface is deprecated and will be removed in coming versions. Use
+ * RuntimeResultConsumer instead
+ */
+@Deprecated
 @FunctionalInterface
 public interface RuntimeResultUser {
 	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);

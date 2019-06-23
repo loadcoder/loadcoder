@@ -160,6 +160,7 @@ public class Load {
 	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup, Intensity intensity,
 			Intensity intensityIterations) {
 		this.ls = ls;
+		this.ls.setLoad(this);
 		this.stopDecision = stopDecision == null ? defaultStopDecision : stopDecision;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
