@@ -76,23 +76,13 @@ public class ExecutionBuilder {
 	}
 
 	/**
-	 * The use case for this method is for shorter performance tests and for unit
-	 * testing, where the amount of transactions are being limited. <br/>
-	 * <b>Use this with caution. Since every TransactionExecutionResult are being
-	 * stored, memory can run out over time, causing both the test to crash and the
-	 * results to be affected.</b> <br/>
-	 * <br/>
-	 * 
 	 * Activates the storage of all TransactionExecutionResult in runtime memory.
-	 * This storage can be accessed through the FinishedExecution instance after an
-	 * executed test, with the method FinishedExecution:getResultFromMemory, that
-	 * returns a Result instance based on this storage.
+	 * This storage content will be consumed by the provided runtimeResultUser.
 	 * 
 	 * @param runtimeResultUser is a functional interface that if provided, will be
 	 *                          invoked every 3 seconds during the entire execution.
-	 *                          It will be provided with the stored result in a Map,
-	 *                          that will be cleared after provided to the
-	 *                          RuntimeResultUser.
+	 *                          It will be invoked with the stored result in a Map,
+	 *                          that will be cleared (and consumed) afterwards.
 	 *                          {@code com.loadcoder.load.chart.logic.RuntimeChart}
 	 *                          implements RuntimeResultUser and will use the stored
 	 *                          runtime result as a graph, where response times,
