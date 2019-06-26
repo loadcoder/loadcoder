@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,4 +61,9 @@ public class LoadUtility {
 		return fileAsLineList;
 	}
 	
+	private static final Random random = new Random();
+	public static int random(int min, int max){
+		int result = random.nextInt(max - min + 1) + min;
+		return result;
+	}
 }

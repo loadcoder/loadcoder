@@ -19,7 +19,7 @@
 package com.loadcoder.load.sut;
 
 import static com.loadcoder.load.LoadUtility.sleep;
-import static com.loadcoder.load.TestUtility.random;
+import static com.loadcoder.load.LoadUtility.random;
 
 import java.io.IOException;
 import java.util.HashMap;

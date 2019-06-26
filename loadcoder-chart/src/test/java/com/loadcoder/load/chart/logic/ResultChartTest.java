@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.Point;
@@ -90,7 +91,7 @@ public class ResultChartTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void testManyTransactions(Method method) {
 		Result result = new ResultExtension(getTranses(1000, 20, 20, (i) -> {
-			return TestUtility.random(5, 9);
+			return LoadUtility.random(5, 9);
 		}));
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
@@ -100,7 +101,7 @@ public class ResultChartTest extends TestNGBase {
 	public void testHighIntensity(Method method) {
 
 		Result result = new ResultExtension(getTranses(1000, 10, 20, (i) -> {
-			return TestUtility.random(5, 9);
+			return LoadUtility.random(5, 9);
 		}));
 		ResultChart c = new ResultChart(result);
 		c.waitUntilClosed();
@@ -234,15 +235,15 @@ public class ResultChartTest extends TestNGBase {
 
 	@Test
 	public void amountOfSeriesesFactorTest() {
-		
+
 		double factor = ResultChartLogic.amountOfSeriesesFactor(1);
 		log.info("factor: {}", factor);
 		double factor2 = ResultChartLogic.amountOfSeriesesFactor(5);
 		log.info("factor: {}", factor);
-		
-		double diff1 = (factor2 - factor) / (5-1);
+
+		double diff1 = (factor2 - factor) / (5 - 1);
 		log.info("factor/series: {}", diff1);
-		
+
 		factor = ResultChartLogic.amountOfSeriesesFactor(10);
 		log.info("factor: {}", factor);
 		factor = ResultChartLogic.amountOfSeriesesFactor(30);
@@ -251,11 +252,11 @@ public class ResultChartTest extends TestNGBase {
 		log.info("factor: {}", factor);
 		factor2 = ResultChartLogic.amountOfSeriesesFactor(150);
 		log.info("factor: {}", factor);
-		
+
 		double diff2 = (factor2 - factor) / (150 - 50);
 		log.info("factor/series: {}", diff2);
 		assertTrue(diff1 > diff2);
-		
+
 	}
 
 	@Test

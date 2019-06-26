@@ -43,10 +43,4 @@ public class TestUtility {
 	public static synchronized <T> void  addValueToList(List<T> list, T value){
 		list.add(value);
 	}
-	
-	public static int random(int min, int max){
-		Random rn = new Random();
-		int result = rn.nextInt(max - min + 1) + min;
-		return result;
-	}
 }
