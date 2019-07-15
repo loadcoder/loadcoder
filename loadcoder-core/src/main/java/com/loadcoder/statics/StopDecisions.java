@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -20,17 +20,18 @@ package com.loadcoder.statics;
 
 import com.loadcoder.load.scenario.StopDecision;
 
-/**
- * Use StopDecisions instead. This class will be removed in coming versions.
- */
-@Deprecated
-public class StopDesisions {
+public class StopDecisions {
 
 	/**
-	 * This method is deprecated and will be removed in coming versions.
-	 * It is replaced by StopDecisions.iterations
+	 * Decision of whether to continue the test or not in regards to how many
+	 * iterations of the LoadScenario that have been made so far. If the amount of
+	 * made iterations is higher than the provided amountOfIterations, the test will
+	 * stop.
+	 * 
+	 * @param targetIterationsToBeMade
+	 *            it the target total amount of
+	 * @return ContinueDecision
 	 */
-	@Deprecated
 	public static final StopDecision iterations(int targetIterationsToBeMade) {
 		StopDecision s2 = (startTime, madeIterations) -> {
 			if (madeIterations < targetIterationsToBeMade)
@@ -41,12 +42,24 @@ public class StopDesisions {
 	}
 
 	/**
-	 * This method is deprecated and will be removed in coming versions.
-	 * It is replaced by StopDecisions.duration
+	 * Decision of whether to continue the test or not in regards to how long the
+	 * test been running so far. If the execution of the test becomes longer than
+	 * the provided executionTimeMillis, the test will stop.
+	 * 
+	 * @param executionTimeMillis
+	 *            is the target duration for the test in milliseconds
+	 * @return ContinueDecision
 	 */
-	@Deprecated
 	public static final StopDecision duration(long executionTimeMillis) {
-		return StopDecisions.duration(executionTimeMillis);
+		StopDecision s2 = (startTime, madeIterations) -> {
+			long now = System.currentTimeMillis();
+			long endTime = (startTime + executionTimeMillis);
+			long diff = now - endTime;
+			if (diff < 0)
+				return false;
+			return true;
+		};
+		return s2;
 	}
 
 }

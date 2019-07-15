@@ -22,8 +22,6 @@ import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STIL
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.intensity.Throttler;
-import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 

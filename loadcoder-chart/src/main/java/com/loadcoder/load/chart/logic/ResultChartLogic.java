@@ -152,6 +152,7 @@ public class ResultChartLogic extends ChartLogic {
 		long sampleLength = calculateSampleLengthWith(defaultIndex);
 		setSampleLengthToUse(sampleLength);
 
+		initiateChart();
 		doSafeUpdate();
 	}
 

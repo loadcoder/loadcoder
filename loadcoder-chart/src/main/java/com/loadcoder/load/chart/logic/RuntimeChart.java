@@ -59,19 +59,18 @@ public class RuntimeChart extends Chart implements RuntimeResultUser {
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();
 
-		chartFrame.getMenu().add(settingsMenu);
-		chartFrame.getMenu().add(aboutMenu);
+		chartFrame.setContentPane(runtimeChartLogic.panelForButtons);
+		chartFrame.pack();
+		chartFrame.setJMenuBar(runtimeChartLogic.getMenu());
+		runtimeChartLogic.getMenu().add(settingsMenu);
+		runtimeChartLogic.getMenu().add(aboutMenu);
 
 		chartFrame.setVisible(true);
 	}
 
 	@Override
 	public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
-		chartFrame.getChart().setNotify(false);
 		runtimeChartLogic.useData(transactionsMap);
-		chartFrame.getChart().setNotify(true);
-		logger.trace("Total Points in chart: {}", runtimeChartLogic.getTotalSize());
-
 	}
 
 }

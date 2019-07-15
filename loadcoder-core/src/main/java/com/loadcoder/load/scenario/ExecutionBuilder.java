@@ -33,8 +33,8 @@ public class ExecutionBuilder {
 
 	/**
 	 * This method is deprecated and will be removed in coming versions. It is
-	 * replaced by the method storeAndConsumeRuntimeResult. <br/>
-	 * <br/>
+	 * replaced by the method storeAndConsumeRuntimeResult.
+	 * <p>
 	 * Sets a RuntimeResultUser
 	 * 
 	 * @param runtimeResultUser is a functional interface that if provided, will be
@@ -57,12 +57,12 @@ public class ExecutionBuilder {
 
 	/**
 	 * The use case for this method is for shorter performance tests and for unit
-	 * testing, where the amount of transactions are being limited. <br/>
-	 * <b>Use this with caution. Since every TransactionExecutionResult are being
+	 * testing, where the amount of transactions are being limited.
+	 * <p>
+	 * Use this with caution. Since every TransactionExecutionResult are being
 	 * stored, memory can run out over time, causing both the test to crash and the
-	 * results to be affected.</b> <br/>
-	 * <br/>
-	 * 
+	 * results to be affected.
+	 * <p>
 	 * Activates the storage of all TransactionExecutionResult in runtime memory.
 	 * This storage can be accessed through the FinishedExecution instance after an
 	 * executed test, with the method FinishedExecution:getResultFromMemory, that

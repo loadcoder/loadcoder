@@ -75,7 +75,7 @@ public class CommonSampleGroup extends Group {
 				 */
 				if (first == null) {
 					if (!internalErrorOccured)
-						log.warn("An internal problem occured. This has been solved with a workaround."
+						log.debug("An internal problem occured. This has been solved with a workaround."
 								+ "If this crashed your test, please report it to the LoadCoder project at http://loadcoder.com");
 					internalErrorOccured = true;
 				} else {

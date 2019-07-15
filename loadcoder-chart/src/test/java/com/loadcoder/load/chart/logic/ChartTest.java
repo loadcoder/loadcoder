@@ -136,14 +136,14 @@ public class ChartTest extends TestNGBase {
 		series.add(new XYDataItem(2000, 10));
 
 		logic.getSeriesCollection().addSeries(series);
-		frame.showChart();
+		logic.initiateChart();
 		frame.setVisible(true);
 		for (int i = 0; i < 5; i++) {
 			series.add(toBeRemoved);
 			LoadUtility.sleep(1000);
 
 			series.getXYDataItems().remove(toBeRemoved);
-			frame.getChart().setNotify(true);
+			logic.getChart().setNotify(true);
 			logic.forceRerender();
 			LoadUtility.sleep(1000);
 		}

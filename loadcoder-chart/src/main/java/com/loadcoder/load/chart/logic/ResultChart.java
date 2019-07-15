@@ -55,9 +55,13 @@ public class ResultChart extends Chart {
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();
 
-		chartFrame.getMenu().add(resultMenu);
-		chartFrame.getMenu().add(settingsMenu);
-		chartFrame.getMenu().add(aboutMenu);
+		chartFrame.setContentPane(resultChartLogic.panelForButtons);
+		chartFrame.pack();
+		chartFrame.setJMenuBar(resultChartLogic.getMenu());
+
+		resultChartLogic.getMenu().add(resultMenu);
+		resultChartLogic.getMenu().add(settingsMenu);
+		resultChartLogic.getMenu().add(aboutMenu);
 
 		chartFrame.setVisible(true);
 

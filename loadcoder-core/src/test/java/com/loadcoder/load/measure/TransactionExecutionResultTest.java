@@ -18,13 +18,28 @@
  ******************************************************************************/
 package com.loadcoder.load.measure;
 
-import java.util.HashSet;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class TransactionExecutionResultTest extends TestNGBase{
+public class TransactionExecutionResultTest extends TestNGBase {
+
+	@Test
+	public void testGetResultListAsMap() {
+		List<TransactionExecutionResult> l = Arrays.asList(new TransactionExecutionResult("foo", 0, 0, true, null),
+				new TransactionExecutionResult("bar", 0, 0, true, null));
+		Map<String, List<TransactionExecutionResult>> m = TransactionExecutionResult.getResultListAsMap(l);
+		assertThat(m.get("foo").get(0), equalTo(l.get(0)));
+		assertThat(m.get("bar").get(0), equalTo(l.get(1)));
+
+	}
 
 }

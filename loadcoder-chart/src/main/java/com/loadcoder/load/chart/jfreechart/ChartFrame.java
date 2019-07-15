@@ -74,27 +74,11 @@ public class ChartFrame extends ApplicationFrame {
 
 	public static Logger log = LoggerFactory.getLogger(ChartFrame.class);
 
-	ChartFrame chartFrame = this;
+	private XYPlotExtension plot;
 
-	private JMenuBar menuBar = new JMenuBar(); // Window menu bar
-
-	/** The chart theme. */
-	private static ChartTheme currentTheme = new StandardChartTheme("JFree");
-	JFreeChart chart;
-
-	ChartPanel chartPanel;
-
-	XYPlotExtension plot;
-
-	List<DataSetUser> dataSetUsers = new ArrayList<DataSetUser>();
-
-	JPanel panelForButtons;
+	private List<DataSetUser> dataSetUsers = new ArrayList<DataSetUser>();
 
 	private final ChartLogic logic;
-
-	public JFreeChart getChart() {
-		return chart;
-	}
 
 	public XYPlotExtension getPlot() {
 		return plot;
@@ -118,8 +102,6 @@ public class ChartFrame extends ApplicationFrame {
 		image.getScaledInstance(200, 200, Image.SCALE_FAST);
 		setIconImage(image);
 
-		showChart();
-
 		addKeyListener(new KeyListener() {
 
 			@Override
@@ -129,7 +111,7 @@ public class ChartFrame extends ApplicationFrame {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if ((e.getKeyCode() == KeyEvent.VK_C) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
-					chartPanel.doCopy();
+					logic.getChartPanel().doCopy();
 				}
 			}
 
@@ -141,223 +123,17 @@ public class ChartFrame extends ApplicationFrame {
 
 	XYDataItem xgetDataItem(XYSeriesExtension series, long x) {
 		int index = series.indexOf(x);
+
 		XYDataItem existing = (XYDataItem) series.getItems().get(index);
 		return existing;
 	}
 
-	public static JFreeChart createXYLineChart(String title, boolean legend, boolean tooltips, boolean urls,
-			XYPlot plot) {
-
-		XYItemRenderer renderer = plot.getRenderer();
-		if (tooltips) {
-			renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
-		}
-		if (urls) {
-			renderer.setURLGenerator(new StandardXYURLGenerator());
-		}
-
-		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
-		currentTheme.apply(chart);
-		return chart;
-	}
-
-	public ChartFrame showChart() {
-
-		PlotOrientation orientation = PlotOrientation.VERTICAL;
-		ParamChecks.nullNotPermitted(orientation, "orientation");
-		plot.setOrientation(orientation);
-
-		panelForButtons = new JPanel();
-
-		panelForButtons.setBackground(Color.WHITE);
-		panelForButtons.setLayout(new BoxLayout(panelForButtons, BoxLayout.PAGE_AXIS));
-
-		chart = createXYLineChart(null, true, true, false, plot);
-
-		// using this constructor in order to get rid of jcharts right click popup menu
-		chartPanel = new ChartPanelExtension(chart, ChartPanel.DEFAULT_WIDTH, ChartPanel.DEFAULT_HEIGHT,
-				ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT,
-				ChartPanel.DEFAULT_MAXIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MAXIMUM_DRAW_HEIGHT,
-				ChartPanel.DEFAULT_BUFFER_USED, false, false, false, false, false, false);
-
-		setJMenuBar(menuBar);
-
-		DateAxis dateAxis = new DateAxisExtension();
-
-		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-
-		format.setTimeZone(TimeZone.getTimeZone("GMT"));
-		dateAxis.setDateFormatOverride(format);
-
-		plot.setDomainAxis(dateAxis);
-
-		chartPanel.addChartMouseListener(new ChartMouseListener() {
-
-			public void chartMouseClicked(ChartMouseEvent e) {
-				int button = e.getTrigger().getButton();
-				Object entity = e.getEntity();
-				XYSeriesCollectionExtention collection = (XYSeriesCollectionExtention) plot.getDataset();
-				handleClick(button, entity, collection);
-			}
-
-			public void chartMouseMoved(ChartMouseEvent e) {
-			}
-
-		});
-
-		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-		chartPanel.setZoomAroundAnchor(true);
-		panelForButtons.add(chartPanel);
-
-		panelForButtons.addMouseWheelListener(new MouseWheelListener() {
-
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				scrolling(e);
-				plot.panDomainAxes(30, null, null);
-			}
-		});
-
-		setContentPane(panelForButtons);
-
-		plot.setDomainGridlinePaint(Color.BLACK);
-		plot.setRangeGridlinePaint(Color.BLACK);
-		plot.setBackgroundPaint(Color.WHITE);
-
-		pack();
-		RefineryUtilities.centerFrameOnScreen(this);
-
-		return this;
-	}
-
-	public static final int MOUSE_LEFT_CLICK_CODE = 1;
-
 	public void handleClick(int button, Object clickedObject, XYSeriesCollectionExtention serieses) {
-
-		synchronized (plot) {
-
-			// if clicked in the graph area
-			if (clickedObject instanceof PlotEntity) {
-				chart.setNotify(false);
-				if (button == MOUSE_LEFT_CLICK_CODE) {
-				} else {
-					chartPanel.restoreAutoBounds();
-				}
-				chart.setNotify(true);
-				serieses.fireChange();
-			}
-			// else is clicked on a legend
-			else if (clickedObject instanceof LegendItemEntity) {
-				chart.setNotify(false);
-				LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
-				Comparable pushedLegend = legendItemEntity.getSeriesKey();
-				List<XYSeriesExtension> lista = serieses.getSeries();
-				int iterator = 0;
-				XYSeriesExtension clickedSeries = null;
-
-				for (XYSeriesExtension xy : lista) {
-					String c = xy.getKey();
-					if (pushedLegend.compareTo(c) == 0) {
-						clickedSeries = xy;
-						break;
-					}
-					iterator++;
-				}
-
-				LegendItem clickedLegend = clickedSeries.getLegend();
-				if (button == MOUSE_LEFT_CLICK_CODE) {
-					boolean visible = !clickedSeries.isVisible();
-
-					logic.setVisibility(clickedSeries, iterator, clickedLegend, visible);
-				} else {
-					int legendIndexIterator = 0;
-					if (clickedSeries.isVisible()) {
-						boolean isAllSeriesVisible = true;
-						for (XYSeriesExtension xy : lista) {
-							if (!xy.isVisible()) {
-								isAllSeriesVisible = false;
-							}
-						}
-
-						if (isAllSeriesVisible) {
-							disableAllLegendsExceptOne(clickedSeries, lista);
-						} else {
-
-							for (XYSeriesExtension xy : lista) {
-								LegendItem legend = xy.getLegend();
-								boolean visible = true;
-								logic.setVisibility(xy, legendIndexIterator, legend, visible);
-								legendIndexIterator++;
-							}
-						}
-
-					} else {
-						disableAllLegendsExceptOne(clickedSeries, lista);
-					}
-				}
-				chart.setNotify(true);
-				serieses.fireChange();
-			}
-		}
-	}
-
-	private void disableAllLegendsExceptOne(XYSeriesExtension clickedSeries, List<XYSeriesExtension> lista) {
-		int legendIndexIterator = 0;
-		for (XYSeriesExtension xy : lista) {
-			LegendItem legend = xy.getLegend();
-			boolean visible = false;
-			if (xy.equals(clickedSeries)) {
-				visible = true;
-			}
-			logic.setVisibility(xy, legendIndexIterator, legend, visible);
-			legendIndexIterator++;
-		}
+		logic.handleClick(button, clickedObject, serieses);
 	}
 
 	public void copy() {
-		chartPanel.doCopy();
-	}
-
-	void addPanel(JPanel resultChartPanel) {
-		panelForButtons.add(resultChartPanel);
-	}
-
-	public JMenuBar getMenu() {
-		return menuBar;
-	}
-
-	public void scrolling(MouseWheelEvent e) {
-
-		if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL)
-			return;
-		if (e.getWheelRotation() < 0)
-			increaseZoom(chartPanel, true);
-		else
-			decreaseZoom(chartPanel, true);
-	}
-
-	public void increaseZoom(JComponent chart, boolean saveAction) {
-		synchronized (plot) {
-			ChartPanel ch = (ChartPanel) chart;
-			zoomChartAxis(ch, true);
-		}
-	}
-
-	public void decreaseZoom(JComponent chart, boolean saveAction) {
-		synchronized (plot) {
-			ChartPanel ch = (ChartPanel) chart;
-			zoomChartAxis(ch, false);
-		}
-	}
-
-	private void zoomChartAxis(ChartPanel chartP, boolean increase) {
-		int width = chartP.getMaximumDrawWidth() - chartP.getMinimumDrawWidth();
-		int height = chartP.getMaximumDrawHeight() - chartP.getMinimumDrawWidth();
-		if (increase) {
-			chartP.zoomInBoth(width / 2, height / 2);
-		} else {
-			chartP.zoomOutBoth(width / 2, height / 2);
-		}
+		logic.getChartPanel().doCopy();
 	}
 
 	public void waitUntilClosed() {

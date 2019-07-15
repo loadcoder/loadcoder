@@ -22,6 +22,7 @@ import static com.loadcoder.statics.Time.DAY;
 import static com.loadcoder.statics.Time.HOUR;
 import static com.loadcoder.statics.Time.MINUTE;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
@@ -98,6 +100,8 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		// Init the first ranges
 		ranges.add(new Range(Long.MIN_VALUE, -1, getSampleLengthToUse()));
 		ranges.add(new Range(0, Long.MAX_VALUE, getSampleLengthToUse()));
+
+		initiateChart();
 	}
 
 	public int getIncomingSize(Map<String, List<TransactionExecutionResult>> listOfListOfList,
@@ -125,6 +129,31 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 		oldRange.setStart(newStart);
 		newRange.setEnd(newStart - 1);
+		if (false) {
+			drawRangeDebugStartLines(oldRange, newStart);
+		}
+	}
+
+	/**
+	 * This method is only for debugging purposes. It is invoked after the Ranges
+	 * has been adjusted for the concatenation of Samples. It will draw the active
+	 * Ranges start points as lines.
+	 * 
+	 * @param oldRange
+	 * @param newStart
+	 */
+	private void drawRangeDebugStartLines(Range oldRange, long newStart) {
+		if (oldRange.getSeries() == null) {
+			Color c = getNewColor("" + oldRange.getSampleLength());
+			oldRange.setSeries(new XYSeriesExtension("" + oldRange.getSampleLength(), true, false, c));
+			addSeries(oldRange.getSeries());
+		} else {
+			oldRange.getSeries().clear();
+		}
+		oldRange.setHigh(new XYDataItemExtension(newStart + 1, 5000));
+		oldRange.setLow(new XYDataItemExtension(newStart, 0));
+		oldRange.getSeries().add(oldRange.getHigh());
+		oldRange.getSeries().add(oldRange.getLow());
 	}
 
 	public void removeFromSampleTimestamps(SampleConcaternator concater, Set<Long> sampleTs) {
@@ -330,13 +359,13 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(30_000, 4); // 4
 		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
 				firstConcatenationDefinition.amountToConcatenate,
 				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));
 
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(10 * MINUTE, 4))); // 16
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(40 * MINUTE, 4))); // 64
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(1 * MINUTE, 4))); // 16
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(3 * MINUTE, 4))); // 64
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 512
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 4096
 
@@ -350,11 +379,16 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 	@Override
 	public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
+
+		getChart().setNotify(false);
 		setIncomingData(transactionsMap);
 		long start = System.currentTimeMillis();
 		doSafeUpdate();
 		long diff = System.currentTimeMillis() - start;
 		logger.debug("update time: {}", diff);
+		getChart().setNotify(true);
+		logger.trace("Total Points in chart: {}", getTotalSize());
+
 	}
 
 }

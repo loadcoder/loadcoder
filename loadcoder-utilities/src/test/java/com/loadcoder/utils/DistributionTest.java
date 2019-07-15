@@ -59,7 +59,7 @@ public class DistributionTest {
 		assertThat(choiseOnlyOneWeight, is("foo"));
 
 		try {
-			String choiseZeroWeight = Distribution.getRandomByWeight(new Item<>("foo", 0));
+			Distribution.getRandomByWeight(new Item<>("foo", 0));
 			fail("Expected an exception here");
 		} catch (RuntimeException rte) {
 		}

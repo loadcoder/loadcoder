@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.intensity;
 
-import static com.loadcoder.statics.StopDesisions.iterations;
+import static com.loadcoder.statics.StopDecisions.iterations;
 import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
 import static com.loadcoder.statics.ThrottleMode.SHARED;
 import static com.loadcoder.statics.Time.PER_SECOND;

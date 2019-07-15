@@ -196,7 +196,6 @@ public class GrafanaClient extends HttpClient {
 	 * @return the http status code for the Grafana request
 	 */
 	public int createNewDashboardFromResult(String name, Result result) {
-		long now = System.currentTimeMillis();
 		return createNewDashboardBase(result.getStart(), result.getEnd(), name, null, result.getResultLists().keySet(),
 				false);
 	}
