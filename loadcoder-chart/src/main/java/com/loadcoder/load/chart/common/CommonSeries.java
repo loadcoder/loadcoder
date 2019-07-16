@@ -23,7 +23,7 @@ import java.awt.Color;
 import org.jfree.chart.ChartColor;
 
 public enum CommonSeries {
-	THROUGHPUT("Throughput (TPS)", ChartColor.BLACK, CommonYCalculators.throughput),
+	THROUGHPUT("Throughput (TPS)", ChartColor.BLACK, CommonYCalculators.THROUGHPUT),
 	FAILS("Fails", ChartColor.RED, CommonYCalculators.FAILS);
 
 	Color color;

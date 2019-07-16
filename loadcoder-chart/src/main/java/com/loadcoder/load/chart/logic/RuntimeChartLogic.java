@@ -359,15 +359,15 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(30_000, 4); // 4
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
 		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
 				firstConcatenationDefinition.amountToConcatenate,
 				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));
 
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(1 * MINUTE, 4))); // 16
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(3 * MINUTE, 4))); // 64
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 512
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 4096
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(10 * MINUTE, 4))); // 16
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(40 * MINUTE, 8))); // 128
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 1024
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 8192
 
 		return concaterSpecs;
 	}
