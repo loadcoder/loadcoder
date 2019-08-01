@@ -20,11 +20,8 @@ package com.loadcoder.load.scenario.design;
 
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
-import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.scenario.ResultHandlerBuilder;
-import com.loadcoder.load.scenario.ResultHandlerLoadBuilder;
 import com.loadcoder.load.scenario.ResultHandlerVoidBuilder;
-import com.loadcoder.load.scenario.ResultHandlerVoidLoadBuilder;
 import com.loadcoder.load.scenario.Scenario;
 
 public class ScenarioLogic {

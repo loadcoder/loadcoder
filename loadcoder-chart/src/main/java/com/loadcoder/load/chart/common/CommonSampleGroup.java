@@ -33,11 +33,7 @@ import com.loadcoder.load.chart.utilities.SampleStatics;
 
 public class CommonSampleGroup extends Group {
 
-	private static Logger log = LoggerFactory.getLogger(CommonSampleGroup.class);
-
 	XYSeriesExtension series;
-
-	private boolean internalErrorOccured = false;
 
 	Map<Long, CommonSample> commonSamples = new HashMap<Long, CommonSample>();
 
@@ -45,67 +41,58 @@ public class CommonSampleGroup extends Group {
 		this.series = series;
 	}
 
-	public CommonSample getExistingSample(long ts, long sampleLength) {
-		long first = calculateFirstTs(ts, sampleLength);
-		CommonSample s = commonSamples.get(first);
-		return s;
-	}
-
-	public void remove(CommonSample s) {
-		commonSamples.remove(s.getFirstTs());
-	}
-
-	public void concaternate(SampleConcaternator concater) {
-
-		long start = concater.getOldRange().getStart();
-		Range oldRange = concater.getOldRange();
-		long oldSampleLength = oldRange.getSampleLength();
-		int amountToConcaternate = concater.getAmountToConcaternate();
+	public void removeAllOldSamples(long start, int amountToConcaternate, long oldSampleLength) {
 		long tsIterator = start;
 
 		for (int i = 0; i < amountToConcaternate; i++) {
-			CommonSample toBeConcaternated = getExistingSample(tsIterator, oldSampleLength);
+			long firstTs = calculateFirstTs(tsIterator, oldSampleLength);
+			CommonSample toBeConcaternated = commonSamples.get(firstTs);
+
 			if (toBeConcaternated != null) {
 				XYDataItemExtension first = toBeConcaternated.getFirst();
-
 				/*
 				 * for some unknown reason, XYDataItemExtension first can in some rare and
 				 * special cases be null. The workaround here is to not remove the
 				 * XYDataItemExtensions from the series.
 				 */
-				if (first == null) {
-					if (!internalErrorOccured)
-						log.debug("An internal problem occured. This has been solved with a workaround."
-								+ "If this crashed your test, please report it to the LoadCoder project at http://loadcoder.com");
-					internalErrorOccured = true;
-				} else {
+				if (first != null) {
 					series.remove(first.getX());
-					if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-						XYDataItemExtension last = toBeConcaternated.getLast();
-						series.remove(last.getX());
-					}
 				}
-				remove(toBeConcaternated);
+				commonSamples.remove(toBeConcaternated.getFirstTs());
 			}
 			tsIterator += oldSampleLength;
 		}
+	}
+
+	public void concaternate(SampleConcaternator concater) {
+
+		Range oldRange = concater.getOldRange();
+		long start = oldRange.getStart();
+
+		long oldSampleLength = oldRange.getSampleLength();
+		int amountToConcaternate = concater.getAmountToConcaternate();
+
+		removeAllOldSamples(start, amountToConcaternate, oldSampleLength);
 
 		Range newRange = concater.getNewRange();
 		long newSampleLength = newRange.getSampleLength();
-		createCommonSample(start, newSampleLength, 1);
-
+		CommonSample newSample = createCommonSampleAndPutInMap(start, newSampleLength);
 	}
 
-	public CommonSample getAndCreateSample(long ts, String name, long sampleLength) {
+	public void putCommonSample(Long key, CommonSample commonSample) {
+		commonSamples.put(key, commonSample);
+	}
+
+	public CommonSample getAndCreateSampleAndPutInMap(long ts, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
-		CommonSample s = getSample(first, name, sampleLength);
+		CommonSample s = getSample(first, sampleLength);
 		if (s == null) {
-			s = createCommonSample(first, sampleLength, 2);
+			s = createCommonSampleAndPutInMap(first, sampleLength);
 		}
 		return s;
 	}
 
-	public CommonSample getSample(long first, String name, long sampleLength) {
+	public CommonSample getSample(long first, long sampleLength) {
 		CommonSample s = fetch(first, sampleLength);
 		return s;
 	}
@@ -115,8 +102,8 @@ public class CommonSampleGroup extends Group {
 		return s;
 	}
 
-	private CommonSample createCommonSample(long first, long sampleLength, int created) {
-		CommonSample s = new CommonSample(first, sampleLength, created);
+	private CommonSample createCommonSampleAndPutInMap(long first, long sampleLength) {
+		CommonSample s = new CommonSample(first, sampleLength);
 		commonSamples.put(first, s);
 		return s;
 	}

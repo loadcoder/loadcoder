@@ -20,6 +20,7 @@ package com.loadcoder.statics;
 
 import static com.loadcoder.load.result.Summary.*;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryUtils {
 
+	private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+	
 	/**
 	 * Logging a simple summary of the provided result
 	 * @param result for the test to be summarized
@@ -45,12 +48,11 @@ public class SummaryUtils {
 		.log(throughput())
 		.table()
 		.column("Transaction", transactionNames())
+		.column("Amount", transactions())
 		.column("MAX", max())
 		.column("AVG", avg())
 		.column("Fails", fails())
 		.column("90%", percentile(90))
-		
-		
 		.print();
 	}
 
@@ -59,10 +61,10 @@ public class SummaryUtils {
 	 * @return ResultSummarizer
 	 */
 	public static ResultSummarizer throughput(){
-		return (a)->{
-			int seconds = getDurationInSeconds(a.getDuration());
-			double throughput = a.getAmountOfTransactions() / seconds;
-			return String.format("Throughput: %sTPS", throughput);
+		return (result)->{
+			int seconds = getDurationInSeconds(result.getDuration());
+			double throughput = (double)result.getAmountOfTransactions() / seconds;
+			return String.format("Throughput: %s TPS", decimalFormat.format(throughput));
 		};
 	}
 
@@ -71,9 +73,9 @@ public class SummaryUtils {
 	 * @return ResultSummarizer
 	 */
 	public static ResultSummarizer duration(){
-		return (a)->{
+		return (result)->{
 
-			return String.format("Duration: %s milliseconds", a.getDuration());
+			return String.format("Duration: %s milliseconds", result.getDuration());
 		};
 	}
 
@@ -82,8 +84,8 @@ public class SummaryUtils {
 	 * @return ResultSummarizer
 	 */
 	public static ResultSummarizer amountOfTransactions(){
-		return (a)->{
-			return String.format("Amount of transactions: %s", a.getAmountOfTransactions());
+		return (result)->{
+			return String.format("Amount of transactions: %s", result.getAmountOfTransactions());
 		};
 	}
 
@@ -92,8 +94,8 @@ public class SummaryUtils {
 	 * @return ResultSummarizer
 	 */
 	public static ResultSummarizer amountOfFails(){
-		return (a)->{
-			return String.format("Amount of fails: %s", a.getAmountOfFails());
+		return (result)->{
+			return String.format("Amount of fails: %s", result.getAmountOfFails());
 		};
 	}
 	

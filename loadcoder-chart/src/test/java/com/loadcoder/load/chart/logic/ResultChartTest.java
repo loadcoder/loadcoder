@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.TestUtility;
+import com.loadcoder.load.chart.ResultExtension;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
@@ -80,12 +81,6 @@ public class ResultChartTest extends TestNGBase {
 			result = result + i + " ";
 		}
 		return result;
-	}
-
-	public static class ResultExtension extends Result {
-		public ResultExtension(Map<String, List<TransactionExecutionResult>> resultLists) {
-			super(resultLists);
-		}
 	}
 
 	@Test(groups = "manual")

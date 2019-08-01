@@ -619,16 +619,13 @@ public abstract class ChartLogic {
 					sampleGroupCommonList.add(commonSampleGroup);
 				}
 
-				CommonSample cs = commonSampleGroup.getAndCreateSample(l, commonKey, r.getSampleLength());
+				CommonSample cs = commonSampleGroup.getAndCreateSampleAndPutInMap(l, r.getSampleLength());
 
 				long longAmount = Sample.amountToYValue(amount);
 				cs.setY(longAmount);
 				if (cs.getFirst() == null) {
 					cs.initDataItems();
 					series.add(cs.getFirst(), false);
-					if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-						series.add(cs.getLast(), false);
-					}
 				} else {
 					cs.updateDataItems();
 				}

@@ -66,12 +66,6 @@ public class FullTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(FullTest.class);
 
-	class ResultExtention extends Result {
-		public ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
-			super(resultLists);
-		}
-	}
-
 	@Test(groups = "manual")
 	public void testInflux(Method method) {
 		File dir = getNewLogDir(rootResultDir, method.getName());

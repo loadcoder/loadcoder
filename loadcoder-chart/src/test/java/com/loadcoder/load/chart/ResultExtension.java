@@ -16,19 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario.design;
+package com.loadcoder.load.chart;
 
-import com.loadcoder.load.scenario.Scenario;
+import java.util.List;
+import java.util.Map;
 
-public class TypeInstanceBase {
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
-	Scenario theActualScenario;
-
-	public Scenario getScenario() {
-		return theActualScenario;
-	}
-
-	public TypeInstanceBase(Scenario theActualScenario) {
-		this.theActualScenario = theActualScenario;
+public class ResultExtension extends Result {
+	public ResultExtension(Map<String, List<TransactionExecutionResult>> resultLists) {
+		super(resultLists);
 	}
 }

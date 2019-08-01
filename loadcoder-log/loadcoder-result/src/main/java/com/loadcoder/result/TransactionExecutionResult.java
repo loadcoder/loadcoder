@@ -98,7 +98,9 @@ public class TransactionExecutionResult {
 	}
 
 	/**
-	 * Creates and returns a new Map with the TransactionExecutionResult grouped in Lists with the transaction id as key
+	 * Creates and returns a new Map with the TransactionExecutionResult grouped in
+	 * Lists with the transaction id as key
+	 * 
 	 * @param filledBucket
 	 * @return the new Map
 	 */

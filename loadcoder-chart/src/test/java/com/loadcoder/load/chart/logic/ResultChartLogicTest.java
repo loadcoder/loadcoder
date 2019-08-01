@@ -18,23 +18,36 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.chart.ResultExtension;
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
-import com.loadcoder.load.chart.logic.ResultChartTest.ResultExtension;
+import com.loadcoder.load.chart.menu.SteppingSlider;
+import com.loadcoder.load.chart.menu.settings.DetailsSettings;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.testng.Assert.assertTrue;
+
 public class ResultChartLogicTest extends TestNGBase {
+
+	Logger log = LoggerFactory.getLogger(ResultChartLogicTest.class);
 
 	Map<String, Boolean> map;
 
@@ -43,6 +56,35 @@ public class ResultChartLogicTest extends TestNGBase {
 	@BeforeMethod
 	public void setup() {
 		map = new HashMap<String, Boolean>();
+	}
+
+	private void printArray(Integer[] ints) {
+		log.info(Arrays.asList(ints).toString());
+	}
+
+	@Test
+	public void testSampleLengthSliderValues(Method method) {
+
+		int tickSize = 1;
+		long sampleLengthToUse = 2 * tickSize * 1000;
+
+		List<Integer> resultList = ResultChartLogic.getValuesForSliderAsList(sampleLengthToUse, tickSize);
+		log.info(resultList.toString());
+
+		assertTrue(resultList.contains(1));
+		assertTrue(resultList.contains(3));
+		assertTrue(resultList.contains(6));
+
+		tickSize = 4;
+		sampleLengthToUse = 2 * tickSize * 1000;
+
+		resultList = ResultChartLogic.getValuesForSliderAsList(sampleLengthToUse, tickSize);
+		log.info(resultList.toString());
+
+		assertTrue(resultList.contains(1));
+		assertTrue(resultList.contains(8));
+		assertTrue(resultList.contains(24));
+
 	}
 
 	@Test

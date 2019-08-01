@@ -49,9 +49,8 @@ public class ResultChart extends Chart {
 
 		resultChartLogic = (ResultChartLogic) this.logic;
 		long sampleLengthToUse = logic.getSampleLengthToUse();
-		int defaultIndex = resultChartLogic.getDefaultSliderIndex();
 
-		JMenu resultMenu = addResultMenu(sampleLengthToUse, defaultIndex);
+		JMenu resultMenu = addResultMenu(sampleLengthToUse);
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();
 
@@ -91,7 +90,7 @@ public class ResultChart extends Chart {
 		resultChartLogic.createHashesAndUpdate(false);
 	}
 
-	private JMenu addResultMenu(long initialSampleLength, int defaultIndex) {
+	private JMenu addResultMenu(long initialSampleLength) {
 
 		JMenu resultMenu = new JMenu("Result");
 

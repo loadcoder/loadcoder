@@ -111,10 +111,6 @@ public class SampleGroup extends Group {
 				XYDataItemExtension first = newSample.getFirst();
 				series.add(first, false, true);
 				log.trace("new concat point at x:{} y:{} for series " + series.getKey(), first.getX(), first.getY());
-				if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-					XYDataItemExtension last = newSample.getLast();
-					series.add(last, false, true);
-				}
 			}
 		}
 	}
