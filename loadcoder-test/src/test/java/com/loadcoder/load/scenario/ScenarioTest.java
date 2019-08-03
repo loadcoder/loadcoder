@@ -201,7 +201,7 @@ public class ScenarioTest extends TestNGBase {
 				.andWait();
 		Assert.assertEquals(verifier.remove(0), "1");
 
-		TypedLoadScenario<String> ls2 = new TypedLoadScenario<String>() {
+		LoadScenarioTyped<String> ls2 = new LoadScenarioTyped<String>() {
 
 			@Override
 			public String createInstance() {

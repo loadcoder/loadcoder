@@ -133,9 +133,9 @@ public class LoadBuilder {
 	}
 
 	/**
-	 * The intensity of the load can be throttled (limited) by using this method. So
-	 * if the throttle is set to 5 PER_SECOND with ThrottleMode SHARED, the total
-	 * throughput wont't be over 5 TPS.<br>
+	 * The intensity of transactions to be executed can be throttled (limited) by
+	 * using this method. So if the throttle is set to 5 PER_SECOND with
+	 * ThrottleMode SHARED, the total throughput wont't be over 5 TPS.<br>
 	 * Default is no throttle.
 	 * 
 	 * 
@@ -158,6 +158,29 @@ public class LoadBuilder {
 		return this;
 	}
 
+	/**
+	 * 
+	 * The intensity of iterations to be executed can be throttled (limited) by
+	 * using this method. So if the throttle is set to 5 PER_SECOND with
+	 * ThrottleMode SHARED, the intensity of starting new iteration won't be over 5
+	 * per second<br>
+	 * Default is no throttle.
+	 * 
+	 * 
+	 * @param amount       of stated PerTimeUnit will be the throttle limit
+	 * @param perTimeUnit  is the unit of which to throttle limit is defined by
+	 * @param throttleMode states whether the limit should be shared (SHARED) among
+	 *                     the threads, or if the there should be a separate
+	 *                     throttle per thread (PER_THREAD) The difference between
+	 *                     these two is that if SHARED is used, the total throughput
+	 *                     won't be higher than the defined limit, no matter the
+	 *                     amount of threads. If PER_THREAD is used, the separate
+	 *                     thread can't produce a higher throughput than the limit,
+	 *                     but the total througput for all threads together will
+	 *                     theoretically be limit * amountOfThreads
+	 * 
+	 * @return the builder instance
+	 */
 	public LoadBuilder throttleIterations(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
 		this.intensityIterations = new Intensity(amount, perTimeUnit, throttleMode);
 		return this;

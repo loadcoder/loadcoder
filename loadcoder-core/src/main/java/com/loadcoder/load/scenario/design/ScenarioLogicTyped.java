@@ -18,23 +18,16 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario.design;
 
-import com.loadcoder.load.scenario.Scenario;
+public class ScenarioLogicTyped<R extends TypeInstanceBase> extends ScenarioLogic {
 
-/**
- * A super class to the TypeInstance classes instantiated through TypedLoadScenario.
- * The type instance object should hold the test logic where the Scenario will is 
- * required. This class works as a guideline of how to structure the type instances,
- * the scenario and the test logic.
- */
-public class TypeInstanceBase {
-
-	Scenario theActualScenario;
-
-	public Scenario getScenario() {
-		return theActualScenario;
+	R typeInstance;
+	
+	public ScenarioLogicTyped(R type) {
+		super(type.getScenario());
+		this.typeInstance = type;
 	}
-
-	public TypeInstanceBase(Scenario theActualScenario) {
-		this.theActualScenario = theActualScenario;
+	
+	public R getTypeInstance(){
+		return typeInstance;
 	}
 }

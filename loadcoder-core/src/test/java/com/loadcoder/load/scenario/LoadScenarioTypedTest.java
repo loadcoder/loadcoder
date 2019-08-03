@@ -24,14 +24,14 @@ import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class TypedLoadScenarioTest {
+public class LoadScenarioTypedTest {
 
 	@Test
 	public void testTwoTypedLoadScenario() {
 
 		List<Object> verifier = new ArrayList<Object>();
 
-		TypedLoadScenario<Object> ls = new TypedLoadScenario<Object>() {
+		LoadScenarioTyped<Object> ls = new LoadScenarioTyped<Object>() {
 
 			@Override
 			public void loadScenario(Object t) {

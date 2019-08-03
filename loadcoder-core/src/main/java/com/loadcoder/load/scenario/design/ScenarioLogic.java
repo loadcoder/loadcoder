@@ -27,11 +27,11 @@ import com.loadcoder.load.scenario.Scenario;
 public class ScenarioLogic {
 
 	Scenario theActualScenario;
-
-	public ScenarioLogic(Scenario theActualScenario) {
-		this.theActualScenario = theActualScenario;
+	
+	public ScenarioLogic(Scenario scenario) {
+		this.theActualScenario = scenario;
 	}
-
+	
 	protected <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		return theActualScenario.load(defaultName, transaction);
 	}

@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +44,8 @@ public class SummaryUtilsTest {
 		map.get("foo").add(new TransactionExecutionResult(132_000, 10, true, null));
 
 		Result r = new ResultExtension(map);
-		String s = throughput.summarize(r);
-		assertEquals(s, "Throughput: 0.02 TPS");
+		String throughputSummary = throughput.summarize(r);
+		assertTrue(throughputSummary.equals("Throughput: 0.02 TPS") || throughputSummary.equals("Throughput: 0,02 TPS"),
+				"Test got the following result back from throughput summary:" + throughputSummary);
 	}
 }

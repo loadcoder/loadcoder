@@ -36,7 +36,7 @@ import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.TypedLoadScenario;
+import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.load.testng.TestNGBase;
 
 public class TypedLoadScenarioTest extends TestNGBase {
@@ -59,7 +59,7 @@ public class TypedLoadScenarioTest extends TestNGBase {
 	@Test
 	public void testThreadInstance() {
 		List<ThreadInstance> instances = new ArrayList<ThreadInstance>();
-		TypedLoadScenario<ThreadInstance> ls = new TypedLoadScenario<ThreadInstance>() {
+		LoadScenarioTyped<ThreadInstance> ls = new LoadScenarioTyped<ThreadInstance>() {
 
 			public void loadScenario(ThreadInstance t) {
 				testLogic(t);
@@ -134,7 +134,7 @@ public class TypedLoadScenarioTest extends TestNGBase {
 	public void testToPassTheLoadInstanceThroughTheThreadInstance() {
 
 		CustomStopDecision customStopDecision = new CustomStopDecision();
-		TypedLoadScenario<ThreadInstanceStopper> ls = new TypedLoadScenario<ThreadInstanceStopper>() {
+		LoadScenarioTyped<ThreadInstanceStopper> ls = new LoadScenarioTyped<ThreadInstanceStopper>() {
 
 			@Override
 			public ThreadInstanceStopper createInstance() {

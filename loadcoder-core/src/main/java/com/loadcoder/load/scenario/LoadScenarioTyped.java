@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-public abstract class TypedLoadScenario<T> extends LoadScenario {
+public abstract class LoadScenarioTyped<T> extends LoadScenario {
 
 	private ThreadLocal<T> threadLocal;
 

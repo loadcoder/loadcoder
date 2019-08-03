@@ -29,7 +29,7 @@ import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.load.scenario.StopDecision;
-import com.loadcoder.load.scenario.TypedLoadScenario;
+import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.StopDecisions;
 import com.loadcoder.statics.ThrottleMode;
@@ -71,22 +71,22 @@ public class LoadTestDesignExamples {
 		return i++;
 	}
 
-	class TypedLoadLogic extends ScenarioLogic {
+	class TypedLoadLogic extends ScenarioLogicTyped<TypeInstance> {
 
-		TypeInstance t;
+//		TypeInstance t;
 
 		public TypedLoadLogic(TypeInstance t) {
 			/*
 			 * The scenario must be passed on to the superclass ScenarioLogic in order to
+			 * have the scenario available in the logic when the transactions are made
 			 */
-			super(t.getScenario());
-			this.t = t;
+			super(t);
 		}
 
 		void loadLogic() {
 
 			load("foo", () -> {
-				System.out.println(t.getI());
+				System.out.println(typeInstance.getI());
 			}).perform();
 
 		}
@@ -123,7 +123,7 @@ public class LoadTestDesignExamples {
 		 * Furthermore, the instance of TypeInstance keeps the test logic instance(s) so
 		 * they can be either uniquely created for each thread, or shared between them.
 		 */
-		TypedLoadScenario<TypeInstance> ls = new TypedLoadScenario<TypeInstance>() {
+		LoadScenarioTyped<TypeInstance> ls = new LoadScenarioTyped<TypeInstance>() {
 
 			@Override
 			public TypeInstance createInstance() {
@@ -214,7 +214,7 @@ public class LoadTestDesignExamples {
 	@Test(groups = "manual")
 	public void testThatLoadWorksWithTheLoadLogic() {
 
-		TypedLoadScenario<TypeInstance> ls = new TypedLoadScenario<TypeInstance>() {
+		LoadScenarioTyped<TypeInstance> ls = new LoadScenarioTyped<TypeInstance>() {
 
 			@Override
 			public TypeInstance createInstance() {

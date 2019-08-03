@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
+	<!-- test test -->
 	<appender name="resultappender" class="com.loadcoder.logback.SharedDirFileAppenderLogback">
 		<file>result.log</file>
 		<append>false</append>
@@ -36,7 +36,7 @@
 	</logger>
 
 
-	<root level="debug">
+	<root level="info">
 		<appender-ref ref="INFOFILE" />
 		<appender-ref ref="CONSOLEAPPENDER" />
 	</root>

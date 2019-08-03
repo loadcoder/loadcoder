@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
+	<!-- core test -->
 	<appender name="resultappender-shared"
 		class="com.loadcoder.logback.SharedDirFileAppenderLogback">
 		<file>result.log</file>
