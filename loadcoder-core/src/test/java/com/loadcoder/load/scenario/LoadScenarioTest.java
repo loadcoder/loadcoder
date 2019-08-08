@@ -20,13 +20,17 @@ package com.loadcoder.load.scenario;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.exceptions.FailedTransactionException;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.TransactionExecutionResult;
@@ -50,7 +54,8 @@ public class LoadScenarioTest extends TestNGBase {
 
 		Load l = mockLoad(s);
 		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting()
+				.get(0);
 		Assert.assertEquals(res.isStatus(), true);
 		Assert.assertNull(res.getMessage());
 		Assert.assertEquals(res.getName(), "t1");
@@ -81,7 +86,8 @@ public class LoadScenarioTest extends TestNGBase {
 		};
 
 		Load l = mockLoad(s);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting()
+				.get(0);
 
 		Assert.assertEquals(res.getName(), "newTransactionName");
 		Assert.assertEquals(res.isStatus(), false);
@@ -111,10 +117,59 @@ public class LoadScenarioTest extends TestNGBase {
 		Load l = mockLoad(s);
 		s.loadScenario(); // run scenario one more time
 		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 2);
-		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
+		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting()
+				.get(0);
 
 		Assert.assertEquals(res.getMessage(), toBeThrown.getClass().getSimpleName());
 		Assert.assertEquals(res.isStatus(), false);
+	}
+
+	@Test
+	public void testThrowIfFailed(Method method) {
+
+		List<FailedTransactionException> exceptions = new ArrayList<FailedTransactionException>();
+
+		LoadScenario s = new LoadScenario() {
+			@Override
+			public void loadScenario() {
+				try {
+					load("t1", () -> {
+
+					}).handleResult((a) -> {
+						a.setStatus(false);
+					}).throwIfFailed().perform();
+					fail("Expected an exception to be thrown before this");
+				} catch (FailedTransactionException fte) {
+					exceptions.add(fte);
+				} catch (Exception e) {
+					fail("Caught an unexpeted exception of type " + e.getClass().getSimpleName());
+				}
+
+				try {
+					load("t2", () -> {
+						return "";
+					}).handleResult((a) -> {
+						a.setStatus(false);
+					}).throwIfFailed().perform();
+					fail("Expected an exception to be thrown before this");
+				} catch (FailedTransactionException fte) {
+					exceptions.add(fte);
+				} catch (Exception e) {
+					fail("Caught an unexpeted exception of type " + e.getClass().getSimpleName());
+				}
+
+			}
+		};
+
+		Load l = mockLoad(s);
+		assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 2);
+		TransactionExecutionResult result = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting()
+				.get(0);
+		TransactionExecutionResult result2 = l.getExecution().getTransactionExecutionResultBuffer()
+				.getBufferForTesting().get(1);
+		assertEquals(result.isStatus(), false);
+		assertEquals(result2.isStatus(), false);
+		assertEquals(exceptions.size(), 2);
 	}
 
 	@Test
@@ -145,6 +200,21 @@ public class LoadScenarioTest extends TestNGBase {
 		when(e.getTransactionExecutionResultBuffer()).thenReturn(buff);
 		s.loadScenario();
 		return l;
+	}
+
+	@Test
+	public void testFailedTransactionException() {
+
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+				load("foo", () -> {
+				}).handleResult(resultModel -> {
+					resultModel.setStatus(false);
+				}).throwIfFailed().perform();
+			}
+		};
 	}
 
 }

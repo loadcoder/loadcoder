@@ -20,6 +20,7 @@ package com.loadcoder.load.utils;
 
 import org.slf4j.Logger;
 
+import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.TestUtility;
 import com.loadcoder.result.ResultFormatter;
 import com.loadcoder.result.ResultLogger;
@@ -51,9 +52,9 @@ public class ResultGenerator {
 			for(int i=0; i<amountOfTypes; i++){
 				boolean status = true;
 				if(i==0){
-					status = ! ( TestUtility.random(1, 10) == 5); // false is match
+					status = ! ( LoadUtility.random(1, 10) == 5); // false is match
 				}
-				long rt = i * 50 + TestUtility.random(1, 100);
+				long rt = i * 50 + LoadUtility.random(1, 100);
 				
 				if(!status)
 					rt = 0;

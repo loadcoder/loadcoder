@@ -71,24 +71,18 @@ public class SummaryTest extends TestNGBase {
 		return summaryWithTable;
 	}
 
-	class ResultExtention extends Result {
-		public ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
-			super(resultLists);
-		}
-	}
-
 	@Test
 	public void SummaryGetDurationInSecondsTest(Method m) {
 		int seconds = Summary.getDurationInSeconds(2000);
 		assertEquals(seconds, 2);
-		
+
 		seconds = Summary.getDurationInSeconds(0);
 		assertEquals(seconds, 1);
 	}
-	
+
 	@Test
 	public void seriesSummaryTest() {
-		Result result = new ResultExtention(getResultList());
+		Result result = new ResultExtension(getResultList());
 		Summary summary = new Summary(result);
 		String summaryString = summary.log(a -> "Foo").log(a -> "Bar").getAsString();
 		assertTrue(summaryString.contains("Foo"));
@@ -98,9 +92,9 @@ public class SummaryTest extends TestNGBase {
 
 	@Test
 	public void commonSummaryTest(Method m) {
-		Result result = new ResultExtention(getResultList());
+		Result result = new ResultExtension(getResultList());
 		SummaryWithTable summaryWithTable = fullSummary(result, m);
-		assertTrue(
-				summaryWithTable.getAsString().contains("Throughput: 2.0TPS"));
+		String summaryText = summaryWithTable.getAsString();
+		assertTrue(summaryWithTable.getAsString().contains("Throughput: 2"), summaryText);
 	}
 }

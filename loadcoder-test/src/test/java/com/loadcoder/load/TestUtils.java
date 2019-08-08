@@ -23,7 +23,7 @@ import java.util.List;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class TestUtils {
+public class TestUtils extends BaseTest {
 
 	public static LoadScenario s = new LoadScenario() {
 		@Override

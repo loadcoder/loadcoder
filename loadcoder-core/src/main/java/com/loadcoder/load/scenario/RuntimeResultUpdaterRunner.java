@@ -71,22 +71,12 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	protected void swapOutDataAndCallUser() {
 
-		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-
 		// Swap bucket. The filled bucket is switched out and a new one is replaced
 		// inside the TransactionExecutionResultBuffer
 		List<TransactionExecutionResult> filledBucket = execution.getTransactionExecutionResultBuffer().swap();
 
 		// Add all the swaped out results to the runtimeResultList
-		for (TransactionExecutionResult transactionExecutionResult : filledBucket) {
-			String name = transactionExecutionResult.getName();
-			List<TransactionExecutionResult> listToAddTo = map.get(name);
-			if (listToAddTo == null) {
-				listToAddTo = new ArrayList<TransactionExecutionResult>();
-				map.put(name, listToAddTo);
-			}
-			listToAddTo.add(transactionExecutionResult);
-		}
+		Map<String, List<TransactionExecutionResult>> map = TransactionExecutionResult.getResultListAsMap(filledBucket);
 
 		try {
 			runtimeDataUser.useData(map);
@@ -96,4 +86,5 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 		map.clear();
 	}
+
 }

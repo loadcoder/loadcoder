@@ -18,12 +18,15 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.common;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 
 public class CommonYCalculators {
 
-	public static final CommonYCalculator throughput = (keys, timestamp, sampleGroups, sampleLength) -> {
+	public static final CommonYCalculator THROUGHPUT = (keys, timestamp, sampleGroups, sampleLength) -> {
 		double amount = 0;
 
 		for(String key : keys){
@@ -34,11 +37,7 @@ public class CommonYCalculators {
 			 * it is likely that the sample doesn't exist for some of the
 			 * series. Then just continue with next one
 			 */
-			if (s == null)
-				continue;
-
-			long amountOfPoints = s.getAmountOfPoints();
-			amount += amountOfPoints;
+			amount += s == null ? 0 : s.getAmountOfPoints();
 		}
 		
 		double pointsPerSecond = amount / (sampleLength / 1000);

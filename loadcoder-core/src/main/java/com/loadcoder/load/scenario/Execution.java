@@ -40,7 +40,7 @@ public class Execution {
 
 	private long startTime;
 
-	private TransactionExecutionResultBuffer transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
+	private TransactionExecutionResultBuffer transactionExecutionResultBuffer = null;
 
 	protected ResultFormatter getResultFormatter() {
 		return resultFormatter;
@@ -58,8 +58,11 @@ public class Execution {
 		return transactionExecutionResultBuffer;
 	}
 
-	protected Execution(ResultFormatter resultFormatter, RuntimeResultUser resultUser, List<Load> loads) {
-		this.resultFormatter = resultFormatter == null ? Formatter.SIMPLE_RESULT_FORMATTER : resultFormatter;
+	protected Execution(ResultFormatter resultFormatter,
+			TransactionExecutionResultBuffer transactionExecutionResultBuffer, RuntimeResultUser resultUser,
+			List<Load> loads) {
+		this.resultFormatter = resultFormatter;
+		this.transactionExecutionResultBuffer = transactionExecutionResultBuffer;
 		this.user = resultUser;
 		this.loads = loads;
 		loads.stream().forEach((load) -> {

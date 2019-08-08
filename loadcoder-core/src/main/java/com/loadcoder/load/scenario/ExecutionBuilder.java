@@ -20,35 +20,95 @@ package com.loadcoder.load.scenario;
 
 import java.util.Arrays;
 
+import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.statics.Formatter;
 
 public class ExecutionBuilder {
 
-	private ResultFormatter resultFormatter;
-	private RuntimeResultUser user;
-	private final Load[] loads;
+	protected ResultFormatter resultFormatter = Formatter.SIMPLE_RESULT_FORMATTER;
+	protected RuntimeResultUser user;
+	protected TransactionExecutionResultBuffer transactionExecutionResultBuffer = null;
+	protected final Load[] loads;
 
 	/**
-	 * sets a RuntimeResultUser that will use the results in runtime. You can use a
-	 * {@code com.loadcoder.load.chart.logic.RuntimeChart} instance here.
+	 * This method is deprecated and will be removed in coming versions. It is
+	 * replaced by the method storeAndConsumeRuntimeResult.
+	 * <p>
+	 * Sets a RuntimeResultUser
 	 * 
-	 * @param runtimeResultUser is the instance that will consume the runtime result
-	 *                          data during the execution
+	 * @param runtimeResultUser is a functional interface that if provided, will be
+	 *                          invoked every 3 seconds during the entire execution.
+	 *                          It will be provided with the stored result in a Map,
+	 *                          that will be cleared after provided to the
+	 *                          RuntimeResultUser.
+	 *                          {@code com.loadcoder.load.chart.logic.RuntimeChart}
+	 *                          implements RuntimeResultUser and will use the stored
+	 *                          runtime result as a graph, where response times,
+	 *                          throughput and amount of fails can be monitored
+	 *                          during the test execution
+	 * 
 	 * @return the builder instance
 	 */
+	@Deprecated
 	public ExecutionBuilder runtimeResultUser(RuntimeResultUser runtimeResultUser) {
+		return storeAndConsumeResultRuntime(runtimeResultUser);
+	}
+
+	/**
+	 * The use case for this method is for shorter performance tests and for unit
+	 * testing, where the amount of transactions are being limited.
+	 * <p>
+	 * Use this with caution. Since every TransactionExecutionResult are being
+	 * stored, memory can run out over time, causing both the test to crash and the
+	 * results to be affected.
+	 * <p>
+	 * Activates the storage of all TransactionExecutionResult in runtime memory.
+	 * This storage can be accessed through the FinishedExecution instance after an
+	 * executed test, with the method FinishedExecution:getResultFromMemory, that
+	 * returns a Result instance based on this storage.
+	 * 
+	 * @return the builder instance
+	 */
+	public ExecutionBuilder storeResultRuntime() {
+		transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
+		return this;
+	}
+
+	/**
+	 * Activates the storage of all TransactionExecutionResult in runtime memory.
+	 * This storage content will be consumed by the provided runtimeResultUser.
+	 * 
+	 * @param runtimeResultUser is a functional interface that if provided, will be
+	 *                          invoked every 3 seconds during the entire execution.
+	 *                          It will be invoked with the stored result in a Map,
+	 *                          that will be cleared (and consumed) afterwards.
+	 *                          {@code com.loadcoder.load.chart.logic.RuntimeChart}
+	 *                          implements RuntimeResultUser and will use the stored
+	 *                          runtime result as a graph, where response times,
+	 *                          throughput and amount of fails can be monitored
+	 *                          during the test execution
+	 * 
+	 * @return the builder instance
+	 */
+	public ExecutionBuilder storeAndConsumeResultRuntime(RuntimeResultUser runtimeResultUser) {
+		transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
 		this.user = runtimeResultUser;
 		return this;
 	}
 
 	/**
-	 * sets a ResultFormatter used to format the results that is going to be logged
+	 * Sets a ResultFormatter used to format the results that is going to be logged
 	 * in the result file. Default formatter is the
 	 * com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER
 	 * 
+	 * If the argument is null, it will disable the default logging of the results
+	 * for the transactions
+	 * 
 	 * @param resultFormatter is the instance that will format the
 	 *                        TransactionExecutionResult to and from loggable
-	 *                        Strings
+	 *                        Strings. A null value will make the
+	 *                        TransactionExecutionResult not being logged
 	 * @return the builder instance
 	 */
 	public ExecutionBuilder resultFormatter(ResultFormatter resultFormatter) {
@@ -58,6 +118,7 @@ public class ExecutionBuilder {
 
 	/**
 	 * Constructor for the ExecutionBuilder
+	 * 
 	 * @param loads is the Load instances that the test will consist of
 	 */
 	public ExecutionBuilder(Load... loads) {
@@ -70,6 +131,6 @@ public class ExecutionBuilder {
 	 * @return an Execution instance.
 	 */
 	public Execution build() {
-		return new Execution(resultFormatter, user, Arrays.asList(loads));
+		return new Execution(resultFormatter, transactionExecutionResultBuffer, user, Arrays.asList(loads));
 	}
 }

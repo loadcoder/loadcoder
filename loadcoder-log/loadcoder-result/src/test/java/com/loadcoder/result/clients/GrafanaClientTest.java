@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.result.Result;
+import com.loadcoder.result.ResultExtension;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.DateTimeUtil;
 import com.loadcoder.result.clients.GrafanaClient;
@@ -48,7 +48,7 @@ public class GrafanaClientTest {
 		Map<String, List<TransactionExecutionResult>> list = new HashMap<String, List<TransactionExecutionResult>>();
 		list.put("foo", Arrays.asList(new TransactionExecutionResult("foo", end - 10_000, 5, true, null),
 				new TransactionExecutionResult(end - 5_000, 6, true, null)));
-		ResultExtention r = new ResultExtention(list);
+		ResultExtension r = new ResultExtension(list);
 
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
@@ -66,9 +66,4 @@ public class GrafanaClientTest {
 		assertTrue(dateTime.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.000"));
 	}
 
-	public static class ResultExtention extends Result {
-		ResultExtention(Map<String, List<TransactionExecutionResult>> resultLists) {
-			super(resultLists);
-		}
-	}
 }

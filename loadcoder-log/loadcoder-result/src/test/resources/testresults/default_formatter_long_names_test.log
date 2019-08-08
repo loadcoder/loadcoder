@@ -1,0 +1,5 @@
+<t name="a0" ts="1525939357501" rt="23" status="true" thread="T1"/>
+<t name="a1" ts="1525939357601" rt="108" status="false" thread="T1"/>
+
+<t name="a0" ts="1525939357701" rt="42" status="true" thread="T2"/>
+<t name="a1" ts="1525939357801" rt="118" status="true" thread="T1" message="foo"/>

@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 
 public class StartedLoad {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-
 	private Load load;
 
 	public StartedLoad(Load l) {

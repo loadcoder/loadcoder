@@ -20,21 +20,20 @@ package com.loadcoder.load.chart.common;
 
 import com.loadcoder.load.chart.sampling.SampleBase;
 
-public class CommonSample extends SampleBase{
+public class CommonSample extends SampleBase {
 
-	public void setY(long y){
+	public void setY(long y) {
 		this.y = y;
 	}
-	
-	public CommonSample(long startTs, long length, int created){
+
+	public CommonSample(long startTs, long length) {
 		this.firstTs = startTs;
-		this.lastTs = startTs + length -1;
+		this.lastTs = startTs + length - 1;
 		this.length = length;
-		this.created = created;
 	}
-	
+
 	@Override
-	public String toString(){
-		return "{" + firstTs + "," + lastTs + ":" +length+"created:" + created+"}";
+	public String toString() {
+		return "{" + firstTs + "," + lastTs + ":" + length + "}";
 	}
 }

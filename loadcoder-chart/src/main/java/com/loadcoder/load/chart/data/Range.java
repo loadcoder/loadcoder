@@ -20,19 +20,34 @@ package com.loadcoder.load.chart.data;
 
 import java.util.List;
 
+import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
+import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
+
 public class Range {
 
-	long start;
-	
-	long end;
-	
-	long sampleLength;
+	private XYSeriesExtension series;
+	private XYDataItemExtension high;
+	private XYDataItemExtension low;
 
-	public boolean isTimestampInThisRange(long ts){
-		if(ts >= start && ts <= end)
+	private long start;
+
+	private long end;
+
+	private long sampleLength;
+
+	public Range(long start, long end, long sampleLength) {
+		super();
+		this.start = start;
+		this.end = end;
+		this.sampleLength = sampleLength;
+	}
+
+	public boolean isTimestampInThisRange(long ts) {
+		if (ts >= start && ts <= end)
 			return true;
 		return false;
 	}
+
 	public String toString() {
 		return "{" + start + " - " + end + "sampleLength:" + sampleLength + "}";
 	}
@@ -61,11 +76,28 @@ public class Range {
 		return sampleLength;
 	}
 
-	public Range(long start, long end, long sampleLength) {
-		super();
-		this.start = start;
-		this.end = end;
-		this.sampleLength = sampleLength;
+	public XYSeriesExtension getSeries() {
+		return series;
+	}
+
+	public void setSeries(XYSeriesExtension series) {
+		this.series = series;
+	}
+
+	public XYDataItemExtension getHigh() {
+		return high;
+	}
+
+	public void setHigh(XYDataItemExtension high) {
+		this.high = high;
+	}
+
+	public XYDataItemExtension getLow() {
+		return low;
+	}
+
+	public void setLow(XYDataItemExtension low) {
+		this.low = low;
 	}
 
 	public static long findSampleLength(long timeStamp, List<Range> ranges) {
@@ -76,5 +108,5 @@ public class Range {
 		}
 		throw new RuntimeException("no matching range found. This should never happend!");
 	}
-	
+
 }

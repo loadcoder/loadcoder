@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.loadcoder.load.chart.common.YCalculator;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
@@ -30,16 +33,18 @@ import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.utilities.SampleStatics;
 
-public class SampleGroup extends Group{
+public class SampleGroup extends Group {
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	boolean locked = true;
 
 	long startOfTheGroup = 0;
-	
+
 	long sampleLengthBase = 0;
 
 	Sample earliestSample;
-	
+
 	private Map<Long, Sample> samples = new HashMap<Long, Sample>();
 
 	private Map<Long, Sample> samplesUnupdated = new HashMap<Long, Sample>();
@@ -51,7 +56,7 @@ public class SampleGroup extends Group{
 		this.sampleLengthBase = sampleLength;
 		this.series = series;
 	}
-	
+
 	public String toString() {
 		return String.format("{samples:%s, samplesUnupdated:%s}", samples.size(), samplesUnupdated.size());
 	}
@@ -71,59 +76,57 @@ public class SampleGroup extends Group{
 	public void remove(Sample s) {
 		samples.remove(s.getFirstTs());
 	}
-	
-	public static class ConcaternationResult{
+
+	public class ConcaternationResult {
 		List<Sample> concaternated;
 		Sample newSample;
-		ConcaternationResult(List<Sample> concaternated, Sample newSample){
+
+		ConcaternationResult(List<Sample> concaternated, Sample newSample) {
 			this.concaternated = concaternated;
 			this.newSample = newSample;
 		}
-		
-		public List<Sample> getConcatenated(){
+
+		public List<Sample> getConcatenated() {
 			return concaternated;
 		}
-		
-		public void fixPointsForSeries(XYSeriesExtension series){
-			
-			for(Sample toBeConcaternated : concaternated){
+
+		public void fixPointsForSeries(XYSeriesExtension series) {
+
+			for (Sample toBeConcaternated : concaternated) {
 				XYDataItemExtension first = toBeConcaternated.getFirst();
 
-				if(first != null){
+				if (first != null) {
 					series.remove(first.getX());
 				}
-				if(SampleStatics.USE_TWO_SAMPLE_POINTS){
+				if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
 					XYDataItemExtension last = toBeConcaternated.getLast();
-					if(last != null){
+					if (last != null) {
 						series.remove(last.getX());
 					}
 				}
-			}	
-			
+			}
+
 			if (!newSample.isEmpty()) {
 				newSample.initDataItems();
 				XYDataItemExtension first = newSample.getFirst();
 				series.add(first, false, true);
-				if(SampleStatics.USE_TWO_SAMPLE_POINTS) {
-					XYDataItemExtension last = newSample.getLast();
-					series.add(last, false, true);
-				}
+				log.trace("new concat point at x:{} y:{} for series " + series.getKey(), first.getX(), first.getY());
 			}
 		}
 	}
-	
+
 	public ConcaternationResult concaternate(SampleConcaternator concater) {
 
 		long start = concater.getOldRange().getStart();
 		Range oldRange = concater.getOldRange();
 		long oldSampleLength = oldRange.getSampleLength();
 		int amountToConcaternate = concater.getAmountToConcaternate();
-		
+
 		long tsIterator = start;
 		List<Point> newPoints = new ArrayList<Point>();
 		int newAmountOfFails = 0;
-		long pointsSum =0;
-		long pointsAmount =0;
+		long pointsSum = 0;
+		long pointsAmount = 0;
 		List<Sample> concaternated = new ArrayList<Sample>();
 		for (int i = 0; i < amountToConcaternate; i++) {
 
@@ -148,11 +151,11 @@ public class SampleGroup extends Group{
 		newSample.setPoints(newPoints);
 		newSample.setPointsSum(pointsSum);
 		newSample.setPointsAmount(pointsAmount);
-		
-		if (! newSample.isEmpty()) {
+
+		if (!newSample.isEmpty()) {
 			newSample.calculateY(yCalculatorToUse);
 		}
-		ConcaternationResult concaternationResult = new ConcaternationResult(concaternated, newSample); 
+		ConcaternationResult concaternationResult = new ConcaternationResult(concaternated, newSample);
 		return concaternationResult;
 
 	}
@@ -186,7 +189,7 @@ public class SampleGroup extends Group{
 		}
 		return s;
 	}
-	
+
 	public Sample getAndCreateSample(long ts, String name, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		Sample s = samples.get(first);
@@ -201,11 +204,11 @@ public class SampleGroup extends Group{
 		Sample s = samples.get(first);
 		return s;
 	}
-	
+
 	public Sample getExistingAndRemoveSample(long ts, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		Sample s = samples.remove(first);
 		return s;
 	}
-	
+
 }

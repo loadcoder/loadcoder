@@ -47,8 +47,6 @@ public class DetailsSettings extends Settings {
 
 	private double keepFactorSelection = -1;
 
-	private long newSampleLengthSelection = -1;
-	
 	JRadioButtonMenuItem points;
 
 	private final ResultChartLogic chartLogic;
@@ -98,9 +96,9 @@ public class DetailsSettings extends Settings {
 			resultChartLogic.getPointsRadioButton().setText(String.format("Points (%s)", keepFactorAsProcentString));
 			chartSettingsActionsModel.setRecreatePoints(true);
 		}
-		
-		if(getNewSampleLengthSelection() != -1) {
-			chartLogic.chartSliderAjustment(getNewSampleLengthSelection());
+
+		if (chartLogic.getNewSampleLengthSelection() != -1) {
+			chartLogic.chartSliderAjustment(chartLogic.getNewSampleLengthSelection());
 		}
 	}
 
@@ -112,14 +110,6 @@ public class DetailsSettings extends Settings {
 		this.keepFactorSelection = keepFactorSelection;
 	}
 
-	public long getNewSampleLengthSelection() {
-		return newSampleLengthSelection;
-	}
-
-	public void setNewSampleLengthSelection(long newSampleLengthSelection) {
-		this.newSampleLengthSelection = newSampleLengthSelection;
-	}	
-	
 	JPanel getWindow() {
 
 		labelTable.put(0, new JLabel("" + (doubles[0] * 100) + "%"));
@@ -167,32 +157,29 @@ public class DetailsSettings extends Settings {
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		jp2.add(keepFactorSliderDescription, c);
-		
+
 		c.gridx = 0;
 		c.gridy = 1;
 		jp2.add(pointsKeepFactorSlider, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		jp2.add(textField, c);
-		
-		JLabel space = new JLabel(
-				" ");
+
+		JLabel space = new JLabel(" ");
 		c.gridx = 0;
 		c.gridy = 2;
 		jp2.add(space, c);
-		
-		JLabel keepFactorSliderDescription2 = new JLabel(
-				"Drag the slider to adjust the sample length in seconds");
+
+		JLabel keepFactorSliderDescription2 = new JLabel("Drag the slider to adjust the sample length in seconds");
 		f = keepFactorSliderDescription2.getFont();
 		keepFactorSliderDescription2.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
 		c.gridx = 0;
 		c.gridy = 3;
 		jp2.add(keepFactorSliderDescription2, c);
-		
+
 		c.gridx = 0;
 		c.gridy = 4;
-		jp2.add(createSlider(chartLogic, chartLogic.getSampleLengthToUse(), chartLogic.getMinorTickLength(), chartLogic.getDefaultSliderIndex()), c);
-		
+		jp2.add(chartLogic.getSteppingSlider(), c);
 		keepFactorSliderDescription.setBackground(Color.LIGHT_GRAY);
 		keepFactorSliderDescription.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
@@ -201,38 +188,4 @@ public class DetailsSettings extends Settings {
 		return detailsLeftArea;
 	}
 
-	protected SteppingSlider createSlider(ResultChartLogic chartLogic, long initialSampleLength, int minorTickPacing, int defaultIndex) {
-
-		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
-		labelTable.put(1, new JLabel("1"));
-
-		int max = ChartUtils.calculateSampleLengthSliderMax(initialSampleLength);
-		max = ((int) initialSampleLength / 1000) + minorTickPacing * 4;
-		List<Integer> valuesList = new ArrayList<Integer>();
-		valuesList.add(1);
-		for (int i = minorTickPacing; i <= max; i = i + minorTickPacing) {
-			if (!valuesList.contains(i))
-				valuesList.add(i);
-		}
-
-		for (int i = 0; i < valuesList.size(); i++) {
-			labelTable.put(i, new JLabel("" + valuesList.get(i)));
-		}
-
-		Integer[] values = valuesList.toArray(new Integer[valuesList.size()]);
-
-		SteppingSlider slider = new SteppingSlider(values, defaultIndex);
-		slider.setLabelTable(labelTable);
-
-		slider.addChangeListener((e) -> {
-			JSlider source = (JSlider) e.getSource();
-			if (!source.getValueIsAdjusting()) {
-				int indexOfSlider = (int) source.getValue();
-
-				long newSampleLength = chartLogic.calculateSampleLengthWith(indexOfSlider);
-				setNewSampleLengthSelection(newSampleLength);
-			}
-		});
-		return slider;
-	}
 }

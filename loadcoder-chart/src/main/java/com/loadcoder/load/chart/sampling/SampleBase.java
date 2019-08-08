@@ -21,31 +21,30 @@ package com.loadcoder.load.chart.sampling;
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 
 public class SampleBase {
-	public int created;
-	
+
 	protected XYDataItemExtension first;
 
 	protected XYDataItemExtension last;
-	
+
 	protected long length;
-	
+
 	protected long firstTs;
-	
+
 	protected long lastTs;
-	
+
 	protected long y = -1;
-	
+
 	SampleBase previousSample;
-	
+
 	public long getLength() {
 		return length;
 	}
-	
-	public void updateDataItems(){
+
+	public void updateDataItems() {
 		first.setY(y);
 		last.setY(y);
 	}
-	
+
 	public long getFirstTs() {
 		return firstTs;
 	}
@@ -53,7 +52,7 @@ public class SampleBase {
 	public long getLastTs() {
 		return lastTs;
 	}
-	
+
 	public long getY() {
 		return y;
 	}
@@ -62,16 +61,16 @@ public class SampleBase {
 		return previousSample;
 	}
 
-	public void setPreviousSample(SampleBase previousSample){
+	public void setPreviousSample(SampleBase previousSample) {
 		this.previousSample = previousSample;
-				
+
 	}
-	
-	public void initDataItems(){
+
+	public void initDataItems() {
 		first = new XYDataItemExtension(firstTs, y);
 		last = new XYDataItemExtension(lastTs, y);
 	}
-	
+
 	public XYDataItemExtension getFirst() {
 		return first;
 	}

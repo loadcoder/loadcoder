@@ -20,6 +20,7 @@ package com.loadcoder.load.log;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -38,11 +40,13 @@ import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class LogTest extends TestNGBase {
 
 	@Test
-	public void test(Method method) {
+	public void testThatResultLogContainsExpectedContent(Method method) {
 
 		File f = getNewLogDir(rootResultDir, method.getName());
 		setResultDestination(f);
@@ -70,7 +74,7 @@ public class LogTest extends TestNGBase {
 	}
 
 	@Test
-	public void asyncThreadLogging(Method method) throws FileNotFoundException, IOException {
+	public void testAsyncThreadResult(Method method) throws FileNotFoundException, IOException {
 
 		List<String> threadNames = new ArrayList<String>();
 		File resultDir = new File(rootResultDir + "/" + method.getName() + "/" + System.currentTimeMillis());
@@ -89,14 +93,16 @@ public class LogTest extends TestNGBase {
 				load("performAsync2", () -> {
 				}).performAsync();
 
-				load("perform", () -> {
-				}).perform();
-
 				load("performAsyncWithReturn", () -> {
 					return "";
 				}).performAsync();
 
+				load("perform", () -> {
+				}).perform();
+
 				load("performWithReturn", () -> {
+					// Sleeping so that the async calls are finished before finishing the execution
+					LoadUtility.sleep(30);
 					return "";
 				}).perform();
 			}
@@ -104,13 +110,14 @@ public class LogTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).amountOfThreads(1).build();
 
-		new ExecutionBuilder(l).build().execute().andWait();
+		Result result = new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build().execute().andWait()
+				.getResultFromMemory();
 
-		List<String> content2 = LoadUtility.readFile(new File(resultDir.getAbsolutePath() + "/result.log"));
-		Assert.assertEquals(content2.size(), 5);
-
-		content2.stream().forEach(row -> {
-			Assert.assertTrue(row.contains(threadNames.get(0)));
-		});
+		Assert.assertEquals(result.getAmountOfTransactions(), 5);
+		Set<String> keys = result.getResultLists().keySet();
+		for (String key : keys) {
+			List<TransactionExecutionResult> e = result.getResultLists().get(key);
+			assertEquals(e.get(0).getThreadId(), threadNames.get(0));
+		}
 	}
 }

@@ -20,32 +20,38 @@ package com.loadcoder.load.scenario;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.loadcoder.load.exceptions.RuntimeResultStorageNotActivatedException;
 import com.loadcoder.load.exceptions.NoResultOrFormatterException;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class FinishedExecution {
-	
+
 	private Execution s;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	private final static String RESULTFILE_DEFAULT = "result.log";
 
-	
 	protected FinishedExecution(Execution s) {
 		this.s = s;
 	}
 
 	/**
 	 * Returns a Result for the default log file (result.log)
+	 * 
 	 * @return a new Result instance from the finished load, assuming that the name
 	 *         of the file containing the result is result.log So if the directory
 	 *         for the result is set to /foo/bar, the the Result will be generated
 	 *         from the file /foo/bar/result.log
-	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
+	 * @throws NoResultOrFormatterException will be thrown if either the result is
+	 *                                      missing or the formatter can format the
+	 *                                      file
 	 */
 	public Result getReportedResultFromResultFile() throws NoResultOrFormatterException {
 		return getReportedResultFromResultFile(RESULTFILE_DEFAULT);
@@ -53,12 +59,14 @@ public class FinishedExecution {
 
 	/**
 	 * Returns a Result
-	 * @param fileName
-	 *            is the name of the file. So if fileName is result.log and the
-	 *            directory for the result is set to /foo/bar, the the Result will
-	 *            be generated from the file /foo/bar/result.log
+	 * 
+	 * @param fileName is the name of the file. So if fileName is result.log and the
+	 *                 directory for the result is set to /foo/bar, the the Result
+	 *                 will be generated from the file /foo/bar/result.log
 	 * @return a new Result instance from the result file
-	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
+	 * @throws NoResultOrFormatterException will be thrown if either the result is
+	 *                                      missing or the formatter can format the
+	 *                                      file
 	 */
 	public Result getReportedResultFromResultFile(String fileName) throws NoResultOrFormatterException {
 		File resultDir = Logs.getLogDir();
@@ -68,12 +76,14 @@ public class FinishedExecution {
 
 	/**
 	 * Returns a Result
-	 * @param resultFile
-	 *            is the file where the result is stored, that will be used to
-	 *            generate the Result
+	 * 
+	 * @param resultFile is the file where the result is stored, that will be used
+	 *                   to generate the Result
 	 * @return a new Result instance from the result file
-	 * @throws NoResultOrFormatterException will be thrown if either the result is missing or the formatter can format the file
-	 */	
+	 * @throws NoResultOrFormatterException will be thrown if either the result is
+	 *                                      missing or the formatter can format the
+	 *                                      file
+	 */
 	public Result getReportedResultFromResultFile(File resultFile) throws NoResultOrFormatterException {
 		if (s.getResultFormatter() != null) {
 			try {
@@ -84,11 +94,32 @@ public class FinishedExecution {
 
 				return result;
 			} catch (IOException ioe) {
-				throw new RuntimeException("Could not read the resultFile " + resultFile, ioe);
+				throw new NoResultOrFormatterException("Could not read the resultFile " + resultFile, ioe);
 			}
 		}
 		throw new NoResultOrFormatterException("The report can not be produced"
 				+ " since the ResultFormatter or/and ResultDestination " + "seems to be missning in the scenario");
+	}
+
+	protected class ResultFromMemory extends Result {
+
+		protected ResultFromMemory(Map<String, List<TransactionExecutionResult>> resultLists) {
+			super(resultLists);
+		}
+
+	}
+
+	public Result getResultFromMemory() {
+		if (s.getTransactionExecutionResultBuffer() == null) {
+			throw new RuntimeResultStorageNotActivatedException(
+					"In memory storage of results was not activated for this execution. "
+							+ "The results are by default written to the configured logger appender");
+
+		}
+		List<TransactionExecutionResult> list = s.getTransactionExecutionResultBuffer().swap();
+		Map<String, List<TransactionExecutionResult>> map = TransactionExecutionResult.getResultListAsMap(list);
+		Result r = new ResultFromMemory(map);
+		return r;
 	}
 
 }

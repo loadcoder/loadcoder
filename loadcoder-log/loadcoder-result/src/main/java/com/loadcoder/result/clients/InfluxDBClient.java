@@ -103,7 +103,7 @@ public class InfluxDBClient extends HttpClient{
 			for (String key : transactionResults.keySet()) {
 				List<TransactionExecutionResult> list = transactionResults.get(key);
 				for (TransactionExecutionResult t : list) {
-					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getRt(), t.getTs());
+					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getValue(), t.getTs());
 					entireBody = entireBody + urlParameters + "\n";
 				}
 			}

@@ -34,24 +34,4 @@ public class DetailsSettingsTest {
 
 	Logger log = LoggerFactory.getLogger(DetailsSettingsTest.class);
 	
-	@Test
-	public void testCreateSlider(Method method){
-
-		long tickSize = 1;
-		int defaultIndex = 4;
-		long sampleLengthToUse = 5000;
-		
-		SteppingSlider s;
-		ResultChartLogic chartLogic = Mockito.mock(ResultChartLogic.class);
-		
-		DetailsSettings settings = new DetailsSettings(chartLogic);
-		s = settings.createSlider(chartLogic, sampleLengthToUse, (int)tickSize, defaultIndex);
-		
-		printArray(s.getValues());
-		Assert.assertTrue(Arrays.asList(s.getValues()).contains((int)(sampleLengthToUse / 1000)));
-	}	
-	
-	private void printArray(Integer[] ints){
-		log.info(Arrays.asList(ints).toString());
-	}
 }

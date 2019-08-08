@@ -24,6 +24,9 @@ import static com.loadcoder.statics.Time.HOUR;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,8 +34,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartTheme;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItem;
+import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.entity.LegendItemEntity;
+import org.jfree.chart.entity.PlotEntity;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.urls.StandardXYURLGenerator;
+import org.jfree.chart.util.ParamChecks;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RefineryUtilities;
 
 import com.loadcoder.load.chart.common.CommonSample;
 import com.loadcoder.load.chart.common.CommonSampleGroup;
@@ -44,6 +71,9 @@ import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.jfreechart.ChartFrame;
+import com.loadcoder.load.chart.jfreechart.ChartPanelExtension;
+import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
@@ -54,6 +84,7 @@ import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.ColorUtils;
 import com.loadcoder.load.chart.utilities.SampleStatics;
+import com.loadcoder.load.jfreechartfixes.DateAxisExtension;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.TransactionExecutionResult;
 
@@ -81,7 +112,7 @@ public abstract class ChartLogic {
 
 	protected final XYLineAndShapeRendererExtention renderer;
 
-	protected final Map<String, Boolean> seriesVisible;
+	protected final Map<String, Boolean> seriesVisible = new HashMap<String, Boolean>();
 
 	protected final List<YCalculator> yCalculators = new ArrayList<YCalculator>();
 
@@ -108,6 +139,84 @@ public abstract class ChartLogic {
 
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
+	JPanel panelForButtons;
+	private JMenuBar menuBar = new JMenuBar(); // Window menu bar
+
+	/** The chart theme. */
+	private static final ChartTheme currentTheme = new StandardChartTheme("JFree");
+
+	final JFreeChart chart;
+	final ChartPanel chartPanel;
+
+	public ChartPanel getChartPanel() {
+		return chartPanel;
+	}
+
+	public JFreeChart getChart() {
+		return chart;
+	}
+
+	public ChartLogic(CommonSeries[] commonSeries, boolean locked) {
+		this.locked = locked;
+		this.seriesCollection = new XYSeriesCollectionExtention();
+
+		Map<String, Color> existingColors = new HashMap<String, Color>();
+		renderer = new LoadcoderRenderer(true, false, seriesCollection, existingColors);
+
+		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
+		this.existingColors = existingColors;
+		for (CommonSeries s : commonsToBeUsed) {
+			existingColors.put(s.getName(), s.getColor());
+		}
+
+		plot = RuntimeChartLogic.createXYPlotExtension("y", "x", seriesCollection, renderer);
+
+		chart = createXYLineChart(null, true, true, false, plot);
+
+		// using this constructor in order to get rid of jcharts right click popup menu
+		chartPanel = new ChartPanelExtension(chart, ChartPanel.DEFAULT_WIDTH, ChartPanel.DEFAULT_HEIGHT,
+				ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT,
+				ChartPanel.DEFAULT_MAXIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MAXIMUM_DRAW_HEIGHT,
+				ChartPanel.DEFAULT_BUFFER_USED, false, false, false, false, false, false);
+		initCommonSeries();
+
+		yCalculators.add(avg);
+		yCalculators.add(max);
+
+		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
+			blacklistColors.add(blackListed);
+		});
+	}
+
+	public static JFreeChart createXYLineChart(String title, boolean legend, boolean tooltips, boolean urls,
+			XYPlot plot) {
+
+		XYItemRenderer renderer = plot.getRenderer();
+		if (tooltips) {
+			renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+		}
+		if (urls) {
+			renderer.setURLGenerator(new StandardXYURLGenerator());
+		}
+
+		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+		currentTheme.apply(chart);
+		return chart;
+	}
+
+	public static XYPlotExtension createXYPlotExtension(String yAxisLabel, String xAxisLabel, XYDataset dataset,
+			XYLineAndShapeRendererExtention renderer) {
+		NumberAxis yAxis = new NumberAxis(yAxisLabel);
+		NumberAxis xAxis = new NumberAxis(xAxisLabel);
+		xAxis.setAutoRangeIncludesZero(false);
+		XYPlotExtension plot = new XYPlotExtension(dataset, xAxis, yAxis, renderer);
+
+		plot.setRenderer(renderer);
+		plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);
+		return plot;
+	}
+
 	protected List<String> getSeriesKeys() {
 		return seriesKeys;
 	}
@@ -131,7 +240,7 @@ public abstract class ChartLogic {
 		return yCalculatorToUse;
 	}
 
-	protected XYSeriesCollectionExtention getSeriesCollection() {
+	public XYSeriesCollectionExtention getSeriesCollection() {
 		return seriesCollection;
 	}
 
@@ -142,10 +251,6 @@ public abstract class ChartLogic {
 	public XYPlotExtension getPlot() {
 		return plot;
 	}
-
-//	protected List<XYSeriesExtension> getCommonSeries() {
-//		return commonSeries;
-//	}
 
 	protected long getXDiff() {
 		if (earliestX == null)
@@ -205,27 +310,111 @@ public abstract class ChartLogic {
 		}
 	}
 
-	public ChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, CommonSeries[] commonSeries,
-			boolean locked, Map<String, Color> existingColors) {
-		this.locked = locked;
-		this.seriesCollection = seriesCollection;
-		this.plot = plot;
-		this.renderer = renderer;
-		this.seriesVisible = seriesVisible;
-		this.commonsToBeUsed = commonSeries == null ? CommonSeries.values() : commonSeries;
-		this.existingColors = existingColors;
-		for (CommonSeries s : commonsToBeUsed) {
-			existingColors.put(s.getName(), s.getColor());
-		}
+	public void initCommonSeries() {
+		createCommons();
+		addAllCommonSeriesToTheChart();
+	}
 
-		yCalculators.add(avg);
-		yCalculators.add(max);
+	public void initiateChart() {
 
-		ColorUtils.defaultBlacklistColors.stream().forEach((blackListed) -> {
-			blacklistColors.add(blackListed);
+		PlotOrientation orientation = PlotOrientation.VERTICAL;
+		ParamChecks.nullNotPermitted(orientation, "orientation");
+		plot.setOrientation(orientation);
+
+		panelForButtons = new JPanel();
+
+		panelForButtons.setBackground(Color.WHITE);
+		panelForButtons.setLayout(new BoxLayout(panelForButtons, BoxLayout.PAGE_AXIS));
+
+		DateAxis dateAxis = new DateAxisExtension();
+
+		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		dateAxis.setDateFormatOverride(format);
+
+		plot.setDomainAxis(dateAxis);
+
+		getChartPanel().addChartMouseListener(new ChartMouseListener() {
+
+			public void chartMouseClicked(ChartMouseEvent e) {
+				int button = e.getTrigger().getButton();
+				Object entity = e.getEntity();
+				XYSeriesCollectionExtention collection = (XYSeriesCollectionExtention) plot.getDataset();
+				handleClick(button, entity, collection);
+			}
+
+			public void chartMouseMoved(ChartMouseEvent e) {
+			}
+
 		});
-//		populateColorArray();
+
+		getChartPanel().setPreferredSize(new java.awt.Dimension(500, 270));
+		getChartPanel().setZoomAroundAnchor(true);
+		panelForButtons.add(getChartPanel());
+
+		panelForButtons.addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				scrolling(e);
+				plot.panDomainAxes(30, null, null);
+			}
+		});
+
+		plot.setDomainGridlinePaint(Color.BLACK);
+		plot.setRangeGridlinePaint(Color.BLACK);
+		plot.setBackgroundPaint(Color.WHITE);
+	}
+
+	public JMenuBar getMenu() {
+		return menuBar;
+	}
+
+	public void scrolling(MouseWheelEvent e) {
+
+		if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL)
+			return;
+		if (e.getWheelRotation() < 0)
+			increaseZoom(getChartPanel(), true);
+		else
+			decreaseZoom(getChartPanel(), true);
+	}
+
+	private void zoomChartAxis(ChartPanel chartP, boolean increase) {
+		int width = chartP.getMaximumDrawWidth() - chartP.getMinimumDrawWidth();
+		int height = chartP.getMaximumDrawHeight() - chartP.getMinimumDrawWidth();
+		if (increase) {
+			chartP.zoomInBoth(width / 2, height / 2);
+		} else {
+			chartP.zoomOutBoth(width / 2, height / 2);
+		}
+	}
+
+	public void increaseZoom(JComponent chart, boolean saveAction) {
+		synchronized (plot) {
+			ChartPanel ch = (ChartPanel) chart;
+			zoomChartAxis(ch, true);
+		}
+	}
+
+	public void decreaseZoom(JComponent chart, boolean saveAction) {
+		synchronized (plot) {
+			ChartPanel ch = (ChartPanel) chart;
+			zoomChartAxis(ch, false);
+		}
+	}
+
+	public void setVisibility(XYSeriesExtension clickedSeries, int iterator, LegendItem legend, boolean visible) {
+
+		if (clickedSeries instanceof XYDottedSeriesExtension) {
+			renderer.setSeriesShapesVisible(iterator, visible);
+		} else {
+			renderer.setSeriesLinesVisible(iterator, visible);
+		}
+		seriesVisible.put(clickedSeries.getKey(), visible);
+		clickedSeries.setVisible(visible);
+		legend.setShapeVisible(visible);
 	}
 
 	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart,
@@ -273,11 +462,93 @@ public abstract class ChartLogic {
 		}
 	}
 
+	public static final int MOUSE_LEFT_CLICK_CODE = 1;
+
+	public void handleClick(int button, Object clickedObject, XYSeriesCollectionExtention serieses) {
+
+		synchronized (plot) {
+			if (clickedObject instanceof PlotEntity || clickedObject instanceof LegendItemEntity) {
+				chart.setNotify(false);
+
+				if (clickedObject instanceof PlotEntity) {
+					if (button == MOUSE_LEFT_CLICK_CODE) {
+					} else {
+						chartPanel.restoreAutoBounds();
+					}
+				}
+				// else is clicked on a legend
+				else if (clickedObject instanceof LegendItemEntity) {
+					LegendItemEntity legendItemEntity = (LegendItemEntity) clickedObject;
+					Comparable pushedLegend = legendItemEntity.getSeriesKey();
+					List<XYSeriesExtension> lista = serieses.getSeries();
+					int iterator = 0;
+					XYSeriesExtension clickedSeries = null;
+
+					for (XYSeriesExtension xy : lista) {
+						String c = xy.getKey();
+						if (pushedLegend.compareTo(c) == 0) {
+							clickedSeries = xy;
+							break;
+						}
+						iterator++;
+					}
+
+					LegendItem clickedLegend = clickedSeries.getLegend();
+					if (button == MOUSE_LEFT_CLICK_CODE) {
+						boolean visible = !clickedSeries.isVisible();
+
+						setVisibility(clickedSeries, iterator, clickedLegend, visible);
+					} else {
+						int legendIndexIterator = 0;
+						if (clickedSeries.isVisible()) {
+							boolean isAllSeriesVisible = true;
+							for (XYSeriesExtension xy : lista) {
+								if (!xy.isVisible()) {
+									isAllSeriesVisible = false;
+								}
+							}
+
+							if (isAllSeriesVisible) {
+								disableAllLegendsExceptOne(clickedSeries, lista);
+							} else {
+
+								for (XYSeriesExtension xy : lista) {
+									LegendItem legend = xy.getLegend();
+									boolean visible = true;
+									setVisibility(xy, legendIndexIterator, legend, visible);
+									legendIndexIterator++;
+								}
+							}
+
+						} else {
+							disableAllLegendsExceptOne(clickedSeries, lista);
+						}
+					}
+				}
+				chart.setNotify(true);
+				serieses.fireChange();
+
+			}
+		}
+
+	}
+
+	private void disableAllLegendsExceptOne(XYSeriesExtension clickedSeries, List<XYSeriesExtension> lista) {
+		int legendIndexIterator = 0;
+		for (XYSeriesExtension xy : lista) {
+			LegendItem legend = xy.getLegend();
+			boolean visible = false;
+			if (xy.equals(clickedSeries)) {
+				visible = true;
+			}
+			setVisibility(xy, legendIndexIterator, legend, visible);
+			legendIndexIterator++;
+		}
+	}
+
 	public void createCommons() {
 
-//		commonSeries = new ArrayList<XYSeriesExtension>();
 		commonSeriesCalculators.clear();
-//		commonSeries.clear();
 		seriesCommonMap.clear();
 
 		Arrays.stream(commonsToBeUsed).forEach((common) -> {
@@ -348,16 +619,13 @@ public abstract class ChartLogic {
 					sampleGroupCommonList.add(commonSampleGroup);
 				}
 
-				CommonSample cs = commonSampleGroup.getAndCreateSample(l, commonKey, r.getSampleLength());
+				CommonSample cs = commonSampleGroup.getAndCreateSampleAndPutInMap(l, r.getSampleLength());
 
 				long longAmount = Sample.amountToYValue(amount);
 				cs.setY(longAmount);
 				if (cs.getFirst() == null) {
 					cs.initDataItems();
 					series.add(cs.getFirst(), false);
-					if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-						series.add(cs.getLast(), false);
-					}
 				} else {
 					cs.updateDataItems();
 				}
@@ -410,7 +678,6 @@ public abstract class ChartLogic {
 	}
 
 	void addPoints(List<DataSet> dataSets, Map<String, SampleGroup> sampleGroups, Set<Long> sampleTimestamps) {
-		long start = System.currentTimeMillis();
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 			SampleGroup sampleGroup = sampleGroups.get(dataSetName);
@@ -507,30 +774,22 @@ public abstract class ChartLogic {
 		return null;
 	}
 
-//	void populateColorArray() {
-//		if (customizedColors != null) {
-//			Iterator<Entry<String, Color>> i = customizedColors.entrySet().iterator();
-//			while (i.hasNext()) {
-//				Entry<String, Color> e = i.next();
-//				existingColors.add(e.getValue());
-//			}
-//		}
-//		for (CommonSeries commonSerie : commonsToBeUsed) {
-//			Color c = commonSerie.getColor();
-//			existingColors.add(c);
-//		}
-//	}
+	public int getTotalSize() {
+		List l = seriesCollection.getSeries();
+		int totalSize = 0;
+		for (Object o : l) {
+			XYSeriesExtension series = (XYSeriesExtension) o;
+			int seriesSize = series.getItemCount();
+			totalSize = totalSize + seriesSize;
+		}
+		return totalSize;
+	}
 
 	public synchronized Color getNewColor(String seriesKey) {
 
-//		if (customizedColors != null) {
-//			Color color = customizedColors.get(seriesKey);
-//			return color;
-//		}
 		Set<Color> set = new HashSet<Color>(existingColors.values());
 		Color newColor = ColorUtils.getNewContrastfulColor(set, blacklistColors);
 		existingColors.put(seriesKey, newColor);
-//		existingColors.add(newColor);
 		return newColor;
 	}
 

@@ -36,9 +36,6 @@ public class ChartUtils {
 			// create the points
 			sample.initDataItems();
 			series.add(sample.getFirst(), false);
-			if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-				series.add(sample.getLast(), false);
-			}
 		} else {
 			sample.updateDataItems();
 		}
@@ -135,20 +132,4 @@ public class ChartUtils {
 		return rounded;
 	}
 
-	public static int calculateSampleLengthSliderMax(long initialSampleLength) {
-		int result = 0;
-		long maxMillis = (long) ((double) initialSampleLength * 2);
-		int amountOf10Sec = (int) (maxMillis / 10_000);
-
-		long diff = (amountOf10Sec + 1) * 10_000 - maxMillis;
-
-		if (diff > 2_000) {
-			result = (amountOf10Sec + 1) * 10;
-		} else {
-			result = (amountOf10Sec + 2) * 10;
-			;
-		}
-
-		return result;
-	}
 }

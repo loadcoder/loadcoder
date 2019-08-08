@@ -18,7 +18,11 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import java.awt.Color;
+import static com.loadcoder.statics.Time.MINUTE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,16 +30,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataItem;
-import static org.testng.Assert.*;
+import org.jfree.data.xy.XYSeries;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.data.Range;
-import com.loadcoder.load.chart.jfreechart.ChartFrame;
-import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
-import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
@@ -45,10 +46,6 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeChartLogicTest extends TestNGBase {
 
-	XYSeriesCollectionExtention collection;
-	LoadcoderRenderer renderer;
-
-	Map<String, Boolean> map;
 	XYPlotExtension plot;
 	RuntimeChartLogic logic;
 
@@ -56,7 +53,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		Map<String, List<TransactionExecutionResult>> listOfListOfList = new HashMap<String, List<TransactionExecutionResult>>();
 		for (TransactionExecutionResult point : points) {
 			List<TransactionExecutionResult> transactions = listOfListOfList.get(point.getName());
-			if(transactions == null) {
+			if (transactions == null) {
 				transactions = new ArrayList<TransactionExecutionResult>();
 				listOfListOfList.put(point.getName(), transactions);
 			}
@@ -67,13 +64,8 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 	@BeforeMethod
 	public void setup() {
-		Map<String, Color> existingColors = new HashMap<String, Color>();
-		
-		collection = new XYSeriesCollectionExtention();
-		renderer = new LoadcoderRenderer(true, false, collection, existingColors);
-		map = new HashMap<String, Boolean>();
-		plot = ChartFrame.createXYPlotExtension("y", "x", collection, renderer);
-		logic = new RuntimeChartLogic(collection, plot, renderer, map, CommonSeries.values(), false, existingColors);
+
+		logic = new RuntimeChartLogic(CommonSeries.values(), false);
 	}
 
 	@Test
@@ -93,7 +85,6 @@ public class RuntimeChartLogicTest extends TestNGBase {
 			if (commonSeries.getKey().equals(CommonSeries.THROUGHPUT.getName())) {
 			}
 		}
-		collection.getSeries("foo");
 
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
@@ -178,10 +169,11 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		assertEquals(a, b); // assert concaternation
 		assertEquals(10, b.getY());
 	}
-	
+
 	/**
-	 * Tests that the runtime functionality works even though all transaction types are'nt represented
-	 * in all batches of incoming data. Test will fail if exception is thrown
+	 * Tests that the runtime functionality works even though all transaction types
+	 * are'nt represented in all batches of incoming data. Test will fail if
+	 * exception is thrown
 	 */
 	@Test
 	public void testDifferntAmountsAndTypesOfTransactions() {
@@ -193,11 +185,10 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.update(listOfListOfList, new HashSet<Long>());
 
 		listOfListOfList = getNewListsOfLists(
-				new TransactionExecutionResult(transactionKey +"2", startTs, 10, true, null));
+				new TransactionExecutionResult(transactionKey + "2", startTs, 10, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>());
 
 	}
-	
 
 	@Test
 	public void testRuntimeChartUnorderedData() {
@@ -239,6 +230,50 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		Sample shouldNotHaveBeenConcatedA = sampleGroup.getExistingSample(-3000, 1000);
 		Sample shouldNotHaveBeenConcatedB = sampleGroup.getExistingSample(-1001, 1000);
 		assertFalse(shouldNotHaveBeenConcatedA.equals(shouldNotHaveBeenConcatedB));
+	}
+
+	@Test
+	public void testRuntimeLogic() {
+
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+
+		long lastMillisAfterStartWithinFirstSampleSecond = 999;
+		long start = System.currentTimeMillis();
+		map.put("a", new ArrayList<TransactionExecutionResult>());
+		map.get("a").add(new TransactionExecutionResult(start, 10, true, null));
+		map.get("a").add(
+				new TransactionExecutionResult(start + lastMillisAfterStartWithinFirstSampleSecond, 20, true, null));
+
+		long lastMillisAfterStartWithinFirstConcatenatedSample = 3999;
+		map.get("a").add(new TransactionExecutionResult(start + lastMillisAfterStartWithinFirstConcatenatedSample, 60,
+				true, null));
+		long longEnoughAfterStartInOrderForTheFirstConcatenatorToBeStarted = 3 * MINUTE;
+
+		map.get("a").add(new TransactionExecutionResult(
+				start + longEnoughAfterStartInOrderForTheFirstConcatenatorToBeStarted, 40, true, null));
+
+		logic.useData(map);
+		XYSeries throughput = logic.getSeriesCollection().getSeries(0);
+		XYSeries fails = logic.getSeriesCollection().getSeries(1);
+		XYSeriesExtension c = (XYSeriesExtension) logic.getSeriesCollection().getSeries(2);
+		XYDataItem firstPoint = c.getDataItem(0);
+		assertEquals(firstPoint.getY().longValue(), 15L);
+
+		XYDataItem firstThroughputPoint = throughput.getDataItem(0);
+		assertEquals(firstThroughputPoint.getY().longValue(), 2L);
+
+		map.get("a").clear();
+
+		logic.useData(map);
+		map.get("a").add(new TransactionExecutionResult(start + lastMillisAfterStartWithinFirstConcatenatedSample + 2,
+				40, true, null));
+
+		XYDataItem concatenatedThroughputPoint = throughput.getDataItem(0);
+		assertEquals(concatenatedThroughputPoint.getY().longValue(), 1L);
+
+		XYDataItem concatenatedPoint = c.getDataItem(0);
+		assertEquals(concatenatedPoint.getY().longValue(), 30L);
+
 	}
 
 }

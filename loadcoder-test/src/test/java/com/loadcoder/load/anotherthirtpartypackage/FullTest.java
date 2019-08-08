@@ -18,18 +18,22 @@
  ******************************************************************************/
 package com.loadcoder.load.anotherthirtpartypackage;
 
+import static com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.StopDesisions.duration;
+import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
+import static com.loadcoder.statics.ThrottleMode.SHARED;
 import static com.loadcoder.statics.Time.PER_MINUTE;
 import static com.loadcoder.statics.Time.PER_SECOND;
 import static com.loadcoder.statics.Time.SECOND;
-import static com.loadcoder.statics.ThrottleMode.*;
-import static com.loadcoder.statics.Formatter.*;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,7 @@ import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.GrafanaClient;
 import com.loadcoder.result.clients.InfluxDBClient;
 import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
@@ -83,13 +88,11 @@ public class FullTest extends TestNGBase {
 		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
 		InfluxDBTestExecution exe = influxClient.createTestExecution();
 		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authenticationValue);
-		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND))
-				.rampup(6 * SECOND)
+		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND)).rampup(6 * SECOND)
 				.throttle(3, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(20).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l)
-				.runtimeResultUser((result) -> exe.writeTransactions(result)).build().execute()
-				.andWait();
+				.storeAndConsumeResultRuntime((result) -> exe.writeTransactions(result)).build().execute().andWait();
 		Result result = finished.getReportedResultFromResultFile();
 		grafanaClient.createNewDashboardFromResult(method.getName(), result);
 	}
@@ -97,7 +100,7 @@ public class FullTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void create(Method method) {
 
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+//		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
 		LoadScenario s = new LoadScenario() {
 
@@ -116,7 +119,7 @@ public class FullTest extends TestNGBase {
 					// setters
 					a.changeTransactionName("newTransactionName");
 					a.setStatus(false);
-					a.reportTransaction(true);
+					a.setReportTransaction(true);
 					a.setMessage("message for the report");
 				}).perform();
 
@@ -129,7 +132,7 @@ public class FullTest extends TestNGBase {
 						// setters
 						a.changeTransactionName("newTransactionName");
 						a.setStatus(false);
-						a.reportTransaction(true);
+						a.setReportTransaction(true);
 						a.setMessage("message for the report");
 					}).perform();
 			}
@@ -146,22 +149,11 @@ public class FullTest extends TestNGBase {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 		List<?> list = new ArrayList<Exception>();
 
-		ThreadLocal<Exception> threadLocal = new ThreadLocal<Exception>();
 		LoadScenario s = new LoadScenario() {
-
-			@Override
-			public void pre() {
-				threadLocal.set(new Exception());
-			}
-
-			@Override
-			public void post() {
-			}
 
 			@Override
 			public void loadScenario() {
 
-				threadLocal.get();
 				load("t1", () -> {
 					return new NullPointerException();
 				}).handleResult((a) -> {
@@ -173,7 +165,7 @@ public class FullTest extends TestNGBase {
 					// setters
 					a.changeTransactionName("newTransactionName");
 					a.setStatus(false);
-					a.reportTransaction(true);
+					a.setReportTransaction(true);
 					a.setMessage("message for the report");
 				}).perform();
 
@@ -186,7 +178,7 @@ public class FullTest extends TestNGBase {
 						// setters
 						a.changeTransactionName("newTransactionName");
 						a.setStatus(false);
-						a.reportTransaction(true);
+						a.setReportTransaction(true);
 						a.setMessage("message for the report");
 					}).perform();
 			}
@@ -211,7 +203,32 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).build();
 
-		new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
+	}
+
+	@Test(groups = "manual")
+	public void testPeakMethod(Method method) {
+
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+
+		RuntimeChart chart = new RuntimeChart();
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+				load("t2", () -> {
+					LoadUtility.sleep(LoadUtility.random(50, 70));
+				}).peak(15, 0.03).perform();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
+				.throttle(2, PER_SECOND, SHARED).build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
+
+		chart.waitUntilClosed();
 	}
 
 	@Test(groups = "manual")
@@ -238,13 +255,15 @@ public class FullTest extends TestNGBase {
 			public void loadScenario() {
 				load("fast", () -> {
 				}).perform();
+				load("fast", () -> "").perform();
 			}
 		};
 
 		RuntimeChart chart = new RuntimeChart();
 		Load l = new LoadBuilder(ls).stopDecision(duration(20 * SECOND)).amountOfThreads(1).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
 
 		SummaryUtils.printSimpleSummary(finished.getReportedResultFromResultFile(), method.getName());
 
@@ -272,7 +291,8 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, PER_THREAD).stopDecision(duration(20 * SECOND))
 				.amountOfThreads(10).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
 
 		SummaryUtils.printSimpleSummary(finished.getReportedResultFromResultFile(), method.getName());
 
@@ -288,7 +308,7 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t1", () -> {
-					LoadUtility.sleep(TestUtility.random(10, 20));
+					LoadUtility.sleep(LoadUtility.random(10, 20));
 				}).perform();
 			}
 		};
@@ -299,7 +319,7 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
-					LoadUtility.sleep(TestUtility.random(30, 40));
+					LoadUtility.sleep(LoadUtility.random(30, 40));
 				}).perform();
 			}
 		};
@@ -308,7 +328,8 @@ public class FullTest extends TestNGBase {
 
 		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l, l2).runtimeResultUser(chart).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
 		chart.waitUntilClosed();
 
 	}
@@ -322,14 +343,15 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
-					LoadUtility.sleep(TestUtility.random(300, 400));
+					LoadUtility.sleep(LoadUtility.random(300, 400));
 				}).perform();
 			}
 		};
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
 
 		chart.waitUntilClosed();
 
@@ -344,16 +366,38 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
-					LoadUtility.sleep(TestUtility.random(2, 10));
+					LoadUtility.sleep(LoadUtility.random(2, 10));
 				}).perform();
 			}
 		};
 
 		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000)).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(chart).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+				.andWait();
 
 		chart.waitUntilClosed();
+
+	}
+
+	@Test(groups = "manual")
+	public void testLowIntensity(Method method) {
+		LoadScenario ls = new LoadScenario() {
+			SUT sut = new SUT();
+
+			@Override
+			public void loadScenario() {
+				load("t2", () -> {
+					LoadUtility.sleep(LoadUtility.random(1000, 15_000));
+				}).perform();
+			}
+		};
+
+		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
+				.build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
+				.execute().andWait();
 
 	}
 
@@ -372,8 +416,8 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).amountOfThreads(2).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute()
-				.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
+				.execute().andWait();
 
 	}
 
@@ -401,7 +445,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).throttle(2, PER_MINUTE, SHARED).stopDecision(duration(60_000)).build();
 
-		new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -438,10 +482,11 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(20 * SECOND)).amountOfThreads(10).rampup(10 * SECOND).build();
+		Load l = new LoadBuilder(s).stopDecision(duration(900 * SECOND)).amountOfThreads(10).rampup(10 * SECOND)
+				.build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(runtimeChart).build().execute()
-				.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
+				.execute().andWait();
 
 		Result result = finished.getReportedResultFromResultFile();
 		ResultChart resultChart = new ResultChart(result);
@@ -465,21 +510,21 @@ public class FullTest extends TestNGBase {
 
 				long mod = 0;
 
-				if (TestUtility.random(0, 100) == 1) {
+				if (LoadUtility.random(0, 100) == 1) {
 					modder = true;
 				}
-				if (TestUtility.random(0, 40) == 1) {
+				if (LoadUtility.random(0, 40) == 1) {
 					modder = false;
 				}
 
 				if (modder)
-					while (TestUtility.random(1, 2) == 1)
-						mod = mod + TestUtility.random(rt, rt * 2);
+					while (LoadUtility.random(1, 2) == 1)
+						mod = mod + LoadUtility.random(rt, rt * 2);
 
 				long modifier = mod;
 
 				load("t1", () -> {
-					LoadUtility.sleep(TestUtility.random(rt, rt + 4) + modifier);
+					LoadUtility.sleep(LoadUtility.random(rt, rt + 4) + modifier);
 				}).handleResult((a) -> {
 				}).perform();
 			}
@@ -488,10 +533,10 @@ public class FullTest extends TestNGBase {
 		RuntimeChart runtimeChart = new RuntimeChart();
 		Load l = new LoadBuilder(s).stopDecision(duration(120 * SECOND)).amountOfThreads(10).rampup(5 * SECOND).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(runtimeChart).build().execute()
-				.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
+				.execute().andWait();
 
-		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart())
+		Execution execution = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart())
 				.resultFormatter(SIMPLE_RESULT_FORMATTER).build();
 
 		Result result = finished.getReportedResultFromResultFile();
@@ -523,8 +568,8 @@ public class FullTest extends TestNGBase {
 		};
 		Load l = new LoadBuilder(s).stopDecision(duration(30_000)).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build().execute()
-				.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
+				.execute().andWait();
 
 		Result result = finished.getReportedResultFromResultFile();
 
@@ -549,4 +594,16 @@ public class FullTest extends TestNGBase {
 		c.waitUntilClosed();
 	}
 
+	@Test(groups = "manual")
+	public void resultChartAndRuntimeChartWithConstructedData() {
+		Result r = new Result(new File("src/test/resources/testresults/result15min.log"));
+		Chart c = new ResultChart(r);
+
+		RuntimeChart runtimeChart = new RuntimeChart();
+		runtimeChart.useData(r.getResultLists());
+		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
+		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
+
+		runtimeChart.waitUntilClosed();
+	}
 }

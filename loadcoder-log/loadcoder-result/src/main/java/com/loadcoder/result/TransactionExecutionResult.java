@@ -27,7 +27,7 @@ public class TransactionExecutionResult {
 
 	private final String name;
 	private final long ts;
-	private final long rt;
+	private final long val;
 	private final boolean status;
 	private final String message;
 	private final String threadId;
@@ -37,7 +37,7 @@ public class TransactionExecutionResult {
 	}
 
 	public String toString() {
-		return String.format("name:%s, ts:%s, rt:%s)", name, ts, rt);
+		return String.format("name:%s, ts:%s, val:%s)", name, ts, val);
 	}
 
 	public TransactionExecutionResult(long ts, long rt, boolean status, String message) {
@@ -48,11 +48,11 @@ public class TransactionExecutionResult {
 		this(name, ts, rt, status, message, Thread.currentThread().getName());
 	}
 
-	public TransactionExecutionResult(String name, long ts, long rt, boolean status, String message, String threadId) {
+	public TransactionExecutionResult(String name, long ts, long val, boolean status, String message, String threadId) {
 
 		this.name = name;
 		this.ts = ts;
-		this.rt = rt;
+		this.val = val;
 		this.status = status;
 		this.message = message;
 		this.threadId = threadId;
@@ -62,7 +62,6 @@ public class TransactionExecutionResult {
 		return name;
 	}
 
-	
 	/**
 	 * @return the timestamp for when the transaction was executed (started)
 	 */
@@ -73,8 +72,8 @@ public class TransactionExecutionResult {
 	/**
 	 * @return the execution time of the transaction
 	 */
-	public long getRt() {
-		return rt;
+	public long getValue() {
+		return val;
 	}
 
 	/**
@@ -96,5 +95,27 @@ public class TransactionExecutionResult {
 	 */
 	public String getThreadId() {
 		return threadId;
+	}
+
+	/**
+	 * Creates and returns a new Map with the TransactionExecutionResult grouped in
+	 * Lists with the transaction id as key
+	 * 
+	 * @param filledBucket
+	 * @return the new Map
+	 */
+	public static Map<String, List<TransactionExecutionResult>> getResultListAsMap(
+			List<TransactionExecutionResult> filledBucket) {
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+		for (TransactionExecutionResult transactionExecutionResult : filledBucket) {
+			String name = transactionExecutionResult.getName();
+			List<TransactionExecutionResult> listToAddTo = map.get(name);
+			if (listToAddTo == null) {
+				listToAddTo = new ArrayList<TransactionExecutionResult>();
+				map.put(name, listToAddTo);
+			}
+			listToAddTo.add(transactionExecutionResult);
+		}
+		return map;
 	}
 }

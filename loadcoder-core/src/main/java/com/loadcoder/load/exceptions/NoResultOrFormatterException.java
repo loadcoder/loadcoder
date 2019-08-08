@@ -18,11 +18,15 @@
  ******************************************************************************/
 package com.loadcoder.load.exceptions;
 
-public class NoResultOrFormatterException extends RuntimeException{
+public class NoResultOrFormatterException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public NoResultOrFormatterException(String message){
+	public NoResultOrFormatterException(String message) {
 		super(message);
+	}
+
+	public NoResultOrFormatterException(String message, Exception cause) {
+		super(message, cause);
 	}
 }

@@ -47,143 +47,139 @@ import org.jfree.ui.RefineryUtilities;
 
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 
-public class ApplicationFrameTest extends ApplicationFrame{
+public class ApplicationFrameTest extends ApplicationFrame {
 
 	private static final long serialVersionUID = 1L;
 
 	XYSeriesCollection data;
-	long firstTs =0;
+	long firstTs = 0;
 
-	long minutIterator =1;
+	long minutIterator = 1;
 
 	XYDataItemExtension test;
 
 	XYSeries firstSeries;
 	XYDataItemExtension first;
 	boolean addFirst;
-	
+
 	JFreeChart chart;
 	ChartPanel chartPanel;
 	XYPlot plot;
 	XYLineAndShapeRenderer renderer;
-	
-	static class TimeWindow{
+
+	static class TimeWindow {
 		public long getStart() {
 			return start;
 		}
+
 		public long getEnd() {
 			return end;
 		}
+
 		long start;
 		long end;
 
-		TimeWindow(long start, long end){
+		TimeWindow(long start, long end) {
 			this.start = start;
 			this.end = end;
 		}
-		boolean isTimestampWithinThisWindow(long timestamp){
-			if(timestamp > start && timestamp < end)
+
+		boolean isTimestampWithinThisWindow(long timestamp) {
+			if (timestamp > start && timestamp < end)
 				return true;
 			return false;
 		}
 	}
 
-	public ApplicationFrameTest(){
+	public ApplicationFrameTest() {
 		super("");
 	}
 
-	XYDataItem xgetDataItem(XYSeries series, long x){
+	XYDataItem xgetDataItem(XYSeries series, long x) {
 		int index = series.indexOf(x);
 		XYDataItem existing = (XYDataItem) series.getItems().get(index);
 		return existing;
 	}
 
-	public ApplicationFrameTest showChart(){
-		
+	public ApplicationFrameTest showChart() {
+
 		data = new XYSeriesCollection();
 
 		XYSeries xySeries = new XYSeries("Throughput (TPS)", true, false);
 		data.addSeries(xySeries);
 
-		Thread t = new Thread(()->{
+		Thread t = new Thread(() -> {
 			XYSeries series3 = new XYSeries("autoupdate", true, false);
 			data.addSeries(series3);
 			XYDataItem item = null;
 			XYDataItem item2 = null;
-			int i =0;
-			minutIterator =10;
-			while(true){
+			int i = 0;
+			minutIterator = 10;
+			while (true) {
 				long ts = System.currentTimeMillis();
 				XYDataItemExtension itemToAdd = new XYDataItemExtension(ts, minutIterator++);
 				series3.add(itemToAdd, true);
 				i++;
-				if(i==5){
+				if (i == 5) {
 					item = itemToAdd;
 				}
-				if(i==6){
+				if (i == 6) {
 					item2 = itemToAdd;
 				}
-				
-				if(item2 != null){
-					item.setY(minutIterator+2);
-					item2.setY(minutIterator+2);
-					
+
+				if (item2 != null) {
+					item.setY(minutIterator + 2);
+					item2.setY(minutIterator + 2);
+
 					series3.addOrUpdate(item);
 					series3.addOrUpdate(item2);
 
 				}
-				try{Thread.sleep(500);}catch(Exception e){}
+				try {
+					Thread.sleep(500);
+				} catch (Exception e) {
+				}
 			}
 		});
-						t.start();
+		t.start();
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.WHITE);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 
-		chart = ChartFactory.createXYLineChart(
-				null,
-				"X", 
-				"Y", 
-				data,
-				PlotOrientation.VERTICAL,
-				true,
-				true,
-				false
-				);
+		chart = ChartFactory.createXYLineChart(null, "X", "Y", data, PlotOrientation.VERTICAL, true, true, false);
 
 		chartPanel = new ChartPanel(chart);
 
-		plot = (XYPlot)chart.getPlot();
-		
+		plot = (XYPlot) chart.getPlot();
+
 		DateAxis dateAxis = new DateAxis();
-		
-		dateAxis.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy")); 
+
+		dateAxis.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"));
 		plot.setDomainAxis(dateAxis);
-		
-		renderer = (XYLineAndShapeRenderer)plot.getRenderer();
+
+		renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 		chartPanel.addChartMouseListener(new ChartMouseListener() {
 
 			public void chartMouseClicked(ChartMouseEvent e) {
 				Object entity = e.getEntity();
-				if(entity instanceof LegendItemEntity){
-					LegendItemEntity legendItemEntity = (LegendItemEntity)entity;
+				if (entity instanceof LegendItemEntity) {
+					LegendItemEntity legendItemEntity = (LegendItemEntity) entity;
 					Comparable pushedLegend = legendItemEntity.getSeriesKey();
 					List<XYSeries> lista = data.getSeries();
-					int iterator =0;
-					for(XYSeries xy : lista){	
+					int iterator = 0;
+					for (XYSeries xy : lista) {
 
 						Comparable c = xy.getKey();
-						if(pushedLegend.compareTo(c) ==0){
+						if (pushedLegend.compareTo(c) == 0) {
 							break;
 						}
 						iterator++;
 					}
 					boolean currentVisibility = true;
-					try{
-						//invert the visibility
+					try {
+						// invert the visibility
 						currentVisibility = renderer.getSeriesLinesVisible(iterator) ? false : true;
-					}catch(NullPointerException exc){
-						//		        		System.out.println(exc);
+					} catch (NullPointerException exc) {
 						currentVisibility = false;
 					}
 					renderer.setSeriesLinesVisible(iterator, currentVisibility);
@@ -191,14 +187,15 @@ public class ApplicationFrameTest extends ApplicationFrame{
 				}
 			}
 
-			public void chartMouseMoved(ChartMouseEvent e) {}
+			public void chartMouseMoved(ChartMouseEvent e) {
+			}
 
 		});
 		final JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 
 		JButton button2 = new JButton("Save in Result Dir");
-		button2.addActionListener((a)->{
+		button2.addActionListener((a) -> {
 			renderer.setSeriesVisibleInLegend(0, true, true);
 			renderer.setSeriesVisibleInLegend(1, true, true);
 		});
@@ -210,7 +207,7 @@ public class ApplicationFrameTest extends ApplicationFrame{
 		panel.add(chartPanel);
 		panel.add(buttonPanel);
 
-		panel.addMouseWheelListener(new MouseWheelListener(){
+		panel.addMouseWheelListener(new MouseWheelListener() {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -230,43 +227,49 @@ public class ApplicationFrameTest extends ApplicationFrame{
 		return this;
 	}
 
-    public void scrolling(MouseWheelEvent e) {
-    	System.out.println("x:" +e.getX() + " y:" +e.getY());
-    	
-        if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL) return;
-        if (e.getWheelRotation()< 0) increaseZoom(chartPanel, true);
-        else                          decreaseZoom(chartPanel, true);
-    }
-    
-    public synchronized void increaseZoom(JComponent chart, boolean saveAction){
-        ChartPanel ch = (ChartPanel)chart;
-        zoomChartAxis(ch, true);
-    }  
-    
-    public synchronized void decreaseZoom(JComponent chart, boolean saveAction){
-        ChartPanel ch = (ChartPanel)chart;
-        zoomChartAxis(ch, false);
-    }  
-    
-    private void zoomChartAxis(ChartPanel chartP, boolean increase){              
-        int width = chartP.getMaximumDrawWidth() - chartP.getMinimumDrawWidth();
-        int height = chartP.getMaximumDrawHeight() - chartP.getMinimumDrawWidth();        
-        if(increase){
-           chartP.zoomInBoth(width/2, height/2);
-        }else{
-           chartP.zoomOutBoth(width/2, height/2);
-        }
-    }
-    
-	public void waitUntilClosed(){
-		while(isDisplayable())
-			try{Thread.sleep(1000);}catch(Exception e){}
+	public void scrolling(MouseWheelEvent e) {
+		System.out.println("x:" + e.getX() + " y:" + e.getY());
+
+		if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL)
+			return;
+		if (e.getWheelRotation() < 0)
+			increaseZoom(chartPanel, true);
+		else
+			decreaseZoom(chartPanel, true);
 	}
-	
-	public static void main(String[] args){
+
+	public synchronized void increaseZoom(JComponent chart, boolean saveAction) {
+		ChartPanel ch = (ChartPanel) chart;
+		zoomChartAxis(ch, true);
+	}
+
+	public synchronized void decreaseZoom(JComponent chart, boolean saveAction) {
+		ChartPanel ch = (ChartPanel) chart;
+		zoomChartAxis(ch, false);
+	}
+
+	private void zoomChartAxis(ChartPanel chartP, boolean increase) {
+		int width = chartP.getMaximumDrawWidth() - chartP.getMinimumDrawWidth();
+		int height = chartP.getMaximumDrawHeight() - chartP.getMinimumDrawWidth();
+		if (increase) {
+			chartP.zoomInBoth(width / 2, height / 2);
+		} else {
+			chartP.zoomOutBoth(width / 2, height / 2);
+		}
+	}
+
+	public void waitUntilClosed() {
+		while (isDisplayable())
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+			}
+	}
+
+	public static void main(String[] args) {
 		ApplicationFrameTest f = new ApplicationFrameTest();
 		f.showChart();
 		f.waitUntilClosed();
 	}
-	
+
 }

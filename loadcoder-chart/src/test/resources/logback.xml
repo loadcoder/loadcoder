@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	
-
-	<appender name="CONSOLEAPPENDER" class="ch.qos.logback.core.ConsoleAppender">
+	<!-- chart test -->
+	<appender name="CONSOLEAPPENDER"
+		class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>
-				%m%n
+				%date{HH:mm:ss.SSS} [%thread] %logger{0} - %m%n
 			</Pattern>
 		</layout>
 	</appender>

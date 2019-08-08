@@ -23,14 +23,19 @@ import static com.loadcoder.statics.Time.HOUR;
 import static com.loadcoder.statics.Time.MINUTE;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Paint;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JLabel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSlider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +51,7 @@ import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
+import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
@@ -70,6 +76,60 @@ public class ResultChartLogic extends ChartLogic {
 	private double keepFactorChosen = -1;
 
 	private JRadioButtonMenuItem pointsRadioButton;
+
+	private long newSampleLengthSelection = -1;
+
+	private SteppingSlider sampleLengthSlider;
+
+	public void setNewSampleLengthSelection(long newSampleLengthSelection) {
+		this.newSampleLengthSelection = newSampleLengthSelection;
+	}
+
+	public long getNewSampleLengthSelection() {
+		return newSampleLengthSelection;
+	}
+
+	public SteppingSlider getSteppingSlider() {
+		return sampleLengthSlider;
+	}
+
+	protected static List<Integer> getValuesForSliderAsList(long currentSampleLength, int tickPacing) {
+		int valueWith4TicksBiggerThanCurrentSampleLengthTickValue = ((int) currentSampleLength / 1000) + tickPacing * 4;
+		List<Integer> valuesList = new ArrayList<Integer>();
+		valuesList.add(1);
+		for (int i = tickPacing; i <= valueWith4TicksBiggerThanCurrentSampleLengthTickValue; i = i + tickPacing) {
+			if (!valuesList.contains(i))
+				valuesList.add(i);
+		}
+		return valuesList;
+	}
+
+	protected SteppingSlider createSlider(long initialSampleLength, int minorTickPacing, int defaultIndex) {
+
+		Dictionary<Integer, Component> labelTable = new Hashtable<Integer, Component>();
+
+		List<Integer> valuesList = getValuesForSliderAsList(initialSampleLength, minorTickPacing);
+
+		for (int i = 0; i < valuesList.size(); i++) {
+			labelTable.put(i, new JLabel("" + valuesList.get(i)));
+		}
+
+		Integer[] values = valuesList.toArray(new Integer[valuesList.size()]);
+
+		SteppingSlider slider = new SteppingSlider(values, defaultIndex);
+		slider.setLabelTable(labelTable);
+
+		slider.addChangeListener((e) -> {
+			JSlider source = (JSlider) e.getSource();
+			if (!source.getValueIsAdjusting()) {
+				int indexOfSlider = (int) source.getValue();
+
+				long newSampleLength = calculateSampleLengthWith(indexOfSlider);
+				setNewSampleLengthSelection(newSampleLength);
+			}
+		});
+		return slider;
+	}
 
 	public double getCurrentKeepFactor() {
 		if (getKeepFactorChosen() != -1) {
@@ -118,11 +178,8 @@ public class ResultChartLogic extends ChartLogic {
 		return dottedSeries;
 	}
 
-	public ResultChartLogic(XYSeriesCollectionExtention seriesCollection, XYPlotExtension plot,
-			XYLineAndShapeRendererExtention renderer, Map<String, Boolean> seriesVisible, boolean defaultDottedMode,
-			CommonSeries[] commonSeries, Map<String, Color> customizedColors, boolean locked,
-			Map<String, Color> existingColors, Result... results) {
-		super(seriesCollection, plot, renderer, seriesVisible, commonSeries, locked, existingColors);
+	public ResultChartLogic(boolean defaultDottedMode, CommonSeries[] commonSeries, boolean locked, Result... results) {
+		super(commonSeries, locked);
 
 		this.dottedMode = defaultDottedMode;
 		populateRemovalFilters();
@@ -143,6 +200,7 @@ public class ResultChartLogic extends ChartLogic {
 
 		long tickSize = calculateSliderTickSize(getFilteredData());
 		minorTickLength = (int) tickSize;
+
 		calculateSliderValueCompensation(minorTickLength);
 
 		defaultIndex = 4;
@@ -150,10 +208,12 @@ public class ResultChartLogic extends ChartLogic {
 		if (minorTickLengthInAmountOfSeconds <= 4) {
 			defaultIndex = minorTickLengthInAmountOfSeconds - 1;
 		}
+		this.sampleLengthSlider = createSlider(getSampleLengthToUse(), getMinorTickLength(), getDefaultSliderIndex());
 
 		long sampleLength = calculateSampleLengthWith(defaultIndex);
 		setSampleLengthToUse(sampleLength);
 
+		initiateChart();
 		doSafeUpdate();
 	}
 
@@ -163,7 +223,12 @@ public class ResultChartLogic extends ChartLogic {
 
 		seriesCollection.removeAllSeries();
 		ranges.clear();
+		initCommonSeries();
+		handleData(listOfListOfList, hashesGettingUpdated);
+	}
 
+	private void handleData(Map<String, List<TransactionExecutionResult>> listOfListOfList,
+			HashSet<Long> hashesGettingUpdated) {
 		earliestX = null;
 
 		FilteredData filteredData = getFilteredData();
@@ -189,9 +254,6 @@ public class ResultChartLogic extends ChartLogic {
 
 		Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
 		createSamplesGroups(seriesMap, sampleGroups);
-
-		createCommons();
-		addAllCommonSeriesToTheChart();
 
 		addSerieseToChart(seriesMap);
 
@@ -234,6 +296,7 @@ public class ResultChartLogic extends ChartLogic {
 		updateSeriesWithSamples(hashesGettingUpdated, filteredData.getDataSets(), sampleGroups, sampleTimestamps,
 				dottedMode);
 		updateCommonsWithSamples(hashesGettingUpdated, sampleGroups, samplesCommonMap, sampleGroupCommonList);
+
 	}
 
 	public long calculateSampleLengthWith(int indexOfSlider) {
@@ -264,6 +327,8 @@ public class ResultChartLogic extends ChartLogic {
 	public void chartSliderAjustment(long newSampleLength) {
 		long sampleLengthToUse = newSampleLength;
 		setSampleLengthToUse(sampleLengthToUse);
+
+		clearChart();
 		createHashesAndUpdate(true);
 	}
 
@@ -319,7 +384,9 @@ public class ResultChartLogic extends ChartLogic {
 	/**
 	 * takes the list of resultlists and generates a list of DataSets from it along
 	 * with some metadata such as min and max timestamp.
-	 * @param src the Map of lists of results that will be used to generate a FilteredData instance from
+	 * 
+	 * @param src the Map of lists of results that will be used to generate a
+	 *            FilteredData instance from
 	 * @return the generated FilteredData
 	 */
 	protected FilteredData generateDataSets(Map<String, List<TransactionExecutionResult>> src) {

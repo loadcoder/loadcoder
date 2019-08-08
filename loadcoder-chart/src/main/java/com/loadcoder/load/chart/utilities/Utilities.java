@@ -57,16 +57,17 @@ public class Utilities {
 			return dataSets;
 		for (String key : keys) {
 			List<TransactionExecutionResult> resultList = resultLists.get(key);
-			if(resultList == null) {
+			if (resultList == null) {
 				continue;
 			}
 			DataSet dataSet = new DataSet(key, new ArrayList<Point>());
 			dataSets.add(dataSet);
 			for (TransactionExecutionResult result : resultList) {
 				if (convertToRelativeTime) {
-					dataSet.getPoints().add(new Point(result.getTs() - earliestTs, result.getRt(), result.isStatus()));
+					dataSet.getPoints()
+							.add(new Point(result.getTs() - earliestTs, result.getValue(), result.isStatus()));
 				} else {
-					dataSet.getPoints().add(new Point(result.getTs(), result.getRt(), result.isStatus()));
+					dataSet.getPoints().add(new Point(result.getTs(), result.getValue(), result.isStatus()));
 				}
 			}
 		}

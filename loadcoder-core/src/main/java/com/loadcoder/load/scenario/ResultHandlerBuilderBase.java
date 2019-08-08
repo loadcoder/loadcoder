@@ -18,20 +18,53 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.RateLimiter;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.result.ResultFormatter;
+import com.loadcoder.result.ResultLogger;
+import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultHandlerBuilderBase {
 
-	protected String transactionName;
+	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	public Logger resultLogger = ResultLogger.resultLogger;
+
 	protected final TransactionExecutionResultBuffer transactionExecutionResultBuffer;
 	protected final ResultFormatter resultFormatter;
 	protected RateLimiter limiter;
-	
-	protected ResultHandlerBuilderBase( TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter, RateLimiter limiter) {
+
+	int amountToPeak = -1;
+	double chanceOfPeakOccuring = -1;
+
+	protected boolean throwIfFailed = false;
+
+	protected String thisThreadName;
+
+	final LoadThreadsSynchronizer loadThreadsSynchronizer;
+
+	protected ResultHandlerBuilderBase(TransactionExecutionResultBuffer transactionExecutionResultBuffer,
+			ResultFormatter resultFormatter, RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer) {
 		this.transactionExecutionResultBuffer = transactionExecutionResultBuffer;
 		this.resultFormatter = resultFormatter;
 		this.limiter = limiter;
+		this.loadThreadsSynchronizer = loadThreadsSynchronizer;
+	}
+
+	protected void useTransactionExecutionResult(TransactionExecutionResult transactionExecutionResult) {
+	}
+
+	protected final void bufferAndLogTransactionExecutionResult(TransactionExecutionResult transactionExecutionResult) {
+		if (transactionExecutionResultBuffer != null) {
+			transactionExecutionResultBuffer.addResult(transactionExecutionResult);
+		}
+
+		if (resultFormatter != null) {
+			String toBeLogged = resultFormatter.toString(transactionExecutionResult);
+			resultLogger.info(toBeLogged);
+		}
 	}
 }

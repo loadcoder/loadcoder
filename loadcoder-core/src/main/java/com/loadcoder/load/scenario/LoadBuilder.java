@@ -22,7 +22,6 @@ import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STIL
 
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
-import com.loadcoder.load.scenario.Load.Executable;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
@@ -31,9 +30,8 @@ public class LoadBuilder {
 	private StopDecision stopDecision;
 	private int amountOfthreads = 1;
 	private long rampupMillis;
-	private Executable preExecution;
-	private Executable postExecution;
 	private Intensity intensity;
+	private Intensity intensityIterations;
 
 	/**
 	 * Constructor for LoadBuilder
@@ -43,14 +41,7 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder(LoadScenario loadScenario) {
 		this.ls = loadScenario;
-	}
 
-	/**
-	 * Build the Load from the LoadBuilders load definition
-	 * 
-	 * @return a Load instance
-	 */
-	public Load build() {
 		Load previousLoad = ls.getLoad();
 		if (previousLoad != null) {
 			StartedLoad previouslyStartedLoad = previousLoad.getStartedLoad();
@@ -62,11 +53,21 @@ public class LoadBuilder {
 			if (previouslyStartedLoad != null && !previouslyStartedLoad.isScenarioTerminated())
 				throw new InvalidLoadStateException(PREVIOUS_LOAD_STILL_RUNNING.toString());
 		}
+	}
 
-		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, preExecution, postExecution, intensity);
+	/**
+	 * Build the Load from the LoadBuilders load definition
+	 * 
+	 * @return a Load instance
+	 */
+	public Load build() {
 
-		ls.setLoad(l);
+		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, intensity, intensityIterations);
 		return l;
+	}
+
+	protected LoadScenario getLoadScenario() {
+		return ls;
 	}
 
 	protected int getAmountOfthreads() {
@@ -109,61 +110,12 @@ public class LoadBuilder {
 		return this;
 	}
 
-	protected Executable getPreExecution() {
-		return preExecution;
-	}
-
-	protected Executable getPostExecution() {
-		return postExecution;
-	}
-
-	/**
-	 * State an action that will be done for each Thread prior to running the
-	 * thread. This is done by implementing
-	 * {@code com.loadcoder.load.scenario.Load.Executable}
-	 * 
-	 * An example of a use case for this method is if the load requires that each
-	 * Thread has it's own client, this client can be created here. In order to
-	 * reach it is the loadscenario, a mapping from the running thread to the
-	 * particular client is needed. This can be done using Java's ThreadLocal.<br>
-	 * <br>
-	 * 
-	 * {@code  ThreadLocal<MyClient> threadLocal = new ThreadLocal<>();}<br>
-	 * {@code  new LoadBuilder(loadScenario).preExecution(()->threadLocal.set(new MyClient())).build();}<br>
-	 * In the loadScenario() method, do:<br>
-	 * {@code  MyClient client = threadLocal.get();}<br>
-	 * 
-	 * @param preExecution is the pre execution implementation
-	 * @return The builder instance
-	 */
-	public LoadBuilder preExecution(Executable preExecution) {
-		this.preExecution = preExecution;
-		return this;
-	}
-
-	/**
-	 * State an action that will be done for each Thread after the thread has
-	 * finished. This is done by implementing
-	 * {@code com.loadcoder.load.scenario.Load.Executable}
-	 * 
-	 * If something thread specific was done/created in the {@code preExecution}
-	 * method, and it needs to be tore down before closing the test, that can be
-	 * done here.<br>
-	 * <br>
-	 * 
-	 * {@code  ThreadLocal<MyClient> threadLocal = new ThreadLocal<>();}<br>
-	 * {@code  new LoadBuilder(loadScenario).preExecution(()-> threadLocal.set(new MyClient())).postExecution(()-> threadLocal.get().teardown()).build();}<br>
-	 * 
-	 * @param postExecution is the post execution implementation
-	 * @return The builder instance
-	 */
-	public LoadBuilder postExecution(Executable postExecution) {
-		this.postExecution = postExecution;
-		return this;
-	}
-
 	protected long getRampup() {
 		return rampupMillis;
+	}
+
+	protected Intensity getThrottleIteration() {
+		return intensityIterations;
 	}
 
 	/**
@@ -181,9 +133,9 @@ public class LoadBuilder {
 	}
 
 	/**
-	 * The intensity of the load can be throttled (limited) by using this method. So
-	 * if the throttle is set to 5 PER_SECOND with ThrottleMode SHARED, the total
-	 * throughput wont't be over 5 TPS.<br>
+	 * The intensity of transactions to be executed can be throttled (limited) by
+	 * using this method. So if the throttle is set to 5 PER_SECOND with
+	 * ThrottleMode SHARED, the total throughput wont't be over 5 TPS.<br>
 	 * Default is no throttle.
 	 * 
 	 * 
@@ -203,6 +155,34 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder throttle(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
 		this.intensity = new Intensity(amount, perTimeUnit, throttleMode);
+		return this;
+	}
+
+	/**
+	 * 
+	 * The intensity of iterations to be executed can be throttled (limited) by
+	 * using this method. So if the throttle is set to 5 PER_SECOND with
+	 * ThrottleMode SHARED, the intensity of starting new iteration won't be over 5
+	 * per second<br>
+	 * Default is no throttle.
+	 * 
+	 * 
+	 * @param amount       of stated PerTimeUnit will be the throttle limit
+	 * @param perTimeUnit  is the unit of which to throttle limit is defined by
+	 * @param throttleMode states whether the limit should be shared (SHARED) among
+	 *                     the threads, or if the there should be a separate
+	 *                     throttle per thread (PER_THREAD) The difference between
+	 *                     these two is that if SHARED is used, the total throughput
+	 *                     won't be higher than the defined limit, no matter the
+	 *                     amount of threads. If PER_THREAD is used, the separate
+	 *                     thread can't produce a higher throughput than the limit,
+	 *                     but the total througput for all threads together will
+	 *                     theoretically be limit * amountOfThreads
+	 * 
+	 * @return the builder instance
+	 */
+	public LoadBuilder throttleIterations(int amount, TimeUnit perTimeUnit, ThrottleMode throttleMode) {
+		this.intensityIterations = new Intensity(amount, perTimeUnit, throttleMode);
 		return this;
 	}
 

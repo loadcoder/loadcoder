@@ -26,11 +26,12 @@
 		<testng>full</testng>
 		<sonar.jacoco.reportPath>${basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
 		<logback.version>1.2.3</logback.version>
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 		<testng.version>6.14.3</testng.version>
-		<mockito.version>1.9.5</mockito.version>
-		<chart-extensions.version>1.0.19</chart-extensions.version>
-		<guava.version>27.0-jre</guava.version>
+		<mockito.version>1.10.19</mockito.version>
+		<hamcrest.version>1.3</hamcrest.version>
+		<chart-extensions.version>1.0.19.1</chart-extensions.version>
+		<guava.version>28.0-jre</guava.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -107,6 +108,13 @@
 				<artifactId>mockito-all</artifactId>
 				<version>${mockito.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-all</artifactId>
+				<version>${hamcrest.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

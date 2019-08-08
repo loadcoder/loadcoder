@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.loadcoder.load.intensity.Intensity;
+import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.intensity.Throttler;
 
 public class Load {
@@ -33,10 +34,9 @@ public class Load {
 	private StopDecision stopDecision;
 	private int amountOfthreads;
 	private long rampup;
-	private Executable preExecution;
-	private Executable postExecution;
-	
+
 	private Throttler throttler;
+	private Throttler throttlerIterations;
 
 	private List<Thread> threads;
 
@@ -46,20 +46,30 @@ public class Load {
 
 	private Execution e;
 
+	LoadThreadsSynchronizer loadThreadsSynchronizer = new LoadThreadsSynchronizer();
+
+	boolean tearDownPerformed = false;
+
+	void tearDownLoad() {
+		synchronized (this) {
+			if (!tearDownPerformed) {
+				loadThreadsSynchronizer.releaseAllThreadSynchronizers();
+				tearDownPerformed = true;
+			}
+		}
+
+	}
+
+	public LoadThreadsSynchronizer getLoadThreadsSynchronizer() {
+		return loadThreadsSynchronizer;
+	}
+
 	protected Execution getExecution() {
 		return this.e;
 	}
 
 	protected void setExecution(Execution e) {
 		this.e = e;
-	}
-
-	protected Executable getPreExecution() {
-		return preExecution;
-	}
-
-	protected Executable getPostExecution() {
-		return postExecution;
 	}
 
 	private StopDecision defaultStopDecision = (a, b) -> {
@@ -74,6 +84,10 @@ public class Load {
 
 	protected Throttler getThrottler() {
 		return throttler;
+	}
+
+	protected Throttler getThrottlerIterations() {
+		return throttlerIterations;
 	}
 
 	protected long getTimesExecuted() {
@@ -104,21 +118,24 @@ public class Load {
 		return amountOfthreads;
 	}
 
-	
 	/**
 	 * Interface for defining a Transaction with return type T
-	 * @param <T> type of the Transaction, which will be the type
-	 * returned from the method transaction()
+	 * 
+	 * @param <T> type of the Transaction, which will be the type returned from the
+	 *        method transaction()
 	 */
 	@FunctionalInterface
 	public interface Transaction<T> {
-		
+
 		/**
 		 * Implementation of the Transaction with return type T
+		 * 
 		 * @return an instance of type T
-		 * @throws Exception whatever {@code java.lang.Exception} that a transaction might throw. Theses
-		 * exceptions will be caught in the the {@code ResultHandlerBuilder} and provided as a part of 
-		 * the {@code ResultModel} that comes as the parameter for the {@code handleResult} call 
+		 * @throws Exception whatever {@code java.lang.Exception} that a transaction
+		 *                   might throw. Theses exceptions will be caught in the the
+		 *                   {@code ResultHandlerBuilder} and provided as a part of the
+		 *                   {@code ResultModel} that comes as the parameter for the
+		 *                   {@code handleResult} call
 		 */
 		T transaction() throws Exception;
 	}
@@ -130,22 +147,23 @@ public class Load {
 	public interface TransactionVoid {
 		/**
 		 * Implementation of the Transaction with return type void
-		 * @throws Exception whatever {@code java.lang.Exception} that a transaction might throw. Theses
-		 * exceptions will be caught in the the {@code ResultHandlerVoidBuilder} and provided as a part of 
-		 * the {@code ResultModel} that comes as the parameter for the {@code handleResult} call 
+		 * 
+		 * @throws Exception whatever {@code java.lang.Exception} that a transaction
+		 *                   might throw. Theses exceptions will be caught in the the
+		 *                   {@code ResultHandlerVoidBuilder} and provided as a part of
+		 *                   the {@code ResultModel} that comes as the parameter for the
+		 *                   {@code handleResult} call
 		 */
 		void transaction() throws Exception;
 	}
 
-	
-	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup,
-			Executable preExecution, Executable postExecution, Intensity intensity) {
+	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup, Intensity intensity,
+			Intensity intensityIterations) {
 		this.ls = ls;
+		this.ls.setLoad(this);
 		this.stopDecision = stopDecision == null ? defaultStopDecision : stopDecision;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
-		this.preExecution = preExecution;
-		this.postExecution = postExecution;
 
 		List<Thread> temporaryThreadList = new ArrayList<Thread>();
 		for (int i = 0; i < amountOfthreads; i++) {
@@ -156,6 +174,10 @@ public class Load {
 
 		if (intensity != null) {
 			this.throttler = new Throttler(intensity, threads);
+		}
+
+		if (intensityIterations != null) {
+			this.throttlerIterations = new Throttler(intensityIterations, threads);
 		}
 	}
 

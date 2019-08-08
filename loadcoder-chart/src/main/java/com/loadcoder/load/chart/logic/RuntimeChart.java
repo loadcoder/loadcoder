@@ -29,49 +29,48 @@ import org.slf4j.LoggerFactory;
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.load.scenario.StartedLoad;
+import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeChart extends Chart implements RuntimeResultUser {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	RuntimeChartLogic logic;
-
-	CommonSeries[] commonSeries;
-
 	StartedLoad startedScenarios;
-
-	private final boolean locked = true;
 
 	public RuntimeChart() {
 		this(CommonSeries.values());
 	}
 
+	public static RuntimeChartLogic createNewRuntimeChartLogic() {
+		return new RuntimeChartLogic(CommonSeries.values(), true);
+	}
+
+	private final RuntimeChartLogic runtimeChartLogic;
+
+	protected RuntimeChartLogic getLogic() {
+		return runtimeChartLogic;
+	}
+	
 	public RuntimeChart(CommonSeries[] commonSeries) {
-		super(true, false);
-		this.commonSeries = commonSeries;
-		logic = new RuntimeChartLogic(chartFrame.getSeriesCollection(), chartFrame.getPlot(), chartFrame.getRenderer(),
-				chartFrame.getSeriesVisible(), commonSeries, locked, existingColors);
+		super(true, false, new RuntimeChartLogic(commonSeries, true));
+		runtimeChartLogic = (RuntimeChartLogic) this.logic;
 
 		JMenu settingsMenu = createSettingsMenu(logic);
 		JMenu aboutMenu = createAboutMenu();
 
-		chartFrame.getMenu().add(settingsMenu);
-		chartFrame.getMenu().add(aboutMenu);
+		chartFrame.setContentPane(runtimeChartLogic.panelForButtons);
+		chartFrame.pack();
+		chartFrame.setJMenuBar(runtimeChartLogic.getMenu());
+		runtimeChartLogic.getMenu().add(settingsMenu);
+		runtimeChartLogic.getMenu().add(aboutMenu);
 
 		chartFrame.setVisible(true);
 	}
 
 	@Override
 	public void useData(Map<String, List<TransactionExecutionResult>> transactionsMap) {
-		logic.setIncomingData(transactionsMap);
-		chartFrame.getChart().setNotify(false);
-		long start = System.currentTimeMillis();
-		logic.doSafeUpdate();
-		long diff = System.currentTimeMillis() - start;
-		logger.debug("update time: {}", diff);
-		logger.debug("Total Points in chart: {}", chartFrame.getTotalSize());
-		chartFrame.getChart().setNotify(true);
+		runtimeChartLogic.useData(transactionsMap);
 	}
 
 }
