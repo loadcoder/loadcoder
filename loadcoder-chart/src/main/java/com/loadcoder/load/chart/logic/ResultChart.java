@@ -80,6 +80,7 @@ public class ResultChart extends Chart {
 		resultChartLogic.setFilteredData(null);
 		resultChartLogic.setDottedSeries(null);
 		resultChartLogic.clearChart();
+		resultChartLogic.getCommonSeriesMap().clear();
 		logic.createCommons();
 		logic.addAllCommonSeriesToTheChart();
 		if (selected) {

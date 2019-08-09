@@ -27,12 +27,15 @@ import org.slf4j.LoggerFactory;
 import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
+import com.loadcoder.load.chart.logic.ChartLogic;
 import com.loadcoder.load.chart.sampling.Group;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
 import com.loadcoder.load.chart.utilities.SampleStatics;
 
 public class CommonSampleGroup extends Group {
 
+	Logger log = LoggerFactory.getLogger(ChartLogic.class);
+	
 	XYSeriesExtension series;
 
 	Map<Long, CommonSample> commonSamples = new HashMap<Long, CommonSample>();
@@ -57,6 +60,9 @@ public class CommonSampleGroup extends Group {
 				 */
 				if (first != null) {
 					series.remove(first.getX());
+					if(series.getKey().contains("Throughput")) {
+						log.trace("removing Throughput at x:{} y:{}", first.getX().intValue(), first.getY().intValue());
+					}
 				}
 				commonSamples.remove(toBeConcaternated.getFirstTs());
 			}

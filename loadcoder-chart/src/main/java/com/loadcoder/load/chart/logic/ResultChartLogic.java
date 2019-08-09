@@ -222,11 +222,12 @@ public class ResultChartLogic extends ChartLogic {
 			HashSet<Long> hashesGettingUpdated) {
 
 		seriesCollection.removeAllSeries();
-		ranges.clear();
+		ranges.clearRanges();
+		commonSeriesCalculators.clear();
 		initCommonSeries();
 		handleData(listOfListOfList, hashesGettingUpdated);
 	}
-
+	
 	private void handleData(Map<String, List<TransactionExecutionResult>> listOfListOfList,
 			HashSet<Long> hashesGettingUpdated) {
 		earliestX = null;
@@ -249,7 +250,7 @@ public class ResultChartLogic extends ChartLogic {
 			}
 			seriesMap = dottedSeries;
 		} else {
-			getSerieses(filteredData.getDataSets(), dottedMode, seriesMap);
+			getSerieses(filteredData.getDataSets(), seriesMap);
 		}
 
 		Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
@@ -344,6 +345,7 @@ public class ResultChartLogic extends ChartLogic {
 		setFilteredData(null);
 		setDottedSeries(null);
 		clearChart();
+		getCommonSeriesMap().clear();
 		createCommons();
 		addAllCommonSeriesToTheChart();
 		createHashesAndUpdate(false);
@@ -555,7 +557,7 @@ public class ResultChartLogic extends ChartLogic {
 	public void clearChart() {
 		commonSeriesCalculators.clear();
 		seriesCollection.removeAllSeries();
-		ranges.clear();
+		ranges.clearRanges();
 		earliestX = null;
 	}
 

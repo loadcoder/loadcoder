@@ -54,7 +54,7 @@ public class SampleConcaternator {
 		return newRange;
 	}
 
-	public void setNewRange(Range newRange) {
-		this.newRange = newRange;
-	}
+//	public void setNewRange(Range newRange) {
+//		this.newRange = newRange;
+//	}
 }

@@ -24,8 +24,6 @@ public class SampleBase {
 
 	protected XYDataItemExtension first;
 
-	protected XYDataItemExtension last;
-
 	protected long length;
 
 	protected long firstTs;
@@ -42,7 +40,6 @@ public class SampleBase {
 
 	public void updateDataItems() {
 		first.setY(y);
-		last.setY(y);
 	}
 
 	public long getFirstTs() {
@@ -68,15 +65,9 @@ public class SampleBase {
 
 	public void initDataItems() {
 		first = new XYDataItemExtension(firstTs, y);
-		last = new XYDataItemExtension(lastTs, y);
 	}
 
 	public XYDataItemExtension getFirst() {
 		return first;
-	}
-
-	@Deprecated
-	public XYDataItemExtension getLast() {
-		return last;
 	}
 }

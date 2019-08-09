@@ -100,13 +100,4 @@ public class Range {
 		this.low = low;
 	}
 
-	public static long findSampleLength(long timeStamp, List<Range> ranges) {
-		for (Range range : ranges) {
-			if (range.getStart() <= timeStamp && range.getEnd() >= timeStamp) {
-				return range.getSampleLength();
-			}
-		}
-		throw new RuntimeException("no matching range found. This should never happend!");
-	}
-
 }

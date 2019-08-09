@@ -59,7 +59,8 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.urls.StandardXYURLGenerator;
 import org.jfree.chart.util.ParamChecks;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.RefineryUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.chart.common.CommonSample;
 import com.loadcoder.load.chart.common.CommonSampleGroup;
@@ -71,7 +72,7 @@ import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
-import com.loadcoder.load.chart.jfreechart.ChartFrame;
+import com.loadcoder.load.chart.data.Ranges;
 import com.loadcoder.load.chart.jfreechart.ChartPanelExtension;
 import com.loadcoder.load.chart.jfreechart.LoadcoderRenderer;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
@@ -83,16 +84,17 @@ import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.ColorUtils;
-import com.loadcoder.load.chart.utilities.SampleStatics;
 import com.loadcoder.load.jfreechartfixes.DateAxisExtension;
 import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public abstract class ChartLogic {
 
-	private Map<String, XYSeriesExtension> seriesCommonMap = new HashMap<String, XYSeriesExtension>();
+	Logger log = LoggerFactory.getLogger(ChartLogic.class);
+	
+	private final Map<String, XYSeriesExtension> commonSeriesMap = new HashMap<String, XYSeriesExtension>();
 
-	private CommonSeries[] commonsToBeUsed;
+	private final CommonSeries[] commonsToBeUsed;
 
 	protected Long earliestX;
 
@@ -135,8 +137,8 @@ public abstract class ChartLogic {
 
 	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
 
-	protected final List<Range> ranges = new ArrayList<Range>();
-
+	Ranges ranges = new Ranges();
+	
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
 	JPanel panelForButtons;
@@ -228,7 +230,7 @@ public abstract class ChartLogic {
 	}
 
 	protected Map<String, XYSeriesExtension> getCommonSeriesMap() {
-		return seriesCommonMap;
+		return commonSeriesMap;
 	}
 
 	protected abstract void update(Map<String, List<TransactionExecutionResult>> listOfListOfList,
@@ -257,15 +259,6 @@ public abstract class ChartLogic {
 			return 0;
 		long xDiff = highestX - earliestX;
 		return xDiff;
-	}
-
-	// only used for test
-	protected Range lookupCorrectRange(long ts) {
-		for (Range range : ranges) {
-			if (range.isTimestampInThisRange(ts))
-				return range;
-		}
-		throw new RuntimeException("No range was found for timestamp " + ts);
 	}
 
 	public void doSafeUpdate() {
@@ -418,14 +411,14 @@ public abstract class ChartLogic {
 	}
 
 	public static void addSurroundingTimestampsAsUpdates(Set<Long> hashesGettingUpdated, long sampleStart,
-			long earliest, long latest, List<Range> ranges, long currentSampleLength, Set<Long> sampleTimestamps,
+			long earliest, long latest, Ranges ranges, long currentSampleLength, Set<Long> sampleTimestamps,
 			Map<Long, Sample> aboutToBeUpdated) {
 
 		// check backwards
 		long iterator = sampleStart;
 		while (earliest < iterator) {
 			long lastTsInPrevious = iterator - 1;
-			long sampleLength = Range.findSampleLength(lastTsInPrevious, ranges);
+			long sampleLength = ranges.findSampleLength(lastTsInPrevious);
 			long firstTsInPrevious = SampleGroup.calculateFirstTs(lastTsInPrevious, sampleLength);
 
 			boolean exists = false;
@@ -445,7 +438,7 @@ public abstract class ChartLogic {
 		// check forward
 		iterator = sampleStart;
 		while (latest > iterator) {
-			long sampleLength = Range.findSampleLength(iterator, ranges);
+			long sampleLength = ranges.findSampleLength(iterator);
 			long firstTsInNext = iterator + sampleLength;
 			boolean exists = false;
 			if (sampleTimestamps.contains(firstTsInNext) || aboutToBeUpdated.containsKey(firstTsInNext)) {
@@ -548,18 +541,14 @@ public abstract class ChartLogic {
 
 	public void createCommons() {
 
-		commonSeriesCalculators.clear();
-		seriesCommonMap.clear();
-
 		Arrays.stream(commonsToBeUsed).forEach((common) -> {
 			Color c = existingColors.get(common.getName());
 			if (c == null) {
 				c = common.getColor();
 			}
 			XYSeriesExtension xySeries = new XYSeriesExtension(common.getName(), true, false, c);
-			seriesCommonMap.put(common.getName(), xySeries);
+			commonSeriesMap.put(common.getName(), xySeries);
 			commonSeriesCalculators.add(new CommonSeriesCalculator(xySeries, common.getCommonYCalculator()));
-//			commonSeries.add(xySeries);
 		});
 
 	}
@@ -571,7 +560,6 @@ public abstract class ChartLogic {
 		if (legend == null) {
 			legend = plot.getRenderer().getLegendItem(0, indexOfSeries);
 			Color c = existingColors.get(serie.getKey());
-//			legend.setFillPaint(serie.getColorInTheChart());
 			legend.setFillPaint(c);
 
 			legend.setShapeVisible(true);
@@ -603,11 +591,15 @@ public abstract class ChartLogic {
 		 * be upated below
 		 */
 		for (Long l : hashesGettingUpdated) {
+			
+			if(l == 0) {
+				System.out.println("here");
+			}
 			for (CommonSeriesCalculator calc : commonSeriesCalculators) {
 				XYSeriesExtension series = calc.getSeries();
-
+				
 				CommonYCalculator calculator = calc.getCalculator();
-				Range r = getSampleLength(l);
+				Range r = ranges.lookupCorrectRange(l);
 				double amount = calculator.calculateCommonY(seriesKeys, l, sampleGroups, r.getSampleLength());
 
 				// get or create the samplegroup for the common series
@@ -625,6 +617,9 @@ public abstract class ChartLogic {
 				cs.setY(longAmount);
 				if (cs.getFirst() == null) {
 					cs.initDataItems();
+					if(commonKey.contains("Throughput")) {
+						log.trace("adding Throughput at x:{} y:{}", cs.getFirst().getX().intValue(), cs.getFirst().getY().intValue());
+					}
 					series.add(cs.getFirst(), false);
 				} else {
 					cs.updateDataItems();
@@ -645,7 +640,7 @@ public abstract class ChartLogic {
 		return seriesColor;
 	}
 
-	void getSerieses(List<DataSet> dataSets, boolean dottedMode, Map<String, XYSeriesExtension> seriesMap) {
+	void getSerieses(List<DataSet> dataSets, Map<String, XYSeriesExtension> seriesMap) {
 		for (DataSet dataSet : dataSets) {
 			String dataSetName = dataSet.getName();
 
@@ -701,14 +696,15 @@ public abstract class ChartLogic {
 		for (Point point : dataSet.getPoints()) {
 			long x = point.getX();
 
-			if (x > highestX)
+			if (x > highestX) {
 				highestX = x;
+			}
 			if (earliestX == null || x < earliestX) {
 				earliestX = x;
-
-				if (ranges.isEmpty()) {
+				//TODO: in runtimechart ranges in never empty. Move this if block to resultchart
+				if (ranges.isRangesEmpty()) {
 					Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, sampleLengthToUse);
-					ranges.add(new Range(s.getFirstTs(), Long.MAX_VALUE, sampleLengthToUse));
+					ranges.addRange(new Range(s.getFirstTs(), Long.MAX_VALUE, sampleLengthToUse));
 
 				} else {
 
@@ -716,7 +712,7 @@ public abstract class ChartLogic {
 					 * if there are more than one range, and a new earliestTimestamp is added we
 					 * must pick up the last added range here.
 					 */
-					Range r = ranges.get(ranges.size() - 1);
+					Range r = ranges.getLastRange();
 					long sampleLengthOfTheLastAddedRange = r.getSampleLength();
 
 					/*
@@ -729,7 +725,7 @@ public abstract class ChartLogic {
 			}
 
 			// fetch the correct Range for the point
-			Range rangeToUse = getSampleLength(x);
+			Range rangeToUse = ranges.lookupCorrectRange(x);
 
 			// here the Sample for the point is either fetched of created
 			Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, rangeToUse.getSampleLength());
@@ -763,15 +759,6 @@ public abstract class ChartLogic {
 			}
 			renderer.setSeriesShapesVisible(indexOfSeries, false);
 		}
-	}
-
-	public Range getSampleLength(long timestamp) {
-		for (Range range : ranges) {
-			if (timestamp >= range.getStart() && timestamp <= range.getEnd()) {
-				return range;
-			}
-		}
-		return null;
 	}
 
 	public int getTotalSize() {
@@ -819,7 +806,6 @@ public abstract class ChartLogic {
 					// y will be -1 if there are no data in the sample. No items to add to the
 					// series
 					if (y != -1) {
-						// itemSeriesAdder.add(series, sample);
 						ChartUtils.populateSeriesWithSamples(sample, series);
 					}
 

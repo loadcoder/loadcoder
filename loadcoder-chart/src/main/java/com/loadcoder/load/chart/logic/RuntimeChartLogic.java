@@ -21,6 +21,7 @@ package com.loadcoder.load.chart.logic;
 import static com.loadcoder.statics.Time.DAY;
 import static com.loadcoder.statics.Time.HOUR;
 import static com.loadcoder.statics.Time.MINUTE;
+import static com.loadcoder.statics.Time.SECOND;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -98,8 +99,8 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		concaterSpecList = getSampleConcaternatorSpecs();
 
 		// Init the first ranges
-		ranges.add(new Range(Long.MIN_VALUE, -1, getSampleLengthToUse()));
-		ranges.add(new Range(0, Long.MAX_VALUE, getSampleLengthToUse()));
+		ranges.addRange(new Range(Long.MIN_VALUE, -1, getSampleLengthToUse()));
+		ranges.addRange(new Range(0, Long.MAX_VALUE, getSampleLengthToUse()));
 
 		initiateChart();
 	}
@@ -181,6 +182,8 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 			concaternationResult.fixPointsForSeries(sampleGroup.getSeries());
 		}
 
+		log.trace("old range:{}", concater.getOldRange());
+		log.trace("new range:{}", concater.getNewRange());
 		for (CommonSampleGroup sampleGroup : sampleGroupCommonList) {
 			sampleGroup.concaternate(concater);
 		}
@@ -211,6 +214,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 	void performUpdate() {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		concat(hashesGettingUpdated);
+		log.trace("hashes after concat removed samples {}", hashesGettingUpdated);
 		update(incomingData, hashesGettingUpdated);
 		addNewSampleConcaternaterIfItsTime();
 	}
@@ -258,7 +262,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 			type.getDataSetUser().useDataSet(dataSets);
 		}
 
-		getSerieses(getFilteredData().getDataSets(), false, seriesMap);
+		getSerieses(getFilteredData().getDataSets(), seriesMap);
 		addSeriesNotAdded(seriesMap);
 		createSamplesGroups(seriesMap, sampleGroups);
 		addPoints(getFilteredData().getDataSets(), sampleGroups, sampleTimestamps);
@@ -283,17 +287,17 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 	public void addNewConcater(int amountOfSamplesToConcaternate,
 			SampleConcaternatorRunDecider sampleConcaternatorRunDecider) {
 
-		Range oldRange = ranges.get(ranges.size() - 1); // the last
+		Range oldRange = ranges.getLastRange();
 		long newSampleLength = oldRange.getSampleLength() * amountOfSamplesToConcaternate;
 		Range newRange = new Range(0, -1, newSampleLength);
-		ranges.add(newRange);
+		ranges.addRange(newRange);
 		SampleConcaternator sampleConcaternator = new SampleConcaternator(oldRange, newRange,
 				amountOfSamplesToConcaternate, sampleConcaternatorRunDecider);
 		getSampleConcaternatorList().add(sampleConcaternator);
 	}
 
 	public void addNewSampleConcaternaterIfItsTime() {
-		if (!concaterSpecList.isEmpty() && !ranges.isEmpty()) {
+		if (!concaterSpecList.isEmpty() && ! ranges.isRangesEmpty()) {
 			SampleConcaternatorSpec s = concaterSpecList.get(0);
 			long howLongAfterStart = s.getHowLongAfterStartShouldThisBeAdded();
 
@@ -359,12 +363,13 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(40 * SECOND, 4); // 4
+//		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
 		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
 				firstConcatenationDefinition.amountToConcatenate,
 				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));
 
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(10 * MINUTE, 4))); // 16
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(100 * MINUTE, 4))); // 16
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(40 * MINUTE, 8))); // 128
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 1024
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 8192
