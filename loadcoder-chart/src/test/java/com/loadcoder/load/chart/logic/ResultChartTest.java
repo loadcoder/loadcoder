@@ -41,7 +41,6 @@ import com.loadcoder.load.chart.ResultExtension;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
-import com.loadcoder.load.chart.data.Ranges;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.menu.settings.DetailsSettings;
@@ -196,8 +195,7 @@ public class ResultChartTest extends TestNGBase {
 		HashSet<Long> hashesGettingUpdated = new HashSet<Long>();
 		HashSet<Long> sampleTimestamps = new HashSet<Long>();
 
-		Ranges ranges = new Ranges();
-		ranges.addRange(new Range(Long.MIN_VALUE, Long.MAX_VALUE, sampleLength));
+		List<Range> ranges = Arrays.asList(new Range(Long.MIN_VALUE, Long.MAX_VALUE, sampleLength));
 		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 7000, 1000, 15000, ranges, sampleLength,
 				sampleTimestamps, new HashMap<Long, Sample>());
 
@@ -213,9 +211,8 @@ public class ResultChartTest extends TestNGBase {
 		sampleTimestamps.add(5000L);
 		sampleTimestamps.add(25_000L);
 
-		Ranges ranges = new Ranges();
-		ranges.addRange(new Range(Long.MIN_VALUE, 14_999, sampleLength));
-		ranges.addRange(new Range(15_000, Long.MAX_VALUE, sampleLength * 2));
+		List<Range> ranges = Arrays.asList(new Range(Long.MIN_VALUE, 14_999, sampleLength),
+				new Range(15_000, Long.MAX_VALUE, sampleLength * 2));
 		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 10_000, 1_000, 30_000, ranges, sampleLength,
 				sampleTimestamps, new HashMap<Long, Sample>());
 

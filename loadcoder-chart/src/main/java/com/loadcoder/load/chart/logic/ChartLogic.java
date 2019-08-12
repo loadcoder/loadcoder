@@ -137,10 +137,8 @@ public abstract class ChartLogic {
 
 	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
 
-	public Ranges getRanges() {
-		return ranges;
-	}
-
+	Ranges ranges = new Ranges();
+	
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
 	JPanel panelForButtons;
@@ -705,7 +703,7 @@ public abstract class ChartLogic {
 				earliestX = x;
 				//TODO: in runtimechart ranges in never empty. Move this if block to resultchart
 				if (ranges.isRangesEmpty()) {
-					Sample s = sampleGroup.getOrCreateSample(x, dataSetName, sampleLengthToUse);
+					Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, sampleLengthToUse);
 					ranges.addRange(new Range(s.getFirstTs(), Long.MAX_VALUE, sampleLengthToUse));
 
 				} else {
@@ -714,14 +712,14 @@ public abstract class ChartLogic {
 					 * if there are more than one range, and a new earliestTimestamp is added we
 					 * must pick up the last added range here.
 					 */
-//					Range r = ranges.getLastRange();
-					Range r = ranges.lookupCorrectRange(x);
+					Range r = ranges.getLastRange();
 					long sampleLengthOfTheLastAddedRange = r.getSampleLength();
+
 					/*
 					 * the last added range will get a new start equal to the firstTs for the Sample
 					 * of this Point that has the earliest timestamp
 					 */
-					Sample s = sampleGroup.getOrCreateSample(x, dataSetName, sampleLengthOfTheLastAddedRange);
+					Sample s = sampleGroup.getAndCreateSample(x, dataSetName, sampleLengthOfTheLastAddedRange);
 					r.setStart(s.getFirstTs());
 				}
 			}
@@ -730,7 +728,7 @@ public abstract class ChartLogic {
 			Range rangeToUse = ranges.lookupCorrectRange(x);
 
 			// here the Sample for the point is either fetched of created
-			Sample s = sampleGroup.getOrCreateSample(point.getX(), dataSetName, rangeToUse.getSampleLength());
+			Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, rangeToUse.getSampleLength());
 
 			if (!sampleTimestamps.contains(s.getFirstTs())) {
 				sampleTimestamps.add(s.getFirstTs());
