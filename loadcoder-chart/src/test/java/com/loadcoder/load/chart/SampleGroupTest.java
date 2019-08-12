@@ -40,8 +40,8 @@ public class SampleGroupTest extends TestNGBase {
 	public void test0() {
 		long sampleLength = 1000;
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(0, series.getKey(), 1000);
-		Sample s2 = group.getAndCreateSample(0, series.getKey(), 1000);
+		Sample s = group.getOrCreateSample(0, series.getKey(), 1000);
+		Sample s2 = group.getOrCreateSample(0, series.getKey(), 1000);
 
 		Assert.assertEquals(0, s.getFirstTs());
 		Assert.assertEquals(999, s.getLastTs());
@@ -54,8 +54,8 @@ public class SampleGroupTest extends TestNGBase {
 		long tsToTest = -1000;
 
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
-		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s2 = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
 
 		Assert.assertEquals(-1000, s.getFirstTs());
 		Assert.assertEquals(-1, s.getLastTs());
@@ -68,8 +68,8 @@ public class SampleGroupTest extends TestNGBase {
 		long tsToTest = 1000;
 
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
-		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s2 = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
 
 		Assert.assertEquals(1000, s.getFirstTs());
 		Assert.assertEquals(1999, s.getLastTs());
@@ -83,8 +83,8 @@ public class SampleGroupTest extends TestNGBase {
 		long tsToTest = -999;
 
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
-		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s2 = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
 
 		Assert.assertEquals(-1000, s.getFirstTs());
 		Assert.assertEquals(-1, s.getLastTs());
@@ -98,8 +98,8 @@ public class SampleGroupTest extends TestNGBase {
 		long tsToTest = -1500;
 
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
-		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s2 = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
 
 		Assert.assertEquals(-2000, s.getFirstTs());
 		Assert.assertEquals(-1001, s.getLastTs());
@@ -112,8 +112,8 @@ public class SampleGroupTest extends TestNGBase {
 		long tsToTest = 1500;
 
 		SampleGroup group = new SampleGroup(sampleLength, series, false);
-		Sample s = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
-		Sample s2 = group.getAndCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
+		Sample s2 = group.getOrCreateSample(tsToTest, series.getKey(), sampleLength);
 
 		Assert.assertEquals(1000, s.getFirstTs());
 		Assert.assertEquals(1999, s.getLastTs());
@@ -125,10 +125,10 @@ public class SampleGroupTest extends TestNGBase {
 		XYSeriesExtension serie = new XYSeriesExtension("foo", true, false, Color.RED);
 
 		SampleGroup group = new SampleGroup(1000, serie, false);
-		Sample a = group.getAndCreateSample(0, "foo", 1000);
+		Sample a = group.getOrCreateSample(0, "foo", 1000);
 		a.addPoint(new Point(1, 10, true));
 
-		Sample b = group.getAndCreateSample(1000, "foo", 1000);
+		Sample b = group.getOrCreateSample(1000, "foo", 1000);
 		b.addPoint(new Point(1001, 0, true));
 
 		ChartUtils.populateSeriesWithSamples(a, serie);

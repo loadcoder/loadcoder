@@ -98,12 +98,6 @@ public class SampleGroup extends Group {
 				if (first != null) {
 					series.remove(first.getX());
 				}
-				if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-					XYDataItemExtension last = toBeConcaternated.getLast();
-					if (last != null) {
-						series.remove(last.getX());
-					}
-				}
 			}
 
 			if (!newSample.isEmpty()) {
@@ -190,7 +184,7 @@ public class SampleGroup extends Group {
 		return s;
 	}
 
-	public Sample getAndCreateSample(long ts, String name, long sampleLength) {
+	public Sample getOrCreateSample(long ts, String name, long sampleLength) {
 		long first = calculateFirstTs(ts, sampleLength);
 		Sample s = samples.get(first);
 		if (s == null) {

@@ -105,7 +105,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range = logic.lookupCorrectRange(0);
+		Range range = logic.getRanges().lookupCorrectRange(0);
 		assertEquals(2000, range.getSampleLength());
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
@@ -149,8 +149,8 @@ public class RuntimeChartLogicTest extends TestNGBase {
 				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>());
 
-		logic.lookupCorrectRange(-1);
-		logic.lookupCorrectRange(1);
+		logic.getRanges().lookupCorrectRange(-1);
+		logic.getRanges().lookupCorrectRange(1);
 
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
@@ -160,7 +160,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range3 = logic.lookupCorrectRange(-1);
+		Range range3 = logic.getRanges().lookupCorrectRange(-1);
 		assertEquals(1000, range3.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 2000);
@@ -218,7 +218,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range = logic.lookupCorrectRange(-1);
+		Range range = logic.getRanges().lookupCorrectRange(-1);
 		assertEquals(1000, range.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 1000);

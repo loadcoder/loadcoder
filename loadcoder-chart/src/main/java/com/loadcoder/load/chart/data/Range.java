@@ -20,11 +20,15 @@ package com.loadcoder.load.chart.data;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 
 public class Range {
 
+	Logger log = LoggerFactory.getLogger(Range.class);
 	private XYSeriesExtension series;
 	private XYDataItemExtension high;
 	private XYDataItemExtension low;
@@ -40,6 +44,7 @@ public class Range {
 		this.start = start;
 		this.end = end;
 		this.sampleLength = sampleLength;
+		log.trace("created Range {}", this);
 	}
 
 	public boolean isTimestampInThisRange(long ts) {
@@ -54,6 +59,7 @@ public class Range {
 
 	public void setStart(long start) {
 		this.start = start;
+		log.trace("Range start was set {}", this);
 	}
 
 	public void setEnd(long end) {

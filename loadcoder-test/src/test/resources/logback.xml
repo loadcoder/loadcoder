@@ -36,7 +36,7 @@
 	</logger>
 
 
-	<root level="info">
+	<root level="trace">
 		<appender-ref ref="INFOFILE" />
 		<appender-ref ref="CONSOLEAPPENDER" />
 	</root>

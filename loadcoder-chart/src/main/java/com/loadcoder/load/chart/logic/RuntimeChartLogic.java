@@ -40,6 +40,7 @@ import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.data.Ranges;
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
@@ -68,8 +69,6 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 	private Set<Long> sampleTimestamps = new HashSet<Long>();
 
-	private long updateTimestamp;
-
 	private Map<String, SampleGroup> sampleGroups = new HashMap<String, SampleGroup>();
 
 	private final List<SampleConcaternatorSpec> concaterSpecList;// = new ArrayList<SampleConcaternatorSpec>();
@@ -80,6 +79,8 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 	private Map<String, List<TransactionExecutionResult>> incomingData;
 
+	Ranges ranges = new Ranges();
+	
 	public List<SampleConcaternator> getSampleConcaternatorList() {
 		return sampleConcaternatorList;
 	}
@@ -229,7 +230,6 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 			return;
 		}
 		long[] minmaxNew = Utilities.findMinMaxTimestamp(incomingData, getSeriesKeys());
-		updateTimestamp = minmaxNew[1];
 
 		/*
 		 * tsForFirstUpdateContainingData is needed in order to determine when to add
@@ -305,7 +305,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 			 * if the updateTimestamp is greater than the timestamp for the first update
 			 * with data + diff (howLongAfterStart) stated in the SampleConcaternatorSpec
 			 */
-			if (updateTimestamp - howLongAfterStart > tsForFirstUpdateContainingData) {
+			if (minmax[1] - howLongAfterStart > tsForFirstUpdateContainingData) {
 
 				logger.debug("Starting a new concater: {}", s);
 				concaterSpecList.remove(0);
@@ -363,13 +363,13 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(40 * SECOND, 4); // 4
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(30 * SECOND, 4); // 4
 //		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
 		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
 				firstConcatenationDefinition.amountToConcatenate,
 				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));
 
-		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(100 * MINUTE, 4))); // 16
+		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(6000 * SECOND, 4))); // 16
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(40 * MINUTE, 8))); // 128
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(5 * HOUR, 8))); // 1024
 		concaterSpecs.add(getNewSpec(new ConcatenationDefinition(2 * DAY, 8))); // 8192
@@ -393,7 +393,6 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		logger.debug("update time: {}", diff);
 		getChart().setNotify(true);
 		logger.trace("Total Points in chart: {}", getTotalSize());
-
 	}
 
 }
