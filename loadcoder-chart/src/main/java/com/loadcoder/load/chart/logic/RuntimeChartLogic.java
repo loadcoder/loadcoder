@@ -66,7 +66,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 	protected List<SampleConcaternator> sampleConcaternatorList = new ArrayList<SampleConcaternator>();
 
-	private Set<Long> sampleTimestamps = new HashSet<Long>();
+	private final Set<Long> sampleTimestamps = new HashSet<Long>();
 
 	private long updateTimestamp;
 
@@ -157,22 +157,19 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		oldRange.getSeries().add(oldRange.getLow());
 	}
 
-	public void removeFromSampleTimestamps(SampleConcaternator concater, Set<Long> sampleTs) {
+	public Set<Long> getConcatedTimestamps(SampleConcaternator concater) {
+
+		Set<Long> result = new HashSet<Long>();
+
 		long start = concater.getOldRange().getStart();
 		long oldSampleLength = concater.getOldRange().getSampleLength();
 		long amount = concater.getAmountToConcaternate();
 		long tsToRemove = start;
 		for (int i = 1; i < amount; i++) {
 			tsToRemove = tsToRemove + oldSampleLength;
-
-			/*
-			 * it is not certain that tsToRemove exists in the Set! this can happen if the
-			 * intensity for the particular transaction is low and there are entire
-			 * samplelength's where the transaction wasn't made. In this case there won't be
-			 * a Sample to be removed and neither an entry in this Set.
-			 */
-			sampleTs.remove(tsToRemove);
+			result.add(tsToRemove);
 		}
+		return result;
 	}
 
 	public void concatAndAdjustRanges(SampleConcaternator concater, Set<Long> hashesGettingUpdated) {
@@ -188,7 +185,8 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 			sampleGroup.concaternate(concater);
 		}
 
-		removeFromSampleTimestamps(concater, sampleTimestamps);
+		Set<Long> concatedTimestampsToRemove = getConcatedTimestamps(concater);
+		sampleTimestamps.removeAll(concatedTimestampsToRemove);
 
 		hashesGettingUpdated.add(concater.getOldRange().getStart());
 
@@ -297,7 +295,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 	}
 
 	public void addNewSampleConcaternaterIfItsTime() {
-		if (!concaterSpecList.isEmpty() && ! ranges.isRangesEmpty()) {
+		if (!concaterSpecList.isEmpty() && !ranges.isRangesEmpty()) {
 			SampleConcaternatorSpec s = concaterSpecList.get(0);
 			long howLongAfterStart = s.getHowLongAfterStartShouldThisBeAdded();
 
@@ -363,8 +361,7 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 		 * this concater starts 10 sec into the test will concat if diff from first
 		 * range start to highest x value is over 20 sec
 		 */
-		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(40 * SECOND, 4); // 4
-//		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
+		ConcatenationDefinition firstConcatenationDefinition = new ConcatenationDefinition(2 * MINUTE, 4); // 4
 		concaterSpecs.add(new SampleConcaternatorSpec(firstConcatenationDefinition.width,
 				firstConcatenationDefinition.amountToConcatenate,
 				getFirstConcaterRunDecider(firstConcatenationDefinition.width)));

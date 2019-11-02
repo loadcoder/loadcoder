@@ -43,8 +43,10 @@ public class Summary {
 
 	/**
 	 * Get the Result as a string formatted with the provided ResultActions
-	 * @param resultSummarizers is the summarizers that will be used to summarize the provided result
-	 * @param result is the Result to be summarized as a String
+	 * 
+	 * @param resultSummarizers is the summarizers that will be used to summarize
+	 *                          the provided result
+	 * @param result            is the Result to be summarized as a String
 	 * @return the Result as a String
 	 */
 	public static String asString(List<ResultSummarizer> resultSummarizers, Result result) {
@@ -71,10 +73,12 @@ public class Summary {
 	/**
 	 * converts duration in milliseconds to seconds
 	 * 
-	 * @param durationMillis is the amount of milliseconds that will be converted to seconds
-	 * @return the amount of seconds equivalent to the amount of milliseconds provided in {@code durationMillis}
-	 * Since the returned value is the duration of the execution, this value will never be 0. The minimum value
-	 * should always be 1. Negative values shall is out of scope.
+	 * @param durationMillis is the amount of milliseconds that will be converted to
+	 *                       seconds
+	 * @return the amount of seconds equivalent to the amount of milliseconds
+	 *         provided in {@code durationMillis} Since the returned value is the
+	 *         duration of the execution, this value will never be 0. The minimum
+	 *         value should always be 1. Negative values shall is out of scope.
 	 */
 	public static int getDurationInSeconds(long durationMillis) {
 		int sec = (int) durationMillis / 1000;
@@ -251,5 +255,19 @@ public class Summary {
 		 * @return a generated String value
 		 */
 		String calculateValue(String key, List<TransactionExecutionResult> resultList);
+	}
+
+	@FunctionalInterface
+	public interface SummaryResultCalculator {
+
+		/**
+		 * Generate a double value based on the transaction key and its
+		 * TransactionExecutionResults
+		 * 
+		 * @param key        is the name of the transaction
+		 * @param resultList is a List of TransactionExecutionResult for the transaction
+		 * @return a generated double value
+		 */
+		double calculateValue(String key, List<TransactionExecutionResult> resultList);
 	}
 }

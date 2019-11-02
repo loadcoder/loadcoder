@@ -27,6 +27,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.data.Range;
+import com.loadcoder.load.chart.data.Ranges;
 import com.loadcoder.load.chart.sampling.Sample;
 
 public class ChartLogicTest {
@@ -39,9 +40,12 @@ public class ChartLogicTest {
 		HashSet<Long> sampleTimestamps = new HashSet<Long>();
 		sampleTimestamps.add(5000L);
 		sampleTimestamps.add(9000L);
-		List<Range> ranges = Arrays.asList(new Range(Long.MIN_VALUE, Long.MAX_VALUE, sampleLength));
-		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 7000, 1000, 15000, ranges,
-				sampleLength, sampleTimestamps, new HashMap<Long, Sample>());
+
+		Ranges ranges = new Ranges();
+		ranges.addRange(new Range(Long.MIN_VALUE, Long.MAX_VALUE, sampleLength));
+
+		ChartLogic.addSurroundingTimestampsAsUpdates(hashesGettingUpdated, 7000, 1000, 15000, ranges, sampleLength,
+				sampleTimestamps, new HashMap<Long, Sample>());
 
 		Assert.assertEquals(hashesGettingUpdated.size(), 2);
 	}

@@ -29,10 +29,12 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.result.Result;
 import com.loadcoder.result.ResultExtension;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.DateTimeUtil;
 import com.loadcoder.result.clients.GrafanaClient;
+import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 
 public class GrafanaClientTest {
 
@@ -44,18 +46,29 @@ public class GrafanaClientTest {
 	@Test(groups = "manual")
 	public void createDashboard(Method method) {
 
-		long end = System.currentTimeMillis();
-		Map<String, List<TransactionExecutionResult>> list = new HashMap<String, List<TransactionExecutionResult>>();
-		list.put("foo", Arrays.asList(new TransactionExecutionResult("foo", end - 10_000, 5, true, null),
-				new TransactionExecutionResult(end - 5_000, 6, true, null)));
-		ResultExtension r = new ResultExtension(list);
-
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
 		GrafanaClient cli = new GrafanaClient("localhost", 3000, false, authorizationValue);
-		int responseCode = cli.createNewDashboardFromResult(method.getName(), r);
+		int responseCode = cli.createNewDashboard(method.getName(), "unique_id2", Arrays.asList("foo"),
+				"\"gdev-influxdb\"");
 		assertEquals(responseCode, 200);
-		responseCode = cli.createNewDashboard(method.getName(), Arrays.asList("foo"));
+
+	}
+
+	@Test(groups = "manual")
+	public void addPointsToExistingChart(Method method) {
+
+		long end = System.currentTimeMillis();
+		Map<String, List<TransactionExecutionResult>> list = new HashMap<String, List<TransactionExecutionResult>>();
+		list.put("foo", Arrays.asList(new TransactionExecutionResult("foo", end - 10_000, 5, true, null)));
+
+		// base64 encoded default grafana user:password
+		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
+
+		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		InfluxDBTestExecution exe = influxClient.createTestExecution("unique_id1");
+		exe.writeTransactions(list);
+
 	}
 
 	@Test

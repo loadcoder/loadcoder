@@ -91,7 +91,7 @@ import com.loadcoder.result.TransactionExecutionResult;
 public abstract class ChartLogic {
 
 	Logger log = LoggerFactory.getLogger(ChartLogic.class);
-	
+
 	private final Map<String, XYSeriesExtension> commonSeriesMap = new HashMap<String, XYSeriesExtension>();
 
 	private final CommonSeries[] commonsToBeUsed;
@@ -138,7 +138,7 @@ public abstract class ChartLogic {
 	protected final List<CommonSeriesCalculator> commonSeriesCalculators = new ArrayList<CommonSeriesCalculator>();
 
 	Ranges ranges = new Ranges();
-	
+
 	public final List<Color> blacklistColors = new ArrayList<Color>();
 
 	JPanel panelForButtons;
@@ -156,6 +156,10 @@ public abstract class ChartLogic {
 
 	public JFreeChart getChart() {
 		return chart;
+	}
+
+	public Ranges getRanges() {
+		return ranges;
 	}
 
 	public ChartLogic(CommonSeries[] commonSeries, boolean locked) {
@@ -591,13 +595,10 @@ public abstract class ChartLogic {
 		 * be upated below
 		 */
 		for (Long l : hashesGettingUpdated) {
-			
-			if(l == 0) {
-				System.out.println("here");
-			}
+
 			for (CommonSeriesCalculator calc : commonSeriesCalculators) {
 				XYSeriesExtension series = calc.getSeries();
-				
+
 				CommonYCalculator calculator = calc.getCalculator();
 				Range r = ranges.lookupCorrectRange(l);
 				double amount = calculator.calculateCommonY(seriesKeys, l, sampleGroups, r.getSampleLength());
@@ -617,9 +618,6 @@ public abstract class ChartLogic {
 				cs.setY(longAmount);
 				if (cs.getFirst() == null) {
 					cs.initDataItems();
-					if(commonKey.contains("Throughput")) {
-						log.trace("adding Throughput at x:{} y:{}", cs.getFirst().getX().intValue(), cs.getFirst().getY().intValue());
-					}
 					series.add(cs.getFirst(), false);
 				} else {
 					cs.updateDataItems();
@@ -701,7 +699,8 @@ public abstract class ChartLogic {
 			}
 			if (earliestX == null || x < earliestX) {
 				earliestX = x;
-				//TODO: in runtimechart ranges in never empty. Move this if block to resultchart
+				// TODO: in runtimechart ranges in never empty. Move this if block to
+				// resultchart
 				if (ranges.isRangesEmpty()) {
 					Sample s = sampleGroup.getAndCreateSample(point.getX(), dataSetName, sampleLengthToUse);
 					ranges.addRange(new Range(s.getFirstTs(), Long.MAX_VALUE, sampleLengthToUse));
@@ -712,7 +711,10 @@ public abstract class ChartLogic {
 					 * if there are more than one range, and a new earliestTimestamp is added we
 					 * must pick up the last added range here.
 					 */
-					Range r = ranges.getLastRange();
+					Range r = ranges.lookupCorrectRange(x);
+					if (r == null) {
+						r = ranges.getLastRange();
+					}
 					long sampleLengthOfTheLastAddedRange = r.getSampleLength();
 
 					/*

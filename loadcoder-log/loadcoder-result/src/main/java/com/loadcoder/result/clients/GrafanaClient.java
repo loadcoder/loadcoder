@@ -124,7 +124,7 @@ public class GrafanaClient extends HttpClient {
 	}
 
 	private int createNewDashboardBase(long start, long end, String name, String executionId,
-			Set<String> transactionNamesSet, boolean refresh) {
+			Set<String> transactionNamesSet, boolean refresh, String datasource) {
 
 		long usedEnd = (end - start) < TIMESPAN_MILLIS_PRECREATED_DASHBOARD
 				? start + TIMESPAN_MILLIS_PRECREATED_DASHBOARD
@@ -136,11 +136,14 @@ public class GrafanaClient extends HttpClient {
 		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(start);
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template.json");
 
+		fileAsString = fileAsString.replace("${datasource}", datasource);
+
 		fileAsString = fileAsString.replace("${time_from}", startTimespan);
 		fileAsString = fileAsString.replace("${time_to}", endTimespan);
 		fileAsString = fileAsString.replace("${title}", name + "_" + dateTimeLabel);
 
 		fileAsString = fileAsString.replace("${refresh}", refresh ? "\"5s\"" : "false");
+
 
 		String targets = getTargets(transactionNamesSet, executionId);
 		fileAsString = fileAsString.replace("${targets}", targets);
@@ -159,14 +162,14 @@ public class GrafanaClient extends HttpClient {
 	 * @param transactionNames is a list of the transaction names
 	 * @return the http status code for the Grafana request
 	 */
-	public int createNewDashboard(String name, List<String> transactionNames) {
+	public int createNewDashboard(String name, List<String> transactionNames, String datasource) {
 
 		Set<String> transactionNamesSet = new HashSet<String>();
 		for (String transactionName : transactionNames) {
 			transactionNamesSet.add(transactionName);
 		}
 		long now = System.currentTimeMillis();
-		return createNewDashboardBase(now, now, name, null, transactionNamesSet, true);
+		return createNewDashboardBase(now, now, name, null, transactionNamesSet, true, datasource);
 	}
 
 	/**
@@ -178,14 +181,14 @@ public class GrafanaClient extends HttpClient {
 	 * @param transactionNames is a list of the transaction names
 	 * @return the http status code for the Grafana request
 	 */
-	public int createNewDashboard(String name, String executionId, List<String> transactionNames) {
+	public int createNewDashboard(String name, String executionId, List<String> transactionNames, String datasource) {
 
 		Set<String> transactionNamesSet = new HashSet<String>();
 		for (String transactionName : transactionNames) {
 			transactionNamesSet.add(transactionName);
 		}
 		long now = System.currentTimeMillis();
-		return createNewDashboardBase(now, now, name, executionId, transactionNamesSet, true);
+		return createNewDashboardBase(now, now, name, executionId, transactionNamesSet, true, datasource);
 	}
 
 	/**
@@ -195,9 +198,9 @@ public class GrafanaClient extends HttpClient {
 	 * @param result is the Result of an already executed test
 	 * @return the http status code for the Grafana request
 	 */
-	public int createNewDashboardFromResult(String name, Result result) {
+	public int createNewDashboardFromResult(String name, Result result, String datasource) {
 		return createNewDashboardBase(result.getStart(), result.getEnd(), name, null, result.getResultLists().keySet(),
-				false);
+				false, datasource);
 	}
 
 	/**
@@ -209,8 +212,8 @@ public class GrafanaClient extends HttpClient {
 	 * @param result is the Result of an already executed test
 	 * @return the http status code for the Grafana request
 	 */
-	public int createNewDashboardFromResult(String name, String executionId, Result result) {
+	public int createNewDashboardFromResult(String name, String executionId, Result result, String datasource) {
 		return createNewDashboardBase(result.getStart(), result.getEnd(), name, executionId,
-				result.getResultLists().keySet(), false);
+				result.getResultLists().keySet(), false, datasource);
 	}
 }

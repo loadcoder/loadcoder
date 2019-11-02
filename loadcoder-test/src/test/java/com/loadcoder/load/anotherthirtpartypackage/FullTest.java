@@ -44,6 +44,7 @@ import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
+import com.loadcoder.load.result.Summary.SummaryResultCalculator;
 import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
@@ -57,6 +58,7 @@ import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.result.clients.GrafanaClient;
 import com.loadcoder.result.clients.InfluxDBClient;
+//import com.loadcoder.result.clients.ValueCal;
 import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.statics.SummaryUtils;
 import com.loadcoder.statics.ThrottleMode;
@@ -67,9 +69,37 @@ public class FullTest extends TestNGBase {
 	Logger log = LoggerFactory.getLogger(FullTest.class);
 
 	@Test(groups = "manual")
+	public void summaryTest() {
+
+		long now = System.currentTimeMillis();
+
+		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		InfluxDBTestExecution exe = influxClient.createTestExecution("unique_id2");
+
+		Map<String, List<TransactionExecutionResult>> summaryMap = new HashMap<String, List<TransactionExecutionResult>>();
+
+		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
+		map.put("foo", new ArrayList<TransactionExecutionResult>());
+
+		map.get("foo").add(new TransactionExecutionResult(now, 127, true, null));
+
+		SummaryResultCalculator avg = SummaryUtils.averageResult();
+
+		map.keySet().stream().forEach(key -> {
+			double s = avg.calculateValue(key, map.get(key));
+			List<TransactionExecutionResult> l = new ArrayList<TransactionExecutionResult>();
+			summaryMap.put(key, l);
+			l.add(new TransactionExecutionResult(now, (long) s, true, null));
+		});
+		exe.writeTransactions(summaryMap);
+	}
+
+	@Test(groups = "manual")
 	public void testInflux(Method method) {
 		File dir = getNewLogDir(rootResultDir, method.getName());
 		setResultDestination(dir);
+
+		String grafanaInfluxDataSource = "influx-rpi";
 		SUT sut = new SUT();
 
 		LoadScenario ls = new LoadScenario() {
@@ -94,7 +124,7 @@ public class FullTest extends TestNGBase {
 		FinishedExecution finished = new ExecutionBuilder(l)
 				.storeAndConsumeResultRuntime((result) -> exe.writeTransactions(result)).build().execute().andWait();
 		Result result = finished.getReportedResultFromResultFile();
-		grafanaClient.createNewDashboardFromResult(method.getName(), result);
+		grafanaClient.createNewDashboardFromResult(method.getName(), result, grafanaInfluxDataSource);
 	}
 
 	@Test(groups = "manual")
@@ -465,7 +495,7 @@ public class FullTest extends TestNGBase {
 				}).handleResult((a) -> {
 				}).perform();
 				load("create", () -> {
-					sut.methodThatTakesBetweenTheseResponseTimes(200, 220);
+					sut.methodWhereResponseTimeFollowSomeKindOfPattern2(this);
 					return "";
 				}).handleResult((a) -> {
 				}).perform();

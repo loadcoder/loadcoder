@@ -98,12 +98,6 @@ public class SampleGroup extends Group {
 				if (first != null) {
 					series.remove(first.getX());
 				}
-				if (SampleStatics.USE_TWO_SAMPLE_POINTS) {
-					XYDataItemExtension last = toBeConcaternated.getLast();
-					if (last != null) {
-						series.remove(last.getX());
-					}
-				}
 			}
 
 			if (!newSample.isEmpty()) {
