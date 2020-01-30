@@ -1,0 +1,20 @@
+package com.loadcoder.network.testing;
+
+import com.loadcoder.load.scenario.design.ScenarioLogicTyped;
+
+import okhttp3.Request;
+public class ScenarioLogic extends ScenarioLogicTyped<ThreadInstance> {
+
+	public ScenarioLogic(ThreadInstance threadInstance) {
+		super(threadInstance);
+	}
+	
+	void performGreeting() {
+		Request request = null;
+	
+		${logic_start}
+		${logic_end}
+		
+	}
+
+}
