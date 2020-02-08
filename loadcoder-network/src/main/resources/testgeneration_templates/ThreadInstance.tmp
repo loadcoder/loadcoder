@@ -1,4 +1,4 @@
-package com.loadcoder.network.testing;
+package ${package};
 
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.load.scenario.design.TypeInstanceBase;

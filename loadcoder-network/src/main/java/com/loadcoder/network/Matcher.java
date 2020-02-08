@@ -19,5 +19,5 @@
 package com.loadcoder.network;
 
 public interface Matcher {
-	boolean match(String url, String matcher);
+	boolean keep(String url);
 }

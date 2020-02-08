@@ -1,8 +1,8 @@
-package com.loadcoder.network.testing;
+package ${package};
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.Statics.*;
+import static com.loadcoder.statics.StopDecisions.*;
 
 import org.testng.annotations.Test;
 
@@ -39,7 +39,7 @@ public class GeneratedLoadTest {
 				 * into separate classes that each can be tested separately, see the test
 				 * testGreetingsLogicAlone
 				 */
-				t.getScenarioLogic().performGreeting();
+				t.getScenarioLogic().performScenario();
 			}
 
 			@Override
@@ -75,6 +75,6 @@ public class GeneratedLoadTest {
 	@Test
 	public void testGreetingsLogicAlone() {
 		ThreadInstance threadInstance = new ThreadInstance(new Scenario());
-		threadInstance.getScenarioLogic().performGreeting();
+		threadInstance.getScenarioLogic().performScenario();
 	}
 }
