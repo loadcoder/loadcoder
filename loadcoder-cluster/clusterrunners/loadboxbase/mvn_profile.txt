@@ -1,0 +1,20 @@
+<profile>
+    <id>snapshots</id>
+    <activation>
+        <property>
+            <name>!snapshots.off</name>
+        </property>
+    </activation>
+    <repositories>
+        <repository>
+            <id>snapshots</id>
+            <url>http://master:8081/artifactory/libs-snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+</profile>

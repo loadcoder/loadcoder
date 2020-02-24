@@ -18,7 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.Statics.*;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;

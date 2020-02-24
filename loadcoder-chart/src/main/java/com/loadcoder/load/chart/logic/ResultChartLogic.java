@@ -18,9 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Time.DAY;
-import static com.loadcoder.statics.Time.HOUR;
-import static com.loadcoder.statics.Time.MINUTE;
+import static com.loadcoder.statics.Statics.*;
 
 import java.awt.Color;
 import java.awt.Component;

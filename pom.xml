@@ -19,6 +19,7 @@
 		<module>loadcoder-test</module>
 		<module>loadcoder-chart</module>
 		<module>loadcoder-log</module>
+		<module>loadcoder-cluster</module>
 		<module>loadcoder-all</module>
 	</modules>
 
@@ -37,6 +38,19 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-all</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-cluster</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.loadcoder</groupId>
 				<artifactId>loadcoder-core</artifactId>
@@ -250,6 +264,7 @@
 	</developers>
 
 	<distributionManagement>
+
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>

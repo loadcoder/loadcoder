@@ -19,10 +19,8 @@
 package com.loadcoder.load.scenario;
 
 import static org.testng.Assert.assertEquals;
-import static com.loadcoder.statics.StopDesisions.*;
-import static com.loadcoder.statics.Time.*;
-import static com.loadcoder.statics.ThrottleMode.*;
 import static com.loadcoder.load.TestUtility.*;
+import static com.loadcoder.statics.Statics.*;
 
 import java.util.ArrayList;
 import java.util.List;

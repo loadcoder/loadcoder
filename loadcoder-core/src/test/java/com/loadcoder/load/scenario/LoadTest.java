@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 - 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -20,10 +20,7 @@ package com.loadcoder.load.scenario;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.StopDesisions.duration;
-import static com.loadcoder.statics.StopDesisions.iterations;
-import static com.loadcoder.statics.Time.PER_SECOND;
-import static com.loadcoder.statics.Time.SECOND;
+import static com.loadcoder.statics.Statics.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;

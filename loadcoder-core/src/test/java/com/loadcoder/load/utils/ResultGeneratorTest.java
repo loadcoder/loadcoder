@@ -20,8 +20,7 @@ package com.loadcoder.load.utils;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.Time.MINUTE;
-
+import static com.loadcoder.statics.Statics.*;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;

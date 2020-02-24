@@ -23,32 +23,32 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateTimeUtil {
-
-	private static final String DATETIME_FORMAT_DEFAULT = "yyyyMMdd-HHmmss";
-
-	private static final SimpleDateFormat SIMPLEDATEFORMAT_DEFAULT = new SimpleDateFormat(DATETIME_FORMAT_DEFAULT);
-
-	/**
-	 * Get a formatted String of the date equivalent to the timestamp. The used
-	 * format is yyyyMMdd-HHmmss
-	 * 
-	 * @param timestamp is the timestamp in milliseconds
-	 * @return a formatted String of the Date and Time
-	 */
-	public static String convertMilliSecondsToFormattedDate(long timestamp) {
-		return convertMilliSecondsToFormattedDate(timestamp, SIMPLEDATEFORMAT_DEFAULT);
-	}
-
-	/**
-	 * Get a formatted String of the date equivalent to the timestamp.
-	 * 
-	 * @param timestamp is the timestamp in milliseconds
-	 * @param simpleDateFormat is the format
-	 * @return a formatted String of the Date and Time
-	 */
-	public static String convertMilliSecondsToFormattedDate(long timestamp, SimpleDateFormat simpleDateFormat) {
-		Timestamp ts = new Timestamp(timestamp);
-		Date date = new Date(ts.getTime());
-		return simpleDateFormat.format(date);
-	}
+//
+//	private static final String DATETIME_FORMAT_DEFAULT = "yyyyMMdd-HHmmss";
+//
+//	private static final SimpleDateFormat SIMPLEDATEFORMAT_DEFAULT = new SimpleDateFormat(DATETIME_FORMAT_DEFAULT);
+//
+//	/**
+//	 * Get a formatted String of the date equivalent to the timestamp. The used
+//	 * format is yyyyMMdd-HHmmss
+//	 * 
+//	 * @param timestamp is the timestamp in milliseconds
+//	 * @return a formatted String of the Date and Time
+//	 */
+//	public static String convertMilliSecondsToFormattedDate(long timestamp) {
+//		return convertMilliSecondsToFormattedDate(timestamp, SIMPLEDATEFORMAT_DEFAULT);
+//	}
+//
+//	/**
+//	 * Get a formatted String of the date equivalent to the timestamp.
+//	 * 
+//	 * @param timestamp is the timestamp in milliseconds
+//	 * @param simpleDateFormat is the format
+//	 * @return a formatted String of the Date and Time
+//	 */
+//	public static String convertMilliSecondsToFormattedDate(long timestamp, SimpleDateFormat simpleDateFormat) {
+//		Timestamp ts = new Timestamp(timestamp);
+//		Date date = new Date(ts.getTime());
+//		return simpleDateFormat.format(date);
+//	}
 }

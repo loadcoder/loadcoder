@@ -21,30 +21,32 @@ package com.loadcoder.load.anotherthirtpartypackage;
 import static com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+//import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
+//import static com.loadcoder.statics.ThrottleMode.SHARED;
+//import static com.loadcoder.statics.Time.PER_MINUTE;
+//import static com.loadcoder.statics.Time.PER_SECOND;
+//import static com.loadcoder.statics.Time.SECOND;
+import static com.loadcoder.statics.Statics.PER_MINUTE;
+import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.PER_THREAD;
+import static com.loadcoder.statics.Statics.SECOND;
+import static com.loadcoder.statics.Statics.SHARED;
 import static com.loadcoder.statics.StopDesisions.duration;
-import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
-import static com.loadcoder.statics.ThrottleMode.SHARED;
-import static com.loadcoder.statics.Time.PER_MINUTE;
-import static com.loadcoder.statics.Time.PER_SECOND;
-import static com.loadcoder.statics.Time.SECOND;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.TestUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.result.Summary.SummaryResultCalculator;
 import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
@@ -56,81 +58,14 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
-import com.loadcoder.result.clients.GrafanaClient;
-import com.loadcoder.result.clients.InfluxDBClient;
-//import com.loadcoder.result.clients.ValueCal;
-import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.statics.SummaryUtils;
-import com.loadcoder.statics.ThrottleMode;
-import com.loadcoder.statics.Time;
 
 public class FullTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(FullTest.class);
 
 	@Test(groups = "manual")
-	public void summaryTest() {
-
-		long now = System.currentTimeMillis();
-
-		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
-		InfluxDBTestExecution exe = influxClient.createTestExecution("unique_id2");
-
-		Map<String, List<TransactionExecutionResult>> summaryMap = new HashMap<String, List<TransactionExecutionResult>>();
-
-		Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-		map.put("foo", new ArrayList<TransactionExecutionResult>());
-
-		map.get("foo").add(new TransactionExecutionResult(now, 127, true, null));
-
-		SummaryResultCalculator avg = SummaryUtils.averageResult();
-
-		map.keySet().stream().forEach(key -> {
-			double s = avg.calculateValue(key, map.get(key));
-			List<TransactionExecutionResult> l = new ArrayList<TransactionExecutionResult>();
-			summaryMap.put(key, l);
-			l.add(new TransactionExecutionResult(now, (long) s, true, null));
-		});
-		exe.writeTransactions(summaryMap);
-	}
-
-	@Test(groups = "manual")
-	public void testInflux(Method method) {
-		File dir = getNewLogDir(rootResultDir, method.getName());
-		setResultDestination(dir);
-
-		String grafanaInfluxDataSource = "influx-rpi";
-		SUT sut = new SUT();
-
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("getCustomer", () -> sut.methodWhereResponseTimeFollowSomeKindOfPattern(sut, 100, 800)).perform();
-				load("updateCustomer", () -> sut.methodWhereResponseTimeFollowSomeKindOfPattern(200, 400)).perform();
-
-			}
-		};
-
-		// default Grafana authentication
-		String authenticationValue = "Basic YWRtaW46YWRtaW4=";
-
-		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
-		InfluxDBTestExecution exe = influxClient.createTestExecution();
-		GrafanaClient grafanaClient = new GrafanaClient("localhost", 3000, false, authenticationValue);
-		Load l = new LoadBuilder(ls).stopDecision(duration(15 * SECOND)).rampup(6 * SECOND)
-				.throttle(3, Time.PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(20).build();
-
-		FinishedExecution finished = new ExecutionBuilder(l)
-				.storeAndConsumeResultRuntime((result) -> exe.writeTransactions(result)).build().execute().andWait();
-		Result result = finished.getReportedResultFromResultFile();
-		grafanaClient.createNewDashboardFromResult(method.getName(), result, grafanaInfluxDataSource);
-	}
-
-	@Test(groups = "manual")
 	public void create(Method method) {
-
-//		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
 		LoadScenario s = new LoadScenario() {
 

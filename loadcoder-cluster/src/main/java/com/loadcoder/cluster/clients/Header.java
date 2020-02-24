@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result.clients;
+package com.loadcoder.cluster.clients;
 
 public class Header {
 	String name;
 	String value;
-	protected Header(String name, String value){
+	public Header(String name, String value){
 		this.name = name;
 		this.value = value;
 	}

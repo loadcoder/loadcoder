@@ -18,10 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.StopDesisions.iterations;
-import static com.loadcoder.statics.ThrottleMode.*;
-import static com.loadcoder.statics.Time.*;
-import static com.loadcoder.statics.Time.SECOND;
+import static com.loadcoder.statics.Statics.*;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;

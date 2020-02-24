@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,27 +16,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result.clients;
+package com.loadcoder.cluster.clients.grafana;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.result.Result;
-import com.loadcoder.result.ResultExtension;
-import com.loadcoder.result.TransactionExecutionResult;
-import com.loadcoder.result.clients.DateTimeUtil;
-import com.loadcoder.result.clients.GrafanaClient;
-import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
+import com.loadcoder.cluster.clients.HttpResponse;
+import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.grafana.dto.Folder;
+import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.utils.DateTimeUtil;
 
-public class GrafanaClientTest {
+public class GrafanaClientTest extends TestNGBase {
+
+	/**
+	 * This test creates a new dashbord in Grafana. Since Grafana needs to be
+	 * available, this test is manual Run the test, then log in to Grafana and see
+	 * if a Dashboard has been created.
+	 */
+	@Test(groups = "manual")
+	public void listAndCreateDataSource(Method method) {
+
+		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		// base64 encoded default grafana user:password
+		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
+		GrafanaClient cli = new GrafanaClient(dockerClusterClient, false, authorizationValue);
+		List<String> responseBody = cli.listDataSources();
+
+		HttpResponse responseCode = cli.createDataSource("listAndCreateDataSource2");
+		assertEquals(responseCode, 200);
+
+		System.out.println("done");
+	}
 
 	/**
 	 * This test creates a new dashbord in Grafana. Since Grafana needs to be
@@ -46,28 +63,15 @@ public class GrafanaClientTest {
 	@Test(groups = "manual")
 	public void createDashboard(Method method) {
 
+		DockerClusterClient dockerClusterClient = new DockerClusterClient();
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
-		GrafanaClient cli = new GrafanaClient("localhost", 3000, false, authorizationValue);
-		int responseCode = cli.createNewDashboard(method.getName(), "unique_id2", Arrays.asList("foo"),
-				"\"gdev-influxdb\"");
-		assertEquals(responseCode, 200);
+		GrafanaClient cli = new GrafanaClient(dockerClusterClient, false, authorizationValue);
 
-	}
-
-	@Test(groups = "manual")
-	public void addPointsToExistingChart(Method method) {
-
-		long end = System.currentTimeMillis();
-		Map<String, List<TransactionExecutionResult>> list = new HashMap<String, List<TransactionExecutionResult>>();
-		list.put("foo", Arrays.asList(new TransactionExecutionResult("foo", end - 10_000, 5, true, null)));
-
-		// base64 encoded default grafana user:password
-		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
-
-		InfluxDBClient influxClient = new InfluxDBClient("localhost", 8086, false, "stefansDB");
-		InfluxDBTestExecution exe = influxClient.createTestExecution("unique_id1");
-		exe.writeTransactions(list);
+		List<Folder> folders = cli.listDashboardFolders();
+		HttpResponse responseCode = cli.createNewDashboard(folders.get(0), method.getName(), Arrays.asList("foo"),
+				"stefan2");
+		assertEquals(responseCode.getStatusCode(), 200);
 
 	}
 

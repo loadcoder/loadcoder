@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result.clients;
+package com.loadcoder.cluster.clients;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -34,27 +35,66 @@ public class HttpClient {
 		return https ? "https" : "http";
 	}
 
-	protected int sendPost(String body, String url, List<Header> headers) {
+	protected HttpResponse sendPost(String body, String url, List<Header> headers) {
 		try {
-			return sendPostChecked(body, url, headers);
+			return sendChecked(body, url, "POST", headers);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected int sendPostChecked(String body, String url, List<Header> headers) throws Exception {
+	protected HttpResponse sendGet(String url, List<Header> headers) {
+		try {
+			return get(url, "GET", headers);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected HttpResponse get(String url, String httpVerb, List<Header> headers) {
+		try {
+			URL yahoo = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) yahoo.openConnection();
+			headers.stream().forEach(header -> con.setRequestProperty(header.getName(), header.getValue()));
+
+			int responseCode = con.getResponseCode();
+
+			InputStream is;
+			if (responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
+				is = con.getInputStream();
+			} else {
+				/* error from server */
+				is = con.getErrorStream();
+			}
+			BufferedReader in = new BufferedReader(new InputStreamReader(is));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null)
+				response.append(inputLine);
+//				System.out.println(inputLine);
+			in.close();
+			return new HttpResponse().setBody(response.toString()).setStatusCode(responseCode);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected HttpResponse sendChecked(String body, String url, String httpVerb, List<Header> headers) throws Exception {
 
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-		con.setRequestMethod("POST");
+		con.setRequestMethod(httpVerb);
 		// add reuqest header
 		headers.stream().forEach(header -> con.setRequestProperty(header.getName(), header.getValue()));
 
 		// Send post request
 		con.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(body);
+		if (body != null) {
+			wr.writeBytes(body);
+		}
 		wr.flush();
 		wr.close();
 
@@ -76,7 +116,7 @@ public class HttpClient {
 		}
 		in.close();
 
-		return responseCode;
+		return new HttpResponse().setBody(response.toString()).setStatusCode(responseCode);
 	}
 
 }

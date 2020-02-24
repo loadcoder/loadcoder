@@ -1,0 +1,11 @@
+<server>
+  <id>jfrog</id>
+  <username>mavenuser</username>
+  <password>password</password>
+</server>
+
+<server>
+  <id>snapshots</id>
+  <username>mavenuser</username>
+  <password>password</password>
+</server>

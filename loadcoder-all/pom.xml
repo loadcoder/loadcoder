@@ -25,6 +25,12 @@
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-cluster</artifactId>
+		</dependency>
+		
 	</dependencies>
 
 </project>

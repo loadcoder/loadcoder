@@ -25,7 +25,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influx-rpi",
+      "datasource": "${datasource}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -45,7 +45,7 @@
       },
       "lines": true,
       "linewidth": 2,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "percentage": false,
       "pointradius": 1,
       "points": false,
@@ -138,6 +138,8 @@
   "title": "${title}",
   "uid": "ZxaxVDTmk${requestid}",
   "version": 2
-}
+},
+
+"folderId": ${folder.id}
 }
 

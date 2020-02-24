@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
+@Deprecated
 public enum ThrottleMode {
 	
 	

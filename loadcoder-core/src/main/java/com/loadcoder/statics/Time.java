@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
-
+@Deprecated
 public class Time { 
 	
 	/**

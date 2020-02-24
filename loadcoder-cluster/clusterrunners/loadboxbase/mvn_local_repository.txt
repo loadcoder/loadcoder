@@ -1,0 +1,1 @@
+<localRepository>/root/docker_mavenrepo</localRepository>

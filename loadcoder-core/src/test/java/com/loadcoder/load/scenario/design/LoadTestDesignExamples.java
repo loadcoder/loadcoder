@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario.design;
 
+import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.SHARED;
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
@@ -27,14 +29,10 @@ import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.Scenario;
-import com.loadcoder.load.scenario.StopDecision;
 import com.loadcoder.load.scenario.LoadScenarioTyped;
+import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.StopDecisions;
-import com.loadcoder.statics.ThrottleMode;
-import com.loadcoder.statics.Time;
-import com.loadcoder.statics.TimeUnit;
 
 public class LoadTestDesignExamples {
 
@@ -229,7 +227,7 @@ public class LoadTestDesignExamples {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).throttle(10, Time.PER_SECOND, ThrottleMode.SHARED)
+		Load l = new LoadBuilder(ls).throttle(10, PER_SECOND, SHARED)
 				.stopDecision(StopDecisions.iterations(5)).build();
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l).storeResultRuntime().build().execute().andWait();

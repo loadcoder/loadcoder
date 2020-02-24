@@ -20,26 +20,28 @@ package com.loadcoder.statics;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.result.Logs;
+import com.loadcoder.utils.DateTimeUtil;
 
 public class LogbackLogging extends Logs {
 
-	private static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
-
 	/**
+	 * Deprecated. Use com.loadcoder.utils.DateTimeUtil:setDateTimeFormatter instead.
+	 * 
+	 * 
 	 * Changes the static date and time format of the directory that the method
 	 * {@code getNewLogDir} creates
 	 * 
 	 * @param dateTimeFormatter is the format to be changed to
 	 */
+	@Deprecated
 	public static void setDateTimeFormatter(DateTimeFormatter dateTimeFormatter) {
-		format = dateTimeFormatter;
+		DateTimeUtil.setDateTimeFormatter(dateTimeFormatter);
 	}
 
 	/**
@@ -108,8 +110,7 @@ public class LogbackLogging extends Logs {
 	 *         {@code dirForAllLogs/<date and time>(-<unique modifier>)}
 	 */
 	public static File getNewLogDir(String dirForAllLogs) {
-		LocalDateTime timePoint = LocalDateTime.now();
-		String dateTime = timePoint.format(format);
+		String dateTime = DateTimeUtil.getDateTimeNowString();
 
 		File logDir = new File(dirForAllLogs + "/" + dateTime);
 

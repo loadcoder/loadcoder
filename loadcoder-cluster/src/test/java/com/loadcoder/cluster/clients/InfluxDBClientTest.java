@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.result.clients;
+package com.loadcoder.cluster.clients;
 
 import static org.testng.Assert.assertEquals;
 
@@ -27,9 +27,9 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
+import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.result.TransactionExecutionResult;
-import com.loadcoder.result.clients.InfluxDBClient;
-import com.loadcoder.result.clients.InfluxDBClient.InfluxDBTestExecution;
 
 public class InfluxDBClientTest {
 
@@ -42,7 +42,32 @@ public class InfluxDBClientTest {
 		transactions.put("hej",
 				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
 
-		responseCode = exe.writeTransactions(transactions);
+		HttpResponse resp = exe.writeTransactions(transactions);
 		assertEquals(responseCode, 204);
 	}
+	
+	
+	@Test(groups = "manual")
+	public void createTheSameDBAgain() {
+		String dbName = "foo"+System.currentTimeMillis();
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+		HttpResponse resp = cli.createDB();
+		assertEquals(resp.getStatusCode(), 200);
+		HttpResponse resp2= cli.createDB();
+		assertEquals(resp2.getStatusCode(), 409);
+	}
+	
+	@Test(groups = "manual")
+	public void testShowMeasurements() {
+		String dbName= "stefan";
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+		List<String> measurements = cli.showMeasurements();
+	}
+	
+	@Test(groups = "manual")
+	public void testDistinctTransactions() {
+		String dbName= "stefan";
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+	}
+	
 }
