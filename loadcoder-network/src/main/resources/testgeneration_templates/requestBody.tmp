@@ -1,0 +1,1 @@
+final RequestBody ${requestbody_variable} = RequestBody.create(MediaType.get("${mediatype}"), getFileContent("${body_file}"));

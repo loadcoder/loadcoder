@@ -20,6 +20,7 @@
 		<module>loadcoder-chart</module>
 		<module>loadcoder-log</module>
 		<module>loadcoder-cluster</module>
+		<module>loadcoder-network</module>
 		<module>loadcoder-all</module>
 	</modules>
 
