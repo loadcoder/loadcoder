@@ -1,0 +1,25 @@
+package ${package};
+
+import com.loadcoder.load.scenario.Scenario;
+import com.loadcoder.load.scenario.design.TypeInstanceBase;
+
+import okhttp3.OkHttpClient;
+
+public class ThreadInstance extends TypeInstanceBase {
+
+	final ScenarioLogic scenarioLogic;
+	final OkHttpClient client;
+	public ThreadInstance(Scenario theActualScenario) {
+		super(theActualScenario);
+		client = new OkHttpClient();
+		scenarioLogic = new ScenarioLogic(this);
+	}
+
+	public ScenarioLogic getScenarioLogic() {
+		return scenarioLogic;
+	}
+	
+	public OkHttpClient getHttpClient() {
+		return client;
+	}
+}
