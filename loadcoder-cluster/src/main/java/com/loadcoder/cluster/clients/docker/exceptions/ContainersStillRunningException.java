@@ -18,8 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.docker.exceptions;
 
-public class ContainersStillRunningException extends RuntimeException{
-	
+public class ContainersStillRunningException extends RuntimeException {
+
 	private static final long serialVersionUID = 1L;
 
 	public ContainersStillRunningException(String message) {

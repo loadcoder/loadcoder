@@ -21,15 +21,16 @@ package com.loadcoder.cluster.clients;
 public class Header {
 	String name;
 	String value;
-	public Header(String name, String value){
+
+	public Header(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}
-	
+
 	protected String getName() {
 		return name;
 	}
-	
+
 	protected String getValue() {
 		return value;
 	}

@@ -39,13 +39,12 @@ public class InfluxDBClientTest {
 		InfluxDBTestExecution exe = cli.createTestExecution("foo" +System.currentTimeMillis());
 		int responseCode = -1;
 		Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
-		transactions.put("hej",
+		transactions.put("hello",
 				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
 
 		HttpResponse resp = exe.writeTransactions(transactions);
 		assertEquals(responseCode, 204);
 	}
-	
 	
 	@Test(groups = "manual")
 	public void createTheSameDBAgain() {
@@ -59,14 +58,14 @@ public class InfluxDBClientTest {
 	
 	@Test(groups = "manual")
 	public void testShowMeasurements() {
-		String dbName= "stefan";
+		String dbName= "foo";
 		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
 		List<String> measurements = cli.showMeasurements();
 	}
 	
 	@Test(groups = "manual")
 	public void testDistinctTransactions() {
-		String dbName= "stefan";
+		String dbName= "foo";
 		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
 	}
 	

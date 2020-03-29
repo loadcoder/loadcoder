@@ -18,48 +18,30 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.docker;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Node {
+import com.loadcoder.cluster.clients.docker.DockerClusterClient.MasterContainerSetupable;
 
-	String id;
-	String host;
-	String containerHost;
+public enum MasterContainers{
+	
+	
+	LOADSHIP((client)->{
+		Map<String, String> loadshipMap = new HashMap<>();
+		loadshipMap.put("HTTP_ENABLED", "true");
+		loadshipMap.put("MODECHOOSER", "LOADSHIP");
+		client.setupMasterContainer("loadship", loadshipMap, "6210");}), 
+	INFLUXDB((client)->{client.setupMasterContainer("influxdb", null, "8086");}),
+	GRAFANA((client)->{client.setupMasterContainer("grafana", null, "3000");}),
+	ARTIFACTORY((client)->{client.setupMasterContainer("artifactory", null, "8081");});
 
-	int port;
-
-	DockerClient dockerClient;
-
-	public Node(String id, String host, int port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
-
-		this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
+	MasterContainerSetupable masterContainerSetupable;
+	
+	MasterContainers(MasterContainerSetupable masterContainerSetupable){
+		this.masterContainerSetupable = masterContainerSetupable;
 	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public DockerClient getDockerClient() {
-		return dockerClient;
-	}
-
-	public String getContainerHost() {
-		return containerHost;
-	}
-
-	public void setContainerHost(String containerHost) {
-		this.containerHost = containerHost;
+	
+	MasterContainerSetupable getMasterContainerSetupable(){
+		return masterContainerSetupable;
 	}
 }

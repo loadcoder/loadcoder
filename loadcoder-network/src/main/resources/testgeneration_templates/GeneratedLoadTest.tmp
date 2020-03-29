@@ -2,9 +2,9 @@ package ${package};
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.StopDecisions.*;
+import static com.loadcoder.statics.Statics.*;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.scenario.ExecutionBuilder;
@@ -14,6 +14,8 @@ import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.SummaryUtils;
+
+${importList}
 
 public class GeneratedLoadTest {
 
@@ -53,17 +55,16 @@ public class GeneratedLoadTest {
 			}
 		};
 
-		Load load = new LoadBuilder(loadScenario).amountOfThreads(1)
-				.stopDecision(iterations(1)).build();
+		Load load = new LoadBuilder(loadScenario)
+		${loadBuilder}
+		.build();
 
-		RuntimeChart runtimeChart = new RuntimeChart();
-
-		Result result = new ExecutionBuilder(load).storeAndConsumeResultRuntime(runtimeChart).build().execute()
-				.andWait().getReportedResultFromResultFile();
+		Result result = new ExecutionBuilder(load)
+		${storeAndConsumeResultRuntime}
+		.build().execute()
+		.andWait().getReportedResultFromResultFile();
 
 		SummaryUtils.printSimpleSummary(result, "Greetings loadtest");
-
-		runtimeChart.waitUntilClosed();
 
 	}
 

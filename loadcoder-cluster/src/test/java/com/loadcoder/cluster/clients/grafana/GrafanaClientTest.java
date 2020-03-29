@@ -51,8 +51,6 @@ public class GrafanaClientTest extends TestNGBase {
 
 		HttpResponse responseCode = cli.createDataSource("listAndCreateDataSource2");
 		assertEquals(responseCode, 200);
-
-		System.out.println("done");
 	}
 
 	/**
@@ -70,7 +68,7 @@ public class GrafanaClientTest extends TestNGBase {
 
 		List<Folder> folders = cli.listDashboardFolders();
 		HttpResponse responseCode = cli.createNewDashboard(folders.get(0), method.getName(), Arrays.asList("foo"),
-				"stefan2");
+				"bar");
 		assertEquals(responseCode.getStatusCode(), 200);
 
 	}

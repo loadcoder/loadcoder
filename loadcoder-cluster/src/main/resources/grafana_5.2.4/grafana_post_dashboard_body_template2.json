@@ -260,6 +260,7 @@
       },
       "hideTimeOverride": false,
       "id": 2,
+      "interval": "3s",
       "legend": {
         "avg": false,
         "current": false,
@@ -282,87 +283,7 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "/^$Execution$/",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") as getCustomer FROM /^$Execution$/ WHERE (\"transaction\" = 'getCustomer') AND $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "transaction",
-              "operator": "=",
-              "value": "getCustomer"
-            }
-          ]
-        },
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") as updateCustomer FROM /^$Execution$/ WHERE (\"transaction\" = 'updateCustomer') AND $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
+     	${targets}
       ],
       "thresholds": [],
       "timeFrom": null,
@@ -419,6 +340,7 @@
         "y": 13
       },
       "id": 4,
+      "interval": "4s",
       "legend": {
         "avg": false,
         "current": false,
@@ -521,7 +443,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -552,7 +474,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {

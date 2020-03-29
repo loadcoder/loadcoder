@@ -20,6 +20,7 @@ package com.loadcoder.cluster.clients.influxdb;
 
 import static com.loadcoder.statics.Statics.getConfiguration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,8 +37,10 @@ import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.DockerClusterClient;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.load.scenario.RuntimeResultConsumer;
+import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.utils.DateTimeUtil;
+import com.loadcoder.utils.FileUtil;
 
 import net.minidev.json.JSONArray;
 
@@ -50,9 +53,10 @@ public class InfluxDBClient extends HttpClient{
 	private final static String QUERY_URL_TEMPLATE = "%s://%s:%s/query";
 	private final static String DB_NAME_TEMPLATE = "%s__%s";
 	
+	public static CodeGeneratable influxReporter(String groupName, String testName) {
+		return codeTemplate -> InfluxDBClient.generateCodeCallStoreAndConsumeResultRuntime(codeTemplate, groupName, testName);
+	}
 	
-	
-//	private final static String WRITE_ENTRY_BODY_TEMPLATE = "%s,execution=%s value=%s %s000000";
 	private final static String WRITE_ENTRY_BODY_TEMPLATE = "%s,transaction=%s,status=%s value=%s %s000000";
 	
 	private final String WRITE_URL;
@@ -73,21 +77,17 @@ public class InfluxDBClient extends HttpClient{
 	}
 	
 	public InfluxDBClient(DockerClusterClient client, String testGroup, String testName) {
-		this(client.getMasterNode().getHost(), getConfiguration("influx.port"), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
+		this(client.getMasterNode().getHost(), getConfiguration("influxdb.port"), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
 	}
 
 	public InfluxDBClient(String host, String port, boolean https, String db) {
 		this(host, Integer.parseInt(port), https, db);
 	}
 	
-//	public static InfluxDBClient getInfluxDBClient() {
-//		return getInfluxDBClient();
-//	}
-	
 	public static InfluxDBClient getInfluxDBClient(DockerClusterClient dockerClusterClient, String dbName) {
 		InfluxDBClient influxClient = new InfluxDBClient(
 				dockerClusterClient.getMasterNode().getHost(),
-				getConfiguration("influx.port"), false, dbName);
+				getConfiguration("influxdb.port"), false, dbName);
 		return influxClient;
 	}
 	
@@ -95,7 +95,7 @@ public class InfluxDBClient extends HttpClient{
 		
 		String dbName = String.format(DB_NAME_TEMPLATE, testGroup, testName);
 		
-		InfluxDBClient influxClient = new InfluxDBClient(dockerClusterClient.getMasterNode().getHost(), getConfiguration("influx.port"), false, dbName);
+		InfluxDBClient influxClient = new InfluxDBClient(dockerClusterClient.getMasterNode().getHost(), getConfiguration("influxdb.port"), false, dbName);
 		List<String> databases = influxClient.listDatabases();
 		if(!databases.contains(dbName)) {
 			
@@ -121,7 +121,7 @@ public class InfluxDBClient extends HttpClient{
 		String body = String.format("q=CREATE DATABASE %s", dbName);
 		return sendPost(body, QUERY_URL, Arrays.asList());
 	}
-//{"results":[{"series":[{"name":"measurements","columns":["name"],"values":[["foo"],["greeting"]]}]}]}
+
 	public List<String> showMeasurements() {
 		List<String> result = new ArrayList<String>();
 		String body = String.format("q=SHOW MEASUREMENTS ON %s", dbName);
@@ -167,8 +167,6 @@ public class InfluxDBClient extends HttpClient{
 		return new InfluxDBTestExecution(executionId, this);
 	}
 	
-	
-	
 	/**
 	 * Class that keeps the influxDB connection together with the current execution
 	 */
@@ -186,7 +184,6 @@ public class InfluxDBClient extends HttpClient{
 			this.executionId = null;
 		}
 		
-		
 		/**
 		 * Write a list of transaction results into the influx DB
 		 * @param transactionResults that is going be be written into the influx DB
@@ -199,7 +196,6 @@ public class InfluxDBClient extends HttpClient{
 		}
 		
 		protected String convertTransactionsToWriteBody(Map<String, List<TransactionExecutionResult>> transactionResults, String executionId) {
-//			String entireBody = "";
 			if(executionId == null || executionId.isEmpty()) {
 				throw new RuntimeException("ExecutionId is null or empty");
 			}
@@ -209,14 +205,34 @@ public class InfluxDBClient extends HttpClient{
 				for (TransactionExecutionResult t : list) {
 					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, executionId, key, t.isStatus(), t.getValue(), t.getTs());
 					
-//					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, key, executionId, t.getValue(), t.getTs());
-//					entireBody = entireBody + urlParameters + "\n";
 					builder.append(urlParameters);
 					builder.append("\n");
 				}
 			}
 			return builder.toString();
 		}
+	}
+	
+	/**
+	 * Generates the code for the storeAndConsumeResultRuntime call where the results are sent to a InfluxDB
+	 * @param originalCode
+	 * @param groupName
+	 * @param testName
+	 * @return
+	 */
+	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode, String groupName, String testName) {
+		String result = originalCode;
+		File f = FileUtil.getFileFromResources("cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
+		String testContent = FileUtil.readFile(f);
+		testContent = testContent.replace("${groupName}", groupName);
+		testContent = testContent.replace("${testName}", testName);
+		
+		result = result.replace("${storeAndConsumeResultRuntime}", testContent);
+
+		result = result.replace("${importList}", "import com.loadcoder.cluster.clients.docker.DockerClusterClient;\n${importList}");
+		result = result.replace("${importList}", "import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;\n${importList}");
+		
+		return result;
 	}
 
 }

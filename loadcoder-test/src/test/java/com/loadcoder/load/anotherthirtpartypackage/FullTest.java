@@ -424,10 +424,16 @@ public class FullTest extends TestNGBase {
 
 			@Override
 			public void loadScenario() {
-
+				
 				load("get", () -> {
+					
 					sut.methodWhereResponseTimeFollowSomeKindOfPattern(sut);
+					
 				}).handleResult((a) -> {
+					
+					if(a.getResponseTime() >300 ) {
+						a.setStatus(false);
+					}
 				}).perform();
 				load("create", () -> {
 					sut.methodWhereResponseTimeFollowSomeKindOfPattern2(this);
@@ -447,10 +453,19 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(900 * SECOND)).amountOfThreads(10).rampup(10 * SECOND)
+		Load l = new LoadBuilder(s)
+				.stopDecision((a,b)->{
+					return false;
+				})
+				
+				.amountOfThreads(2000)
+				.throttle(10, PER_MINUTE, PER_THREAD)
+				
+				.rampup(10 * SECOND)
 				.build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
+		FinishedExecution finished = new ExecutionBuilder(l)
+				.storeAndConsumeResultRuntime(runtimeChart).build()
 				.execute().andWait();
 
 		Result result = finished.getReportedResultFromResultFile();

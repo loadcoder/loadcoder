@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>loadcoder-network</artifactId>
+	<artifactId>loadcoder-cluster</artifactId>
 	<packaging>jar</packaging>
-	<name>LoadCoder Network</name>
+	<name>LoadCoder Cluster</name>
 	<url>http://loadcoder.com</url>
 
 	<description>This project contains the core features in Loadcoder</description>
@@ -19,21 +19,34 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.9.9</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 		</dependency>
-
+		
+		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
 		<dependency>
-			<groupId>de.sstoehr</groupId>
-			<artifactId>har-reader</artifactId>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java</artifactId>
+			<version>3.1.5</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
@@ -45,23 +58,6 @@
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-chart</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-logback</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-testutilities</artifactId>
-			<scope>test</scope>
-		</dependency>
-		
 	</dependencies>
 
 	<build>

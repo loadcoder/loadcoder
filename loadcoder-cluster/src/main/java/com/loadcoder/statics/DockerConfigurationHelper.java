@@ -38,7 +38,6 @@ public class DockerConfigurationHelper {
 				result.add(id);
 			}
 		});
-
 		return result;
 	}
 }

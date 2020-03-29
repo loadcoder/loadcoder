@@ -72,7 +72,6 @@ public class HttpClient {
 
 			while ((inputLine = in.readLine()) != null)
 				response.append(inputLine);
-//				System.out.println(inputLine);
 			in.close();
 			return new HttpResponse().setBody(response.toString()).setStatusCode(responseCode);
 		} catch (Exception e) {

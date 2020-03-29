@@ -22,21 +22,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class PackageSender {
+
+	static OkHttpClient client = new OkHttpClient();
 
 	public static byte[] readFileAsPackage(File file) {
 
@@ -50,65 +43,40 @@ public class PackageSender {
 
 	public static void performPOSTRequest(String urlString, byte[] body) {
 
-		RestTemplate t = getRestTemplateIgnoringTLS();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Content-type", "application/octet-stream; charset=utf-8");
-		HttpEntity<byte[]> ent = new HttpEntity<>(body);
-		t.exchange(urlString, HttpMethod.POST, ent, String.class);
-		
-		System.out.println("done");
-//		("Content-type", "application/octet-stream; charset=utf-8");
-
-	}
-	
-	static RestTemplate getRestTemplateIgnoringTLS(){
+		final RequestBody reqBody19 = RequestBody.create(MediaType.get("application/octet-stream; charset=utf-8"),
+				body);
+		final Request request19 = new Request.Builder().url(urlString).method("POST", reqBody19).build();
 		try {
-			TrustStrategy acceptingTrustStrategy = (chain, authType) -> {
-				return true;
-			};
-			SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-
-			LayeredConnectionSocketFactory layeredConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
-
-			CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(layeredConnectionSocketFactory)
-					.build();
-
-			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-
-			requestFactory.setHttpClient(client);
-			RestTemplate restTemplate = new RestTemplate(requestFactory);
-			return restTemplate;
-		} catch (Exception e) {
+			client.newCall(request19).execute();
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	
-	
-    public static File findFile(String directory, String fileNameRegExpMatcher) {
-        // Creates an array in which we will store the names of files and directories
-        String[] pathnames;
+	public static File findFile(String directory, String fileNameRegExpMatcher) {
+		// Creates an array in which we will store the names of files and directories
+		String[] pathnames;
 
-        // Creates a new File instance by converting the given pathname string
-        // into an abstract pathname
-        File f = new File(directory);
-        if(!f.exists()) {
-    		throw new RuntimeException("Directory " + f.getPath() + " does not exist");
-        }
-        
-        // Populates the array with names of files and directories
-        pathnames = f.list();
+		// Creates a new File instance by converting the given pathname string
+		// into an abstract pathname
+		File f = new File(directory);
+		if (!f.exists()) {
+			throw new RuntimeException("Directory " + f.getPath() + " does not exist");
+		}
 
-        // For each pathname in the pathnames array
-        for (String pathname : pathnames) {
-        	if(pathname.matches(fileNameRegExpMatcher)) {
-        		File foundFile = new File(f, pathname);
-        		if(foundFile.exists()) {
-        			return foundFile;
-        		}
-        	}
-        }
-		throw new RuntimeException("Could not found a file with name matching " + fileNameRegExpMatcher + " in directory " + f.getPath());
-    }
+		// Populates the array with names of files and directories
+		pathnames = f.list();
+
+		// For each pathname in the pathnames array
+		for (String pathname : pathnames) {
+			if (pathname.matches(fileNameRegExpMatcher)) {
+				File foundFile = new File(f, pathname);
+				if (foundFile.exists()) {
+					return foundFile;
+				}
+			}
+		}
+		throw new RuntimeException(
+				"Could not found a file with name matching " + fileNameRegExpMatcher + " in directory " + f.getPath());
+	}
 }

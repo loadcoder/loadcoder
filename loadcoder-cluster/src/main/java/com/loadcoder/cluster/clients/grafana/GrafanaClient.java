@@ -56,7 +56,6 @@ public class GrafanaClient extends HttpClient {
 	private Logger log = LoggerFactory.getLogger(GrafanaClient.class);
 
 	protected static final String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.000";
-//	protected static final String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd-hh:mm:ss.000";
 
 	protected static final DateTimeFormatter TIMESPAN_FORMAT = DateTimeFormatter.ofPattern(
 			GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
@@ -70,6 +69,8 @@ public class GrafanaClient extends HttpClient {
 
 	private static final long TIMESPAN_MILLIS_PRECREATED_DASHBOARD = 50_000;
 
+	private List<Type> types = Arrays.asList(new Type("mean", "A"));
+	
 	private final String authorizationValue;
 
 	/**
@@ -93,9 +94,6 @@ public class GrafanaClient extends HttpClient {
 	public GrafanaClient(DockerClusterClient dockerClusterClient, boolean https, String authorizationValue) {
 		this(dockerClusterClient.getMasterNode().getHost(), https, authorizationValue);
 	}
-//	public GrafanaClient(String host, String port, boolean https, String authorizationValue) {
-//		this(host, Integer.parseInt(port), https, authorizationValue);
-//	}
 
 	private static class Type {
 		String type;
@@ -106,8 +104,6 @@ public class GrafanaClient extends HttpClient {
 			this.refId = refId;
 		}
 	}
-
-	private List<Type> types = Arrays.asList(new Type("mean", "A"));
 
 	private String getFileAsString(String filename) {
 		InputStream in = getClass().getResourceAsStream("/" + filename);
@@ -126,35 +122,7 @@ public class GrafanaClient extends HttpClient {
 		}
 	}
 
-	private String getTargets(Set<String> measurementNames, String executionId) {
-
-		String targetTagTemplate = "";
-		if (executionId != null) {
-			targetTagTemplate = getFileAsString("grafana_5.2.4/grafana_target_tag_body_template.json");
-			targetTagTemplate = targetTagTemplate.replace("${executionid}", executionId);
-
-		}
-		String targetTemplate = getFileAsString("grafana_5.2.4/grafana_target_body_template.json");
-
-		targetTemplate = targetTemplate.replace("${tags}", targetTagTemplate);
-
-		List<String> targetsList = new ArrayList<String>();
-		for (String name : measurementNames) {
-			for (Type t : types) {
-				String target = targetTemplate.replace("${measurement_name}", name).replace("${refid}", t.refId)
-						.replace("${select_type}", t.type);
-				targetsList.add(target);
-			}
-		}
-		String result = "";
-		for (int i = 0; i < targetsList.size(); i++) {
-			String delimiter = i == targetsList.size() - 1 ? "\n" : ",\n";
-			result = result + targetsList.get(i) + delimiter;
-		}
-		return result;
-	}
-
-	public HttpResponse createNewDashboardBase(long start, long end, String name, String executionId,
+	private HttpResponse createNewDashboardBase(long start, long end, String name, String executionId,
 			Set<String> transactionNamesSet, boolean refresh, String datasource, int folderId) {
 
 		long usedEnd = (end - start) < TIMESPAN_MILLIS_PRECREATED_DASHBOARD
@@ -176,7 +144,23 @@ public class GrafanaClient extends HttpClient {
 		fileAsString = fileAsString.replace("${refresh}", refresh ? "\"5s\"" : "false");
 		fileAsString = fileAsString.replace("${folder.id}", ""+folderId);
 
-		String targets = getTargets(transactionNamesSet, executionId);
+		String targets ="";
+
+		String targetTemplate = getFileAsString("grafana_5.2.4/target_body.json");
+		List<String> targetList = new ArrayList<>();
+		transactionNamesSet.stream().forEach(transactionId-> {
+			
+			String newTarget = targetTemplate.replace("${transactionid}", transactionId);
+			targetList.add(newTarget);
+		});
+		
+		for(int i=0; i<targetList.size();i++) {
+			targets += targetList.get(i);
+			if(i != targetList.size()-1) {
+				targets += ",";
+			}
+		}
+		
 		fileAsString = fileAsString.replace("${targets}", targets);
 		fileAsString = fileAsString.replace("${requestid}", "" + System.currentTimeMillis());
 
@@ -188,7 +172,6 @@ public class GrafanaClient extends HttpClient {
 		}
 		return resp;
 	}
-
 	
 	/**
 	 * Create a new Grafana Dashboard.
@@ -208,25 +191,6 @@ public class GrafanaClient extends HttpClient {
 		long now = System.currentTimeMillis();
 		return createNewDashboardBase(now, now, dashboardName, null, transactionNamesSet, true, datasource, folder.getId());
 	}
-
-	/**
-	 * Create a new Grafana Dashboard.
-	 *  
-	 * @param name is the name of the Dashboard
-	 * @param executionId is the id for a specific set of results, for instance all results for
-	 * a particular test execution
-	 * @param transactionNames is a list of the transaction names
-	 * @return the http status code for the Grafana request
-	 */
-//	public HttpResponse createNewDashboard(String name, String executionId, List<String> transactionNames, String datasource) {
-//
-//		Set<String> transactionNamesSet = new HashSet<String>();
-//		for (String transactionName : transactionNames) {
-//			transactionNamesSet.add(transactionName);
-//		}
-//		long now = System.currentTimeMillis();
-//		return createNewDashboardBase(now, now, name, executionId, transactionNamesSet, true, datasource);
-//	}
 
 	/**
 	 * Create a new Grafana Dashboard.
@@ -268,7 +232,6 @@ public class GrafanaClient extends HttpClient {
 		});
 		
 		return result;
-//		return sendGet("http://loadcoder.com", headers);
 	}
 
 	public List<Folder> listDashboardFolders() {
@@ -287,9 +250,8 @@ public class GrafanaClient extends HttpClient {
 		}
 		
 		return result;
-//		return sendGet("http://loadcoder.com", headers);
 	}
-	
+//	String influxdbHost, String influxdbPort
 	public HttpResponse createDataSource(String datasource) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_datasource.json");
 

@@ -1,0 +1,1 @@
+				.storeAndConsumeResultRuntime(InfluxDBClient.setupInfluxDataConsumer(new DockerClusterClient(), "${groupName}", "${testName}"))

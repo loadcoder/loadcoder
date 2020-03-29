@@ -19,17 +19,18 @@
 package com.loadcoder.network;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.loadcoder.utils.FileUtil;
 
 import de.sstoehr.harreader.HarReader;
 import de.sstoehr.harreader.HarReaderException;
@@ -39,11 +40,13 @@ import de.sstoehr.harreader.model.HarHeader;
 import de.sstoehr.harreader.model.HarQueryParam;
 import de.sstoehr.harreader.model.HarRequest;
 import de.sstoehr.harreader.model.HarResponse;
+import de.sstoehr.harreader.model.HttpMethod;
 
 public class LoadTestGenerator {
 
-	static List<String> URL_MATCHERS = Arrays.asList(".*/[a-zA-Z0-9._-]*[.]{1}fileextension",
-			".*/[a-zA-Z0-9._-]*[.]{1}fileextension\\?.*");
+	private static Logger log = LoggerFactory.getLogger(LoadTestGenerator.class);
+	static List<String> URL_MATCHERS = Arrays.asList(".*/.*[.]{1}fileextension", ".*/.*[.]{1}fileextension\\?.*");
+
 	static List<String> WEBPAGES_FILTERS = Arrays.asList("html", "htm", "aspx", "php");
 
 	static List<String> staticRegexps = getStaticRegexps();
@@ -61,8 +64,14 @@ public class LoadTestGenerator {
 	final private File testDstFile;
 	final private File threadInstanceFile;
 
+	final private CodeGeneratable reporting;
+	final private CodeGeneratable loadBuilders;
+
+	final private List<String> bodyMatchers;
+
 	private LoadTestGenerator(String pathToHARFile, List<String> allowedRULStarts, String javaPackage,
-			String destinationJavaCodeDir, String destinationResourceDir, boolean allowOverwritingExistingFiles) {
+			String destinationJavaCodeDir, String destinationResourceDir, boolean allowOverwritingExistingFiles,
+			CodeGeneratable reporting, CodeGeneratable loadBuilders, List<String> bodyMatchers) {
 		this.pathToHARFile = pathToHARFile;
 		this.javaPackage = javaPackage;
 		this.destinationJavaCodeDir = destinationJavaCodeDir;
@@ -75,9 +84,53 @@ public class LoadTestGenerator {
 
 		this.matcher = getDefaultMatcher(allowedRULStarts);
 
+		this.reporting = reporting;
+		this.loadBuilders = loadBuilders;
+		this.bodyMatchers = bodyMatchers;
 	}
 
-	static Matcher getDefaultMatcher(List<String> urlShallStartWithOneOfThese) {
+	protected static String removeBasePathOfUrl(String url) {
+		String[] splitted = url.split("://", 2);
+
+		if (splitted.length != 2) {
+			return null;
+		}
+		String urlLeft = splitted[1];
+		return urlLeft.replaceFirst("[^/]*", "");
+	}
+
+	protected static String getPossibleFilenameExtension(String url) {
+		String partToUse = removeBasePathOfUrl(url);
+		String[] splitted = partToUse.split("/");
+		if (splitted.length == 0) {
+			return null;
+		}
+		partToUse = splitted[splitted.length - 1];
+
+		String[] questionmarkSplit = partToUse.split("\\?");
+		partToUse = questionmarkSplit[0];
+
+		String[] dotSplit = partToUse.split("\\.");
+		if (dotSplit.length <= 1) {
+			return null;
+		}
+
+		partToUse = dotSplit[dotSplit.length - 1];
+		if (!isStringQualifiedFilenameExtension(partToUse)) {
+			return null;
+		}
+
+		return partToUse;
+	}
+
+	protected static boolean isStringQualifiedFilenameExtension(String partToUse) {
+		if (partToUse.length() <= 5 && partToUse.matches("[a-zA-Z0-9]{" + partToUse.length() + "}")) {
+			return true;
+		}
+		return false;
+	}
+
+	protected static Matcher getDefaultMatcher(List<String> urlShallStartWithOneOfThese) {
 		Matcher m = (url) -> {
 
 			boolean removeUrlBecauseOfWrongStart = removeBecasueOfWrongStartOfUrl(url, urlShallStartWithOneOfThese);
@@ -85,24 +138,22 @@ public class LoadTestGenerator {
 				return false;
 			}
 
-			boolean isStatic = isUrlStatic(url);
-			boolean isWantedStatic = isUrlWantedStatic(url);
-
-			if (isStatic) {
-				if (isWantedStatic) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				if (isWantedStatic) {
-					return false;
-				} else {
-					return true;
-				}
+			String possibleFilenameExtension = getPossibleFilenameExtension(url);
+			if (possibleFilenameExtension == null) {
+				return true;
 			}
+
+			boolean result = isFilenameExtensionAKeeper(possibleFilenameExtension);
+			return result;
 		};
 		return m;
+	}
+
+	protected static boolean isFilenameExtensionAKeeper(String filenameExtension) {
+		boolean result = WEBPAGES_FILTERS.stream().anyMatch(okFilenameExtension -> {
+			return okFilenameExtension.equalsIgnoreCase(filenameExtension);
+		});
+		return result;
 	}
 
 	static boolean removeBecasueOfWrongStartOfUrl(String url, List<String> urlShallStartWithOneOfThese) {
@@ -115,24 +166,6 @@ public class LoadTestGenerator {
 			}
 		}
 		return true;
-	}
-
-	static boolean isUrlStatic(String url) {
-		for (String staticRegexp : staticRegexps) {
-			if (url.matches(staticRegexp)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	static boolean isUrlWantedStatic(String url) {
-		for (String wantedStaticRegexp : wantedStaticRegexps) {
-			if (url.matches(wantedStaticRegexp)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	static List<String> getWantedStaticRegexps() {
@@ -161,19 +194,63 @@ public class LoadTestGenerator {
 		for (HarEntry entry : entries) {
 			Date date = entry.getStartedDateTime();
 			String url = entry.getRequest().getUrl();
-			System.out.println(date + " " + url);
+			log.info(date + " " + url);
 		}
 
+	}
+
+	public interface BodyMatcher {
+		boolean matchBody(String body);
 	}
 
 	public void sortHarEntries(List<HarEntry> entries) {
 		entries.sort((a, b) -> a.getStartedDateTime().before(b.getStartedDateTime()) ? -1 : 1);
 	}
 
-	public static void generate(String pathToHARFile, List<String> acceptableUrlStarts, String javaPackage,
-			String destinationJavaCodeDir, String destinationResourceDir, boolean allowOverwritingExistingFiles) {
+	/**
+	 * Generate a Loadcoder test based from a har file.
+	 * 
+	 * @param pathToHARFile          the path to where the har file is located. A
+	 *                               har file is a file with http requests and
+	 *                               response, that can be recorded from various
+	 *                               internet browsers and proxy servers.
+	 * 
+	 * @param acceptableUrlStarts    Whitelist for acceptable starts of urls that
+	 *                               should be a part of the generated tests. Most
+	 *                               time you don't want to generate a load test
+	 *                               containing all the request from the har file.
+	 *                               You probably want to filter out some of the
+	 *                               requests that isn't a part of the scope for the
+	 *                               test.
+	 * 
+	 * @param javaPackage            the java package as a string value. This value
+	 *                               shall correlate with the argument
+	 *                               <code>destinationJavaCodeDir</code>
+	 * @param destinationJavaCodeDir the destination package to where the load test
+	 *                               Java files shall be generated. This shall
+	 *                               correlate with the argument for the package
+	 *                               <code> destinationJavaCodeDir</code>
+	 * @param destinationResourceDir the destination directory to where resource
+	 *                               files for the load test shall be generated
+	 * @param reporting              CodeTemplateModifier for how to generate the
+	 *                               code for performing the
+	 *                               storeAndConsumeResultRuntime call
+	 * @param loadBuilder            CodeTemplateModifier for how to generate the
+	 *                               code for the loadBuilder methods
+	 */
+	protected static void generate(String pathToHARFile, List<String> acceptableUrlStarts, String javaPackage,
+			String destinationJavaCodeDir, String destinationResourceDir, CodeGeneratable reporting,
+			CodeGeneratable loadBuilder, List<String> bodyMatchers) {
+		generate(pathToHARFile, acceptableUrlStarts, javaPackage, destinationJavaCodeDir, destinationResourceDir, false,
+				reporting, loadBuilder, bodyMatchers);
+	}
+
+	protected static void generate(String pathToHARFile, List<String> acceptableUrlStarts, String javaPackage,
+			String destinationJavaCodeDir, String destinationResourceDir, boolean allowOverwritingExistingFiles,
+			CodeGeneratable reporting, CodeGeneratable loadBuilder, List<String> bodyMatchers) {
 		LoadTestGenerator generator = new LoadTestGenerator(pathToHARFile, acceptableUrlStarts, javaPackage,
-				destinationJavaCodeDir, destinationResourceDir, allowOverwritingExistingFiles);
+				destinationJavaCodeDir, destinationResourceDir, allowOverwritingExistingFiles, reporting, loadBuilder,
+				bodyMatchers);
 		generator.gen();
 	}
 
@@ -184,7 +261,9 @@ public class LoadTestGenerator {
 		List<HarEntry> filteredEntries = new ArrayList<>();
 		for (HarEntry entry : entries) {
 			String url = entry.getRequest().getUrl();
+			String responseText = entry.getResponse().getContent().getText();
 			boolean result = matcher.keep(url);
+
 			if (result) {
 				filteredEntries.add(entry);
 			}
@@ -227,7 +306,8 @@ public class LoadTestGenerator {
 	}
 
 	public void generateScenario(List<HarEntry> entries, File javaDstDir, File resourceDstDir) {
-		String scenarioLogic = readFile("src/main/resources/testgeneration_templates/ScenarioLogic.tmp");
+		File f = FileUtil.getFileFromResources("testgeneration_templates/ScenarioLogic.tmp");
+		String scenarioLogic = FileUtil.readFile(f);
 		scenarioLogic = scenarioLogic.replace("${package}", javaPackage);
 
 		TransactionNameGenerator transactionNameGenerator = new TransactionNameGenerator();
@@ -241,28 +321,34 @@ public class LoadTestGenerator {
 		scenarioLogic = scenarioLogic.replace("${logic_start}", "");
 		scenarioLogic = scenarioLogic.replace("${logic_end}", "");
 
-		writeFile(scenarioLogic.getBytes(), scenarioDstFile);
+		FileUtil.writeFile(scenarioLogic.getBytes(), scenarioDstFile);
 	}
 
 	public void generateTest(File dstDir) {
-
-		String testContent = readFile("src/main/resources/testgeneration_templates/GeneratedLoadTest.tmp");
+		File f = FileUtil.getFileFromResources("testgeneration_templates/GeneratedLoadTest.tmp");
+		String testContent = FileUtil.readFile(f);
 		testContent = testContent.replace("${package}", javaPackage);
 
-		writeFile(testContent.getBytes(), testDstFile);
+		testContent = reporting.generateCode(testContent);
+		testContent = loadBuilders.generateCode(testContent);
+
+		testContent = testContent.replace("${importList}", "");
+		FileUtil.writeFile(testContent.getBytes(), testDstFile);
 	}
 
 	public void generateThreadInstance(File dstDir) {
 
-		String threadInstanceContent = readFile("src/main/resources/testgeneration_templates/ThreadInstance.tmp");
+		File f = FileUtil.getFileFromResources("testgeneration_templates/ThreadInstance.tmp");
+		String threadInstanceContent = FileUtil.readFile(f);
 		threadInstanceContent = threadInstanceContent.replace("${package}", javaPackage);
 
-		writeFile(threadInstanceContent.getBytes(), threadInstanceFile);
+		FileUtil.writeFile(threadInstanceContent.getBytes(), threadInstanceFile);
 	}
 
 	public String generateLoadMethod(HarEntry entry, TransactionNameGenerator transactionNameGenerator,
 			int transactionIterator, File resourceDstDir) {
-		String loadMethodTemplate = readFile("src/main/resources/testgeneration_templates/loadmethod.tmp");
+		File loadMethodFile = FileUtil.getFileFromResources("testgeneration_templates/loadmethod.tmp");
+		String loadMethodTemplate = FileUtil.readFile(loadMethodFile);
 
 		String transactionName = transactionNameGenerator.generateTransactionName(entry, 1, 20);
 		String loadMethod = loadMethodTemplate;
@@ -275,7 +361,9 @@ public class LoadTestGenerator {
 
 		HarHeader contentType = null;
 		List<HarHeader> headers = req.getHeaders();
-		String headerTemplate = readFile("src/main/resources/testgeneration_templates/addheader.tmp");
+
+		File f = FileUtil.getFileFromResources("testgeneration_templates/addheader.tmp");
+		String headerTemplate = FileUtil.readFile(f);
 		for (HarHeader header : headers) {
 
 			if (isHeaderNameSPDY(header.getName())) {
@@ -287,30 +375,46 @@ public class LoadTestGenerator {
 					headerValue);
 			loadMethod = loadMethod.replace("${request_building}", h + "\n${request_building}");
 
-			if (header.getName().equals("content-type")) {
+			if (header.getName().equalsIgnoreCase("content-type")) {
 				contentType = header;
 			}
 		}
 
 		String requestBodyTemplate = "";
 		String body = entry.getRequest().getPostData().getText();
-		if (body != null && !body.isEmpty()) {
+		boolean methodIsGET = entry.getRequest().getMethod().equals(HttpMethod.GET);
+		boolean hasBody = body != null && !body.isEmpty();
+		String requestBodyVariable = "reqBody" + transactionIterator;
+		;
+		if (hasBody) {
 			String fileName = "body" + transactionIterator + ".txt";
 			File bodyFile = new File(resourceDstDir, fileName);
-			writeFile(body.getBytes(), bodyFile);
+			FileUtil.writeFile(body.getBytes(), bodyFile);
 
-			requestBodyTemplate = readFile("src/main/resources/testgeneration_templates/requestBody.tmp");
-			requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}",
-					"reqBody" + transactionIterator);
+			File requestBodyFile = FileUtil.getFileFromResources("testgeneration_templates/requestBody.tmp");
+			requestBodyTemplate = FileUtil.readFile(requestBodyFile);
+			requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
 			requestBodyTemplate = requestBodyTemplate.replace("${body_file}", destinationResourceDir + "/" + fileName);
-			requestBodyTemplate = requestBodyTemplate.replace("${mediatype}", contentType.getValue());
 
-			String requestMethodBodyTemplate = readFile(
-					"src/main/resources/testgeneration_templates/requestMethodBody.tmp");
+			String mediaType = contentType.getValue();
+			requestBodyTemplate = requestBodyTemplate.replace("${mediatype}", mediaType);
+
+		} else {
+
+			if (!methodIsGET) {
+				File getEmptyRequestBodyTemplateFile = FileUtil
+						.getFileFromResources("testgeneration_templates/getEmptyRequestBody.tmp");
+				requestBodyTemplate = FileUtil.readFile(getEmptyRequestBodyTemplateFile);
+				requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
+			}
+		}
+
+		if (hasBody || !methodIsGET) {
+			File requestMothodBody = FileUtil.getFileFromResources("testgeneration_templates/requestMethodBody.tmp");
+			String requestMethodBodyTemplate = FileUtil.readFile(requestMothodBody);
 			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_http_verb}",
 					entry.getRequest().getMethod().name());
-			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_body_file}",
-					"reqBody" + transactionIterator);
+			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_body_file}", requestBodyVariable);
 
 			loadMethod = loadMethod.replace("${request_building}", requestMethodBodyTemplate + "\n${request_building}");
 		}
@@ -321,31 +425,38 @@ public class LoadTestGenerator {
 
 		HarResponse resp = entry.getResponse();
 		loadMethod = loadMethod.replace("${expected_http_code}", "" + resp.getStatus());
+
+		String responseBody = entry.getResponse().getContent().getText();
+		if (responseBody != null && !responseBody.isEmpty()) {
+
+			File getResponseBodyTemplateFile = FileUtil
+					.getFileFromResources("testgeneration_templates/getResponseBody.tmp");
+			String getResponseBodyTemplate = FileUtil.readFile(getResponseBodyTemplateFile);
+			loadMethod = loadMethod.replace("${handleResultReadResponse}", "\n" + getResponseBodyTemplate);
+
+			File resultHandlerAssertionTemplateFile = FileUtil
+					.getFileFromResources("testgeneration_templates/resulthandler_assert.tmp");
+			String resultHandlerAssertionTemplate = FileUtil.readFile(resultHandlerAssertionTemplateFile);
+			for (String matcher : bodyMatchers) {
+				if (responseBody.contains(matcher)) {
+					String resultHandlerAssertion = resultHandlerAssertionTemplate.replace("${expected_body_part}",
+							matcher);
+
+					loadMethod = loadMethod.replace("${result_asserts}",
+							"\n" + resultHandlerAssertion + "${result_asserts}");
+				}
+			}
+		} else {
+			loadMethod = loadMethod.replace("${handleResultReadResponse}", "");
+
+		}
+		loadMethod = loadMethod.replace("${result_asserts}", "");
+
 		return loadMethod;
 	}
 
 	private boolean isHeaderNameSPDY(String headerName) {
 		return headerName.startsWith(":");
-	}
-
-	private String readFile(String path) {
-		Path p = Paths.get(path);
-		try {
-			byte[] src = Files.readAllBytes(p);
-			String s = new String(src);
-			return s;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private void writeFile(byte[] bytes, File destination) {
-		Path p2 = Paths.get(destination.getAbsolutePath());
-		try {
-			Files.write(p2, bytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public static Har readHar(String pathToHARFile) {
@@ -388,7 +499,7 @@ public class LoadTestGenerator {
 		}
 
 		protected String makeTransactionFriendlyString(String original) {
-			return original.replaceAll("[% .,&(){}=$#@!_-]*", "");
+			return original.replaceAll("[^a-zA-Z0-9]*", "");
 		}
 
 		public String generateTransactionName(HarEntry entry, int amountofUrlPartsToUse, int maxTransactionNameLength) {
@@ -437,6 +548,7 @@ public class LoadTestGenerator {
 				result = aggregateTransactionName(httpMethod, urlPartToUse, query);
 				break;
 			}
+			result = limitTransactionName(result, maxTransactionNameLength);
 
 			List<UrlAmount> amounts = urlsGeneratedTransaction.get(result);
 			if (amounts == null) {
@@ -461,6 +573,13 @@ public class LoadTestGenerator {
 			}
 		}
 
+		protected String limitTransactionName(String result, int maxTransactionNameLength) {
+			if (result.length() > maxTransactionNameLength) {
+				result = result.substring(0, maxTransactionNameLength);
+			}
+			return result;
+		}
+
 		public String aggregateTransactionName(String httpMethod, String path, String query) {
 			String result = httpMethod;
 			result += "_" + path;
@@ -469,5 +588,20 @@ public class LoadTestGenerator {
 			}
 			return result;
 		}
+	}
+
+	public static String generateCodeLoadBuilder(String originalCode, long durationMilliseconds, int amountOfThreads,
+			int callsPerSecond) {
+		String result = originalCode;
+		File f = FileUtil.getFileFromResources("testgeneration_templates/loadBuilderMethods.tmp");
+		String testContent = FileUtil.readFile(f);
+		int durationSeconds = (int) (durationMilliseconds / 1000);
+		testContent = testContent.replace("${threads}", "" + amountOfThreads);
+		testContent = testContent.replace("${duration}", "" + durationSeconds);
+		testContent = testContent.replace("${throttle}", "" + callsPerSecond);
+
+		result = result.replace("${loadBuilder}", testContent);
+
+		return result;
 	}
 }
