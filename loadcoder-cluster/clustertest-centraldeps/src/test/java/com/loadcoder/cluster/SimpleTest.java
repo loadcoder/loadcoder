@@ -16,41 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients.docker;
+package com.loadcoder.cluster;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
-public class Node {
+import org.testng.annotations.Test;
 
-	String id;
-	String host;
-	String containerHost;
-	String port;
+import com.loadcoder.load.scenario.ExecutionBuilder;
+import com.loadcoder.load.scenario.Load;
+import com.loadcoder.load.scenario.LoadBuilder;
+import com.loadcoder.load.scenario.LoadScenario;
 
-	DockerClient dockerClient;
+public class SimpleTest {
 
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
+	
+	@Test
+	public void simpleTest() {
+	
+		setResultDestination(getNewLogDir("target", "simpleTest"));
+		
+		LoadScenario ls = new LoadScenario() {
+			
+			@Override
+			public void loadScenario() {
+				load("simple-transaction", ()->{}).perform();
 			}
-		}
-		return this.dockerClient;
+		};
+	
+	Load l = new LoadBuilder(ls).build();
+	new ExecutionBuilder(l).build().execute().andWait();
 	}
-
 }

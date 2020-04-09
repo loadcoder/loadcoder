@@ -19,7 +19,7 @@
 package com.loadcoder.cluster.clients.grafana;
 
 import static com.loadcoder.statics.Statics.getConfiguration;
-
+import static com.loadcoder.cluster.clients.ClientUtils.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +40,7 @@ import com.loadcoder.cluster.clients.Header;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.MasterContainers;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.result.Result;
@@ -77,13 +78,12 @@ public class GrafanaClient extends HttpClient {
 	 * Constructor for the GrafanaClient
 	 * 
 	 * @param host is the hostname of where Grafana is hosted
-	 * @param port is the port where Grafana exposes is API
 	 * @param https is boolean if the communcation is encrypted or not. 
 	 * @param authorizationValue the value for the HTTP header Authorization used in the request towards
 	 * Grafana in order to authenticate the client
 	 */
-	private GrafanaClient(String host, boolean https, String authorizationValue) {
-		String port = getConfiguration("grafana.port");
+	public GrafanaClient(String host, boolean https, String authorizationValue) {
+		String port = MasterContainers.GRAFANA.getPort();
 		String protocol = protocolAsString(https);
 		DB_URL = String.format(DB_URL_TEMPLATE, protocol, host, port);
 		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, host, port);
@@ -197,6 +197,7 @@ public class GrafanaClient extends HttpClient {
 	 * 
 	 * @param name is the name of the Dashboard
 	 * @param result is the Result of an already executed test
+	 * @param datasource the dataSource to be used
 	 * @return the http status code for the Grafana request
 	 */
 	public HttpResponse createNewDashboardFromResult(String name, Result result, String datasource) {
@@ -251,10 +252,15 @@ public class GrafanaClient extends HttpClient {
 		
 		return result;
 	}
-//	String influxdbHost, String influxdbPort
+
 	public HttpResponse createDataSource(String datasource) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_datasource.json");
-
+		String influxDBHost = getHostValue("influxdb.host");
+		fileAsString = fileAsString.replace("${influxDBHost}", influxDBHost);
+		
+		String influxDBPort = MasterContainers.INFLUXDB.getExposedPort();
+		fileAsString = fileAsString.replace("${influxDBPort}", influxDBPort);
+		
 		fileAsString = fileAsString.replace("${datasource}", datasource);
 
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),

@@ -16,41 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients.docker;
+package com.loadcoder.cluster.clients;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
-
-public class Node {
-
-	String id;
-	String host;
-	String containerHost;
-	String port;
-
-	DockerClient dockerClient;
-
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
+import static com.loadcoder.statics.Statics.*;
+public class ClientUtils {
+	
+	public static String getHostValue(String configVariableName){
+		String configVariableValue = getConfiguration(configVariableName);
+		return configVariableValue == null ? "master" : configVariableValue;
 	}
 
-	public String getId() {
-		return id;
+	public interface Statable <T> {
+		boolean statement();
 	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
-			}
+	public static <T> void throwIfTrue(Statable<T> statable, String message) {
+		if(statable.statement()) {
+			throw new RuntimeException(message);
 		}
-		return this.dockerClient;
 	}
-
 }

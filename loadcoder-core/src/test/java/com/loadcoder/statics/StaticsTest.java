@@ -20,5 +20,4 @@ public class StaticsTest {
 		assertEquals(h, "h");
 		
 	}
-	
 }

@@ -18,39 +18,19 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.docker;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import static org.testng.Assert.assertEquals;
 
-public class Node {
+import org.testng.annotations.Test;
 
-	String id;
-	String host;
-	String containerHost;
-	String port;
+public class DockerClusterClientTest {
 
-	DockerClient dockerClient;
-
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
+	@Test
+	public void testGetComponentNameFromHostIpMapping() {
+		String host = DockerClusterClient.getComponentNameFromHostIpMapping("hostip.foo");
+		assertEquals(host, "foo");
+	
+		host = DockerClusterClient.getComponentNameFromHostIpMapping("hostip.foo.bar");
+		assertEquals(host, "foo.bar");
+	
 	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
-			}
-		}
-		return this.dockerClient;
-	}
-
 }

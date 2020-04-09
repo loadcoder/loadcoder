@@ -16,41 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients.docker;
+package com.loadcoder.cluster.clients.grafana;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 
-public class Node {
+public class GrafanaHelper {
 
-	String id;
-	String host;
-	String containerHost;
-	String port;
-
-	DockerClient dockerClient;
-
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
+	public static void createGrafanaDashboard(DockerClusterClient dockerClusterClient, String groupName, String testName, String executionIdRegexp) {
+		
+		String authenticationValue = "Basic YWRtaW46YWRtaW4=";
+		
+		InfluxDBClient incluxDBClient = new InfluxDBClient(dockerClusterClient, groupName, testName);
+		GrafanaClient grafanaClient = new GrafanaClient(dockerClusterClient, false, authenticationValue);
+		
+		grafanaClient.createGrafanaDashboard(groupName, testName, executionIdRegexp, incluxDBClient);
 	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
-			}
-		}
-		return this.dockerClient;
-	}
-
 }

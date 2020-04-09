@@ -35,6 +35,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.MasterContainers;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.network.CodeGeneratable;
@@ -77,7 +78,7 @@ public class InfluxDBClient extends HttpClient{
 	}
 	
 	public InfluxDBClient(DockerClusterClient client, String testGroup, String testName) {
-		this(client.getMasterNode().getHost(), getConfiguration("influxdb.port"), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
+		this(client.getMasterNode().getHost(), MasterContainers.INFLUXDB.getPort(), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
 	}
 
 	public InfluxDBClient(String host, String port, boolean https, String db) {
@@ -87,18 +88,20 @@ public class InfluxDBClient extends HttpClient{
 	public static InfluxDBClient getInfluxDBClient(DockerClusterClient dockerClusterClient, String dbName) {
 		InfluxDBClient influxClient = new InfluxDBClient(
 				dockerClusterClient.getMasterNode().getHost(),
-				getConfiguration("influxdb.port"), false, dbName);
+				MasterContainers.INFLUXDB.getPort(), false, dbName);
 		return influxClient;
 	}
 	
 	public static RuntimeResultConsumer setupInfluxDataConsumer(DockerClusterClient dockerClusterClient, String testGroup, String testName) {
+		return setupInfluxDataConsumer(dockerClusterClient.getMasterNode().getHost(), testGroup, testName);
+	}
+	
+	public static RuntimeResultConsumer setupInfluxDataConsumer(String influxDBHost, String testGroup, String testName) {
 		
 		String dbName = String.format(DB_NAME_TEMPLATE, testGroup, testName);
-		
-		InfluxDBClient influxClient = new InfluxDBClient(dockerClusterClient.getMasterNode().getHost(), getConfiguration("influxdb.port"), false, dbName);
+		InfluxDBClient influxClient = new InfluxDBClient(influxDBHost, MasterContainers.INFLUXDB.getPort(), false, dbName);
 		List<String> databases = influxClient.listDatabases();
 		if(!databases.contains(dbName)) {
-			
 			influxClient.createDB();
 		}
 
@@ -215,10 +218,10 @@ public class InfluxDBClient extends HttpClient{
 	
 	/**
 	 * Generates the code for the storeAndConsumeResultRuntime call where the results are sent to a InfluxDB
-	 * @param originalCode
-	 * @param groupName
-	 * @param testName
-	 * @return
+	 * @param originalCode the code that will be modified into the new code
+	 * @param groupName name of the group of the test
+	 * @param testName the name of the test
+	 * @return returns the new generated code
 	 */
 	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode, String groupName, String testName) {
 		String result = originalCode;

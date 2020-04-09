@@ -16,41 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients.docker;
+package com.loadcoder;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import static com.loadcoder.cluster.clients.grafana.GrafanaHelper.*;
 
-public class Node {
+import java.io.File;
 
-	String id;
-	String host;
-	String containerHost;
-	String port;
+import com.loadcoder.cluster.clients.docker.DockerClusterClient;
 
-	DockerClient dockerClient;
+public class Controller {
 
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
+	public static void main(String[] args){
+		DockerClusterClient client = new DockerClusterClient();
+		
+		//Creates and starts Grafana, InfluxDB, Loadship and also Artifactory
+//		client.setupMaster();
+		
+		//Send this Maven project as a zip file to the Loadship server
+//		client.zipAndSendToLoadship(new File("."));
+		
+		//Start a new clustered Loadcoder test
+//		client.startNewExecution(1);
+
+		//Create a Grafana Dashboard based on the data that the test wrote to InfluxDB
+//		createGrafanaDashboard(client, "LoadcoderClusterTests", "InfluxReportTest", "2020.*");
+		
+		//Stops and removes Grafana, InfluxDB and Loadship
+//		client.stopAndRemoveAllMasterContainers();
+		
 	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
-			}
-		}
-		return this.dockerClient;
-	}
-
 }

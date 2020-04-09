@@ -16,41 +16,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients.docker;
+package com.loadcoder.statics;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.core.DockerClientBuilder;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-public class Node {
+import java.util.HashMap;
+import java.util.Map;
 
-	String id;
-	String host;
-	String containerHost;
-	String port;
+import org.mockito.Mockito;
+import org.testng.annotations.Test;
 
-	DockerClient dockerClient;
+import com.loadcoder.statics.Configuration.ConfigHolder;
 
-	public Node(String id, String host, String port) {
-		this.id = id;
-		this.host = host;
-		this.port = port;
+public class ConfigurationTest {
+
+
+	final private static String HOSTIP_REGEXP = "hostip..*";
+	
+	@Test
+	public void testConfig() {
+		
+		assertTrue("hostip.foo".matches(HOSTIP_REGEXP));
+		
+		Map<String, String> testConfig = new HashMap<String, String>();
+		testConfig.put("hostip.foo", "bar");
+		ConfigHolder confHolder = Mockito.mock(ConfigHolder.class);
+		when(confHolder.getConfig()).thenReturn(testConfig);
+		Configuration conf = new Configuration(confHolder);
+
+		Map<String, String> map = conf.getMatchingConfig(HOSTIP_REGEXP);
+		assertEquals(map.size(), 1);
 	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public DockerClient getDockerClient() {
-		synchronized (this){
-			if(dockerClient == null) {
-				this.dockerClient = DockerClientBuilder.getInstance("tcp://" + host + ":" + port).build();
-			}
-		}
-		return this.dockerClient;
-	}
-
 }

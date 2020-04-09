@@ -25,7 +25,7 @@ import java.util.Set;
 public class DockerConfigurationHelper {
 
 	public static Set<String> getAllNodeIds() {
-		return getAllNodeIds(Configuration.getConfiguration());
+		return getAllNodeIds(Configuration.getConfigurationInstance().getConfiguration());
 	}
 
 	protected static Set<String> getAllNodeIds(Map<String, String> configuration) {

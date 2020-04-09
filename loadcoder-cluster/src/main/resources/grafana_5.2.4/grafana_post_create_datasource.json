@@ -1,7 +1,7 @@
 {
   "name":"${datasource}",
   "type":"influxdb",
-  "url":"http://master:8086",
+  "url":"http://${influxDBHost}:${influxDBPort}",
   "basicAuth":false,
   "database":"${datasource}",
   "access": "proxy"

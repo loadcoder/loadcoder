@@ -70,7 +70,7 @@ public class ZipUtil {
 		}
 	}
 
-	public List<File> filterOutWhiteListedFiles(File[] filesInDirectory, String... whiteListedFiles) {
+	protected List<File> filterOutWhiteListedFiles(File[] filesInDirectory, String... whiteListedFiles) {
 		List<File> fileToBeZiped = new ArrayList<>();
 		for (File listedFile : filesInDirectory) {
 			String listedFileName = listedFile.getName();
@@ -119,8 +119,8 @@ public class ZipUtil {
 	 * 
 	 * @param listFiles   A collection of files and directories
 	 * @param destZipFile The path of the destination zip file
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * @throws FileNotFoundException when a file that is specified in the listFiles parameter can't be found
+	 * @throws IOException when there is some problem with reading or writing the files
 	 */
 	public void zip(List<File> listFiles, File destZipFile) throws FileNotFoundException, IOException {
 		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(destZipFile));

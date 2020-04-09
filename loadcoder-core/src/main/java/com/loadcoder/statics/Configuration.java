@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +36,60 @@ public class Configuration {
 	
 	private static Logger log = LoggerFactory.getLogger(Configuration.class);
 
-	private final static Map<String, String> CONFIGURATION = generationConfiguration();
-
-	protected static Map<String, String> getConfiguration() {
-		return CONFIGURATION;
+	final ConfigHolder configHolder;
+	private static Configuration config = new Configuration();
+	
+	private Configuration() {
+		this(new ConfigHolder());
 	}
+	protected Configuration(ConfigHolder configHolder) {
+		this.configHolder = configHolder;
+	}
+	
+	public static Configuration getConfigurationInstance() {
+		return config;
+	}
+	
+	protected static class ConfigHolder{
+		final Map<String, String> config;
+		
+		protected ConfigHolder(Map<String, String> config) {
+			this.config = config;
+		}
+		
+		protected ConfigHolder() {
+			this(generationConfiguration());
+		}
+		
+		Map<String, String> getConfig(){
+			return config;
+		}
+	}
+	
+	protected ConfigHolder getConfigHolder() {
+		return configHolder;
+	}
+	protected Map<String, String> getConfiguration() {
+		return configHolder.getConfig();
+	}
+	
 	public static String getConfig(String key) {
-		return CONFIGURATION.get(key);
+		return config.getConfigHolder().getConfig().get(key);
+	}
+	
+	public String getConfiguration(String key) {
+		return getConfigHolder().getConfig().get(key);
+	}
+	
+	
+	public Map<String, String> getMatchingConfig(String keyMatchingRegexp) {
+		Map<String, String> m = getConfigHolder().getConfig().entrySet().stream().filter(entry -> {
+			boolean result = entry.getKey().matches(keyMatchingRegexp);
+			return result;
+			})
+		.collect(Collectors.toMap(Entry<String, String>::getKey, Entry<String, String>::getValue));
+		
+		return m;
 	}
 	
 	private static  Map<String, String> generationConfiguration(){
@@ -56,7 +105,7 @@ public class Configuration {
 		if (propertyFilePath == null || propertyFilePath.isEmpty()) {
 			propertyFilePath = "loadcoder.conf";
 		}
-
+		
 		File resourceFile = null;
 		URL resourceURL = Statics.class.getClassLoader().getResource(propertyFilePath);
 		if (resourceURL != null) {
