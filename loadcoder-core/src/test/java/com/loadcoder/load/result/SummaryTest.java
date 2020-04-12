@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -82,7 +82,7 @@ public class SummaryTest extends TestNGBase {
 
 	@Test
 	public void seriesSummaryTest() {
-		Result result = new ResultExtension(getResultList());
+		Result result = null;
 		Summary summary = new Summary(result);
 		String summaryString = summary.log(a -> "Foo").log(a -> "Bar").getAsString();
 		assertTrue(summaryString.contains("Foo"));

@@ -1,3 +1,4 @@
+
 package com.loadcoder.network;
 
 public interface CodeGeneratable {

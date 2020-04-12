@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -23,12 +23,12 @@ import static com.loadcoder.cluster.clients.grafana.GrafanaHelper.*;
 import java.io.File;
 
 import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import static com.loadcoder.cluster.clients.docker.MasterContainers.*;
 
 public class Controller {
 
 	public static void main(String[] args){
 		DockerClusterClient client = new DockerClusterClient();
-		
 		//Creates and starts Grafana, InfluxDB, Loadship and also Artifactory
 //		client.setupMaster();
 		
@@ -43,6 +43,7 @@ public class Controller {
 		
 		//Stops and removes Grafana, InfluxDB and Loadship
 //		client.stopAndRemoveAllMasterContainers();
+//		client.stopAndRemoveMasterContainers(LOADSHIP);
 		
 	}
 }

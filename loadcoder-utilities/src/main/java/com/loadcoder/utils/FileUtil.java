@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2020 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -56,6 +56,11 @@ public class FileUtil {
 //	}
 
     // get file from classpath, resources folder
+	
+	public static String readResourceFile(String fileName) {
+		return readFile(getFileFromResources(fileName));
+	}
+	
 	public static File getFileFromResources(String fileName) {
 
         ClassLoader classLoader = FileUtil.class.getClassLoader();

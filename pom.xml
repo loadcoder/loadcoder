@@ -38,11 +38,25 @@
 		<okhttp.version>3.14.2</okhttp.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson-databind.version>2.9.9</jackson-databind.version>
+		<docker-java.version>3.1.5</docker-java.version>
+		<json-path.version>2.4.0</json-path.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 
+		<dependency>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java</artifactId>
+			<version>${docker-java.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>${json-path.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -155,7 +169,6 @@
 	</dependencyManagement>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.sonarsource.java/sonar-jacoco-listeners -->
 		<dependency>
 			<groupId>org.sonarsource.java</groupId>
 			<artifactId>sonar-jacoco-listeners</artifactId>
@@ -245,7 +258,7 @@
 				</configuration>
 			</plugin>
 
-			<!--plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
 				<version>1.6</version>
@@ -258,7 +271,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin-->
+			</plugin>
 
 		</plugins>
 
@@ -286,17 +299,13 @@
 	</developers>
 
 	<distributionManagement>
-
 		<snapshotRepository>
-			<id>local-snapshot-repo</id>
-			<url>http://localhost:8081/artifactory/libs-snapshot</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
-		<!-- snapshotRepository> <id>ossrh</id> <url>https://oss.sonatype.org/content/repositories/snapshots</url> 
-			</snapshotRepository -->
-
 		<repository>
-			<id>local-release-repo</id>
-			<url>http://localhost:8081/artifactory/libs-release</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 </project>
