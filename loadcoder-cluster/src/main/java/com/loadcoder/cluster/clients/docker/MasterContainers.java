@@ -51,7 +51,19 @@ public enum MasterContainers{
 	protected void setConfiguration(Configuration config) {
 		this.config = config;
 	}
-			
+
+//	public String getHost(DockerClusterClient dockerClusterClient){
+//		String configVariableName = name().toLowerCase() + ".host";
+//		String s = config.getConfiguration(configVariableName);
+//		return s == null ? dockerClusterClient.getMasterNode().getHost() : s;
+//	}
+//	
+//	public String getInternalHost(DockerClusterClient dockerClusterClient){
+//		String configVariableName = name().toLowerCase() + ".internal.host";
+//		String s = config.getConfiguration(configVariableName);
+//		return s == null ? dockerClusterClient.getMasterNode().getInternalHost() : s;
+//	}
+	
 	public String getPort(){
 		String configVariableName = name().toLowerCase() + ".port";
 		String s = config.getConfiguration(configVariableName);

@@ -239,13 +239,6 @@ public class LoadTestGenerator {
 	 *                               code for the loadBuilder methods
 	 */
 	protected static void generate(String pathToHARFile, List<String> acceptableUrlStarts, String javaPackage,
-			String destinationJavaCodeDir, String destinationResourceDir, CodeGeneratable reporting,
-			CodeGeneratable loadBuilder, List<String> bodyMatchers) {
-		generate(pathToHARFile, acceptableUrlStarts, javaPackage, destinationJavaCodeDir, destinationResourceDir, false,
-				reporting, loadBuilder, bodyMatchers);
-	}
-
-	protected static void generate(String pathToHARFile, List<String> acceptableUrlStarts, String javaPackage,
 			String destinationJavaCodeDir, String destinationResourceDir, boolean allowOverwritingExistingFiles,
 			CodeGeneratable reporting, CodeGeneratable loadBuilder, List<String> bodyMatchers) {
 		LoadTestGenerator generator = new LoadTestGenerator(pathToHARFile, acceptableUrlStarts, javaPackage,
@@ -329,7 +322,11 @@ public class LoadTestGenerator {
 		String testContent = FileUtil.readFile(f);
 		testContent = testContent.replace("${package}", javaPackage);
 
-		testContent = reporting.generateCode(testContent);
+		if(reporting != null) {
+			testContent = reporting.generateCode(testContent);
+		}else {
+			testContent = testContent.replace("${storeAndConsumeResultRuntime}", "");
+		}
 		testContent = loadBuilders.generateCode(testContent);
 
 		testContent = testContent.replace("${importList}", "");
@@ -437,13 +434,15 @@ public class LoadTestGenerator {
 			File resultHandlerAssertionTemplateFile = FileUtil
 					.getFileFromResources("testgeneration_templates/resulthandler_assert.tmp");
 			String resultHandlerAssertionTemplate = FileUtil.readFile(resultHandlerAssertionTemplateFile);
-			for (String matcher : bodyMatchers) {
-				if (responseBody.contains(matcher)) {
-					String resultHandlerAssertion = resultHandlerAssertionTemplate.replace("${expected_body_part}",
-							matcher);
-
-					loadMethod = loadMethod.replace("${result_asserts}",
-							"\n" + resultHandlerAssertion + "${result_asserts}");
+			if(bodyMatchers != null) {
+				for (String matcher : bodyMatchers) {
+					if (responseBody.contains(matcher)) {
+						String resultHandlerAssertion = resultHandlerAssertionTemplate.replace("${expected_body_part}",
+								matcher);
+	
+						loadMethod = loadMethod.replace("${result_asserts}",
+								"\n" + resultHandlerAssertion + "${result_asserts}");
+					}
 				}
 			}
 		} else {

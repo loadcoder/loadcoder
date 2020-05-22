@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,5 +49,22 @@ public class ConfigurationTest {
 
 		Map<String, String> map = conf.getMatchingConfig(HOSTIP_REGEXP);
 		assertEquals(map.size(), 1);
+	}
+	
+	
+	@Test
+	public void testConfigFromFilePath() {
+		
+		File confFile = new File("src/test/resources/custom.conf");
+		assertTrue(confFile.exists());
+		System.setProperty("loadcoder.configuration", confFile.getPath());
+		Configuration conf = new Configuration(new ConfigHolder());
+		
+		String value = conf.getConfigHolder().getConfig().get("foo");
+		assertEquals(value, "custom");
+		
+		System.setProperty("loadcoder.configuration", "custom.conf");
+		value = conf.getConfigHolder().getConfig().get("foo");
+		assertEquals(value, "custom");
 	}
 }

@@ -35,20 +35,23 @@ public class LoadcoderGeneratorBuilder {
 	private int callsPerSecond = -1;
 	private List<String> expectedResponseBodyParts;
 
+	private boolean allowCodeOverWriting = false;
+
 	/**
 	 * Create the generator Builder with this constructor. Call the
 	 * <code>generate</code> method when the builder is ready to generate the load
 	 * test.
 	 * 
-	 * @param pathToHARFile the path to where the HAR file exists
+	 * @param pathToHARFile the path to where the HAR file exists.
 	 * @param urlBeginningsWhiteList list of beginnings of URLs that the generator will create transactions for.
 	 * If the value is null, all urls will be accepted to use for transaction call generations
 	 * @param javaPackage the java package where the Java code shall be created, for instance <code>com.company.loadtests</code>.
-	 * This value shall correlate with the value for argument <code>packagePath</code>
+	 * This value shall correlate with the value for argument <code>packagePath</code>.
 	 * @param packagePath the path to where the java the Java code shall be created,
 	 * for instance <code>src/test/java/com/company/loadtests</code>. This value shall correlate with the value
-	 * for argument <code>javaPackage</code>
-	 * @param resourcesPath
+	 * for argument <code>javaPackage</code>.
+	 * @param resourcesPath the path where to resources shall be created. Typically for Maven projects, this would
+	 * be directory src/test/resources/my-loadtest. The 
 	 */
 	public LoadcoderGeneratorBuilder(String pathToHARFile, List<String> urlBeginningsWhiteList, String javaPackage,
 			String packagePath, String resourcesPath) {
@@ -61,7 +64,7 @@ public class LoadcoderGeneratorBuilder {
 
 	public void generate() {
 		LoadTestGenerator.generate(pathToHARFile, urlBeginningsWhiteList, javaPackage, packagePath, resourcesPath,
-				reporting, codeTemplate -> LoadTestGenerator.generateCodeLoadBuilder(codeTemplate,
+				allowCodeOverWriting, reporting, codeTemplate -> LoadTestGenerator.generateCodeLoadBuilder(codeTemplate,
 						executionDurationMillis, amountOfThreads, callsPerSecond),
 				expectedResponseBodyParts);
 	}
@@ -116,6 +119,17 @@ public class LoadcoderGeneratorBuilder {
 	 */
 	public LoadcoderGeneratorBuilder checkResponseBodiesContaining(List<String> expectedResponseBodyParts) {
 		this.expectedResponseBodyParts = expectedResponseBodyParts;
+		return this;
+	}
+
+	/**
+	 * Allow to overwrite already existing Java classes. If this method is not used,
+	 * file name will throw a RuntimeException during generation if there are
+	 * colliding files 
+	 * @return this builder instance
+	 */
+	public LoadcoderGeneratorBuilder allowCodeOverWriting() {
+		this.allowCodeOverWriting = true;
 		return this;
 	}
 

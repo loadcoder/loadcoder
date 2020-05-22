@@ -40,6 +40,12 @@ public class Statics {
 		return Configuration.getConfig(key);
 	}
 	
+	public static String getConfiguration(String key, String defaultValue) {
+		String valueFromConfig = Configuration.getConfig(key);
+		String result = valueFromConfig == null ? defaultValue : valueFromConfig;
+		return result;
+	}
+	
 	public static Map<String, String> getMatchingConfiguration(String keyMatchingRegexp) {
 		Map<String, String> result = Configuration.getConfigurationInstance().getMatchingConfig(keyMatchingRegexp);
 		return result;

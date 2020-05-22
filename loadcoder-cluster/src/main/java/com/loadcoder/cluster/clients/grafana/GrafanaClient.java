@@ -19,14 +19,13 @@
 package com.loadcoder.cluster.clients.grafana;
 
 import static com.loadcoder.statics.Statics.getConfiguration;
-import static com.loadcoder.cluster.clients.ClientUtils.*;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,39 +69,29 @@ public class GrafanaClient extends HttpClient {
 
 	private static final long TIMESPAN_MILLIS_PRECREATED_DASHBOARD = 50_000;
 
-	private List<Type> types = Arrays.asList(new Type("mean", "A"));
-	
 	private final String authorizationValue;
 
+	private final String dataSourceInfluxDBHost;
 	/**
 	 * Constructor for the GrafanaClient
 	 * 
-	 * @param host is the hostname of where Grafana is hosted
+	 * @param grafanaHost is the hostname of where Grafana is hosted
 	 * @param https is boolean if the communcation is encrypted or not. 
 	 * @param authorizationValue the value for the HTTP header Authorization used in the request towards
 	 * Grafana in order to authenticate the client
 	 */
-	public GrafanaClient(String host, boolean https, String authorizationValue) {
+	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, boolean https, String authorizationValue) {
 		String port = MasterContainers.GRAFANA.getPort();
+		this.dataSourceInfluxDBHost = dataSourceInfluxDBHost;
 		String protocol = protocolAsString(https);
-		DB_URL = String.format(DB_URL_TEMPLATE, protocol, host, port);
-		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, host, port);
-		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, protocol, host, port);
+		DB_URL = String.format(DB_URL_TEMPLATE, protocol, grafanaHost, port);
+		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, grafanaHost, port);
+		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, protocol, grafanaHost, port);
 		this.authorizationValue = authorizationValue;
 	}
 
 	public GrafanaClient(DockerClusterClient dockerClusterClient, boolean https, String authorizationValue) {
-		this(dockerClusterClient.getMasterNode().getHost(), https, authorizationValue);
-	}
-
-	private static class Type {
-		String type;
-		String refId;
-
-		private Type(String type, String refId) {
-			this.type = type;
-			this.refId = refId;
-		}
+		this(dockerClusterClient.getHost(MasterContainers.GRAFANA), dockerClusterClient.getInternalHost(MasterContainers.INFLUXDB), https, authorizationValue);
 	}
 
 	private String getFileAsString(String filename) {
@@ -133,7 +122,7 @@ public class GrafanaClient extends HttpClient {
 
 		log.debug("panel will have timespan: " + startTimespan + " - " + endTimespan);
 		String dateTimeLabel = DateTimeUtil.convertMilliSecondsToFormattedDate(start);
-		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template2.json");
+		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_dashboard_body_template.json");
 
 		fileAsString = fileAsString.replace("${datasource}", datasource);
 
@@ -241,7 +230,6 @@ public class GrafanaClient extends HttpClient {
 				new Header("Accept", "application/json"),
 				new Header("Authorization", authorizationValue));
 		HttpResponse resp = sendGet(FOLDERS_URL, headers);
-		Map<String,String> d;
 		ArrayList<Map<String, Object>>  array = JsonPath.read(resp.getBody(), "[*]");
 		for(Map<String, Object> ar :array) {
 			
@@ -255,8 +243,7 @@ public class GrafanaClient extends HttpClient {
 
 	public HttpResponse createDataSource(String datasource) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_datasource.json");
-		String influxDBHost = getHostValue("influxdb.host");
-		fileAsString = fileAsString.replace("${influxDBHost}", influxDBHost);
+		fileAsString = fileAsString.replace("${influxDBHost}", dataSourceInfluxDBHost);
 		
 		String influxDBPort = MasterContainers.INFLUXDB.getExposedPort();
 		fileAsString = fileAsString.replace("${influxDBPort}", influxDBPort);

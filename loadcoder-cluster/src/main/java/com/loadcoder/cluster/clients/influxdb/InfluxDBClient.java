@@ -78,22 +78,22 @@ public class InfluxDBClient extends HttpClient{
 	}
 	
 	public InfluxDBClient(DockerClusterClient client, String testGroup, String testName) {
-		this(client.getMasterNode().getHost(), MasterContainers.INFLUXDB.getPort(), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
+		this(client.getHost(MasterContainers.INFLUXDB), MasterContainers.INFLUXDB.getPort(), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
 	}
 
 	public InfluxDBClient(String host, String port, boolean https, String db) {
 		this(host, Integer.parseInt(port), https, db);
 	}
 	
-	public static InfluxDBClient getInfluxDBClient(DockerClusterClient dockerClusterClient, String dbName) {
-		InfluxDBClient influxClient = new InfluxDBClient(
-				dockerClusterClient.getMasterNode().getHost(),
-				MasterContainers.INFLUXDB.getPort(), false, dbName);
-		return influxClient;
-	}
+//	public static InfluxDBClient getInfluxDBClient(DockerClusterClient dockerClusterClient, String dbName) {
+//		InfluxDBClient influxClient = new InfluxDBClient(
+//				dockerClusterClient.getMasterNode().getHost(),
+//				MasterContainers.INFLUXDB.getPort(), false, dbName);
+//		return influxClient;
+//	}
 	
 	public static RuntimeResultConsumer setupInfluxDataConsumer(DockerClusterClient dockerClusterClient, String testGroup, String testName) {
-		return setupInfluxDataConsumer(dockerClusterClient.getMasterNode().getHost(), testGroup, testName);
+		return setupInfluxDataConsumer(dockerClusterClient.getHost(MasterContainers.INFLUXDB), testGroup, testName);
 	}
 	
 	public static RuntimeResultConsumer setupInfluxDataConsumer(String influxDBHost, String testGroup, String testName) {

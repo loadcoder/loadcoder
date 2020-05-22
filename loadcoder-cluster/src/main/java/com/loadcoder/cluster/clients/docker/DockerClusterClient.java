@@ -18,12 +18,18 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.docker;
 
-import static com.loadcoder.statics.Statics.*;
-import static com.loadcoder.cluster.clients.ClientUtils.*;
+import static com.loadcoder.cluster.clients.ClientUtils.throwIfTrue;
+import static com.loadcoder.cluster.clients.docker.MasterContainers.GRAFANA;
+import static com.loadcoder.cluster.clients.docker.MasterContainers.INFLUXDB;
+import static com.loadcoder.cluster.clients.docker.MasterContainers.LOADSHIP;
+import static com.loadcoder.statics.Statics.getMatchingConfiguration;
+
 import java.io.File;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,18 +50,14 @@ import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
-import com.loadcoder.cluster.clients.ClientUtils;
 import com.loadcoder.cluster.clients.docker.exceptions.ContainersStillRunningException;
+import com.loadcoder.cluster.clients.grafana.GrafanaClient;
 import com.loadcoder.cluster.util.ZipUtil;
+import com.loadcoder.statics.Configuration;
 import com.loadcoder.statics.DockerConfigurationHelper;
 import com.loadcoder.utils.DateTimeUtil;
 import com.loadcoder.utils.FileUtil;
-import static com.loadcoder.cluster.clients.docker.MasterContainers.*;
 
-/**
- * @author stefan
- *
- */
 public class DockerClusterClient {
 
 	private static Logger log = LoggerFactory.getLogger(DockerClusterClient.class);
@@ -66,7 +68,8 @@ public class DockerClusterClient {
 	private Node masterNode = null;
 
 	private final String clusterId;
-
+	private final String CLUSTER_ID_DEFAULT = "loadcoder";
+	
 	final ZipUtil zip = new ZipUtil();
 
 	final String[] MAVEN_FILE_AND_DIR_NAME_WHITELIST_DEFAULT = { "pom.xml", "src", "test.sh", "settings.xml" };
@@ -74,52 +77,118 @@ public class DockerClusterClient {
 	final Map<String, String> hostIpMapping;
 
 	final private static String HOSTIP_REGEXP = "hostip[.].*";
+	
+	Configuration config;
+	
 	public DockerClusterClient() {
+		this(new Configuration());
+	}
+	
+	protected DockerClusterClient(Configuration config) {
+		this.config = config;
 		nodes = new ArrayList<Node>();
 		nodesMap = new HashMap<String, Node>();
 
-		String masterNodeId = getConfiguration("cluster.masternode");
-		Set<String> ids = DockerConfigurationHelper.getAllNodeIds();
+		String masterNodeId = config.getConfiguration("cluster.masternode");
+		Set<String> ids = getAllNodeIds();
+		
+		String useDockerMTLSConfiguration = config.getConfiguration("docker.mtls", "true");
+		boolean useDockerMTLS = useDockerMTLSConfiguration != null && useDockerMTLSConfiguration.equals("false") ? false : true;
+		
 		ids.stream().forEach(id -> {
-			String apiHost = getConfiguration("node." + id + ".host");
-			String apiPortFromConfig = getConfiguration("node." + id + ".dockerapi.port");
+			String publicHost = config.getConfiguration("node." + id + ".host");
+			String internalHost = config.getConfiguration("node." + id + ".internal.host");
+
+			String apiPortFromConfig = config.getConfiguration("node." + id + ".dockerapi.port");
+			String useAsWorker = config.getConfiguration("node." + id + ".use-as-worker");
+			String mtlsPassword = getPassword();
+			Node node = new Node(id, publicHost, internalHost, apiPortFromConfig, useDockerMTLS, mtlsPassword);
 			
-			Node node = new Node(id, apiHost, apiPortFromConfig);
-			nodes.add(node);
-			nodesMap.put(id, node);
+			if(useAsWorker != null && useAsWorker.toLowerCase().equals("false")) {
+				
+			}else {
+				nodes.add(node);
+				nodesMap.put(id, node);
+			}
+
 			if (id.equals(masterNodeId)) {
 				masterNode = node;
 			}
 		});
-		clusterId = getConfiguration("cluster.id");
+		if(nodes.size() == 0) {
+			throw new RuntimeException("No nodes configured. A node is found in the configuration with the following pattern: node.<node ID>.host");
+		}
+		clusterId = config.getConfiguration("cluster.id", CLUSTER_ID_DEFAULT);
+	
+		hostIpMapping = new HashMap<String, String>();
+		Map<String, String> hostIpConf = getMatchingConfiguration(HOSTIP_REGEXP);
+		hostIpConf.entrySet().stream().forEach(entry -> {
+			String host = getHostNameFromHostIpMapping(entry.getKey());	
+			hostIpMapping.put(host, entry.getValue());
+		});
 		
-		hostIpMapping = getMatchingConfiguration(HOSTIP_REGEXP);
 	}
 	
-	public Node getMasterNode() {
+	private String getPassword() {
+		String result;
+		String passwordFromJVMArgs = System.getProperty("docker.mtls.password");
+		
+		String passwordFromConfig = config.getConfiguration("docker.mtls.password");
+	
+		if(passwordFromJVMArgs != null) {
+			result = passwordFromJVMArgs;
+		}else if(passwordFromConfig != null) {
+			result = passwordFromConfig;
+		}else {
+			result = null;
+		}
+		return result;
+	}
+	
+	protected Set<String> getAllNodeIds() {
+
+		Set<String> result = new HashSet<>();
+		
+		Map<String, String> map = config.getConfiguration();
+		map.entrySet().stream().forEach(entry -> {
+			String key = entry.getKey();
+			if (key.matches("node\\..*\\.host") && ! key.contains("internal")) {
+				String id = key.replace("node.", "").replace(".host", "");
+				result.add(id);
+			}
+		});
+		return result;
+	}
+	
+	private Node getMasterNode() {
 		return masterNode;
 	}
 
-	public void pullImageIfNeeded(Node node, String image) {
+	public List<Container> listContainers() {
+		List<Container> containers = getMasterNode().getDockerClient().listContainersCmd().exec();
+		return containers;
+	}
+	
+	private void pullImageIfNeeded(Node node, String image) {
 		if(image == null || image.isEmpty()) {
 			throw new RuntimeException("");
 		}
+		List<Image> images = getMasterNode().getDockerClient().listImagesCmd().withImageNameFilter(image).exec();
 		
-		List<Image> images = node.getDockerClient().listImagesCmd().withImageNameFilter(image).exec();
 		if (images.isEmpty()) {
 			log.info("pulling image " + image);
 			pullImage(node, image);
 		}
 	}
 
-	public void setupMasterContainer(String component, Map<String, String> envs, String defaultServerPort) {
-		String image = getConfiguration(component + ".image");
+	protected void setupMasterContainer(String component, Map<String, String> envs, String defaultServerPort) {
+		String image = config.getConfiguration(component + ".image");
 		throwIfTrue(()-> image == null || image.isEmpty(), "There are no docker image defined for component " + component);
 		pullImageIfNeeded(masterNode, image);
-		String portFromConfiguration = getConfiguration(component + ".server.port");
+		String portFromConfiguration = config.getConfiguration(component + ".server.port");
 
 		String portToUse = portFromConfiguration == null ? defaultServerPort : portFromConfiguration;
-		setupMasterContainer(getConfiguration(component + ".image"), component, portToUse, envs);
+		setupMasterContainer(config.getConfiguration(component + ".image"), component, portToUse, envs);
 	}
 
 	public void setupMaster(MasterContainers... containers) {
@@ -129,22 +198,15 @@ public class DockerClusterClient {
 
 	public void setupMaster() {
 
-		List<MasterContainers> list = Arrays.asList(LOADSHIP, INFLUXDB, GRAFANA, ARTIFACTORY);
+		List<MasterContainers> list = Arrays.asList(LOADSHIP, INFLUXDB, GRAFANA);
 		setupMaster(list);
 	}
 
-	public void setupMaster(List<MasterContainers> map) {
+	private void setupMaster(List<MasterContainers> map) {
 		map.stream().forEach(entry -> entry.setup(this));
 	}
 
-//	public void setupMasterWithConfiguration(Map<String, Map<String, String>> envs) {
-//		setupMasterContainer("loadship", envs.get("loadship"), "6210");
-//		setupMasterContainer("influx", envs.get("influx"), "8086");
-//		setupMasterContainer("grafana", envs.get("grafana"), "3000");
-//		setupMasterContainer("artifactory", envs.get("artifactory"), "8081");
-//	}
-
-	public void createVolume(Node node) {
+	private void createVolume(Node node) {
 		CreateVolumeResponse volume1Info = node.getDockerClient().createVolumeCmd().withName("JavaVolume").exec();
 	}
 
@@ -153,7 +215,7 @@ public class DockerClusterClient {
 		setupMasterContainer(image, containerName, Integer.parseInt(portToExpose), envs);
 	}
 
-	public Ports getPortBinding(int portToExpose) {
+	private Ports getPortBinding(int portToExpose) {
 		Ports portBindings = new Ports();
 		portBindings.bind(ExposedPort.tcp(portToExpose), Ports.Binding.bindPort(portToExpose));
 		return portBindings;
@@ -199,13 +261,13 @@ public class DockerClusterClient {
 				.exec();
 	}
 
-	public List<Container> getAllRunningContainers(Node node, String... states) {
+	private List<Container> getAllRunningContainers(Node node, String... states) {
 		List<Container> cont = node.getDockerClient().listContainersCmd().withStatusFilter(Arrays.asList(states))
 				.exec();
 		return cont;
 	}
 
-	public void checkNoRunningContainers() {
+	private void checkNoRunningContainers() {
 		List<Node> containsRunningContainers = new ArrayList<>();
 		nodes.stream().forEach(node -> {
 
@@ -230,16 +292,6 @@ public class DockerClusterClient {
 					"The following nodes has running containers with name containing the cluster.id " + clusterId + ": "
 							+ nodesWithRunningClusterContainers.toString());
 		}
-	}
-
-	public void stopAndRemoveContainersAtAllNodes(MasterContainers... containerNames) {
-
-		List<String> nameMatcherToBeStopedAndRemoved = Arrays.asList(containerNames).stream().map(c -> c.toString())
-				.collect(Collectors.toList());
-		stopAndRemoveContainer(masterNode, nameMatcherToBeStopedAndRemoved);
-		nameMatcherToBeStopedAndRemoved = Arrays.asList(clusterId + ".*");
-
-		stopAndRemoveClusterInstances();
 	}
 
 	public void stopAndRemoveClusterInstances() {
@@ -298,7 +350,7 @@ public class DockerClusterClient {
 		});
 	}
 
-	public void pullImage(Node node, String image) {
+	private void pullImage(Node node, String image) {
 		PullImageResultCallback cb = new PullImageResultCallback();
 		node.getDockerClient().pullImageCmd(image).exec(cb);
 
@@ -318,76 +370,93 @@ public class DockerClusterClient {
 	 */
 	private HostConfig getNewHostConfig() {
 		HostConfig hostConfig = new HostConfig();
-		hostIpMapping.entrySet().stream().forEach(entry -> {
+		List<String> list = hostIpMapping.entrySet().stream().map((hostIp)->{
+			return hostIp.getKey()+":" +hostIp.getValue();
+		}).collect(Collectors.toList());
+		String[] hostIpArray = list.toArray(new String[list.size()]);
+		hostConfig.withExtraHosts(hostIpArray);
 
-			String host = getComponentNameFromHostIpMapping(entry.getKey());
-			hostConfig.withExtraHosts(new String[] { host + ":" + entry.getValue() });
-				
-		});
 		return hostConfig;
 	}
 
-	protected static String getComponentNameFromHostIpMapping(String variableName) {
+	protected static String getHostNameFromHostIpMapping(String variableName) {
 		String[] splitted = variableName.split("[.]", 2);
 		throwIfTrue(() ->splitted.length != 2, "Could not read the host from config variable " + variableName);
 		String host = splitted[1];
 		return host;
 	}
 	
-	public void startNewContainer(Node node, String containerId, String image, String executionId) {
+	private void startNewContainer(Node node, String containerId, String image, String executionId, String md5sum) {
 
 		pullImageIfNeeded(node, image);
 
-		Volume volume2 = new Volume("/root/docker_mavenrepo");
-		Bind bind1 = new Bind("JavaVolume", volume2);
+		Volume volume2 = new Volume("/root/host-volume");
+		Bind bind1 = new Bind("LoadcoderVolume", volume2);
 
 		HostConfig hostConfig = getNewHostConfig();
 		hostConfig.withBinds(bind1);
 		CreateContainerResponse resp = node.getDockerClient().createContainerCmd(image)
 				.withEnv("LOADCODER_EXECUTION_ID=" + executionId,
 						"LOADCODER_CLUSTER_INSTANCE_ID=" + clusterId + "-" + containerId,
-						"LOADSHIP_HOST="+ ClientUtils.getHostValue("loadship.host"), 
-						"LOADSHIP_PORT="+ MasterContainers.LOADSHIP.getExposedPort())
+						"LOADSHIP_HOST="+ getInternalHost(MasterContainers.LOADSHIP), 
+						"LOADSHIP_PORT="+ MasterContainers.LOADSHIP.getExposedPort(),
+						"TEST_MD5SUM="+md5sum
+						)
 				.withName(clusterId + "-" + containerId).withHostConfig(hostConfig).exec();
 
 		node.getDockerClient().startContainerCmd(resp.getId()).exec();
 	}
 
-	public void createAndStartNode(String nodeId, String image, String executionId) {
-		Node node = nodesMap.get(nodeId);
-		startNewContainer(node, com.loadcoder.utils.DateTimeUtil.getDateTimeNowString(), image, executionId);
+//	public void createAndStartNode(String nodeId, String image, String executionId) {
+//		Node node = nodesMap.get(nodeId);
+//		startNewContainer(node, com.loadcoder.utils.DateTimeUtil.getDateTimeNowString(), image, executionId);
+//	}
+
+	public void uploadTest(File directory) {
+		uploadTest(directory, MAVEN_FILE_AND_DIR_NAME_WHITELIST_DEFAULT);
 	}
 
-	public void zipAndSendToLoadship(File directory) {
-		zipAndSendToCache(directory, MAVEN_FILE_AND_DIR_NAME_WHITELIST_DEFAULT);
-	}
-
-	public void zipAndSendToCache(File directory, String... fileAndDirNamesWhitelist) {
+	public void uploadTest(File directory, String... fileAndDirNamesWhitelist) {
 		byte[] bytes = zip.zipToBytes(new File("."), fileAndDirNamesWhitelist);
-
+		String md5 = md5Bytes(bytes);
+		FileUtil.writeFile(md5.getBytes(), new File("test-md5sum.txt"));
 		String url = "http://" + masterNode.getHost() + ":" + MasterContainers.LOADSHIP.getPort() + "/loadship/data";
 
 		PackageSender.performPOSTRequest(url, bytes);
 	}
-
-	/**
-	 * Https is not yet supported, hence the private access modifier
-	 * 
-	 * @param directory
-	 */
-	private void zipAndSendToCacheTLS(File directory) {
-		byte[] bytes = zip.zipToBytes(new File("."), "pom.xml", "src", "test.sh");
-		String url = "https://" + masterNode.getHost() + ":" + getConfiguration("loadship.port") + "/loadship/data";
-		PackageSender.performPOSTRequest(url, bytes);
+	
+	private static String md5Bytes(byte[] bytes) {
+		return rebase(md5(bytes));
+	}
+	
+	private static byte[] md5(byte[] bytes){
+		try {
+			byte[] md5Byte = MessageDigest.getInstance("MD5").digest(bytes);
+			return md5Byte;
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private static String rebase(byte[] bytes) {
+		
+	    StringBuilder sb = new StringBuilder();
+	    for(int i=0; i< bytes.length ;i++)
+	    {
+	        sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+	    }
+	     
+	    //return complete hash
+	   return sb.toString();
 	}
 
-	public void startCluster(int amountOfContainersToStart, String executionId) {
+	private void startCluster(int amountOfContainersToStart, String executionId, String md5sum) {
 		checkNoRunningContainers();
 		stopAndRemoveClusterInstances();
 		int i = 0;
 		whileloop: while (true) {
 			for (Node node : nodes) {
-				startNewContainer(node, "" + i, getConfiguration("loadcoder.image"), executionId);
+				startNewContainer(node, "" + i, config.getConfiguration("loadcoder.image"), executionId, md5sum);
 				log.info("Started new loadinstance at node:" + node.getId());
 				i++;
 				if (i >= amountOfContainersToStart) {
@@ -398,12 +467,13 @@ public class DockerClusterClient {
 	}
 
 	public void startNewExecution(int amountOfContainersToStart) {
-		startNewExecution(amountOfContainersToStart, DateTimeUtil.getDateTimeNowString());
+		String md5sum = FileUtil.readFile("test-md5sum.txt");
+		startNewExecution(amountOfContainersToStart, DateTimeUtil.getDateTimeNowString(), md5sum);
 	}
 
-	public void startNewExecution(int amountOfContainersToStart, String executionId) {
+	private void startNewExecution(int amountOfContainersToStart, String executionId, String md5sum) {
 		FileUtil.writeFile(executionId.getBytes(), new File("executionId.txt"));
-		startCluster(amountOfContainersToStart, executionId);
+		startCluster(amountOfContainersToStart, executionId, md5sum);
 	}
 
 	public void scaleExistingExecution(String nodeId) {
@@ -422,16 +492,49 @@ public class DockerClusterClient {
 		}).sorted().collect(Collectors.toList());
 		int highest = i.get(i.size() - 1);
 		String executionId = FileUtil.readFile("executionId.txt");
+		String md5sum = FileUtil.readFile("test-md5sum.txt");
 		int newNumber = highest + 1;
-		startNewContainer(node, "" + newNumber, getConfiguration("loadcoder.image"), executionId);
+		startNewContainer(node, "" + newNumber, config.getConfiguration("loadcoder.image"), executionId, md5sum);
 
 	}
 
-	public List<Node> getNodes() {
+	protected List<Node> getNodes() {
 		return nodes;
 	}
 
-	public Node getNode(String key) {
+	private Node getNode(String key) {
 		return nodesMap.get(key);
+	}
+
+	public String getInternalHost(MasterContainers masterContainers) {
+		String result;
+		String internalImage = config.getConfiguration(masterContainers.name().toLowerCase()+".internal.host");
+		String internalMaster = getMasterNode().getInternalHost();
+		if(internalImage != null && ! internalImage.isEmpty()) {
+			result = internalImage;
+		}else if(internalMaster != null && ! internalMaster.isEmpty()){
+			result = internalMaster;
+		}else {
+			result = getMasterNode().getHost();
+		}
+
+		return result;
+	}
+	
+	public String getHost(MasterContainers masterContainers) {
+		String result;
+		String hostImage = config.getConfiguration(masterContainers.name().toLowerCase()+".host");
+		if(hostImage != null && ! hostImage.isEmpty()) {
+			result = hostImage;
+		}else {
+			result = getMasterNode().getHost();
+		}
+
+		return result;
+	}
+
+	public GrafanaClient createGrafanaClient() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -24,20 +24,20 @@ import java.util.Set;
 
 public class DockerConfigurationHelper {
 
-	public static Set<String> getAllNodeIds() {
-		return getAllNodeIds(Configuration.getConfigurationInstance().getConfiguration());
-	}
+//	public static Set<String> getAllNodeIds() {
+//		return getAllNodeIds(Configuration.getConfigurationInstance().getConfiguration());
+//	}
 
-	protected static Set<String> getAllNodeIds(Map<String, String> configuration) {
-
-		Set<String> result = new HashSet<>();
-		configuration.entrySet().stream().forEach(entry -> {
-			String key = entry.getKey();
-			if (key.matches("node\\..*\\.host")) {
-				String id = key.replace("node.", "").replace(".host", "");
-				result.add(id);
-			}
-		});
-		return result;
-	}
+//	protected static Set<String> getAllNodeIds(Map<String, String> configuration) {
+//
+//		Set<String> result = new HashSet<>();
+//		configuration.entrySet().stream().forEach(entry -> {
+//			String key = entry.getKey();
+//			if (key.matches("node\\..*\\.host") && ! key.contains("internal")) {
+//				String id = key.replace("node.", "").replace(".host", "");
+//				result.add(id);
+//			}
+//		});
+//		return result;
+//	}
 }

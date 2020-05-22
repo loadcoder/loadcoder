@@ -26,16 +26,9 @@ import java.util.Set;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+
 public class DockerConfigurationHelperTest {
 
-	@Test
-	public void testGetNodes() {
-		Map<String, String> config = new HashMap<>();
-		config.put("node.foo.host", "localhost");
-		config.put("node.bar.host", "localhost");
 
-		Set<String> ids = DockerConfigurationHelper.getAllNodeIds(config);
-		assertTrue(ids.contains("foo"));
-		assertTrue(ids.contains("bar"));
-	}
 }

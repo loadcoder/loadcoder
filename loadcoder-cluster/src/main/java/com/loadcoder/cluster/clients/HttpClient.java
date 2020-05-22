@@ -39,7 +39,7 @@ public class HttpClient {
 		try {
 			return sendChecked(body, url, "POST", headers);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("POST to url: " + url + " did not work", e);
 		}
 	}
 
@@ -47,7 +47,7 @@ public class HttpClient {
 		try {
 			return get(url, "GET", headers);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("GET to url: " + url + " did not work", e);
 		}
 	}
 

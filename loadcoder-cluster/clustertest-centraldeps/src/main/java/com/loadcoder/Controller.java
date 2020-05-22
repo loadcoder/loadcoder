@@ -30,7 +30,7 @@ public class Controller {
 	public static void main(String[] args){
 		DockerClusterClient client = new DockerClusterClient();
 		//Creates and starts Grafana, InfluxDB, Loadship and also Artifactory
-//		client.setupMaster();
+		client.setupMaster();
 		
 		//Send this Maven project as a zip file to the Loadship server
 //		client.zipAndSendToLoadship(new File("."));

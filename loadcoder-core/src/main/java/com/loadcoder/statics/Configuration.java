@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -39,9 +40,10 @@ public class Configuration {
 	final ConfigHolder configHolder;
 	private static Configuration config = new Configuration();
 	
-	private Configuration() {
+	public Configuration() {
 		this(new ConfigHolder());
 	}
+
 	protected Configuration(ConfigHolder configHolder) {
 		this.configHolder = configHolder;
 	}
@@ -58,18 +60,71 @@ public class Configuration {
 		}
 		
 		protected ConfigHolder() {
-			this(generationConfiguration());
+			this.config = generationConfiguration();
 		}
 		
 		Map<String, String> getConfig(){
 			return config;
+		}
+		
+		private Map<String, String> generationConfiguration(){
+			Map<String, String> configuration = readConfigurationFile();
+			populateMapWithLoadcoderEnvironments(configuration);
+			return configuration;
+		}
+		
+		File getFileFromResourceOrPath(String propertyFilePath) {
+			File resourceFile = null;
+			URL resourceURL = Statics.class.getClassLoader().getResource(propertyFilePath);
+			if (resourceURL != null) {
+				resourceFile = new File(resourceURL.getFile());
+			}
+			File pathFile = new File(propertyFilePath);
+
+			File chosenFile;
+			if (resourceFile != null && resourceFile.exists()) {
+				chosenFile = resourceFile;
+			} else if (pathFile.exists()) {
+				chosenFile = pathFile;
+			}else {
+				throw new RuntimeException("Tried to load configuration file " + propertyFilePath + "but it could not be found."
+						+ "The path to this file is configurable with jvm arg -Dconfiguration=<PATH TO CONFIG FILE>");
+			}
+			return chosenFile;
+			
+		}
+		private Map<String, String> readConfigurationFile() {
+			Map<String, String> result = new HashMap<String, String>();
+
+			String propertyFilePath = System.getProperty("loadcoder.configuration");
+			if (propertyFilePath == null || propertyFilePath.isEmpty()) {
+				propertyFilePath = "loadcoder.conf";
+			}
+			
+			File chosenFile = getFileFromResourceOrPath(propertyFilePath);
+
+			log.info("Will read configuration from file {}", chosenFile);
+			List<String> lines;
+			try {
+				lines = LoadUtility.readFile(chosenFile);
+			} catch (IOException e) {
+				throw new RuntimeException("Found the file" + propertyFilePath + " but it could not be read", e);
+			}
+
+			lines.stream().forEach(line -> {
+				String[] splitted = line.split("[ ]*=[ ]*");
+				if (splitted.length == 2) {
+					result.put(splitted[0], splitted[1]);
+				}
+			});
+			return result;
 		}
 	}
 	
 	protected ConfigHolder getConfigHolder() {
 		return configHolder;
 	}
-	protected Map<String, String> getConfiguration() {
+	public Map<String, String> getConfiguration() {
 		return configHolder.getConfig();
 	}
 	
@@ -81,6 +136,11 @@ public class Configuration {
 		return getConfigHolder().getConfig().get(key);
 	}
 	
+	public String getConfiguration(String key, String defaultValue) {
+		String valueFromConfig = getConfigHolder().getConfig().get(key);
+		String result = valueFromConfig == null ? defaultValue : valueFromConfig;
+		return result;
+	}
 	
 	public Map<String, String> getMatchingConfig(String keyMatchingRegexp) {
 		Map<String, String> m = getConfigHolder().getConfig().entrySet().stream().filter(entry -> {
@@ -92,53 +152,7 @@ public class Configuration {
 		return m;
 	}
 	
-	private static  Map<String, String> generationConfiguration(){
-		Map<String, String> configuration = readConfigurationFile();
-		populateMapWithLoadcoderEnvironments(configuration);
-		return configuration;
-	}
-	
-	private static Map<String, String> readConfigurationFile() {
-		Map<String, String> result = new HashMap<String, String>();
 
-		String propertyFilePath = System.getProperty("configuration");
-		if (propertyFilePath == null || propertyFilePath.isEmpty()) {
-			propertyFilePath = "loadcoder.conf";
-		}
-		
-		File resourceFile = null;
-		URL resourceURL = Statics.class.getClassLoader().getResource(propertyFilePath);
-		if (resourceURL != null) {
-			resourceFile = new File(resourceURL.getFile());
-		}
-		File pathFile = new File(propertyFilePath);
-
-		File chosenFile;
-		if (resourceFile != null && resourceFile.exists()) {
-			chosenFile = resourceFile;
-		} else if (pathFile.exists()) {
-			chosenFile = pathFile;
-		}else {
-			throw new RuntimeException("Tried to load configuration file " + propertyFilePath + "but it could not be found."
-					+ "The path to this file is configurable with jvm arg -Dconfiguration=<PATH TO CONFIG FILE>");
-		}
-
-		log.info("Will read configuration from file {}", chosenFile);
-		List<String> lines;
-		try {
-			lines = LoadUtility.readFile(chosenFile);
-		} catch (IOException e) {
-			throw new RuntimeException("Found the file" + propertyFilePath + " but it could not be read", e);
-		}
-
-		lines.stream().forEach(line -> {
-			String[] splitted = line.split("[ ]*=[ ]*");
-			if (splitted.length == 2) {
-				result.put(splitted[0], splitted[1]);
-			}
-		});
-		return result;
-	}
 
 	private static void populateMapWithLoadcoderEnvironments(Map<String, String> destination) {
 
@@ -147,7 +161,6 @@ public class Configuration {
 			log.info(entry.getKey() + ":" + entry.getValue());
 		});
 		populateMapWithLoadcoderParameters(envs, destination);
-		
 	}
 	
 	private static void populateMapWithLoadcoderParameters(Map<String, String> source, Map<String, String> destination) {
@@ -161,4 +174,5 @@ public class Configuration {
 		});
 		
 	}
+
 }
