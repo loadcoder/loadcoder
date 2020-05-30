@@ -25,15 +25,36 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.DockerClusterClient;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
+import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.utils.DateTimeUtil;
 
 public class GrafanaClientTest extends TestNGBase {
+
+	@Test(groups = "manual")
+	void createFolderTest() {
+		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
+		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
+		String folderName = "TestFolder" + System.currentTimeMillis();
+		Folder resp = grafanaClient.createDashboardFolder(folderName);
+		assertEquals(resp.getName(), folderName);
+	}
+
+	@Test(groups = "manual")
+	void testListFolders() {
+		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
+		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
+		List<Folder> resp = grafanaClient.listDashboardFolders();
+		resp.forEach(folder -> System.out.println(folder.getName()));
+	}
 
 	/**
 	 * This test creates a new dashbord in Grafana. Since Grafana needs to be
@@ -46,11 +67,13 @@ public class GrafanaClientTest extends TestNGBase {
 		DockerClusterClient dockerClusterClient = new DockerClusterClient();
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
-		GrafanaClient cli = new GrafanaClient(dockerClusterClient, false, authorizationValue);
-		List<String> responseBody = cli.listDataSources();
+		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
+		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
 
-		HttpResponse responseCode = cli.createDataSource("listAndCreateDataSource2");
-		assertEquals(responseCode, 200);
+		List<String> responseBody = grafanaClient.listDataSources();
+		String dataSourceName = "GrafanaClientTest" + System.currentTimeMillis();
+		HttpResponse responseCode = grafanaClient.createDataSource(dataSourceName);
+		assertEquals(responseCode.getStatusCode(), 200);
 	}
 
 	/**
@@ -63,12 +86,12 @@ public class GrafanaClientTest extends TestNGBase {
 
 		DockerClusterClient dockerClusterClient = new DockerClusterClient();
 		// base64 encoded default grafana user:password
-		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
-		GrafanaClient cli = new GrafanaClient(dockerClusterClient, false, authorizationValue);
+		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
+		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
 
-		List<Folder> folders = cli.listDashboardFolders();
-		HttpResponse responseCode = cli.createNewDashboard(folders.get(0), method.getName(), Arrays.asList("foo"),
-				"bar");
+		List<Folder> folders = grafanaClient.listDashboardFolders();
+		HttpResponse responseCode = grafanaClient.createNewDashboard(folders.get(0), method.getName(),
+				Arrays.asList("foo"), "bar");
 		assertEquals(responseCode.getStatusCode(), 200);
 
 	}

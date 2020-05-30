@@ -40,32 +40,45 @@
 		<jackson-databind.version>2.9.9</jackson-databind.version>
 		<docker-java.version>3.1.5</docker-java.version>
 		<json-path.version>2.4.0</json-path.version>
+		<activation.version>1.1.1</activation.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 
-		<dependency>
-			<groupId>com.github.docker-java</groupId>
-			<artifactId>docker-java</artifactId>
-			<version>${docker-java.version}</version>
-		</dependency>
+			<dependency>
+				<groupId>com.github.docker-java</groupId>
+				<artifactId>docker-java</artifactId>
+				<version>${docker-java.version}</version>
+			</dependency>
 
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>${json-path.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
-		</dependency>
-		
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>${activation.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path</artifactId>
+				<version>${json-path.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-databind.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.loadcoder</groupId>
 				<artifactId>loadcoder-all</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.loadcoder</groupId>
+				<artifactId>loadcoder-network</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -117,18 +130,18 @@
 				<version>${chart-extensions.version}</version>
 			</dependency>
 
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>${okhttp.version}</version>
-		</dependency>
-		
-				<dependency>
-			<groupId>de.sstoehr</groupId>
-			<artifactId>har-reader</artifactId>
-			<version>${har-reader.version}</version>
-		</dependency>
-		
+			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp</artifactId>
+				<version>${okhttp.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>de.sstoehr</groupId>
+				<artifactId>har-reader</artifactId>
+				<version>${har-reader.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
@@ -258,20 +271,9 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			<!--plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-gpg-plugin</artifactId> 
+				<version>1.6</version> <executions> <execution> <id>sign-artifacts</id> <phase>deploy</phase> 
+				<goals> <goal>sign</goal> </goals> </execution> </executions> </plugin -->
 
 		</plugins>
 
@@ -299,13 +301,15 @@
 	</developers>
 
 	<distributionManagement>
+		<!-- <snapshotRepository> <id>ossrh</id> <url>https://oss.sonatype.org/content/repositories/snapshots</url> 
+			</snapshotRepository> -->
 		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>local-snapshot-repo</id>
+			<url>http://localhost:8081/artifactory/libs-snapshot</url>
 		</snapshotRepository>
 		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<id>local-snapshot-repo</id>
+			<url>http://localhost:8081/artifactory/libs-release</url>
 		</repository>
 	</distributionManagement>
 </project>

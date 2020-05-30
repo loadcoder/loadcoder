@@ -25,68 +25,53 @@ import com.loadcoder.statics.Configuration;
 import com.loadcoder.statics.Statics;
 
 import static com.loadcoder.statics.Statics.*;
-public enum MasterContainers{
-	
 
-	
-	LOADSHIP(()->{
+public enum MasterContainers {
+
+	LOADSHIP(() -> {
 		Map<String, String> loadshipMap = new HashMap<>();
 		loadshipMap.put("HTTP_ENABLED", "true");
 		loadshipMap.put("MODECHOOSER", "LOADSHIP");
 		return loadshipMap;
-		}, 6210), 
-	INFLUXDB(()-> null, 8086),
-	GRAFANA(()-> null, 3000),
-	ARTIFACTORY(()-> null, 8081);
+	}, 6210), INFLUXDB(() -> null, 8086), GRAFANA(() -> null, 3000), ARTIFACTORY(() -> null, 8081);
 
 	Configuration config = Configuration.getConfigurationInstance();
-	final Map<String, String> loadshipMap;
+	final Map<String, String> envMap;
 	final int port;
-	
-	MasterContainers(CreateEnvironmentVariableMap masterContainerSetupable, int port){
-		this.loadshipMap = masterContainerSetupable.createEnvironmentVariableMap();
+
+	MasterContainers(CreateEnvironmentVariableMap masterContainerSetupable, int port) {
+		this.envMap = masterContainerSetupable.createEnvironmentVariableMap();
 		this.port = port;
 	}
-	
+
 	protected void setConfiguration(Configuration config) {
 		this.config = config;
 	}
 
-//	public String getHost(DockerClusterClient dockerClusterClient){
-//		String configVariableName = name().toLowerCase() + ".host";
-//		String s = config.getConfiguration(configVariableName);
-//		return s == null ? dockerClusterClient.getMasterNode().getHost() : s;
-//	}
-//	
-//	public String getInternalHost(DockerClusterClient dockerClusterClient){
-//		String configVariableName = name().toLowerCase() + ".internal.host";
-//		String s = config.getConfiguration(configVariableName);
-//		return s == null ? dockerClusterClient.getMasterNode().getInternalHost() : s;
-//	}
-	
-	public String getPort(){
+	public String getPort() {
 		String configVariableName = name().toLowerCase() + ".port";
 		String s = config.getConfiguration(configVariableName);
 		return s == null ? getExposedPort() : s;
 	}
-	
-	public String getExposedPort(){
+
+	public String getExposedPort() {
 		String configVariableName = name().toLowerCase() + ".exposed.port";
 		String s = config.getConfiguration(configVariableName);
 		return s == null ? getServerPort() : s;
 	}
-	
-	public String getServerPort(){
+
+	public String getServerPort() {
 		String configVariableName = name().toLowerCase() + ".server.port";
 		String s = config.getConfiguration(configVariableName);
-		return s == null ? ""+this.port : s;
+		return s == null ? "" + this.port : s;
 	}
-	
-	void setup(DockerClusterClient client){
-		client.setupMasterContainer(this.name().toLowerCase(), loadshipMap, "" + port);
+
+	void setup(DockerClusterClient client) {
+
+		client.setupMasterContainer(this.name().toLowerCase(), envMap, getServerPort());
 	}
-	
-	private interface CreateEnvironmentVariableMap{
+
+	private interface CreateEnvironmentVariableMap {
 		Map<String, String> createEnvironmentVariableMap();
 	}
 }

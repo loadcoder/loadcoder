@@ -18,11 +18,18 @@
 
 	<dependencies>
 
+		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+		<!-- Needed for loadcoder-cluster from Java 11 -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
 		<dependency>
 			<groupId>com.github.docker-java</groupId>
@@ -44,7 +51,7 @@
 			<artifactId>loadcoder-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>

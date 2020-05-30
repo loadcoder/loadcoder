@@ -72,15 +72,19 @@ public class GrafanaClient extends HttpClient {
 	private final String authorizationValue;
 
 	private final String dataSourceInfluxDBHost;
+
+	private final InfluxDBClient influxClient;
 	/**
 	 * Constructor for the GrafanaClient
 	 * 
 	 * @param grafanaHost is the hostname of where Grafana is hosted
+	 * @param dataSourceInfluxDBHost is the host that grafana will use in the datasource endpoint.
 	 * @param https is boolean if the communcation is encrypted or not. 
 	 * @param authorizationValue the value for the HTTP header Authorization used in the request towards
+	 * @param influxClient  is the InfluxDB client
 	 * Grafana in order to authenticate the client
 	 */
-	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, boolean https, String authorizationValue) {
+	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, boolean https, String authorizationValue, InfluxDBClient influxClient) {
 		String port = MasterContainers.GRAFANA.getPort();
 		this.dataSourceInfluxDBHost = dataSourceInfluxDBHost;
 		String protocol = protocolAsString(https);
@@ -88,10 +92,7 @@ public class GrafanaClient extends HttpClient {
 		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, grafanaHost, port);
 		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, protocol, grafanaHost, port);
 		this.authorizationValue = authorizationValue;
-	}
-
-	public GrafanaClient(DockerClusterClient dockerClusterClient, boolean https, String authorizationValue) {
-		this(dockerClusterClient.getHost(MasterContainers.GRAFANA), dockerClusterClient.getInternalHost(MasterContainers.INFLUXDB), https, authorizationValue);
+		this.influxClient = influxClient;
 	}
 
 	private String getFileAsString(String filename) {
@@ -270,12 +271,11 @@ public class GrafanaClient extends HttpClient {
 		return f;
 	}
 
-	public void createGrafanaDashboard(String groupName, String testName, String executionIdRegexp, InfluxDBClient influxClient) {
-		createGrafanaDashboard(groupName, testName, executionIdRegexp, getConfiguration("grafana.port"), influxClient);
+	public void createGrafanaDashboard(String executionIdRegexp) {
+		createGrafanaDashboard(executionIdRegexp, getConfiguration("grafana.port"));
 	}
 	
-	private void createGrafanaDashboard(String groupName, String testName, String executionIdRegexp, String grafanaPort,
-			InfluxDBClient influxClient) {
+	private void createGrafanaDashboard(String executionIdRegexp, String grafanaPort) {
 
 		String dbName = influxClient.getDatabaseName();
 		
@@ -295,13 +295,13 @@ public class GrafanaClient extends HttpClient {
 		Folder folder = null;
 		List<Folder> folders = listDashboardFolders();
 		for(Folder f : folders) {
-			if(f.getName().equals(groupName)) {
+			if(f.getName().equals(influxClient.getTestGroup())) {
 				folder = f;
 				break;
 			}
 		}
 		if(folder == null) {
-			folder = createDashboardFolder(groupName);
+			folder = createDashboardFolder(influxClient.getTestGroup());
 		}
 
 		List<String> dataSources = listDataSources();
@@ -309,7 +309,6 @@ public class GrafanaClient extends HttpClient {
 			createDataSource(dbName);
 		}
 		
-		createNewDashboard(folder, testName, transaction, dbName);
+		createNewDashboard(folder, influxClient.getTestName(), transaction, dbName);
 	}
-	
 }

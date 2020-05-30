@@ -30,6 +30,11 @@
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-cluster</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-network</artifactId>
+		</dependency>
 		
 	</dependencies>
 

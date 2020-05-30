@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.cluster.clients;
+package com.loadcoder.cluster.clients.influxdb;
 
 import static org.testng.Assert.assertEquals;
 
@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.result.TransactionExecutionResult;
@@ -35,7 +36,7 @@ public class InfluxDBClientTest {
 
 	@Test(groups = "manual")
 	public void createEntry() {
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "stefansDB");
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 		InfluxDBTestExecution exe = cli.createTestExecution("foo" +System.currentTimeMillis());
 		int responseCode = -1;
 		Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
@@ -43,30 +44,25 @@ public class InfluxDBClientTest {
 				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
 
 		HttpResponse resp = exe.writeTransactions(transactions);
-		assertEquals(responseCode, 204);
+		assertEquals(resp.getStatusCode(), 204);
 	}
 	
 	@Test(groups = "manual")
 	public void createTheSameDBAgain() {
-		String dbName = "foo"+System.currentTimeMillis();
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 		HttpResponse resp = cli.createDB();
 		assertEquals(resp.getStatusCode(), 200);
-		HttpResponse resp2= cli.createDB();
-		assertEquals(resp2.getStatusCode(), 409);
 	}
 	
 	@Test(groups = "manual")
 	public void testShowMeasurements() {
-		String dbName= "foo";
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 		List<String> measurements = cli.showMeasurements();
 	}
 	
 	@Test(groups = "manual")
 	public void testDistinctTransactions() {
-		String dbName= "foo";
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, dbName);
+		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 	}
 	
 }
