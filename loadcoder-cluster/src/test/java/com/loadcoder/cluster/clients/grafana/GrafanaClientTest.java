@@ -29,7 +29,7 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import com.loadcoder.cluster.clients.HttpResponse;
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.load.testng.TestNGBase;
@@ -39,7 +39,7 @@ public class GrafanaClientTest extends TestNGBase {
 
 	@Test(groups = "manual")
 	void createFolderTest() {
-		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
 		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
 		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
 		String folderName = "TestFolder" + System.currentTimeMillis();
@@ -49,7 +49,7 @@ public class GrafanaClientTest extends TestNGBase {
 
 	@Test(groups = "manual")
 	void testListFolders() {
-		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
 		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
 		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
 		List<Folder> resp = grafanaClient.listDashboardFolders();
@@ -64,7 +64,7 @@ public class GrafanaClientTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void listAndCreateDataSource(Method method) {
 
-		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
 		// base64 encoded default grafana user:password
 		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
 		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
@@ -84,7 +84,7 @@ public class GrafanaClientTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void createDashboard(Method method) {
 
-		DockerClusterClient dockerClusterClient = new DockerClusterClient();
+		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
 		// base64 encoded default grafana user:password
 		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
 		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);

@@ -4,8 +4,6 @@ import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.Statics.*;
 
-import org.junit.Test;
-
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
@@ -15,34 +13,38 @@ import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.SummaryUtils;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+
 ${importList}
 
 public class GeneratedLoadTest {
+
+
+	LoadScenarioTyped<ThreadInstance> loadScenario = new LoadScenarioTyped<ThreadInstance>() {
+
+		@Override
+		public void loadScenario(ThreadInstance t) {
+			t.getScenarioLogic().performScenario();
+		}
+
+		@Override
+		public ThreadInstance createInstance() {
+			/*
+			 * The ThreadInstance created here for each thread will be a container for
+			 * everything uniquely to each specific thead, and will in this case also hold
+			 * separate instances for the load test logic.
+			 */
+			return new ThreadInstance(this);
+		}
+	};
 
 	@Test
 	public void bestPractiseLoadTestDesign() {
 
 		// Giving the test a unique directory for the result logs
 		setResultDestination(getNewLogDir("target", "bestPracticeLoadTest"));
-
-		LoadScenarioTyped<ThreadInstance> loadScenario = new LoadScenarioTyped<ThreadInstance>() {
-
-			@Override
-			public void loadScenario(ThreadInstance t) {
-
-				t.getScenarioLogic().performScenario();
-			}
-
-			@Override
-			public ThreadInstance createInstance() {
-				/*
-				 * The ThreadInstance created here for each thread will be a container for
-				 * everything uniquely to each specific thead, and will in this case also hold
-				 * separate instances for the load test logic.
-				 */
-				return new ThreadInstance(this);
-			}
-		};
 
 		Load load = new LoadBuilder(loadScenario)
 		${loadBuilder}
@@ -64,7 +66,8 @@ public class GeneratedLoadTest {
 	 */
 	@Test
 	public void testGreetingsLogicAlone() {
-		ThreadInstance threadInstance = new ThreadInstance(new Scenario());
-		threadInstance.getScenarioLogic().performScenario();
+		Result result = loadScenario.test();
+		SummaryUtils.printSimpleSummary(result, "LoadScenario Test");
+		assertEquals(result.getAmountOfFails(), 0);
 	}
 }

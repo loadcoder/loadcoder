@@ -20,7 +20,7 @@ package com.loadcoder.cluster;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.scenario.ExecutionBuilder;
@@ -43,7 +43,7 @@ public class InfluxReportTest {
 
 		Load l = new LoadBuilder(ls).stopDecision(iterations(50)).throttle(2, PER_SECOND, SHARED).build();
 		new ExecutionBuilder(l).storeAndConsumeResultRuntime(InfluxDBClient
-				.setupInfluxDataConsumer(new DockerClusterClient(), "LoadcoderClusterTests", "InfluxReportTest"))
+				.setupInfluxDataConsumer(new LoadcoderCluster(), "LoadcoderClusterTests", "InfluxReportTest"))
 				.build().execute().andWait();
 	}
 }

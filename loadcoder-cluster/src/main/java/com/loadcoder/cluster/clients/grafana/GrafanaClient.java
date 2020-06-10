@@ -38,11 +38,12 @@ import com.jayway.jsonpath.JsonPath;
 import com.loadcoder.cluster.clients.Header;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.docker.MasterContainers;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.result.Result;
+import com.loadcoder.statics.Configuration;
 import com.loadcoder.utils.DateTimeUtil;
 
 import net.minidev.json.JSONArray;
@@ -57,8 +58,8 @@ public class GrafanaClient extends HttpClient {
 
 	protected static final String GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.000";
 
-	protected static final DateTimeFormatter TIMESPAN_FORMAT = DateTimeFormatter.ofPattern(
-			GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
+	protected static final DateTimeFormatter TIMESPAN_FORMAT = DateTimeFormatter
+			.ofPattern(GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
 	private final String DB_URL_TEMPLATE = "%s://%s:%s/api/dashboards/db";
 	private final String DATASOURCES_URL_TEMPLATE = "%s://%s:%s/api/datasources";
 	private final String FOLDERS_URL_TEMPLATE = "%s://%s:%s/api/folders";
@@ -72,22 +73,28 @@ public class GrafanaClient extends HttpClient {
 	private final String authorizationValue;
 
 	private final String dataSourceInfluxDBHost;
-
+	private final String dataSourceInfluxDBHostPort;
 	private final InfluxDBClient influxClient;
+
 	/**
 	 * Constructor for the GrafanaClient
 	 * 
-	 * @param grafanaHost is the hostname of where Grafana is hosted
-	 * @param dataSourceInfluxDBHost is the host that grafana will use in the datasource endpoint.
-	 * @param https is boolean if the communcation is encrypted or not. 
-	 * @param authorizationValue the value for the HTTP header Authorization used in the request towards
-	 * @param influxClient  is the InfluxDB client
-	 * Grafana in order to authenticate the client
+	 * @param grafanaHost            is the hostname of where Grafana is hosted
+	 * @param dataSourceInfluxDBHost is the host that grafana will use in the
+	 *                               datasource endpoint.
+	 * @param authorizationValue     the value for the HTTP header Authorization
+	 *                               used in the request towards
+	 * @param influxClient           is the InfluxDB client
+	 * @param config                 is the Configuration for the Loadcoder cluster
+	 *                               Grafana in order to authenticate the client
 	 */
-	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, boolean https, String authorizationValue, InfluxDBClient influxClient) {
-		String port = MasterContainers.GRAFANA.getPort();
+	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, String authorizationValue,
+			InfluxDBClient influxClient, Configuration config) {
+		String port = MasterContainers.GRAFANA.getPort(config);
+		this.dataSourceInfluxDBHostPort = MasterContainers.INFLUXDB.getExposedPort(config);
+
 		this.dataSourceInfluxDBHost = dataSourceInfluxDBHost;
-		String protocol = protocolAsString(https);
+		String protocol = protocolAsString(false);
 		DB_URL = String.format(DB_URL_TEMPLATE, protocol, grafanaHost, port);
 		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, grafanaHost, port);
 		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, protocol, grafanaHost, port);
@@ -132,61 +139,64 @@ public class GrafanaClient extends HttpClient {
 		fileAsString = fileAsString.replace("${title}", name + "_" + dateTimeLabel);
 
 		fileAsString = fileAsString.replace("${refresh}", refresh ? "\"5s\"" : "false");
-		fileAsString = fileAsString.replace("${folder.id}", ""+folderId);
+		fileAsString = fileAsString.replace("${folder.id}", "" + folderId);
 
-		String targets ="";
+		String targets = "";
 
 		String targetTemplate = getFileAsString("grafana_5.2.4/target_body.json");
 		List<String> targetList = new ArrayList<>();
-		transactionNamesSet.stream().forEach(transactionId-> {
-			
+		transactionNamesSet.stream().forEach(transactionId -> {
+
 			String newTarget = targetTemplate.replace("${transactionid}", transactionId);
 			targetList.add(newTarget);
 		});
-		
-		for(int i=0; i<targetList.size();i++) {
+
+		for (int i = 0; i < targetList.size(); i++) {
 			targets += targetList.get(i);
-			if(i != targetList.size()-1) {
+			if (i != targetList.size() - 1) {
 				targets += ",";
 			}
 		}
-		
+
 		fileAsString = fileAsString.replace("${targets}", targets);
 		fileAsString = fileAsString.replace("${requestid}", "" + System.currentTimeMillis());
 
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
 				new Header("Authorization", authorizationValue));
 		HttpResponse resp = sendPost(fileAsString, DB_URL, headers);
-		if(resp.getStatusCode() != 200) {
-			throw new RuntimeException("Get the following response then trying to create dashboard. Http Status:" + resp.getStatusCode() + "   message:" + resp.getBody());
+		if (resp.getStatusCode() != 200) {
+			throw new RuntimeException("Get the following response then trying to create dashboard. Http Status:"
+					+ resp.getStatusCode() + "   message:" + resp.getBody());
 		}
 		return resp;
 	}
-	
+
 	/**
 	 * Create a new Grafana Dashboard.
-	 *  
-	 * @param folder is the name of the Dashboard folder
-	 * @param dashboardName is the name of the Dashboard
+	 * 
+	 * @param folder           is the name of the Dashboard folder
+	 * @param dashboardName    is the name of the Dashboard
 	 * @param transactionNames is a list of the transaction names
-	 * @param datasource is the same of the datasource
+	 * @param datasource       is the same of the datasource
 	 * @return the http status code for the Grafana request
 	 */
-	public HttpResponse createNewDashboard(Folder folder, String dashboardName, List<String> transactionNames, String datasource) {
+	public HttpResponse createNewDashboard(Folder folder, String dashboardName, List<String> transactionNames,
+			String datasource) {
 
 		Set<String> transactionNamesSet = new HashSet<String>();
 		for (String transactionName : transactionNames) {
 			transactionNamesSet.add(transactionName);
 		}
 		long now = System.currentTimeMillis();
-		return createNewDashboardBase(now, now, dashboardName, null, transactionNamesSet, true, datasource, folder.getId());
+		return createNewDashboardBase(now, now, dashboardName, null, transactionNamesSet, true, datasource,
+				folder.getId());
 	}
 
 	/**
 	 * Create a new Grafana Dashboard.
 	 * 
-	 * @param name is the name of the Dashboard
-	 * @param result is the Result of an already executed test
+	 * @param name       is the name of the Dashboard
+	 * @param result     is the Result of an already executed test
 	 * @param datasource the dataSource to be used
 	 * @return the http status code for the Grafana request
 	 */
@@ -198,14 +208,15 @@ public class GrafanaClient extends HttpClient {
 	/**
 	 * Create a new Grafana Dashboard.
 	 * 
-	 * @param name is the name of the Dashboard
-	 * @param executionId is the id for a specific set of results, for instance all results for
-	 * a particular test execution
-	 * @param result is the Result of an already executed test
-	 * @param datasource is the datasource
+	 * @param name        is the name of the Dashboard
+	 * @param executionId is the id for a specific set of results, for instance all
+	 *                    results for a particular test execution
+	 * @param result      is the Result of an already executed test
+	 * @param datasource  is the datasource
 	 * @return the http status code for the Grafana request
 	 */
-	public HttpResponse createNewDashboardFromResult(String name, String executionId, Result result, String datasource) {
+	public HttpResponse createNewDashboardFromResult(String name, String executionId, Result result,
+			String datasource) {
 		return createNewDashboardBase(result.getStart(), result.getEnd(), name, executionId,
 				result.getResultLists().keySet(), false, datasource, -1);
 	}
@@ -213,42 +224,39 @@ public class GrafanaClient extends HttpClient {
 	public List<String> listDataSources() {
 		List<String> result = new ArrayList<String>();
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
-				new Header("Accept", "application/json"),
-				new Header("Authorization", authorizationValue));
+				new Header("Accept", "application/json"), new Header("Authorization", authorizationValue));
 		HttpResponse resp = sendGet(DATASOURCES_URL, headers);
-		
+
 		JSONArray array = JsonPath.read(resp.getBody(), "[*]['name']");
-		array.stream().forEach(dataSourceNames ->{
+		array.stream().forEach(dataSourceNames -> {
 			result.add(dataSourceNames.toString());
 		});
-		
+
 		return result;
 	}
 
 	public List<Folder> listDashboardFolders() {
 		List<Folder> result = new ArrayList<>();
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
-				new Header("Accept", "application/json"),
-				new Header("Authorization", authorizationValue));
+				new Header("Accept", "application/json"), new Header("Authorization", authorizationValue));
 		HttpResponse resp = sendGet(FOLDERS_URL, headers);
-		ArrayList<Map<String, Object>>  array = JsonPath.read(resp.getBody(), "[*]");
-		for(Map<String, Object> ar :array) {
-			
-			Folder f = new Folder(ar.get("title").toString(), (int)ar.get("id"), ar.get("uid").toString());
+		ArrayList<Map<String, Object>> array = JsonPath.read(resp.getBody(), "[*]");
+		for (Map<String, Object> ar : array) {
+
+			Folder f = new Folder(ar.get("title").toString(), (int) ar.get("id"), ar.get("uid").toString());
 			result.add(f);
-			
+
 		}
-		
+
 		return result;
 	}
 
 	public HttpResponse createDataSource(String datasource) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_datasource.json");
 		fileAsString = fileAsString.replace("${influxDBHost}", dataSourceInfluxDBHost);
-		
-		String influxDBPort = MasterContainers.INFLUXDB.getExposedPort();
-		fileAsString = fileAsString.replace("${influxDBPort}", influxDBPort);
-		
+
+		fileAsString = fileAsString.replace("${influxDBPort}", dataSourceInfluxDBHostPort);
+
 		fileAsString = fileAsString.replace("${datasource}", datasource);
 
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
@@ -259,56 +267,57 @@ public class GrafanaClient extends HttpClient {
 	public Folder createDashboardFolder(String folderName) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_folder.json");
 
-		fileAsString = fileAsString.replace("${uid}", ""+System.currentTimeMillis());
+		fileAsString = fileAsString.replace("${uid}", "" + System.currentTimeMillis());
 		fileAsString = fileAsString.replace("${title}", folderName);
 
 		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
 				new Header("Authorization", authorizationValue));
-		HttpResponse resp =  sendPost(fileAsString, FOLDERS_URL, headers);
+		HttpResponse resp = sendPost(fileAsString, FOLDERS_URL, headers);
 		String respBody = resp.getBody();
 		Map<String, Object> map = JsonPath.<Map<String, Object>>read(respBody, "$");
-		Folder f = new Folder(map.get("title").toString(), (int)(map.get("id")), map.get("uid").toString());
+		Folder f = new Folder(map.get("title").toString(), (int) (map.get("id")), map.get("uid").toString());
 		return f;
 	}
 
 	public void createGrafanaDashboard(String executionIdRegexp) {
 		createGrafanaDashboard(executionIdRegexp, getConfiguration("grafana.port"));
 	}
-	
+
 	private void createGrafanaDashboard(String executionIdRegexp, String grafanaPort) {
 
 		String dbName = influxClient.getDatabaseName();
-		
+
 		String measurement = null;
 		List<String> measurements = influxClient.showMeasurements();
-		for(String m : measurements) {
-			if(m.matches(executionIdRegexp)) {
+		for (String m : measurements) {
+			if (m.matches(executionIdRegexp)) {
 				measurement = m;
 			}
 		}
-		if(measurement == null) {
-			throw new RuntimeException("There was no measurement with name matching " + executionIdRegexp + " in the database " + dbName);
+		if (measurement == null) {
+			throw new RuntimeException(
+					"There was no measurement with name matching " + executionIdRegexp + " in the database " + dbName);
 		}
-		
+
 		List<String> transaction = influxClient.listDistinctTransactions(measurement);
-		
+
 		Folder folder = null;
 		List<Folder> folders = listDashboardFolders();
-		for(Folder f : folders) {
-			if(f.getName().equals(influxClient.getTestGroup())) {
+		for (Folder f : folders) {
+			if (f.getName().equals(influxClient.getTestGroup())) {
 				folder = f;
 				break;
 			}
 		}
-		if(folder == null) {
+		if (folder == null) {
 			folder = createDashboardFolder(influxClient.getTestGroup());
 		}
 
 		List<String> dataSources = listDataSources();
-		if(!dataSources.contains(dbName)) {
+		if (!dataSources.contains(dbName)) {
 			createDataSource(dbName);
 		}
-		
+
 		createNewDashboard(folder, influxClient.getTestName(), transaction, dbName);
 	}
 }

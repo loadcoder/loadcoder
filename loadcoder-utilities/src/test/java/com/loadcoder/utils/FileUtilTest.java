@@ -16,19 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.statics;
+package com.loadcoder.utils;
 
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+public class FileUtilTest {
 
-public class DockerConfigurationHelperTest {
-
-
+	@Test
+	public void testToListDirectory() {
+	
+		List<Path> files = FileUtil.listDirectory("src");
+		assertFalse(files.isEmpty());
+	}
 }

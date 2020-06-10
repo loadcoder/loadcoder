@@ -20,34 +20,24 @@ package com.loadcoder.statics;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.result.Logs;
 import com.loadcoder.utils.DateTimeUtil;
+import com.loadcoder.utils.FileUtil;
 
 public class LogbackLogging extends Logs {
 
 	/**
-	 * Deprecated. Use com.loadcoder.utils.DateTimeUtil:setDateTimeFormatter instead.
-	 * 
-	 * 
-	 * Changes the static date and time format of the directory that the method
-	 * {@code getNewLogDir} creates
-	 * 
-	 * @param dateTimeFormatter is the format to be changed to
-	 */
-	@Deprecated
-	public static void setDateTimeFormatter(DateTimeFormatter dateTimeFormatter) {
-		DateTimeUtil.setDateTimeFormatter(dateTimeFormatter);
-	}
-
-	/**
 	 * This method will be called from the test to set the result dir
 	 * 
-	 * @param sharedDirForLogsPath is the path to the new directory 
+	 * @param sharedDirForLogsPath is the path to the new directory
 	 */
 	public static void setResultDirectory(String sharedDirForLogsPath) {
 		setResultDestination(new File(sharedDirForLogsPath));
@@ -69,7 +59,7 @@ public class LogbackLogging extends Logs {
 	 * framework. A logback implementation is provided in loadcoder-logback module.
 	 * 
 	 * 
-	 * @param sharedDirForLogs is the path to the new directory 
+	 * @param sharedDirForLogs is the path to the new directory
 	 */
 	public static void setResultDestination(File sharedDirForLogs) {
 		Logger initiateLogging = LoggerFactory.getLogger(LogbackLogging.class);
@@ -85,13 +75,12 @@ public class LogbackLogging extends Logs {
 	/**
 	 * Helper method to get a unique directory for logs
 	 * 
-	 * @param rootDirPathForAllLogs
-	 *            is the base directory for all your logs
+	 * @param rootDirPathForAllLogs is the base directory for all your logs
 	 * 
-	 * @param nameOfTheTest
-	 *            is the name of the directory where you want to store logs from all
-	 *            executions for a particular test, which will be located inside
-	 *            {@code rootDirPathForAllLogs}
+	 * @param nameOfTheTest         is the name of the directory where you want to
+	 *                              store logs from all executions for a particular
+	 *                              test, which will be located inside
+	 *                              {@code rootDirPathForAllLogs}
 	 * 
 	 * @return a File that will have a path according to following pattern:
 	 *         {@code rootDirPathForAllLogs/nameOfTheTest/<date and time>(-<unique modifier>)}
@@ -100,11 +89,35 @@ public class LogbackLogging extends Logs {
 		return getNewLogDir(rootDirPathForAllLogs + "/" + nameOfTheTest);
 	}
 
+	protected static File getLatestLogDir(String rootDirPathForAllLogs, String nameOfTheTest) {
+		List<Path> directories = FileUtil.listDirectory(rootDirPathForAllLogs + "/" + nameOfTheTest);
+
+		directories.sort((a, b) -> {
+			FileTime aTime = FileUtil.getCreationDate(a);
+			long aMillis = aTime.toMillis();
+
+			FileTime bTime = FileUtil.getCreationDate(b);
+			long bMillis = bTime.toMillis();
+			long diff = bMillis - aMillis;
+			int diffSec = (int) (diff / 1000);
+			return diffSec;
+		});
+
+		Path latestPath = directories.get(0);
+		File latestFile = latestPath.toFile();
+		return latestFile;
+	}
+
+	public static File getLatestResultFile(String rootDirPathForAllLogs, String nameOfTheTest) {
+		File f = getLatestLogDir("target", "simpleLoadTest");
+		File resultFile = new File(f, Logs.RESULTFILE_DEFAULT);
+		return resultFile;
+	}
+
 	/**
 	 * Helper method to get a unique directory for logs
 	 * 
-	 * @param dirForAllLogs
-	 *            is the directory for all your logs
+	 * @param dirForAllLogs is the directory for all your logs
 	 * 
 	 * @return a File that will have a path according to following pattern:
 	 *         {@code dirForAllLogs/<date and time>(-<unique modifier>)}

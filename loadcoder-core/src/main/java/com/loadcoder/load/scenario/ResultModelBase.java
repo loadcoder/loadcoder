@@ -69,7 +69,7 @@ public class ResultModelBase {
 	/**
 	 * @return the name of the transaction
 	 */
-	protected String getTransactionName() {
+	public String getTransactionName() {
 		return transactionName;
 	}
 
@@ -129,29 +129,8 @@ public class ResultModelBase {
 		this.reportTransaction = reportTransaction;
 	}
 
-	/**
-	 * Use setReportTransaction instead
-	 * 
-	 * @param reportTransaction if the transaction shall be reported (logged and
-	 *                          send to the runtime user) or not.
-	 */
-	@Deprecated
-	public void reportTransaction(boolean reportTransaction) {
-		this.reportTransaction = reportTransaction;
-	}
-
 	protected boolean reportTransaction() {
 		return reportTransaction;
-	}
-
-	/**
-	 * Use setTransactionName instead
-	 * 
-	 * @param transactionName is the value of the new transaction name
-	 */
-	@Deprecated
-	public void transactionName(String transactionName) {
-		setTransactionName(transactionName);
 	}
 
 	/**

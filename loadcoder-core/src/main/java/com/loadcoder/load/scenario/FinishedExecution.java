@@ -36,7 +36,6 @@ public class FinishedExecution {
 
 	private Execution s;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private final static String RESULTFILE_DEFAULT = "result.log";
 
 	protected FinishedExecution(Execution s) {
 		this.s = s;
@@ -54,7 +53,7 @@ public class FinishedExecution {
 	 *                                      file
 	 */
 	public Result getReportedResultFromResultFile() throws NoResultOrFormatterException {
-		return getReportedResultFromResultFile(RESULTFILE_DEFAULT);
+		return getReportedResultFromResultFile(Logs.RESULTFILE_DEFAULT);
 	}
 
 	/**

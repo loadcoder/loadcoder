@@ -59,9 +59,9 @@ import com.loadcoder.statics.DockerConfigurationHelper;
 import com.loadcoder.utils.DateTimeUtil;
 import com.loadcoder.utils.FileUtil;
 
-public class DockerClusterClient {
+public class LoadcoderCluster {
 
-	private static Logger log = LoggerFactory.getLogger(DockerClusterClient.class);
+	private static Logger log = LoggerFactory.getLogger(LoadcoderCluster.class);
 	private final List<Node> nodes;
 
 	private final Map<String, Node> nodesMap;
@@ -84,11 +84,11 @@ public class DockerClusterClient {
 	GrafanaClient grafana;
 	InfluxDBClient influxDB;
 
-	public DockerClusterClient() {
+	public LoadcoderCluster() {
 		this(new Configuration());
 	}
 
-	protected DockerClusterClient(Configuration config) {
+	protected LoadcoderCluster(Configuration config) {
 		this.config = config;
 		nodes = new ArrayList<Node>();
 		nodesMap = new HashMap<String, Node>();
@@ -208,11 +208,16 @@ public class DockerClusterClient {
 	}
 
 	private void setupMaster(List<MasterContainers> map) {
-		map.stream().forEach(entry -> entry.setup(this));
+		map.stream().forEach(entry -> {
+			setupMasterContainer(entry.name().toLowerCase(), entry.getEnv(), entry.getServerPort(config));
+		});
 	}
 
-	private void createVolume(Node node) {
-		CreateVolumeResponse volume1Info = node.getDockerClient().createVolumeCmd().withName("JavaVolume").exec();
+	private void addAdditionalEnvs(Map<String, String> envs) {
+		String timezone = config.getConfiguration("cluster.timezone");
+		if (timezone != null && !timezone.isEmpty()) {
+			envs.put("TZ", timezone);
+		}
 	}
 
 	private void setupMasterContainer(String image, String containerName, String portToExpose,
@@ -400,11 +405,18 @@ public class DockerClusterClient {
 
 		HostConfig hostConfig = getNewHostConfig();
 		hostConfig.withBinds(bind1);
-		CreateContainerResponse resp = node.getDockerClient().createContainerCmd(image)
-				.withEnv("LOADCODER_EXECUTION_ID=" + executionId,
+		String timezone = config.getConfiguration("cluster.timezone");
+
+		List<String> envs = Arrays
+				.asList("LOADCODER_EXECUTION_ID=" + executionId,
 						"LOADCODER_CLUSTER_INSTANCE_ID=" + clusterId + "-" + containerId,
 						"LOADSHIP_HOST=" + getInternalHost(MasterContainers.LOADSHIP),
-						"LOADSHIP_PORT=" + MasterContainers.LOADSHIP.getExposedPort(), "TEST_MD5SUM=" + md5sum)
+						"LOADSHIP_PORT=" + MasterContainers.LOADSHIP.getExposedPort(config), "TEST_MD5SUM=" + md5sum)
+				.stream().collect(Collectors.toList());
+		if (timezone != null && !timezone.isEmpty()) {
+			envs.add("TZ=" + timezone);
+		}
+		CreateContainerResponse resp = node.getDockerClient().createContainerCmd(image).withEnv(envs)
 				.withName(clusterId + "-" + containerId).withHostConfig(hostConfig).exec();
 
 		node.getDockerClient().startContainerCmd(resp.getId()).exec();
@@ -418,7 +430,8 @@ public class DockerClusterClient {
 		byte[] bytes = zip.zipToBytes(new File("."), fileAndDirNamesWhitelist);
 		String md5 = md5Bytes(bytes);
 		FileUtil.writeFile(md5.getBytes(), new File("test-md5sum.txt"));
-		String url = "http://" + masterNode.getHost() + ":" + MasterContainers.LOADSHIP.getPort() + "/loadship/data";
+		String url = "http://" + masterNode.getHost() + ":" + MasterContainers.LOADSHIP.getPort(config)
+				+ "/loadship/data";
 
 		PackageSender.performPOSTRequest(url, bytes);
 	}
@@ -545,7 +558,7 @@ public class DockerClusterClient {
 
 		if (this.grafana == null) {
 			this.grafana = new GrafanaClient(getHost(MasterContainers.GRAFANA),
-					getInternalHost(MasterContainers.INFLUXDB), false, authenticationValue, incluxDBClient);
+					getInternalHost(MasterContainers.INFLUXDB), authenticationValue, incluxDBClient, config);
 		}
 		return this.grafana;
 
@@ -555,7 +568,7 @@ public class DockerClusterClient {
 
 		if (this.influxDB == null) {
 			this.influxDB = new InfluxDBClient(getHost(MasterContainers.INFLUXDB),
-					Integer.parseInt(MasterContainers.INFLUXDB.getPort()), false, testGroup, testName);
+					Integer.parseInt(MasterContainers.INFLUXDB.getPort(config)), false, testGroup, testName);
 		}
 		return this.influxDB;
 	}

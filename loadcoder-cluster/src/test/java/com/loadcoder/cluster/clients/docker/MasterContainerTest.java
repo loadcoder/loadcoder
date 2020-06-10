@@ -27,42 +27,38 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.statics.Configuration;
 
-public class MasterContainerTest extends TestNGBase{
+public class MasterContainerTest extends TestNGBase {
 
 	@Test
 	public void getTestToGetPort() {
-		
+
 		Configuration mock = Mockito.mock(Configuration.class);
-		MasterContainers.GRAFANA.setConfiguration(mock);
-		
+
 		when(mock.getConfiguration("grafana.port")).thenReturn("3010");
-		String port = MasterContainers.GRAFANA.getPort();
+		String port = MasterContainers.GRAFANA.getPort(mock);
 		assertEquals(port, "3010");
-	
+
 		mock = Mockito.mock(Configuration.class);
-		MasterContainers.GRAFANA.setConfiguration(mock);
-		port = MasterContainers.GRAFANA.getPort();
+		port = MasterContainers.GRAFANA.getPort(mock);
 		assertEquals(port, "3000");
-	
+
 	}
-	
+
 	@Test
 	public void testDifferentPortConfigurations() {
-		
+
 		Configuration mock = Mockito.mock(Configuration.class);
-		MasterContainers.GRAFANA.setConfiguration(mock);
-		
+
 		when(mock.getConfiguration("grafana.server.port")).thenReturn("3030");
 		when(mock.getConfiguration("grafana.exposed.port")).thenReturn("3020");
 		when(mock.getConfiguration("grafana.port")).thenReturn("3010");
 
-		String port = MasterContainers.GRAFANA.getPort();
+		String port = MasterContainers.GRAFANA.getPort(mock);
 		assertEquals(port, "3010");
-		port = MasterContainers.GRAFANA.getExposedPort();
+		port = MasterContainers.GRAFANA.getExposedPort(mock);
 		assertEquals(port, "3020");
-		port = MasterContainers.GRAFANA.getServerPort();
+		port = MasterContainers.GRAFANA.getServerPort(mock);
 		assertEquals(port, "3030");
-	
-	
-	}	
+
+	}
 }

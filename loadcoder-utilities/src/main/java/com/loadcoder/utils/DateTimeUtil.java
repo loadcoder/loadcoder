@@ -29,13 +29,13 @@ public class DateTimeUtil {
 	private static final String DATETIME_FORMAT_DEFAULT = "yyyyMMdd-HHmmss";
 
 	private static DateTimeFormatter dateTimeFormatterDefault = DateTimeFormatter.ofPattern(DATETIME_FORMAT_DEFAULT);
-	
+
 	public static String getDateTimeNowString() {
 		LocalDateTime timePoint = LocalDateTime.now();
 		String dateTime = timePoint.format(dateTimeFormatterDefault);
 		return dateTime;
 	}
-	
+
 	/**
 	 * Changes the static date and time format of the directory that the method
 	 * {@code getNewLogDir} creates
@@ -60,14 +60,13 @@ public class DateTimeUtil {
 	/**
 	 * Get a formatted String of the date equivalent to the timestamp.
 	 * 
-	 * @param timestamp is the timestamp in milliseconds
+	 * @param timestamp        is the timestamp in milliseconds
 	 * @param simpleDateFormat is the format
 	 * @return a formatted String of the Date and Time
 	 */
 	public static String convertMilliSecondsToFormattedDate(long timestamp, DateTimeFormatter simpleDateFormat) {
-		
-		LocalDateTime date =
-			    Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+		LocalDateTime date = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
 		String result = date.format(simpleDateFormat);
 		return result;
 	}

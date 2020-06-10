@@ -34,7 +34,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.docker.MasterContainers;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.load.scenario.RuntimeResultConsumer;
@@ -70,12 +70,12 @@ public class InfluxDBClient extends HttpClient {
 	/**
 	 * Constructor for the InfluxDBClient
 	 * 
-	 * @param host  is the host for where the influx DB is hosted
-	 * @param port  is the port where the influx DB exposes its API
-	 * @param https is boolean for whether or not the communication is encrypted or
-	 *              not.
+	 * @param host      is the host for where the influx DB is hosted
+	 * @param port      is the port where the influx DB exposes its API
+	 * @param https     is boolean for whether or not the communication is encrypted
+	 *                  or not.
 	 * @param testGroup is the group name of the test
-	 * @param testName is the name of the test
+	 * @param testName  is the name of the test
 	 */
 	public InfluxDBClient(String host, int port, boolean https, String testGroup, String testName) {
 		String protocol = protocolAsString(https);
@@ -87,31 +87,14 @@ public class InfluxDBClient extends HttpClient {
 		this.testName = testName;
 	}
 
-//	public InfluxDBClient(DockerClusterClient client, String testGroup, String testName) {
-//		this(client.getHost(MasterContainers.INFLUXDB), MasterContainers.INFLUXDB.getPort(), false, String.format(DB_NAME_TEMPLATE, testGroup, testName));
-//	}
-
-//	public InfluxDBClient(String host, String port, boolean https, String db) {
-//		this(host, Integer.parseInt(port), https, db);
-//	}
-
-//	public static InfluxDBClient getInfluxDBClient(DockerClusterClient dockerClusterClient, String dbName) {
-//		InfluxDBClient influxClient = new InfluxDBClient(
-//				dockerClusterClient.getMasterNode().getHost(),
-//				MasterContainers.INFLUXDB.getPort(), false, dbName);
-//		return influxClient;
-//	}
-
-	public static RuntimeResultConsumer setupInfluxDataConsumer(DockerClusterClient dockerClusterClient,
-			String testGroup, String testName) {
+	public static RuntimeResultConsumer setupInfluxDataConsumer(LoadcoderCluster dockerClusterClient, String testGroup,
+			String testName) {
 		InfluxDBClient client = dockerClusterClient.getInfluxDBClient(testGroup, testName);
 		return client.setupInfluxDataConsumer(testGroup, testName);
-}
+	}
 
 	public RuntimeResultConsumer setupInfluxDataConsumer(String testGroup, String testName) {
 
-//		InfluxDBClient influxClient = new InfluxDBClient(influxDBHost,
-//				Integer.parseInt(MasterContainers.INFLUXDB.getPort()), false, testGroup, dbName);
 		List<String> databases = listDatabases();
 		if (!databases.contains(dbName)) {
 			createDB();
@@ -254,8 +237,7 @@ public class InfluxDBClient extends HttpClient {
 	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode, String groupName,
 			String testName) {
 		String result = originalCode;
-		File f = FileUtil.getFileFromResources("cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
-		String testContent = FileUtil.readFile(f);
+		String testContent = FileUtil.getResourceAsString("/cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
 		testContent = testContent.replace("${groupName}", groupName);
 		testContent = testContent.replace("${testName}", testName);
 

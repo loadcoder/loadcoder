@@ -18,32 +18,33 @@
  ******************************************************************************/
 package com.loadcoder;
 
-import static com.loadcoder.cluster.clients.grafana.GrafanaHelper.*;
-
 import java.io.File;
 
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
-import static com.loadcoder.cluster.clients.docker.MasterContainers.*;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
+import com.loadcoder.cluster.clients.grafana.GrafanaClient;
 
-public class ControllerCustomHost {
+public class ControllerCustomHost{
 
-	public static void main(String[] args){
-		DockerClusterClient client = new DockerClusterClient();
-		//Creates and starts Grafana, InfluxDB, Loadship and also Artifactory
-//		client.setupMaster();
-		
-		//Send this Maven project as a zip file to the Loadship server
-//		client.zipAndSendToLoadship(new File("."));
-		
-		//Start a new clustered Loadcoder test
-		client.startNewExecution(1);
+	public static void main(String[] args) {
+		LoadcoderCluster client = new LoadcoderCluster();
+		// Creates and starts Grafana, InfluxDB, Loadship and also Artifactory
+		client.setupMaster();
 
-		//Create a Grafana Dashboard based on the data that the test wrote to InfluxDB
-//		createGrafanaDashboard(client, "LoadcoderClusterTests", "InfluxReportTest", "2020.*");
-		
-		//Stops and removes Grafana, InfluxDB and Loadship
+		// Send this Maven project as a zip file to the Loadship server
+//		client.uploadTest(new File("."));
+
+		// Start a new clustered Loadcoder test
+//		client.startNewExecution(1);
+
+//		client.stopExecution();
+
+		// Create a Grafana Dashboard based on the data that the test wrote to InfluxDB
+//		GrafanaClient grafana = client
+//				.getGrafanaClient(client.getInfluxDBClient("LoadcoderClusterTests", "InfluxReportTest"));
+//		grafana.createGrafanaDashboard("2020.*");
+
+		// Stops and removes Grafana, InfluxDB and Loadship
 //		client.stopAndRemoveAllMasterContainers();
-//		client.stopAndRemoveMasterContainers(LOADSHIP);
-		
+
 	}
 }

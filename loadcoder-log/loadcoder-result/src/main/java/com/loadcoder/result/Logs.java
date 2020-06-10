@@ -25,6 +25,8 @@ import java.util.List;
 
 public class Logs {
 
+	public final static String RESULTFILE_DEFAULT = "result.log";
+
 	public static final List<SharedDirFileAppender> sharedDirFileAppenders = new ArrayList<SharedDirFileAppender>();
 
 	private static File logDir = new File(".");

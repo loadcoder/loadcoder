@@ -271,9 +271,20 @@
 				</configuration>
 			</plugin>
 
-			<!--plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-gpg-plugin</artifactId> 
-				<version>1.6</version> <executions> <execution> <id>sign-artifacts</id> <phase>deploy</phase> 
-				<goals> <goal>sign</goal> </goals> </execution> </executions> </plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 		</plugins>
 
@@ -301,15 +312,13 @@
 	</developers>
 
 	<distributionManagement>
-		<!-- <snapshotRepository> <id>ossrh</id> <url>https://oss.sonatype.org/content/repositories/snapshots</url> 
-			</snapshotRepository> -->
 		<snapshotRepository>
-			<id>local-snapshot-repo</id>
-			<url>http://localhost:8081/artifactory/libs-snapshot</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 		<repository>
-			<id>local-snapshot-repo</id>
-			<url>http://localhost:8081/artifactory/libs-release</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 </project>

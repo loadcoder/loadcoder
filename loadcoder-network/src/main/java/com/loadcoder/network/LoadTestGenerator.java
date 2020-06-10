@@ -299,16 +299,18 @@ public class LoadTestGenerator {
 	}
 
 	public void generateScenario(List<HarEntry> entries, File javaDstDir, File resourceDstDir) {
-		File f = FileUtil.getFileFromResources("testgeneration_templates/ScenarioLogic.tmp");
-		String scenarioLogic = FileUtil.readFile(f);
+		String scenarioLogic = FileUtil.getResourceAsString("/testgeneration_templates/ScenarioLogic.tmp");
 		scenarioLogic = scenarioLogic.replace("${package}", javaPackage);
-
+		System.out.println("scenarioLogic length:" + scenarioLogic.length());
 		TransactionNameGenerator transactionNameGenerator = new TransactionNameGenerator();
 		int requestIterator = 0;
 		for (HarEntry entry : entries) {
 			String loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir);
+			System.out.println("loadMethod length:" + loadMethod.length());
+
 			scenarioLogic = scenarioLogic.replace("${logic_end}", loadMethod + "\n" + "${logic_end}");
 			requestIterator++;
+			System.out.println("scenarioLogic length:" + scenarioLogic.length());
 		}
 
 		scenarioLogic = scenarioLogic.replace("${logic_start}", "");
@@ -318,14 +320,17 @@ public class LoadTestGenerator {
 	}
 
 	public void generateTest(File dstDir) {
-		File f = FileUtil.getFileFromResources("testgeneration_templates/GeneratedLoadTest.tmp");
-		String testContent = FileUtil.readFile(f);
+		String testContent = FileUtil.getResourceAsString("/testgeneration_templates/GeneratedLoadTest.tmp");
+
 		testContent = testContent.replace("${package}", javaPackage);
 
-		if(reporting != null) {
+		if (reporting != null) {
 			testContent = reporting.generateCode(testContent);
-		}else {
-			testContent = testContent.replace("${storeAndConsumeResultRuntime}", "");
+		} else {
+			String storeResultsRuntime = FileUtil
+					.getResourceAsString("/testgeneration_templates/storeResultsRuntime.tmp");
+			testContent = testContent.replace("${storeAndConsumeResultRuntime}", storeResultsRuntime);
+
 		}
 		testContent = loadBuilders.generateCode(testContent);
 
@@ -335,8 +340,8 @@ public class LoadTestGenerator {
 
 	public void generateThreadInstance(File dstDir) {
 
-		File f = FileUtil.getFileFromResources("testgeneration_templates/ThreadInstance.tmp");
-		String threadInstanceContent = FileUtil.readFile(f);
+		String threadInstanceContent = FileUtil.getResourceAsString("/testgeneration_templates/ThreadInstance.tmp");
+
 		threadInstanceContent = threadInstanceContent.replace("${package}", javaPackage);
 
 		FileUtil.writeFile(threadInstanceContent.getBytes(), threadInstanceFile);
@@ -344,8 +349,7 @@ public class LoadTestGenerator {
 
 	public String generateLoadMethod(HarEntry entry, TransactionNameGenerator transactionNameGenerator,
 			int transactionIterator, File resourceDstDir) {
-		File loadMethodFile = FileUtil.getFileFromResources("testgeneration_templates/loadmethod.tmp");
-		String loadMethodTemplate = FileUtil.readFile(loadMethodFile);
+		String loadMethodTemplate = FileUtil.getResourceAsString("/testgeneration_templates/loadmethod.tmp");
 
 		String transactionName = transactionNameGenerator.generateTransactionName(entry, 1, 20);
 		String loadMethod = loadMethodTemplate;
@@ -359,8 +363,8 @@ public class LoadTestGenerator {
 		HarHeader contentType = null;
 		List<HarHeader> headers = req.getHeaders();
 
-		File f = FileUtil.getFileFromResources("testgeneration_templates/addheader.tmp");
-		String headerTemplate = FileUtil.readFile(f);
+		String headerTemplate = FileUtil.getResourceAsString("/testgeneration_templates/addheader.tmp");
+
 		for (HarHeader header : headers) {
 
 			if (isHeaderNameSPDY(header.getName())) {
@@ -388,8 +392,8 @@ public class LoadTestGenerator {
 			File bodyFile = new File(resourceDstDir, fileName);
 			FileUtil.writeFile(body.getBytes(), bodyFile);
 
-			File requestBodyFile = FileUtil.getFileFromResources("testgeneration_templates/requestBody.tmp");
-			requestBodyTemplate = FileUtil.readFile(requestBodyFile);
+			requestBodyTemplate = FileUtil.getResourceAsString("/testgeneration_templates/requestBody.tmp");
+
 			requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
 			requestBodyTemplate = requestBodyTemplate.replace("${body_file}", destinationResourceDir + "/" + fileName);
 
@@ -399,16 +403,16 @@ public class LoadTestGenerator {
 		} else {
 
 			if (!methodIsGET) {
-				File getEmptyRequestBodyTemplateFile = FileUtil
-						.getFileFromResources("testgeneration_templates/getEmptyRequestBody.tmp");
-				requestBodyTemplate = FileUtil.readFile(getEmptyRequestBodyTemplateFile);
+				requestBodyTemplate = FileUtil.getResourceAsString("/testgeneration_templates/getEmptyRequestBody.tmp");
+
 				requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
 			}
 		}
 
 		if (hasBody || !methodIsGET) {
-			File requestMothodBody = FileUtil.getFileFromResources("testgeneration_templates/requestMethodBody.tmp");
-			String requestMethodBodyTemplate = FileUtil.readFile(requestMothodBody);
+			String requestMethodBodyTemplate = FileUtil
+					.getResourceAsString("/testgeneration_templates/requestMethodBody.tmp");
+
 			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_http_verb}",
 					entry.getRequest().getMethod().name());
 			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_body_file}", requestBodyVariable);
@@ -426,20 +430,20 @@ public class LoadTestGenerator {
 		String responseBody = entry.getResponse().getContent().getText();
 		if (responseBody != null && !responseBody.isEmpty()) {
 
-			File getResponseBodyTemplateFile = FileUtil
-					.getFileFromResources("testgeneration_templates/getResponseBody.tmp");
-			String getResponseBodyTemplate = FileUtil.readFile(getResponseBodyTemplateFile);
+			String getResponseBodyTemplate = FileUtil
+					.getResourceAsString("/testgeneration_templates/getResponseBody.tmp");
+
 			loadMethod = loadMethod.replace("${handleResultReadResponse}", "\n" + getResponseBodyTemplate);
 
-			File resultHandlerAssertionTemplateFile = FileUtil
-					.getFileFromResources("testgeneration_templates/resulthandler_assert.tmp");
-			String resultHandlerAssertionTemplate = FileUtil.readFile(resultHandlerAssertionTemplateFile);
-			if(bodyMatchers != null) {
+			String resultHandlerAssertionTemplate = FileUtil
+					.getResourceAsString("/testgeneration_templates/resulthandler_assert.tmp");
+
+			if (bodyMatchers != null) {
 				for (String matcher : bodyMatchers) {
 					if (responseBody.contains(matcher)) {
 						String resultHandlerAssertion = resultHandlerAssertionTemplate.replace("${expected_body_part}",
 								matcher);
-	
+
 						loadMethod = loadMethod.replace("${result_asserts}",
 								"\n" + resultHandlerAssertion + "${result_asserts}");
 					}
@@ -592,14 +596,18 @@ public class LoadTestGenerator {
 	public static String generateCodeLoadBuilder(String originalCode, long durationMilliseconds, int amountOfThreads,
 			int callsPerSecond) {
 		String result = originalCode;
-		File f = FileUtil.getFileFromResources("testgeneration_templates/loadBuilderMethods.tmp");
-		String testContent = FileUtil.readFile(f);
-		int durationSeconds = (int) (durationMilliseconds / 1000);
-		testContent = testContent.replace("${threads}", "" + amountOfThreads);
-		testContent = testContent.replace("${duration}", "" + durationSeconds);
-		testContent = testContent.replace("${throttle}", "" + callsPerSecond);
+		String loadBuilderMethods = FileUtil.getResourceAsString("/testgeneration_templates/loadBuilderMethods.tmp");
 
-		result = result.replace("${loadBuilder}", testContent);
+		if (amountOfThreads != -1) {
+			int durationSeconds = (int) (durationMilliseconds / 1000);
+			loadBuilderMethods = loadBuilderMethods.replace("${threads}", "" + amountOfThreads);
+			loadBuilderMethods = loadBuilderMethods.replace("${duration}", "" + durationSeconds);
+			loadBuilderMethods = loadBuilderMethods.replace("${throttle}", "" + callsPerSecond);
+		} else {
+			loadBuilderMethods = "";
+		}
+
+		result = result.replace("${loadBuilder}", loadBuilderMethods);
 
 		return result;
 	}

@@ -33,42 +33,37 @@ public enum MasterContainers {
 		loadshipMap.put("HTTP_ENABLED", "true");
 		loadshipMap.put("MODECHOOSER", "LOADSHIP");
 		return loadshipMap;
-	}, 6210), INFLUXDB(() -> null, 8086), GRAFANA(() -> null, 3000), ARTIFACTORY(() -> null, 8081);
+	}, 6210), INFLUXDB(() -> new HashMap<>(), 8086), GRAFANA(() -> new HashMap<>(), 3000),
+	ARTIFACTORY(() -> new HashMap<>(), 8081);
 
-	Configuration config = Configuration.getConfigurationInstance();
-	final Map<String, String> envMap;
-	final int port;
+	private final Map<String, String> envMap;
+	private final int port;
 
 	MasterContainers(CreateEnvironmentVariableMap masterContainerSetupable, int port) {
 		this.envMap = masterContainerSetupable.createEnvironmentVariableMap();
 		this.port = port;
 	}
 
-	protected void setConfiguration(Configuration config) {
-		this.config = config;
+	public Map<String, String> getEnv() {
+		return envMap;
 	}
 
-	public String getPort() {
+	public String getPort(Configuration config) {
 		String configVariableName = name().toLowerCase() + ".port";
 		String s = config.getConfiguration(configVariableName);
-		return s == null ? getExposedPort() : s;
+		return s == null ? getExposedPort(config) : s;
 	}
 
-	public String getExposedPort() {
+	public String getExposedPort(Configuration config) {
 		String configVariableName = name().toLowerCase() + ".exposed.port";
 		String s = config.getConfiguration(configVariableName);
-		return s == null ? getServerPort() : s;
+		return s == null ? getServerPort(config) : s;
 	}
 
-	public String getServerPort() {
+	public String getServerPort(Configuration config) {
 		String configVariableName = name().toLowerCase() + ".server.port";
 		String s = config.getConfiguration(configVariableName);
 		return s == null ? "" + this.port : s;
-	}
-
-	void setup(DockerClusterClient client) {
-
-		client.setupMasterContainer(this.name().toLowerCase(), envMap, getServerPort());
 	}
 
 	private interface CreateEnvironmentVariableMap {

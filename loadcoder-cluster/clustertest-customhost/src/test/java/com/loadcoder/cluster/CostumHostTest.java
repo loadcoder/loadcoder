@@ -18,16 +18,20 @@
  ******************************************************************************/
 package com.loadcoder.cluster;
 
+import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.SHARED;
+import static com.loadcoder.statics.Statics.iterations;
+
 import org.testng.annotations.Test;
 
-import com.loadcoder.cluster.clients.docker.DockerClusterClient;
+import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import static com.loadcoder.statics.Statics.*;
+
 public class CostumHostTest {
 
 	@Test
@@ -36,14 +40,15 @@ public class CostumHostTest {
 
 			@Override
 			public void loadScenario() {
-				load("simple-transaction", () -> { LoadUtility.sleep(54);
+				load("simple-transaction", () -> {
+					LoadUtility.sleep(54);
 				}).perform();
 			}
 		};
 
 		Load l = new LoadBuilder(ls).stopDecision(iterations(50)).throttle(2, PER_SECOND, SHARED).build();
 		new ExecutionBuilder(l).storeAndConsumeResultRuntime(InfluxDBClient
-				.setupInfluxDataConsumer(new DockerClusterClient(), "LoadcoderClusterTests", "InfluxReportTest"))
-				.build().execute().andWait();
+				.setupInfluxDataConsumer(new LoadcoderCluster(), "LoadcoderClusterTests", "InfluxReportTest")).build()
+				.execute().andWait();
 	}
 }

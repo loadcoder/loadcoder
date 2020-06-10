@@ -116,7 +116,7 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 		} catch (Exception e) {
 			log.error("Caught exception the resultHandler for transaction " + resultModel.getTransactionName(), e);
 			resultModel.setStatus(false);
-			resultModel.reportTransaction(true);
+			resultModel.setReportTransaction(true);
 			throw new ResultHandlerException(resultModel.getTransactionName(), e);
 		} finally {
 

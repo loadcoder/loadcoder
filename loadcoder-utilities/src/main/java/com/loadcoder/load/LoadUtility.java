@@ -40,62 +40,73 @@ public class LoadUtility {
 	}
 
 	public static String rightpad(String text, int length) {
-	    return String.format("%-" + length + "." + length + "s", text);
+		return String.format("%-" + length + "." + length + "s", text);
 	}
-	
-	public static void sleep(long millis){
-		try{
+
+	public static void sleep(long millis) {
+		try {
 			Thread.sleep(millis);
-		}catch(Exception e){}
+		} catch (Exception e) {
+		}
 	}
-	
-	public static List<String> readFile(File file)throws FileNotFoundException, IOException{
+
+	public static void randomSleep(int minMillis, int maxMillis) {
+		try {
+			long toSleep = random(minMillis, maxMillis);
+			Thread.sleep(toSleep);
+		} catch (Exception e) {
+		}
+	}
+
+	public static List<String> readFile(File file) throws FileNotFoundException, IOException {
 		List<String> fileAsLineList = new ArrayList<String>();
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-		    String line;
-		    while ((line = br.readLine()) != null) {
-		       // process the line.
-		    	fileAsLineList.add(line);
-		    }
+			String line;
+			while ((line = br.readLine()) != null) {
+				// process the line.
+				fileAsLineList.add(line);
+			}
 		}
 		return fileAsLineList;
 	}
-	
+
 	private static final Random random = new Random();
-	public static int random(int min, int max){
+
+	public static int random(int min, int max) {
 		int result = random.nextInt(max - min + 1) + min;
 		return result;
 	}
-	
+
 	public static <T> T tryCatch(TryPerformer<T> tryPerformer, CatchPerformer catchPerformer) {
 		try {
 			return tryPerformer.perform();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			catchPerformer.perform(e);
 		}
 		return null;
 	}
-	
-	public static <T> T tryCatchFinally(TryPerformer<T> tryPerformer, CatchPerformer catchPerformer, FinallyPerformer finallyPerform) {
+
+	public static <T> T tryCatchFinally(TryPerformer<T> tryPerformer, CatchPerformer catchPerformer,
+			FinallyPerformer finallyPerform) {
 		try {
-		return tryPerformer.perform();
-		}catch(Exception e) {
+			return tryPerformer.perform();
+		} catch (Exception e) {
 			catchPerformer.perform(e);
-		}finally {
+		} finally {
 			finallyPerform.perform();
 		}
 		return null;
 	}
-	
-	public interface TryPerformer <T>{
+
+	public interface TryPerformer<T> {
 		T perform() throws Exception;
 	}
-	
-	public interface FinallyPerformer{
+
+	public interface FinallyPerformer {
 		void perform();
 	}
-	
-	public interface CatchPerformer{
+
+	public interface CatchPerformer {
 		void perform(Exception cause) throws RuntimeException;
 	}
 }
