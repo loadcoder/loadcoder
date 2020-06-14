@@ -71,7 +71,7 @@ public class ZipUtilTest {
 		File f = new File("src/test/resources/countertest");
 		try{
 			int files = counter.getNumberOfFilesInDir(f);
-			assertEquals(files, 5);
+			assertEquals(files, 6);
 		}catch(TooManyFilesFoundException tmffe) {
 			fail("Unexpected TooManyFilesFoundException was caught", tmffe);
 		}

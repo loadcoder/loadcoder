@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
@@ -134,11 +135,17 @@ public class InfluxDBClient extends HttpClient {
 		String body = String.format("q=SHOW MEASUREMENTS ON %s", dbName);
 		HttpResponse resp = sendPost(body, QUERY_URL, Arrays.asList());
 		String respBody = resp.getBody();
+		try {
 		JSONArray array = JsonPath.read(respBody, "$['results'][0]['series'][0]['values'][*][*]");
 		array.stream().forEach(db -> {
 			result.add(db.toString());
 		});
+
 		return result;
+		}catch(PathNotFoundException pnfe) {
+			throw new RuntimeException("There are no measurements in the InfluxDB database " +dbName + ". Make sure that there are results written to the database before trying to create a Grafana dashboard.");
+		}
+
 	}
 
 	public List<String> listDatabases() {
