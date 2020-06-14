@@ -301,16 +301,12 @@ public class LoadTestGenerator {
 	public void generateScenario(List<HarEntry> entries, File javaDstDir, File resourceDstDir) {
 		String scenarioLogic = FileUtil.getResourceAsString("/testgeneration_templates/ScenarioLogic.tmp");
 		scenarioLogic = scenarioLogic.replace("${package}", javaPackage);
-		System.out.println("scenarioLogic length:" + scenarioLogic.length());
 		TransactionNameGenerator transactionNameGenerator = new TransactionNameGenerator();
 		int requestIterator = 0;
 		for (HarEntry entry : entries) {
 			String loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir);
-			System.out.println("loadMethod length:" + loadMethod.length());
-
 			scenarioLogic = scenarioLogic.replace("${logic_end}", loadMethod + "\n" + "${logic_end}");
 			requestIterator++;
-			System.out.println("scenarioLogic length:" + scenarioLogic.length());
 		}
 
 		scenarioLogic = scenarioLogic.replace("${logic_start}", "");

@@ -18,11 +18,14 @@
  ******************************************************************************/
 package com.loadcoder.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class DateTimeUtil {
 
@@ -30,10 +33,16 @@ public class DateTimeUtil {
 
 	private static DateTimeFormatter dateTimeFormatterDefault = DateTimeFormatter.ofPattern(DATETIME_FORMAT_DEFAULT);
 
+	private static SimpleDateFormat simpleDateFormatDefault = new SimpleDateFormat(DATETIME_FORMAT_DEFAULT);
+
 	public static String getDateTimeNowString() {
 		LocalDateTime timePoint = LocalDateTime.now();
 		String dateTime = timePoint.format(dateTimeFormatterDefault);
 		return dateTime;
+	}
+
+	public static String getDefaultDateTimeFormat() {
+		return DATETIME_FORMAT_DEFAULT;
 	}
 
 	/**
@@ -69,5 +78,10 @@ public class DateTimeUtil {
 		LocalDateTime date = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
 		String result = date.format(simpleDateFormat);
 		return result;
+	}
+
+	public static Date getAsDate(String m) throws ParseException {
+		Date d = simpleDateFormatDefault.parse(m);
+		return d;
 	}
 }

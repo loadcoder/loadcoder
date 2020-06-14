@@ -23,9 +23,11 @@ import static com.loadcoder.statics.Statics.getConfiguration;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -280,14 +282,18 @@ public class GrafanaClient extends HttpClient {
 	}
 
 	public void createGrafanaDashboard(String executionIdRegexp) {
-		createGrafanaDashboard(executionIdRegexp, getConfiguration("grafana.port"));
+		String measurement = matchMeaurement(executionIdRegexp);
+		createGrafanaDashboard(measurement, getConfiguration("grafana.port"));
 	}
 
-	private void createGrafanaDashboard(String executionIdRegexp, String grafanaPort) {
+	public void createGrafanaDashboard() {
+		String measurement = getLatestMeaurement();
+		createGrafanaDashboard(measurement, getConfiguration("grafana.port"));
+	}
 
-		String dbName = influxClient.getDatabaseName();
-
+	public String matchMeaurement(String executionIdRegexp) {
 		String measurement = null;
+
 		List<String> measurements = influxClient.showMeasurements();
 		for (String m : measurements) {
 			if (m.matches(executionIdRegexp)) {
@@ -295,9 +301,54 @@ public class GrafanaClient extends HttpClient {
 			}
 		}
 		if (measurement == null) {
-			throw new RuntimeException(
-					"There was no measurement with name matching " + executionIdRegexp + " in the database " + dbName);
+			throw new RuntimeException("There was no measurement with name matching " + executionIdRegexp
+					+ " in the database " + influxClient.getDatabaseName());
 		}
+		return measurement;
+	}
+
+	class Pair {
+		String measurement;
+		Date date;
+
+		Pair(String m, Date d) {
+			this.measurement = m;
+			this.date = d;
+		}
+	}
+
+	public String getLatestMeaurement() {
+		String measurement = null;
+		List<Pair> dates = new ArrayList<>();
+		List<String> measurements = influxClient.showMeasurements();
+		for (String m : measurements) {
+			try {
+				Date d = DateTimeUtil.getAsDate(m);
+				dates.add(new Pair(m, d));
+
+			} catch (ParseException pe) {
+				log.debug("Measurement " + m + " in influxDB database " + influxClient.getDatabaseName()
+						+ "cant be parsed as a Date with the default pattern "
+						+ DateTimeUtil.getDefaultDateTimeFormat());
+			}
+		}
+
+		if (dates.isEmpty()) {
+			if (measurements.isEmpty()) {
+				throw new RuntimeException(
+						"There are no measurements in influxDB database" + influxClient.getDatabaseName());
+			} else {
+				return measurements.get(0);
+			}
+		}
+		dates.sort((dateA, dateB) -> dateB.date.compareTo(dateA.date));
+		String latestMeasurement = dates.get(0).measurement;
+		return latestMeasurement;
+	}
+
+	private void createGrafanaDashboard(String measurement, String grafanaPort) {
+
+		String dbName = influxClient.getDatabaseName();
 
 		List<String> transaction = influxClient.listDistinctTransactions(measurement);
 
