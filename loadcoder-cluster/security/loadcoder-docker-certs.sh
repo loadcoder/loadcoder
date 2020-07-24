@@ -24,11 +24,11 @@ dst=$3
 
 openssl genrsa -aes256 -passout pass:$password -out $dst/ca-key.pem 4096
 
-openssl req -new -x509 -days 365 -key $dst/ca-key.pem -sha256 -out $dst/ca.pem -passin pass:$password -subj "/C=UA/ST=Kharkov/L=Kharkov/O=Super Secure Company/OU=IT Department/CN=$commonName"
+openssl req -new -x509 -days 365 -key $dst/ca-key.pem -sha256 -out $dst/ca.pem -passin pass:$password -subj "/C=SE/ST=Stockholm/L=Stockholm/O=Loadcoder/OU=Team Loadcoder/CN=$commonName"
 
 openssl genrsa -passout pass:$password -out $dst/server-key.pem 4096
 
-openssl req -sha256 -new -key $dst/server-key.pem -out $dst/server.csr -passin pass:$password -subj "/C=UA/ST=Kharkov/L=Kharkov/O=Super Secure Company/OU=IT Department/CN=$commonName"
+openssl req -sha256 -new -key $dst/server-key.pem -out $dst/server.csr -passin pass:$password -subj "/C=SE/ST=Stockholm/L=Stockholm/O=Loadcoder/OU=Team Loadcoder/CN=$commonName"
 
 echo "Exports the certificate to a truststore.jks"
 keytool -import -file $dst/ca.pem -alias serverCA -keystore $dst/truststore.jks -storepass $password -noprompt

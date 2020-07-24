@@ -109,7 +109,7 @@ public class LogbackLogging extends Logs {
 	}
 
 	public static File getLatestResultFile(String rootDirPathForAllLogs, String nameOfTheTest) {
-		File f = getLatestLogDir("target", "simpleLoadTest");
+		File f = getLatestLogDir(rootDirPathForAllLogs, nameOfTheTest);
 		File resultFile = new File(f, Logs.RESULTFILE_DEFAULT);
 		return resultFile;
 	}

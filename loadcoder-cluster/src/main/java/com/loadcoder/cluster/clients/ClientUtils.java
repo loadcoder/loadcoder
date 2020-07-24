@@ -18,14 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients;
 
-import static com.loadcoder.statics.Statics.*;
 public class ClientUtils {
 	
-	public static String getHostValue(String configVariableName){
-		String configVariableValue = getConfiguration(configVariableName);
-		return configVariableValue == null ? "master" : configVariableValue;
-	}
-
 	public interface Statable <T> {
 		boolean statement();
 	}

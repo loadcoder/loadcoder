@@ -43,9 +43,7 @@ public class LoadcoderClusterTest {
 	
 		host = LoadcoderCluster.getHostNameFromHostIpMapping("hostip.foo.bar");
 		assertEquals(host, "foo.bar");
-	
 	}
-	
 	
 	@Test
 	public void testInternalHosts() {
@@ -122,6 +120,7 @@ public class LoadcoderClusterTest {
 		when(conf.getConfiguration("node.1.use-as-worker")).thenReturn("false");
 		try{
 			docker = new LoadcoderCluster(conf);
+			docker.stopExecution();
 			fail("Exception expected since there shouldnt be any nodes to run Loadcoder in");
 		}catch(RuntimeException rte) {}
 		

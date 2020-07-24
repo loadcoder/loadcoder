@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.grafana;
 
-import static com.loadcoder.statics.Statics.getConfiguration;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,7 +38,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.loadcoder.cluster.clients.Header;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
-import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
 import com.loadcoder.cluster.clients.docker.MasterContainers;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
@@ -78,6 +75,8 @@ public class GrafanaClient extends HttpClient {
 	private final String dataSourceInfluxDBHostPort;
 	private final InfluxDBClient influxClient;
 
+	private final Configuration config;
+
 	/**
 	 * Constructor for the GrafanaClient
 	 * 
@@ -92,6 +91,7 @@ public class GrafanaClient extends HttpClient {
 	 */
 	public GrafanaClient(String grafanaHost, String dataSourceInfluxDBHost, String authorizationValue,
 			InfluxDBClient influxClient, Configuration config) {
+		this.config = config;
 		String port = MasterContainers.GRAFANA.getPort(config);
 		this.dataSourceInfluxDBHostPort = MasterContainers.INFLUXDB.getExposedPort(config);
 
@@ -283,12 +283,12 @@ public class GrafanaClient extends HttpClient {
 
 	public void createGrafanaDashboard(String executionIdRegexp) {
 		String measurement = matchMeaurement(executionIdRegexp);
-		createGrafanaDashboard(measurement, getConfiguration("grafana.port"));
+		createGrafanaDashboard(measurement, config.getConfiguration("grafana.port"));
 	}
 
 	public void createGrafanaDashboard() {
 		String measurement = getLatestMeaurement();
-		createGrafanaDashboard(measurement, getConfiguration("grafana.port"));
+		createGrafanaDashboard(measurement, config.getConfiguration("grafana.port"));
 	}
 
 	public String matchMeaurement(String executionIdRegexp) {
@@ -318,7 +318,6 @@ public class GrafanaClient extends HttpClient {
 	}
 
 	public String getLatestMeaurement() {
-		String measurement = null;
 		List<Pair> dates = new ArrayList<>();
 		List<String> measurements = influxClient.showMeasurements();
 		for (String m : measurements) {

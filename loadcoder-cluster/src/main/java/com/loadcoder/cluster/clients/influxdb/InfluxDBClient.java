@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.influxdb;
 
-import static com.loadcoder.statics.Statics.getConfiguration;
+//import static com.loadcoder.statics.Statics.getConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecuti
 import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.result.TransactionExecutionResult;
+import com.loadcoder.statics.Configuration;
 import com.loadcoder.utils.DateTimeUtil;
 import com.loadcoder.utils.FileUtil;
 
@@ -91,17 +92,18 @@ public class InfluxDBClient extends HttpClient {
 	public static RuntimeResultConsumer setupInfluxDataConsumer(LoadcoderCluster dockerClusterClient, String testGroup,
 			String testName) {
 		InfluxDBClient client = dockerClusterClient.getInfluxDBClient(testGroup, testName);
-		return client.setupInfluxDataConsumer(testGroup, testName);
+
+		return client.setupInfluxDataConsumer(testGroup, testName, dockerClusterClient.getConfiguration());
 	}
 
-	public RuntimeResultConsumer setupInfluxDataConsumer(String testGroup, String testName) {
+	public RuntimeResultConsumer setupInfluxDataConsumer(String testGroup, String testName, Configuration config) {
 
 		List<String> databases = listDatabases();
 		if (!databases.contains(dbName)) {
 			createDB();
 		}
 
-		String executionId = getConfiguration("LOADCODER_EXECUTION_ID");
+		String executionId = config.getConfiguration("LOADCODER_EXECUTION_ID");
 		if (executionId == null) {
 			executionId = DateTimeUtil.getDateTimeNowString();
 		}
@@ -136,14 +138,15 @@ public class InfluxDBClient extends HttpClient {
 		HttpResponse resp = sendPost(body, QUERY_URL, Arrays.asList());
 		String respBody = resp.getBody();
 		try {
-		JSONArray array = JsonPath.read(respBody, "$['results'][0]['series'][0]['values'][*][*]");
-		array.stream().forEach(db -> {
-			result.add(db.toString());
-		});
+			JSONArray array = JsonPath.read(respBody, "$['results'][0]['series'][0]['values'][*][*]");
+			array.stream().forEach(db -> {
+				result.add(db.toString());
+			});
 
-		return result;
-		}catch(PathNotFoundException pnfe) {
-			throw new RuntimeException("There are no measurements in the InfluxDB database " +dbName + ". Make sure that there are results written to the database before trying to create a Grafana dashboard.");
+			return result;
+		} catch (PathNotFoundException pnfe) {
+			throw new RuntimeException("There are no measurements in the InfluxDB database " + dbName
+					+ ". Make sure that there are results written to the database before trying to create a Grafana dashboard.");
 		}
 
 	}

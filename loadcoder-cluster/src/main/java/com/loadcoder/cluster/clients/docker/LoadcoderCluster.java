@@ -22,7 +22,6 @@ import static com.loadcoder.cluster.clients.ClientUtils.throwIfTrue;
 import static com.loadcoder.cluster.clients.docker.MasterContainers.GRAFANA;
 import static com.loadcoder.cluster.clients.docker.MasterContainers.INFLUXDB;
 import static com.loadcoder.cluster.clients.docker.MasterContainers.LOADSHIP;
-import static com.loadcoder.statics.Statics.getMatchingConfiguration;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -41,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.CreateVolumeResponse;
+import com.github.dockerjava.api.exception.DockerClientException;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -55,14 +54,16 @@ import com.loadcoder.cluster.clients.grafana.GrafanaClient;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.cluster.util.ZipUtil;
 import com.loadcoder.statics.Configuration;
-import com.loadcoder.statics.DockerConfigurationHelper;
+import com.loadcoder.statics.Statics;
 import com.loadcoder.utils.DateTimeUtil;
 import com.loadcoder.utils.FileUtil;
 
 public class LoadcoderCluster {
 
 	private static Logger log = LoggerFactory.getLogger(LoadcoderCluster.class);
-	private final List<Node> nodes;
+
+	private static int IMAGE_PULL_TIMEOUT_MIN_DEFAULT = 5;
+	private final List<Node> workers = new ArrayList<Node>();;
 
 	private final Map<String, Node> nodesMap;
 
@@ -79,7 +80,7 @@ public class LoadcoderCluster {
 
 	final private static String HOSTIP_REGEXP = "hostip[.].*";
 
-	Configuration config;
+	final Configuration config;
 
 	GrafanaClient grafana;
 	InfluxDBClient influxDB;
@@ -88,9 +89,18 @@ public class LoadcoderCluster {
 		this(new Configuration());
 	}
 
+	private Node getNodeFromConfiguration(String id, boolean useDockerMTLS, String mtlsPassword) {
+		String publicHost = config.getConfiguration("node." + id + ".host");
+		String internalHost = config.getConfiguration("node." + id + ".internal.host");
+
+		String apiPortFromConfig = config.getConfiguration("node." + id + ".dockerapi.port");
+
+		Node node = new Node(id, publicHost, internalHost, apiPortFromConfig, useDockerMTLS, mtlsPassword);
+		return node;
+	}
+
 	protected LoadcoderCluster(Configuration config) {
 		this.config = config;
-		nodes = new ArrayList<Node>();
 		nodesMap = new HashMap<String, Node>();
 
 		String masterNodeId = config.getConfiguration("cluster.masternode");
@@ -100,19 +110,15 @@ public class LoadcoderCluster {
 		boolean useDockerMTLS = useDockerMTLSConfiguration != null && useDockerMTLSConfiguration.equals("false") ? false
 				: true;
 
+		String mtlsPassword = getPassword();
+
 		ids.stream().forEach(id -> {
-			String publicHost = config.getConfiguration("node." + id + ".host");
-			String internalHost = config.getConfiguration("node." + id + ".internal.host");
-
-			String apiPortFromConfig = config.getConfiguration("node." + id + ".dockerapi.port");
+			Node node = getNodeFromConfiguration(id, useDockerMTLS, mtlsPassword);
 			String useAsWorker = config.getConfiguration("node." + id + ".use-as-worker");
-			String mtlsPassword = getPassword();
-			Node node = new Node(id, publicHost, internalHost, apiPortFromConfig, useDockerMTLS, mtlsPassword);
-
 			if (useAsWorker != null && useAsWorker.toLowerCase().equals("false")) {
 
 			} else {
-				nodes.add(node);
+				workers.add(node);
 				nodesMap.put(id, node);
 			}
 
@@ -120,19 +126,33 @@ public class LoadcoderCluster {
 				masterNode = node;
 			}
 		});
-		if (nodes.size() == 0) {
-			throw new RuntimeException(
-					"No nodes configured. A node is found in the configuration with the following pattern: node.<node ID>.host");
-		}
+
 		clusterId = config.getConfiguration("cluster.id", CLUSTER_ID_DEFAULT);
 
-		hostIpMapping = new HashMap<String, String>();
-		Map<String, String> hostIpConf = getMatchingConfiguration(HOSTIP_REGEXP);
+		hostIpMapping = getHostIpMap();
+
+	}
+
+	public Configuration getConfiguration() {
+		return config;
+	}
+
+	private Map<String, String> getHostIpMap() {
+		Map<String, String> hostIpMapping = new HashMap<String, String>();
+		Map<String, String> hostIpConf = config.getMatchingConfig(HOSTIP_REGEXP);
+
 		hostIpConf.entrySet().stream().forEach(entry -> {
 			String host = getHostNameFromHostIpMapping(entry.getKey());
 			hostIpMapping.put(host, entry.getValue());
 		});
+		return hostIpMapping;
+	}
 
+	void checkIfThereAreWorkers() {
+		if (workers.size() == 0) {
+			throw new RuntimeException(
+					"No nodes configured. A node is found in the configuration with the following pattern: node.<node ID>.host");
+		}
 	}
 
 	private String getPassword() {
@@ -179,7 +199,7 @@ public class LoadcoderCluster {
 		if (image == null || image.isEmpty()) {
 			throw new RuntimeException("");
 		}
-		List<Image> images = getMasterNode().getDockerClient().listImagesCmd().withImageNameFilter(image).exec();
+		List<Image> images = node.getDockerClient().listImagesCmd().withImageNameFilter(image).exec();
 
 		if (images.isEmpty()) {
 			log.info("pulling image " + image);
@@ -278,8 +298,9 @@ public class LoadcoderCluster {
 	}
 
 	private void checkNoRunningContainers() {
+		checkIfThereAreWorkers();
 		List<Node> containsRunningContainers = new ArrayList<>();
-		nodes.stream().forEach(node -> {
+		workers.stream().forEach(node -> {
 
 			List<Container> cont = getAllRunningContainers(node, "running");
 
@@ -305,7 +326,8 @@ public class LoadcoderCluster {
 	}
 
 	public void stopExecution() {
-		nodes.stream().forEach(node -> {
+		checkIfThereAreWorkers();
+		workers.stream().forEach(node -> {
 			log.info("Removing conainers at node " + node.getId());
 			List<String> nameMatcherOfClusterInstance = Arrays.asList(clusterId + ".*");
 			stopAndRemoveContainer(node, nameMatcherOfClusterInstance);
@@ -360,16 +382,54 @@ public class LoadcoderCluster {
 		});
 	}
 
+	private int getImagePullTimeoutMin() {
+		String imagePullTimeoutMinString = config.getConfiguration("docker.image-pull-timeout-minutes");
+		if (imagePullTimeoutMinString == null) {
+			return IMAGE_PULL_TIMEOUT_MIN_DEFAULT;
+		} else {
+			int imagePullTimeoutMin = Integer.parseInt(imagePullTimeoutMinString);
+			if (imagePullTimeoutMin < 1) {
+				throw new RuntimeException("docker.image-pull-timeout-minutes was set to " + imagePullTimeoutMin
+						+ " which is invalid. Set the value to higher than 0");
+			}
+			return imagePullTimeoutMin;
+		}
+	}
+
 	private void pullImage(Node node, String image) {
 		PullImageResultCallback cb = new PullImageResultCallback();
 		node.getDockerClient().pullImageCmd(image).exec(cb);
 
-		try {
+		int imagePullTimeoutMin = getImagePullTimeoutMin();
+		boolean complete = false;
+		long timeoutCountStart = System.currentTimeMillis();
+		long timeoutCountEnd = timeoutCountStart + imagePullTimeoutMin * Statics.MINUTE;
+		int pollSeconds = 10;
 
-			cb.awaitCompletion(60, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		while (true) {
+			if (System.currentTimeMillis() > timeoutCountEnd) {
+				log.debug("The pull image timeout at " + imagePullTimeoutMin + " minute/s occured");
+				break;
+			}
+			try {
+				log.debug("Pulling...");
+				complete = cb.awaitCompletion(pollSeconds, TimeUnit.SECONDS);
+				log.debug("Pulling image " + image + " succeeded with status {}", complete);
+				break;
+			} catch (DockerClientException e) {
+				if (e.getMessage().contains("complete")) {
+					pollSeconds = 1;
+				}
+				log.debug("Exception pull message: " + e.getMessage());
+			} catch (InterruptedException e) {
+				throw new RuntimeException("Unexpected exception caught during image " + image + " pull" + e);
+			}
+
 		}
+		if (!complete) {
+			throw new RuntimeException("Did not succeed to pull image " + image);
+		}
+
 	}
 
 	/**
@@ -461,11 +521,12 @@ public class LoadcoderCluster {
 	}
 
 	private void startCluster(int amountOfContainersToStart, String executionId, String md5sum) {
+		checkIfThereAreWorkers();
 		checkNoRunningContainers();
 		stopExecution();
 		int i = 0;
 		whileloop: while (true) {
-			for (Node node : nodes) {
+			for (Node node : workers) {
 				startNewContainer(node, "" + i, config.getConfiguration("loadcoder.image"), executionId, md5sum);
 				log.info("Started new loadinstance at node:" + node.getId());
 				i++;
@@ -509,11 +570,7 @@ public class LoadcoderCluster {
 	}
 
 	protected List<Node> getNodes() {
-		return nodes;
-	}
-
-	private Node getNode(String key) {
-		return nodesMap.get(key);
+		return workers;
 	}
 
 	/**
