@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Team Loadcoder
+ * Copyright (C) 2020 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -16,28 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.load.scenario.design;
+package com.loadcoder.result;
 
-import com.loadcoder.load.scenario.Load.Transaction;
-import com.loadcoder.load.scenario.Load.TransactionVoid;
-import com.loadcoder.load.scenario.ResultHandlerBuilder;
-import com.loadcoder.load.scenario.ResultHandlerVoidBuilder;
-import com.loadcoder.load.scenario.Scenario;
+import java.util.List;
+import java.util.Map;
 
-public class ScenarioLogic {
+public interface Summarizable {
 
-	Scenario theActualScenario;
+	public long getDuration();
 
-	public ScenarioLogic(Scenario scenario) {
-		this.theActualScenario = scenario;
-	}
+	public int getAmountOfTransactions();
 
-	protected <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
-		return theActualScenario.load(defaultName, transaction);
-	}
+	public int getAmountOfFails();
 
-	protected ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
-		return theActualScenario.load(defaultName, transaction);
-	}
-
+	public Map<String, List<TransactionExecutionResult>> getResultLists();
 }

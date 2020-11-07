@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.scenario.RuntimeResultUser;
 import com.loadcoder.load.scenario.StartedLoad;
-import com.loadcoder.result.Result;
+import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class RuntimeChart extends Chart implements RuntimeResultUser {
@@ -51,7 +51,7 @@ public class RuntimeChart extends Chart implements RuntimeResultUser {
 	protected RuntimeChartLogic getLogic() {
 		return runtimeChartLogic;
 	}
-	
+
 	public RuntimeChart(CommonSeries[] commonSeries) {
 		super(true, false, new RuntimeChartLogic(commonSeries, true));
 		runtimeChartLogic = (RuntimeChartLogic) this.logic;
@@ -73,4 +73,17 @@ public class RuntimeChart extends Chart implements RuntimeResultUser {
 		runtimeChartLogic.useData(transactionsMap);
 	}
 
+	public static CodeGeneratable chartReporter() {
+		return codeTemplate -> generateCodeCallStoreAndConsumeResultRuntime(codeTemplate);
+	}
+
+	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode) {
+		String result = originalCode;
+
+		result = result.replace("${storeAndConsumeResultRuntime}", ".storeAndConsumeResultRuntime(new RuntimeChart())");
+
+		result = result.replace("${importList}", "import com.loadcoder.load.chart.logic.RuntimeChart;\n${importList}");
+
+		return result;
+	}
 }

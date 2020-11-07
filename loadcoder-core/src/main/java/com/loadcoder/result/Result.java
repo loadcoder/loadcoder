@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.loadcoder.load.result.SummaryBuilder;
 import com.loadcoder.statics.Formatter;
 
-public class Result {
+public class Result implements Summarizable{
 
 	private Map<String, List<TransactionExecutionResult>> resultLists;
 
@@ -183,4 +184,28 @@ public class Result {
 		amountOfTransactions += resultToBeMerged.getAmountOfTransactions();
 	}
 
+	public SummaryBuilder summaryBuilder() {
+
+		return new SummaryBuilder(this);
+	}
+
+	public SummaryBuilder summaryStandard() {
+
+		return new SummaryBuilder(this).overall((a, c)-> a
+				.use(c.amountOfTransactions())
+				.use(c.duration())
+				.use(c.throughput())
+				.use(c.fails())
+				)
+		.perTransaction((a, c) -> a
+				.use(c.amount())
+				.use(c.fails())
+				.use(c.avg())
+				.use(c.maximum())
+				.use(c.minimum())
+				.use(c.percentile(95))
+				)
+		.roundValues(2);
+	}
+	
 }

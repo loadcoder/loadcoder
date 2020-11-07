@@ -254,7 +254,7 @@ public class InfluxDBClient extends HttpClient {
 		result = result.replace("${storeAndConsumeResultRuntime}", testContent);
 
 		result = result.replace("${importList}",
-				"import com.loadcoder.cluster.clients.docker.DockerClusterClient;\n${importList}");
+				"import com.loadcoder.cluster.clients.docker.LoadcoderCluster;\n${importList}");
 		result = result.replace("${importList}",
 				"import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;\n${importList}");
 

@@ -32,11 +32,12 @@ public class ResultGenerator {
 	final static Logger log = ResultLogger.resultLogger;
 	
 	/**
-	 * The purpose of this method is only to 
+	 * The purpose of this method is only to log transactions to the resultLogger
+	 * for a particular duration and for an amount of transaction types
 	 * @param duration
 	 * @param amountOfTypes
 	 */
-	protected static void generateResult(long duration, int amountOfTypes){
+	public static void generateResult(long duration, int amountOfTypes){
 		
 		ResultFormatter formatter = Formatter.SIMPLE_RESULT_FORMATTER;
 		

@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.utils;
 
-import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
-import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.Statics.*;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -32,12 +30,5 @@ import com.loadcoder.load.TestUtility;
 
 public class ResultGeneratorTest {
 
-	@Test
-	public void testToGenerateResult(Method method) {
-		File resultDir = getNewLogDir("target", method.getName());
-		setResultDestination(resultDir);
-		ResultGenerator.generateResult(1 * MINUTE, 2);
-		List<String> resultList = TestUtility.readFile(new File(resultDir.getAbsolutePath() + "/result.log"));
-		Assert.assertTrue(resultList.size() > 1);
-	}
+
 }

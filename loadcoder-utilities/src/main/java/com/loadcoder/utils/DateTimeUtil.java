@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DateTimeUtil {
 
@@ -83,5 +84,23 @@ public class DateTimeUtil {
 	public static Date getAsDate(String m) throws ParseException {
 		Date d = simpleDateFormatDefault.parse(m);
 		return d;
+	}
+
+	public static String getMillisAsHoursMinutesSecondsString(long millis) {
+		String result = String.format("%dh %dmin %dsec", TimeUnit.MILLISECONDS.toHours(millis),
+				TimeUnit.MILLISECONDS.toMinutes(millis)
+						- TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+				TimeUnit.MILLISECONDS.toSeconds(millis)
+						- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+		if (result.startsWith("0h ")) {
+			result = result.replace("0h ", "");
+		}
+		if (result.contains("0min ")) {
+			result = result.replace("0min ", "");
+		}
+		if (result.contains(" 0sec")) {
+			result = result.replace(" 0sec", "");
+		}
+		return result;
 	}
 }

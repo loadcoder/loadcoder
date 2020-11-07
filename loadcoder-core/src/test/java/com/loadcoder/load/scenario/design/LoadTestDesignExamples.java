@@ -71,8 +71,6 @@ public class LoadTestDesignExamples {
 
 	class TypedLoadLogic extends ScenarioLogicTyped<TypeInstance> {
 
-//		TypeInstance t;
-
 		public TypedLoadLogic(TypeInstance t) {
 			/*
 			 * The scenario must be passed on to the superclass ScenarioLogic in order to

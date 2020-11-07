@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.log;
 
-import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
-import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -45,79 +43,7 @@ import com.loadcoder.result.TransactionExecutionResult;
 
 public class LogTest extends TestNGBase {
 
-	@Test
-	public void testThatResultLogContainsExpectedContent(Method method) {
 
-		File f = getNewLogDir(rootResultDir, method.getName());
-		setResultDestination(f);
-		File resultFile = new File(f, "result.log");
 
-		List<String> rows = TestUtility.readFile(resultFile);
-		int sizeBeforeTest = rows.size();
 
-		String uniqueTransactionId = this.getClass().getName() + System.currentTimeMillis();
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load(uniqueTransactionId, () -> {
-					/* some fancy transaction */}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).build();
-		new ExecutionBuilder(l).build().execute().andWait();
-		List<String> rowsAfterTest = TestUtility.readFile(resultFile);
-		Assert.assertEquals(rowsAfterTest.size(), sizeBeforeTest + 1);
-		Assert.assertTrue(rowsAfterTest.get(rowsAfterTest.size() - 1).contains(uniqueTransactionId));
-
-	}
-
-	@Test
-	public void testAsyncThreadResult(Method method) throws FileNotFoundException, IOException {
-
-		List<String> threadNames = new ArrayList<String>();
-		File resultDir = new File(rootResultDir + "/" + method.getName() + "/" + System.currentTimeMillis());
-		setResultDestination(resultDir);
-
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-
-				threadNames.add(Thread.currentThread().getName());
-
-				load("performAsync", () -> {
-				}).performAsync();
-
-				load("performAsync2", () -> {
-				}).performAsync();
-
-				load("performAsyncWithReturn", () -> {
-					return "";
-				}).performAsync();
-
-				load("perform", () -> {
-				}).perform();
-
-				load("performWithReturn", () -> {
-					// Sleeping so that the async calls are finished before finishing the execution
-					LoadUtility.sleep(30);
-					return "";
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).amountOfThreads(1).build();
-
-		Result result = new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build().execute().andWait()
-				.getResultFromMemory();
-
-		Assert.assertEquals(result.getAmountOfTransactions(), 5);
-		Set<String> keys = result.getResultLists().keySet();
-		for (String key : keys) {
-			List<TransactionExecutionResult> e = result.getResultLists().get(key);
-			assertEquals(e.get(0).getThreadId(), threadNames.get(0));
-		}
-	}
 }

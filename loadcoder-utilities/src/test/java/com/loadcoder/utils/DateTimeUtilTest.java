@@ -18,19 +18,31 @@
  ******************************************************************************/
 package com.loadcoder.utils;
 
-import static org.testng.Assert.*;
-
-import java.nio.file.Path;
-import java.util.List;
+import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-public class FileUtilTest {
+public class DateTimeUtilTest {
 
 	@Test
-	public void testToListDirectory() {
-
-		List<Path> files = FileUtil.listDirectory("src");
-		assertFalse(files.isEmpty());
+	public void hejsdf() {
+		String result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 12*60_000 + 13*1000);
+		assertEquals(result, "11h 12min 13sec");
+		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12*60_000 + 13*1000);
+		assertEquals(result, "12min 13sec");
+		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 0*60_000 + 13*1000);
+		assertEquals(result, "13sec");
+		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0*60_000 + 0*1000);
+		assertEquals(result, "11h");
+		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12*60_000 + 0*1000);
+		assertEquals(result, "12min");
+		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0*60_000 + 13*1000);
+		assertEquals(result, "11h 13sec");
+		
 	}
 }

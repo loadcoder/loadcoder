@@ -16,21 +16,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.utils;
+package com.loadcoder.load.result;
 
-import static org.testng.Assert.*;
-
-import java.nio.file.Path;
-import java.util.List;
+import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-public class FileUtilTest {
+public class ValueHolderTest {
 
 	@Test
-	public void testToListDirectory() {
+	public void testRounding() {
+		ValueHolder v = new ValueHolder(4.39, d -> d.asDouble());
+		String s = v.getConverter().convert(v);
+		assertEquals(s, "4.39");
+		
+		v = new ValueHolder(4.39, d -> d.noDecimals());
+		s = v.getConverter().convert(v);
+		assertEquals(s, "4");
+		
+		v = new ValueHolder(4.51, d -> d.noDecimals());
+		s = v.getConverter().convert(v);
+		assertEquals(s, "5");
+		
+		v = new ValueHolder(4.513, d -> d.asDouble());
+		v.useRoundedValue(3);
+		s = v.getConverter().convert(v);
+		assertEquals(s, "4.513");
 
-		List<Path> files = FileUtil.listDirectory("src");
-		assertFalse(files.isEmpty());
+		v = new ValueHolder(4.513, d -> d.asDouble());
+		v.useRoundedValue(4);
+		s = v.getConverter().convert(v);
+		assertEquals(s, "4.513");
+		
+		v = new ValueHolder(4.516, d -> d.asDouble());
+		v.useRoundedValue(2);
+		s = v.getConverter().convert(v);
+		assertEquals(s, "4.52");
+		
+		
 	}
 }

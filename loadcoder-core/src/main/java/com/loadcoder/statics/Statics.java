@@ -77,7 +77,7 @@ public class Statics {
 	}
 
 	public static void printSimpleSummary(Result result, String resultName) {
-		SummaryUtils.printSimpleSummary(result, resultName);
+		result.summaryBuilder().build().prettyPrint();
 	}
 
 	/*

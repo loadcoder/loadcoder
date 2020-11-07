@@ -1,5 +1,5 @@
 		${request_body}
-		final Request ${request_variable} = new Request.Builder().url("${transaction_url}")
+		final Request ${request_variable} = new OKHttpRequestBuilder().url("${transaction_url}")
 ${request_building}		.build();
 		
 		load("${transaction_name}", ()->{	

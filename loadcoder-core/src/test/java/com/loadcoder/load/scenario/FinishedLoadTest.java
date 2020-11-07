@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.LogbackLogging.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -35,7 +33,6 @@ public class FinishedLoadTest {
 	@Test
 	public void getReportWhenUsingSharedDirAppenderTest() {
 		
-		setResultDestination(getNewLogDir("target/" + this.getClass().getSimpleName()));
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
 				load("t1", ()->{}).perform();
@@ -43,9 +40,11 @@ public class FinishedLoadTest {
 		};
 		
 		Load s = new LoadBuilder(ls).build();
-		FinishedExecution finished = new ExecutionBuilder(s).build().execute().andWait();
+		FinishedExecution finished = new ExecutionBuilder(s)
+				.storeResultRuntime()
+				.build().execute().andWait();
 		
-		Result r = finished.getReportedResultFromResultFile(Logs.getResultFileInLogDir());
+		Result r = finished.getResultFromMemory();
 		Assert.assertEquals(r.getAmountOfTransactions(), 1);
 	}
 }

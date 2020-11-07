@@ -47,12 +47,7 @@
 
 		<dependency>
 			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-result</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-utilities</artifactId>
+			<artifactId>loadcoder-core</artifactId>
 		</dependency>
 
 		<dependency>

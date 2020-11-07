@@ -31,7 +31,7 @@ import static com.loadcoder.statics.Statics.PER_SECOND;
 import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
-import static com.loadcoder.statics.StopDesisions.duration;
+import static com.loadcoder.statics.Statics.duration;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -47,6 +47,7 @@ import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
+import com.loadcoder.load.result.Summary;
 import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
@@ -230,7 +231,8 @@ public class FullTest extends TestNGBase {
 		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
 
-		SummaryUtils.printSimpleSummary(finished.getReportedResultFromResultFile(), method.getName());
+		Summary summary = finished.getResultFromMemory().summaryStandard().build();
+		summary.prettyPrint();
 
 		chart.waitUntilClosed();
 	}
@@ -253,13 +255,13 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart chart = new RuntimeChart();
-		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, PER_THREAD).stopDecision(duration(20 * SECOND))
+		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, PER_THREAD).stopDecision(duration(5 * SECOND))
 				.amountOfThreads(10).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		FinishedExecution finished = new ExecutionBuilder(l).storeResultRuntime().build().execute().andWait();
 
-		SummaryUtils.printSimpleSummary(finished.getReportedResultFromResultFile(), method.getName());
+		Summary summary = finished.getResultFromMemory().summaryStandard().build();
+		summary.prettyPrint();
 
 		chart.waitUntilClosed();
 	}
@@ -424,14 +426,14 @@ public class FullTest extends TestNGBase {
 
 			@Override
 			public void loadScenario() {
-				
+
 				load("get", () -> {
-					
+
 					sut.methodWhereResponseTimeFollowSomeKindOfPattern(sut);
-					
+
 				}).handleResult((a) -> {
-					
-					if(a.getResponseTime() >300 ) {
+
+					if (a.getResponseTime() > 300) {
 						a.setStatus(false);
 					}
 				}).perform();
@@ -453,25 +455,20 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s)
-				.stopDecision((a,b)->{
-					return false;
-				})
-				
-				.amountOfThreads(2000)
-				.throttle(10, PER_MINUTE, PER_THREAD)
-				
-				.rampup(10 * SECOND)
-				.build();
+		Load l = new LoadBuilder(s).stopDecision(duration(20_000))
 
-		FinishedExecution finished = new ExecutionBuilder(l)
-				.storeAndConsumeResultRuntime(runtimeChart).build()
+				.amountOfThreads(2000).throttle(10, PER_MINUTE, PER_THREAD)
+
+				.rampup(10 * SECOND).build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
 				.execute().andWait();
 
 		Result result = finished.getReportedResultFromResultFile();
 		ResultChart resultChart = new ResultChart(result);
 
-		SummaryUtils.printSimpleSummary(result, "simleTest");
+		Summary summary = result.summaryStandard().build();
+		summary.prettyPrint();
 		runtimeChart.waitUntilClosed();
 	}
 
@@ -511,18 +508,16 @@ public class FullTest extends TestNGBase {
 		};
 
 		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(120 * SECOND)).amountOfThreads(10).rampup(5 * SECOND).build();
+		Load l = new LoadBuilder(s).stopDecision(duration(12 * SECOND)).amountOfThreads(10).rampup(5 * SECOND).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
 				.execute().andWait();
 
-		Execution execution = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart())
-				.resultFormatter(SIMPLE_RESULT_FORMATTER).build();
+		Execution execution = new ExecutionBuilder(l).storeResultRuntime().resultFormatter(null).build();
 
 		Result result = finished.getReportedResultFromResultFile();
-		ResultChart resultChart = new ResultChart(result);
+		result.summaryBuilder().build().prettyPrint();
 
-		SummaryUtils.printSimpleSummary(result, "simleTest");
 		runtimeChart.waitUntilClosed();
 	}
 

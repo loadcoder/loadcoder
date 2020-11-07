@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.result;
 
-import static com.loadcoder.statics.SummaryUtils.*;
+import static org.testng.Assert.assertEquals;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,12 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
-import com.loadcoder.load.result.Summary.SummaryWithResultActions.Table.SummaryWithTable;
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryTest extends TestNGBase {
@@ -60,16 +57,6 @@ public class SummaryTest extends TestNGBase {
 		return resultLists;
 	}
 
-	public SummaryWithTable fullSummary(Result result, Method method) {
-		Summary resultSummarizer = new Summary(result);
-		SummaryWithTable summaryWithTable = resultSummarizer.log((a) -> {
-			return String.format("Summary for %s:%s", this.getClass().getSimpleName(), method.getName());
-		}).log(throughput()).log(amountOfTransactions()).log(amountOfFails()).table()
-				.column("Transaction", transactionNames()).column("Amount", transactions()).column("MAX", max())
-				.column("AVG", avg()).column("80%", percentile(80)).column("FAILS", fails());
-
-		return summaryWithTable;
-	}
 
 	@Test
 	public void SummaryGetDurationInSecondsTest(Method m) {
@@ -80,21 +67,4 @@ public class SummaryTest extends TestNGBase {
 		assertEquals(seconds, 1);
 	}
 
-	@Test
-	public void seriesSummaryTest() {
-		Result result = null;
-		Summary summary = new Summary(result);
-		String summaryString = summary.log(a -> "Foo").log(a -> "Bar").getAsString();
-		assertTrue(summaryString.contains("Foo"));
-		assertTrue(summaryString.contains("Bar"));
-
-	}
-
-	@Test
-	public void commonSummaryTest(Method m) {
-		Result result = new ResultExtension(getResultList());
-		SummaryWithTable summaryWithTable = fullSummary(result, m);
-		String summaryText = summaryWithTable.getAsString();
-		assertTrue(summaryWithTable.getAsString().contains("Throughput: 2"), summaryText);
-	}
 }

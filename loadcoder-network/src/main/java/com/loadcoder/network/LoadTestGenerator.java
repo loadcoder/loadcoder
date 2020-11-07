@@ -22,10 +22,14 @@ import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -301,10 +305,46 @@ public class LoadTestGenerator {
 	public void generateScenario(List<HarEntry> entries, File javaDstDir, File resourceDstDir) {
 		String scenarioLogic = FileUtil.getResourceAsString("/testgeneration_templates/ScenarioLogic.tmp");
 		scenarioLogic = scenarioLogic.replace("${package}", javaPackage);
+
+		Map<String, Map<String, List<HarEntry>>> commmonHeaders = findCommonHeaders(entries);
+		Map<String, Entry<String, List<HarEntry>>> filtered = removeValueWithLeastOccurences(commmonHeaders);
+		List<Entry<String, Entry<String, List<HarEntry>>>> sortedList = sortMap(filtered);
+		List<Entry<String, Entry<String, List<HarEntry>>>> wantedList = wantedList(sortedList);
+
+		List<HarEntry> toShareCommonHeaders = getEntrysToShareCommonHeaders(wantedList);
+		if (toShareCommonHeaders.size() > 0) {
+
+			List<HarHeader> headers = new ArrayList<HarHeader>();
+			for (Entry<String, Entry<String, List<HarEntry>>> e : wantedList) {
+				HarHeader h = new HarHeader();
+				h.setName(e.getKey());
+				h.setValue(e.getValue().getKey());
+				headers.add(h);
+			}
+			String commonHeader = FileUtil.getResourceAsString("/testgeneration_templates/commonHeader.tmp");
+			commonHeader = addHeaders(headers, commonHeader);
+			commonHeader = commonHeader.replace("${request_building}", ".build();");
+			scenarioLogic = scenarioLogic.replace("${common_header_method}", commonHeader);
+
+		}
+
 		TransactionNameGenerator transactionNameGenerator = new TransactionNameGenerator();
 		int requestIterator = 0;
+		List<String> headerNames = wantedList.stream().map((e) -> {
+			return e.getKey();
+		}).collect(Collectors.toList());
 		for (HarEntry entry : entries) {
-			String loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir);
+			List<HarHeader> heads = null;
+			if (toShareCommonHeaders.contains(entry)) {
+				heads = entry.getRequest().getHeaders().stream().filter(header -> {
+					return !headerNames.contains(header.getName());
+				}).collect(Collectors.toList());
+			} else {
+				heads = entry.getRequest().getHeaders();
+			}
+
+			String loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir,
+					heads);
 			scenarioLogic = scenarioLogic.replace("${logic_end}", loadMethod + "\n" + "${logic_end}");
 			requestIterator++;
 		}
@@ -313,6 +353,93 @@ public class LoadTestGenerator {
 		scenarioLogic = scenarioLogic.replace("${logic_end}", "");
 
 		FileUtil.writeFile(scenarioLogic.getBytes(), scenarioDstFile);
+	}
+
+	private List<Entry<String, Entry<String, List<HarEntry>>>> sortMap(
+			Map<String, Entry<String, List<HarEntry>>> filtered) {
+
+		List<Entry<String, Entry<String, List<HarEntry>>>> lista = filtered.entrySet().stream()
+				.collect(Collectors.toList());
+		lista.sort((a, b) -> {
+			int maxA = a.getValue().getValue().size();
+			int maxB = b.getValue().getValue().size();
+			return maxA - maxB;
+		});
+		return lista;
+	}
+
+	private List<Entry<String, Entry<String, List<HarEntry>>>> wantedList(
+			List<Entry<String, Entry<String, List<HarEntry>>>> lista) {
+
+		int medianIndex = lista.size() / 2;
+		Entry<String, Entry<String, List<HarEntry>>> medianHars = lista.get(medianIndex);
+		int targetSize = medianHars.getValue().getValue().size();
+		int iterationIndex = medianIndex;
+
+		for (int i = 0; i < lista.size(); i++) {
+			if (lista.get(i).getValue().getValue().size() == targetSize) {
+				iterationIndex = i;
+				break;
+			}
+		}
+		List<Entry<String, Entry<String, List<HarEntry>>>> result = new ArrayList<Entry<String, Entry<String, List<HarEntry>>>>();
+		for (int i = iterationIndex; i < lista.size(); i++) {
+			result.add(lista.get(i));
+		}
+		return result;
+	}
+
+	private List<HarEntry> getEntrysToShareCommonHeaders(List<Entry<String, Entry<String, List<HarEntry>>>> lista) {
+
+		List<HarEntry> result = lista.get(0).getValue().getValue();
+		for (int i = 1; i < lista.size(); i++) {
+			Entry<String, Entry<String, List<HarEntry>>> ee = lista.get(i);
+			List<HarEntry> toComareWith = ee.getValue().getValue();
+			result = result.stream().filter(e -> {
+				return toComareWith.contains(e);
+			}).collect(Collectors.toList());
+		}
+
+		return result;
+	}
+
+	private Map<String, Entry<String, List<HarEntry>>> removeValueWithLeastOccurences(
+			Map<String, Map<String, List<HarEntry>>> map) {
+
+		Map<String, Entry<String, List<HarEntry>>> result = new HashMap<String, Entry<String, List<HarEntry>>>();
+		map.entrySet().stream().forEach(entry -> {
+			List<Entry<String, List<HarEntry>>> list = entry.getValue().entrySet().stream()
+					.collect(Collectors.toList());
+			list.sort((a, b) -> {
+				return b.getValue().size() - a.getValue().size();
+			});
+			result.put(entry.getKey(), list.get(0));
+
+		});
+
+		return result;
+	}
+
+	private Map<String, Map<String, List<HarEntry>>> findCommonHeaders(List<HarEntry> entries) {
+		Map<String, Map<String, List<HarEntry>>> map = new HashMap<String, Map<String, List<HarEntry>>>();
+
+		entries.stream().forEach(entry -> {
+			entry.getRequest().getHeaders().stream().forEach(header -> {
+				Map<String, List<HarEntry>> valueHarEntry = map.get(header.getName());
+				if (valueHarEntry == null) {
+					valueHarEntry = new HashMap<String, List<HarEntry>>();
+					map.put(header.getName(), valueHarEntry);
+				}
+				Map<String, List<HarEntry>> harMap = map.get(header.getName());
+				List<HarEntry> list = harMap.get(header.getValue());
+				if (list == null) {
+					list = new ArrayList<HarEntry>();
+					harMap.put(header.getValue(), list);
+				}
+				list.add(entry);
+			});
+		});
+		return map;
 	}
 
 	public void generateTest(File dstDir) {
@@ -343,8 +470,17 @@ public class LoadTestGenerator {
 		FileUtil.writeFile(threadInstanceContent.getBytes(), threadInstanceFile);
 	}
 
+	HarHeader getContentTypeHeader(List<HarHeader> headers) {
+		for (HarHeader header : headers) {
+			if (header.getName().equalsIgnoreCase("content-type")) {
+				return header;
+			}
+		}
+		return null;
+	}
+
 	public String generateLoadMethod(HarEntry entry, TransactionNameGenerator transactionNameGenerator,
-			int transactionIterator, File resourceDstDir) {
+			int transactionIterator, File resourceDstDir, List<HarHeader> heads) {
 		String loadMethodTemplate = FileUtil.getResourceAsString("/testgeneration_templates/loadmethod.tmp");
 
 		String transactionName = transactionNameGenerator.generateTransactionName(entry, 1, 20);
@@ -356,25 +492,11 @@ public class LoadTestGenerator {
 
 		loadMethod = loadMethod.replace("${request_variable}", "request" + transactionIterator);
 
-		HarHeader contentType = null;
-		List<HarHeader> headers = req.getHeaders();
+		HarHeader contentType = getContentTypeHeader(heads);
 
-		String headerTemplate = FileUtil.getResourceAsString("/testgeneration_templates/addheader.tmp");
-
-		for (HarHeader header : headers) {
-
-			if (isHeaderNameSPDY(header.getName())) {
-				continue;
-			}
-			String headerValue = header.getValue();
-			headerValue = headerValue.replaceAll("[\"]", "\\\\\"");
-			String h = headerTemplate.replace("${header_key}", header.getName()).replace("${header_value}",
-					headerValue);
-			loadMethod = loadMethod.replace("${request_building}", h + "\n${request_building}");
-
-			if (header.getName().equalsIgnoreCase("content-type")) {
-				contentType = header;
-			}
+		loadMethod = addHeaders(heads, loadMethod);
+		if (entry.getRequest().getHeaders().size() != heads.size()) {
+			loadMethod = loadMethod.replace("${request_building}", "		.add(commonHeaders)" + "${request_building}");
 		}
 
 		String requestBodyTemplate = "";
@@ -451,6 +573,24 @@ public class LoadTestGenerator {
 		}
 		loadMethod = loadMethod.replace("${result_asserts}", "");
 
+		return loadMethod;
+	}
+
+	private String addHeaders(List<HarHeader> headers, String loadMethod) {
+		String headerTemplate = FileUtil.getResourceAsString("/testgeneration_templates/addheader.tmp");
+
+		for (HarHeader header : headers) {
+
+			if (isHeaderNameSPDY(header.getName())) {
+				continue;
+			}
+			String headerValue = header.getValue();
+			headerValue = headerValue.replaceAll("[\"]", "\\\\\"");
+			String h = headerTemplate.replace("${header_key}", header.getName()).replace("${header_value}",
+					headerValue);
+			loadMethod = loadMethod.replace("${request_building}", "		" +h + "${request_building}");
+
+		}
 		return loadMethod;
 	}
 
@@ -607,4 +747,5 @@ public class LoadTestGenerator {
 
 		return result;
 	}
+
 }
