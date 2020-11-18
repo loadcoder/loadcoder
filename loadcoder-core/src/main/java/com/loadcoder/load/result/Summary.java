@@ -169,16 +169,25 @@ public class Summary {
 		return value;
 	}
 
-	public Double transaction(String name, String type) {
-		Map<String, ValueHolder> transactionTypeMap = transactionsSummary.get(type);
+	public Double transaction(String name, String transaction) {
+		Map<String, ValueHolder> transactionTypeMap = transactionsSummary.get(transaction);
 		Double d = transactionTypeMap.get(name).value();
 		return d;
 	}
 
-	public Double transaction(TransactionValueCalculator calc, String type) {
+	public Double transaction(TransactionValueCalculator calc, String transaction) {
 
-		Map<String, ValueHolder> ee = transactionsSummary.get(type);
+		Map<String, ValueHolder> ee = transactionsSummary.get(transaction);
 		String name = getNameFromTransactionValueCalculator(calc);
+		Double d = ee.get(name).value();
+		return d;
+	}
+
+	public Double transaction(TransactionValueCalculatorFetchable calc, String transaction) {
+
+		Map<String, ValueHolder> ee = transactionsSummary.get(transaction);
+		TransactionValueCalculator t = calc.getTransactionValueCalculator(new TransactionValueCalculators());
+		String name = getNameFromTransactionValueCalculator(t);
 		Double d = ee.get(name).value();
 		return d;
 	}
@@ -189,15 +198,6 @@ public class Summary {
 
 	public interface OverallValueCalculatorFetchable {
 		OverallValueCalculator getOverallValueCalculator(OverallValueCalculators c);
-	}
-
-	public Double transaction(TransactionValueCalculatorFetchable calc, String type) {
-
-		Map<String, ValueHolder> ee = transactionsSummary.get(type);
-		TransactionValueCalculator t = calc.getTransactionValueCalculator(new TransactionValueCalculators());
-		String name = getNameFromTransactionValueCalculator(t);
-		Double d = ee.get(name).value();
-		return d;
 	}
 
 	public Double overall(OverallValueCalculatorFetchable calc) {
@@ -274,7 +274,8 @@ public class Summary {
 	public void prettyPrint() {
 
 		UserDefinedConverters userDefinedConverters = new UserDefinedConverters();
-		SummaryPrinter.tableAsString(this, userDefinedConverters);
+		String result = SummaryPrinter.tableAsString(this, userDefinedConverters);
+		log.info(result);
 	}
 
 	public interface PrinterFormatBuilable {

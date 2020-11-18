@@ -39,12 +39,12 @@ public class SummaryBuilder {
 	PerTransactionSummaryValueBuilder perTransactionSummaryValueBuilder = new PerTransactionSummaryValueBuilder();
 
 	int maxAmountOfDecimals = -1;
-	
+
 	public SummaryBuilder(Result result) {
 		this.result = result;
 
 	}
-	
+
 	public SummaryBuilder overall(OverallSummaryValueBuildable overallSummaryValueBuildable) {
 		this.overallSummaryValueBuildable.add(overallSummaryValueBuildable);
 		return this;
@@ -56,16 +56,19 @@ public class SummaryBuilder {
 	}
 
 	public interface OverallSummaryValueBuildable {
-		OverallSummaryValueBuilder builder(OverallSummaryValueBuilder overallSummaryValueBuilder, OverallValueCalculators c);
+		OverallSummaryValueBuilder builder(OverallSummaryValueBuilder overallSummaryValueBuilder,
+				OverallValueCalculators c);
 	}
 
 	public interface PerTransactionSummaryValueBuildable {
-		PerTransactionSummaryValueBuilder builder(PerTransactionSummaryValueBuilder perTransactionSummaryValueBuilder, TransactionValueCalculators c);
+		PerTransactionSummaryValueBuilder builder(PerTransactionSummaryValueBuilder perTransactionSummaryValueBuilder,
+				TransactionValueCalculators c);
 	}
 
 	public class PerTransactionSummaryValueBuilder {
 		List<TransactionValueCalculator> list = new ArrayList<>();
 		int maxAmountOfDecimals = -1;
+
 		public PerTransactionSummaryValueBuilder use(TransactionValueCalculator summaryValueCalculator) {
 			list.add(summaryValueCalculator);
 			return this;
@@ -82,8 +85,9 @@ public class SummaryBuilder {
 			return this;
 		}
 
-		protected Map<String, List<SummaryValueHolder>> build(Map<String, List<TransactionExecutionResult>> toBeSummarized) {
-			
+		protected Map<String, List<SummaryValueHolder>> build(
+				Map<String, List<TransactionExecutionResult>> toBeSummarized) {
+
 			Map<String, List<SummaryValueHolder>> summaryValues = new HashMap<String, List<SummaryValueHolder>>();
 			list.forEach(perTransactionCalculator -> {
 				toBeSummarized.entrySet().forEach(transactions -> {
@@ -92,7 +96,7 @@ public class SummaryBuilder {
 					SummaryValueHolder value = perTransactionCalculator.getPerTransactionSummaryValue(t,
 							new SummaryValueHolderBuilder(maxAmountOfDecimals));
 					List<SummaryValueHolder> summaryValueHolders = summaryValues.get(transactionName);
-					if(summaryValueHolders == null) {
+					if (summaryValueHolders == null) {
 						summaryValueHolders = new ArrayList<SummaryValueHolder>();
 						summaryValues.put(transactionName, summaryValueHolders);
 					}
@@ -111,10 +115,10 @@ public class SummaryBuilder {
 	}
 
 	public class OverallSummaryValueBuilder {
-		
+
 		List<OverallValueCalculator> list = new ArrayList<>();
 		int maxAmountOfDecimals = -1;
-		
+
 		public OverallSummaryValueBuilder use(OverallValueCalculator summaryValueCalculator) {
 			list.add(summaryValueCalculator);
 			return this;
@@ -147,43 +151,43 @@ public class SummaryBuilder {
 	}
 
 	public static class SummaryValueHolderBuilder {
-		
+
 		DoubleToStringConvert converter;
 		final int maxAmountOfDecimals;
-		
-		SummaryValueHolderBuilder(int maxAmountOfDecimals){
+
+		SummaryValueHolderBuilder(int maxAmountOfDecimals) {
 			this.maxAmountOfDecimals = maxAmountOfDecimals;
 		}
-		
+
 		public SummaryValueHolderBuilder convert(DoubleToStringConvert converter) {
 			this.converter = converter;
 			return this;
 		}
-		
+
 		public SummaryValueHolder build(String name, Double value) {
 			ValueHolder v = new ValueHolder(value, converter);
-			if(maxAmountOfDecimals != -1) {
+			if (maxAmountOfDecimals != -1) {
 				v.useRoundedValue(maxAmountOfDecimals);
 			}
 			return new SummaryValueHolder(name, v);
 		}
-		
+
 		public SummaryValueHolder build(String name, Integer value) {
 			ValueHolder v = new ValueHolder(value, converter);
-			if(maxAmountOfDecimals != -1) {
+			if (maxAmountOfDecimals != -1) {
 				v.useRoundedValue(maxAmountOfDecimals);
 			}
 			return new SummaryValueHolder(name, v);
 		}
-		
+
 		public SummaryValueHolder build(String name, Long value) {
 			ValueHolder v = new ValueHolder(value, converter);
-			if(maxAmountOfDecimals != -1) {
+			if (maxAmountOfDecimals != -1) {
 				v.useRoundedValue(maxAmountOfDecimals);
 			}
 			return new SummaryValueHolder(name, v);
 		}
-		
+
 	}
 
 	public static class SummaryValueHolder {
@@ -219,30 +223,30 @@ public class SummaryBuilder {
 	}
 
 	public Summary build() {
-		for(OverallSummaryValueBuildable f :overallSummaryValueBuildable) {
+		for (OverallSummaryValueBuildable f : overallSummaryValueBuildable) {
 			overallSummaryValueBuilder.setMaxAmountOfDecimals(maxAmountOfDecimals);
-		f.builder(overallSummaryValueBuilder, new OverallValueCalculators());
+			f.builder(overallSummaryValueBuilder, new OverallValueCalculators());
 		}
-		
-		
-		for(PerTransactionSummaryValueBuildable f : perTransactionSummaryValueBuildable) {
+
+		for (PerTransactionSummaryValueBuildable f : perTransactionSummaryValueBuildable) {
 			perTransactionSummaryValueBuilder.setMaxAmountOfDecimals(maxAmountOfDecimals);
 			f.builder(perTransactionSummaryValueBuilder, new TransactionValueCalculators());
 		}
 		List<SummaryValueHolder> overallSummary = overallSummaryValueBuilder.build();
-		Map<String, List<SummaryValueHolder>> perTransactionSummary = perTransactionSummaryValueBuilder.build(result.getResultLists());
-		
-		
+		Map<String, List<SummaryValueHolder>> perTransactionSummary = perTransactionSummaryValueBuilder
+				.build(result.getResultLists());
+
 		List<TransactionExecutionResult> allTransactions = new ArrayList<TransactionExecutionResult>();
 
 		result.getResultLists().entrySet().forEach(transactions -> {
-			
+
 			allTransactions.addAll(transactions.getValue());
 		});
 		Map<String, List<TransactionExecutionResult>> totalTransactions = new HashMap<String, List<TransactionExecutionResult>>();
 		totalTransactions.put("TOTAL", allTransactions);
-		Map<String, List<SummaryValueHolder>> allTransactionsSummary = perTransactionSummaryValueBuilder.build(totalTransactions);
-		
+		Map<String, List<SummaryValueHolder>> allTransactionsSummary = perTransactionSummaryValueBuilder
+				.build(totalTransactions);
+
 		Summary summary = new Summary(overallSummary, perTransactionSummary, allTransactionsSummary, result);
 		return summary;
 	}

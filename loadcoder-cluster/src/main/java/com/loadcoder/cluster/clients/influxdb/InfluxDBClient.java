@@ -64,7 +64,7 @@ public class InfluxDBClient extends HttpClient {
 				testName);
 	}
 
-	private final static String WRITE_ENTRY_BODY_TEMPLATE = "%s,transaction=%s,status=%s value=%s %s000000";
+	private final static String WRITE_ENTRY_BODY_TEMPLATE = "%s,transaction=%s,status=%s value=%s %s00";
 
 	private final String WRITE_URL;
 	private final String QUERY_URL;
@@ -193,6 +193,8 @@ public class InfluxDBClient extends HttpClient {
 		final String executionId;
 		final InfluxDBClient client;
 
+		private final Map<String, Integer> uniqueNanos = new HashMap<String, Integer>();
+
 		private InfluxDBTestExecution(String executionId, InfluxDBClient client) {
 			this.client = client;
 			this.executionId = executionId;
@@ -222,14 +224,30 @@ public class InfluxDBClient extends HttpClient {
 			}
 			StringBuilder builder = new StringBuilder();
 			for (String key : transactionResults.keySet()) {
+				StringBuilder builder2 = new StringBuilder();
+
+				Integer nanoIterator = uniqueNanos.get(key);
+				if (nanoIterator == null) {
+					nanoIterator = 1000;
+					uniqueNanos.put(key, nanoIterator);
+				}
+
 				List<TransactionExecutionResult> list = transactionResults.get(key);
 				for (TransactionExecutionResult t : list) {
-					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE, executionId, key, t.isStatus(),
-							t.getValue(), t.getTs());
 
-					builder.append(urlParameters);
-					builder.append("\n");
+					if (nanoIterator > 9998) {
+						nanoIterator = 1000;
+					}
+					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE + (nanoIterator++), executionId, key,
+							t.isStatus(), t.getValue(), t.getTs());
+
+					builder2.append(urlParameters);
+					builder2.append("\n");
 				}
+				uniqueNanos.put(key, nanoIterator);
+
+				String transactionsString = builder2.toString();
+				builder.append(transactionsString);
 			}
 			return builder.toString();
 		}

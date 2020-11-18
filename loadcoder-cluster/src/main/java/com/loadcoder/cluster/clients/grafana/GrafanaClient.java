@@ -39,6 +39,8 @@ import com.loadcoder.cluster.clients.Header;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.MasterContainers;
+import com.loadcoder.cluster.clients.docker.StartedClusterExecution;
+import com.loadcoder.cluster.clients.grafana.dto.DashboardSearchResult;
 import com.loadcoder.cluster.clients.grafana.dto.Folder;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.result.Result;
@@ -59,13 +61,20 @@ public class GrafanaClient extends HttpClient {
 
 	protected static final DateTimeFormatter TIMESPAN_FORMAT = DateTimeFormatter
 			.ofPattern(GRAFANA_DASHBOARD_TIMESPAN_DATETIMEFORMAT);
+
+	String PROTOCOL = protocolAsString(false);
+	final String GRAFANA_HOST;
+	final String GRAFANA_PORT;
+
 	private final String DB_URL_TEMPLATE = "%s://%s:%s/api/dashboards/db";
 	private final String DATASOURCES_URL_TEMPLATE = "%s://%s:%s/api/datasources";
 	private final String FOLDERS_URL_TEMPLATE = "%s://%s:%s/api/folders";
+	private final String SEARCH_URL_TEMPLATE = "%s://%s:%s/api/search?type=dash-db";
 
 	private final String DB_URL;
 	private final String DATASOURCES_URL;
 	private final String FOLDERS_URL;
+	private final String SEARCH_URL;
 
 	private static final long TIMESPAN_MILLIS_PRECREATED_DASHBOARD = 50_000;
 
@@ -96,10 +105,13 @@ public class GrafanaClient extends HttpClient {
 		this.dataSourceInfluxDBHostPort = MasterContainers.INFLUXDB.getExposedPort(config);
 
 		this.dataSourceInfluxDBHost = dataSourceInfluxDBHost;
-		String protocol = protocolAsString(false);
-		DB_URL = String.format(DB_URL_TEMPLATE, protocol, grafanaHost, port);
-		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, protocol, grafanaHost, port);
-		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, protocol, grafanaHost, port);
+		this.GRAFANA_HOST = grafanaHost;
+		this.GRAFANA_PORT = port;
+
+		DB_URL = String.format(DB_URL_TEMPLATE, PROTOCOL, grafanaHost, port);
+		DATASOURCES_URL = String.format(DATASOURCES_URL_TEMPLATE, PROTOCOL, grafanaHost, port);
+		FOLDERS_URL = String.format(FOLDERS_URL_TEMPLATE, PROTOCOL, grafanaHost, port);
+		SEARCH_URL = String.format(SEARCH_URL_TEMPLATE, PROTOCOL, grafanaHost, port);
 		this.authorizationValue = authorizationValue;
 		this.influxClient = influxClient;
 	}
@@ -253,6 +265,23 @@ public class GrafanaClient extends HttpClient {
 		return result;
 	}
 
+	public List<DashboardSearchResult> search() {
+		List<DashboardSearchResult> result = new ArrayList<>();
+		List<Header> headers = Arrays.asList(new Header("Content-Type", "application/json"),
+				new Header("Accept", "application/json"), new Header("Authorization", authorizationValue));
+		HttpResponse resp = sendGet(SEARCH_URL, headers);
+		ArrayList<Map<String, Object>> array = JsonPath.read(resp.getBody(), "[*]");
+		for (Map<String, Object> ar : array) {
+
+			DashboardSearchResult f = new DashboardSearchResult(ar.get("uid").toString(), ar.get("title").toString(),
+					ar.get("uri").toString(), ar.get("url").toString(), ar.get("folderTitle").toString(),
+					ar.get("folderUrl").toString());
+			result.add(f);
+		}
+
+		return result;
+	}
+
 	public HttpResponse createDataSource(String datasource) {
 		String fileAsString = getFileAsString("grafana_5.2.4/grafana_post_create_datasource.json");
 		fileAsString = fileAsString.replace("${influxDBHost}", dataSourceInfluxDBHost);
@@ -369,5 +398,40 @@ public class GrafanaClient extends HttpClient {
 		}
 
 		createNewDashboard(folder, influxClient.getTestName(), transaction, dbName);
+	}
+
+	public GrafanaDashboardLinks getDashboardLinks(StartedClusterExecution startedExecution) {
+
+		String urlTemplate = "%s://%s:%s%s?refresh=5s&orgId=1&var-Execution=%s";
+
+		DashboardSearchResult foundDashboard = searchAndFindCorrectDashboard();
+		String url = String.format(urlTemplate, PROTOCOL, GRAFANA_HOST, GRAFANA_PORT, foundDashboard.getUrl(),
+				startedExecution.getExecutionId());
+
+		GrafanaDashboardLinks links = new GrafanaDashboardLinks(url, url);
+		return links;
+	}
+
+	private DashboardSearchResult searchAndFindCorrectDashboard() {
+		List<DashboardSearchResult> searchResult = search();
+		DashboardSearchResult foundDashboard = null;
+		String titleToFind = influxClient.getTestName();
+		String folderToFind = influxClient.getTestGroup();
+		for (DashboardSearchResult dashboardSearchResult : searchResult) {
+
+			if (matchTitleWithTestNamePattern(titleToFind, dashboardSearchResult.getTitle())
+					&& dashboardSearchResult.getFolderTitle().equals(folderToFind)) {
+				foundDashboard = dashboardSearchResult;
+			}
+		}
+		if (foundDashboard == null) {
+			throw new RuntimeException("There are no dashboard in folder " + folderToFind
+					+ " and dashboard with a title match testname" + titleToFind);
+		}
+		return foundDashboard;
+	}
+
+	protected boolean matchTitleWithTestNamePattern(String testName, String titleFoundInSearch) {
+		return titleFoundInSearch.matches(testName + "_[0-9]{8}-[0-9]{6}");
 	}
 }

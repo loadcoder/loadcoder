@@ -20,6 +20,7 @@ package com.loadcoder.cluster.clients.grafana;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -102,6 +103,30 @@ public class GrafanaClientTest extends TestNGBase {
 		String dateTime = DateTimeUtil.convertMilliSecondsToFormattedDate(System.currentTimeMillis(),
 				GrafanaClient.TIMESPAN_FORMAT);
 		assertTrue(dateTime.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.000"));
+	}
+
+	@Test
+	public void testMatchTitleWithTestNamePattern() {
+		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
+		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
+		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
+		boolean result = grafanaClient.matchTitleWithTestNamePattern("testName", "testName_20200101-080101");
+		assertTrue(result);
+
+		result = grafanaClient.matchTitleWithTestNamePattern("testName", "testName_20200101-080101-080101");
+		assertFalse(result);
+
+		result = grafanaClient.matchTitleWithTestNamePattern("testName", "testNamee_20200101-080101");
+		assertFalse(result);
+
+		result = grafanaClient.matchTitleWithTestNamePattern("testName", "ttestName_20200101-080101");
+		assertFalse(result);
+
+		result = grafanaClient.matchTitleWithTestNamePattern("testNamee", "testName_20200101-080101");
+		assertFalse(result);
+
+		result = grafanaClient.matchTitleWithTestNamePattern("ttestName", "testName_20200101-080101");
+		assertFalse(result);
 	}
 
 }

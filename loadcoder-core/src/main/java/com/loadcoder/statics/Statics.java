@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
+import java.awt.Desktop;
+import java.net.URI;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -35,21 +37,22 @@ public class Statics {
 	public String getConfig(String key) {
 		return getConfiguration(key);
 	}
-	
+
 	public static String getConfiguration(String key) {
 		return Configuration.getConfig(key);
 	}
-	
+
 	public static String getConfiguration(String key, String defaultValue) {
 		String valueFromConfig = Configuration.getConfig(key);
 		String result = valueFromConfig == null ? defaultValue : valueFromConfig;
 		return result;
 	}
-	
+
 	public static Map<String, String> getMatchingConfiguration(String keyMatchingRegexp) {
 		Map<String, String> result = Configuration.getConfigurationInstance().getMatchingConfig(keyMatchingRegexp);
 		return result;
 	}
+
 	/**
 	 * Decision of whether to continue the test or not in regards to how many
 	 * iterations of the LoadScenario that have been made so far. If the amount of
@@ -124,4 +127,14 @@ public class Statics {
 	public static final TimeUnit PER_SECOND = TimeUnit.SECOND;
 	public static final TimeUnit PER_MINUTE = TimeUnit.MINUTE;
 	public static final TimeUnit PER_HOUR = TimeUnit.HOUR;
+
+	public static void openBrowser(String url) {
+		try {
+			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+				Desktop.getDesktop().browse(new URI(url));
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

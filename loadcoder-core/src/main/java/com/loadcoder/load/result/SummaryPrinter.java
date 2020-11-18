@@ -82,8 +82,21 @@ public class SummaryPrinter {
 			resultBuilder.append(stringBuilderHead.toString() + "\n");
 		});
 
+		if(summary.getTransactionsSummaryValueHolderList() != null) {
+			StringBuilder tableStringBuilder = doTable(summary, userDefinedConverters);
+			resultBuilder.append(tableStringBuilder.toString());
+		}
+		
+		String result = resultBuilder.toString();
+		return result;
+	}
+	
+	public static StringBuilder doTable(Summary summary, UserDefinedConverters userDefinedConverters) {
+		StringBuilder resultBuilder = new StringBuilder();
+		Map<String, DoubleToStringConvert> valueConverters = userDefinedConverters.getMap();
 		Map<String, Integer> maxWidthPerColumn = new HashMap<String, Integer>();
 		String transactionsColumnName = "Transactions";
+
 		summary.getTransactionsSummaryValueHolderList().stream().forEach(a -> {
 			maxWidthPerColumn.put(a.getName(), a.getName().length());
 		});
@@ -174,7 +187,6 @@ public class SummaryPrinter {
 			String line = stringBuilder.toString();
 			resultBuilder.append(line + "\n");
 		});
-		String result = resultBuilder.toString();
-		return result;
+		return resultBuilder;
 	}
 }

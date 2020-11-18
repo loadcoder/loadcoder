@@ -47,10 +47,21 @@ public class SummaryUtilsTest {
 		Result r = new ResultExtension(map);
 
 		Summary summary = r.summaryBuilder()
-				.overall((a, c) -> a.use(c.fails()).use(c.throughput()).use(c.duration()).use(c.amountOfTransactions()))
-				.perTransaction((a, c) -> a.use(c.amount()).use(c.avg()).use(c.fails()).use(c.maximum())
-						.use(c.minimum()).use(c.percentile(90)).use(c.percentile(95))
-						.use((list, valueHolder) -> valueHolder.build("fisken", 5.6)).use("maximus", c.maximum()))
+				.overall((a, c) -> a
+						.use(c.fails())
+						.use(c.throughput())
+						.use(c.duration())
+						.use(c.amountOfTransactions()))
+				.perTransaction((a, c) -> a
+						.use(c.amount())
+						.use(c.avg())
+						.use(c.fails())
+						.use(c.maximum())
+						.use(c.minimum())
+						.use(c.percentile(90))
+						.use(c.percentile(95))
+						.use((list, valueHolder) -> valueHolder.build("made up value", 5.6))
+						.use("maximus", c.maximum()))
 				.roundValues(3).build();
 
 		summary.prettyPrint((builder, c) -> builder.convert("95%", d -> d.noDecimals()));
@@ -61,12 +72,54 @@ public class SummaryUtilsTest {
 		assertEquals(summary.transaction("Max", "foo").intValue(), 99);
 		assertEquals(summary.transaction("95%", "foo").intValue(), 95);
 		assertEquals(summary.transaction("90%", "foo").intValue(), 90);
+		
 		assertEquals(summary.transaction(c -> c.percentile(90), "bar").intValue(), 190);
+		assertEquals(summary.transaction(c -> c.percentile(95), "bar").intValue(), 195);
+		assertEquals(summary.transaction(c -> c.maximum(), "bar").intValue(), 395);
+		assertEquals(summary.transaction(cc -> cc.minimum(), "bar").intValue(), 100);
+		assertEquals(summary.transaction(cc -> cc.fails(), "bar").intValue(), 0);
 
 		assertEquals(summary.allTransactions("90%").intValue(), 180);
 
 	}
 
+	@Test
+	public void testSummaryWithNoTransactionSummary() {
+
+		Map<String, List<TransactionExecutionResult>> map = getTestdata();
+		Result r = new ResultExtension(map);
+
+		Summary summary = r.summaryBuilder()
+				.overall((a, c) -> a
+						.use(c.fails())
+						.use(c.throughput())
+						.use(c.duration())
+						.use(c.amountOfTransactions()))
+				.roundValues(3).build();
+
+		summary.prettyPrint();
+
+		assertEquals(summary.overall("Fails").intValue(), 0);
+		assertEquals(summary.overall("Throughput"), 0.922);
+
+	}
+
+	@Test
+	public void testSummaryWithNoOverallSummary() {
+
+		Map<String, List<TransactionExecutionResult>> map = getTestdata();
+		Result r = new ResultExtension(map);
+
+		Summary summary = r.summaryBuilder()
+				.perTransaction((a, c) -> a
+						.use(c.amount()))
+				.roundValues(3).build();
+
+		summary.prettyPrint();
+
+		assertEquals(summary.transaction("Amount", "bar").intValue(), 101);
+	}
+	
 	@Test
 	public void testSummaryStandard() {
 

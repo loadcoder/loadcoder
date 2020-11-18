@@ -344,6 +344,11 @@ public class LoadcoderCluster {
 		stopAndRemoveContainer(masterNode, s);
 	}
 
+	public void stopAndRemoveAllContainers() {
+		stopAndRemoveAllMasterContainers();
+		stopExecution();
+	}
+
 	public void stopAndRemoveMasterContainers(MasterContainers... containerNames) {
 		Node masterNode = getMasterNode();
 
@@ -537,9 +542,11 @@ public class LoadcoderCluster {
 		}
 	}
 
-	public void startNewExecution(int amountOfContainersToStart) {
+	public StartedClusterExecution startNewExecution(int amountOfContainersToStart) {
 		String md5sum = FileUtil.readFile("test-md5sum.txt");
-		startNewExecution(amountOfContainersToStart, DateTimeUtil.getDateTimeNowString(), md5sum);
+		String executionId = DateTimeUtil.getDateTimeNowString();
+		startNewExecution(amountOfContainersToStart, executionId, md5sum);
+		return new StartedClusterExecution(executionId);
 	}
 
 	private void startNewExecution(int amountOfContainersToStart, String executionId, String md5sum) {
@@ -611,7 +618,9 @@ public class LoadcoderCluster {
 
 	public GrafanaClient getGrafanaClient(InfluxDBClient incluxDBClient) {
 
-		String authenticationValue = "Basic YWRtaW46YWRtaW4=";
+		String configuredBasicAuth = config.getConfiguration("grafana.basic.auth");
+		String defaultAdminBasicAuth = "YWRtaW46YWRtaW4=";
+		String authenticationValue = "Basic " + (configuredBasicAuth != null ? configuredBasicAuth : defaultAdminBasicAuth);
 
 		if (this.grafana == null) {
 			this.grafana = new GrafanaClient(getHost(MasterContainers.GRAFANA),
