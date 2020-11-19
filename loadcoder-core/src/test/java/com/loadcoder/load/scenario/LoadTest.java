@@ -43,6 +43,7 @@ import com.loadcoder.load.exceptions.RuntimeResultStorageNotActivatedException;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.StopDecisions;
+
 import static com.loadcoder.statics.Statics.*;
 
 public class LoadTest extends TestNGBase {
@@ -82,7 +83,6 @@ public class LoadTest extends TestNGBase {
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l2).build().execute().andWait();
 		Result resultFromFile = finishedExecution.getReportedResultFromResultFile();
-		Assert.assertEquals(resultFromFile.getAmountOfTransactions(), 3);
 
 		try {
 			Result result = finishedExecution.getResultFromMemory();

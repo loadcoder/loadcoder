@@ -26,7 +26,12 @@ public class ValueHolder {
 
 	double originalValue;
 	double presentedValue;
-	DoubleToStringConvert converter = d -> d.asDouble(2);
+	DoubleToStringConvert converter = d -> d.asDecimalString(2);
+
+	@Override
+	public String toString() {
+		return "" + originalValue;
+	}
 
 	public ValueHolder(double d, DoubleToStringConvert converter) {
 		this.originalValue = d;
@@ -37,23 +42,29 @@ public class ValueHolder {
 	}
 
 	public void useRoundedValue(int maxNumberOfDecimals) {
-		String roundedValueString = new DecimalFormat(getFormatString(maxNumberOfDecimals)).format(originalValue);
-		this.presentedValue = Double.valueOf(roundedValueString);
+		String format = getFormatString(maxNumberOfDecimals);
+		String roundedValueString = new DecimalFormat(format).format(originalValue);
+		String roundedValueStringWithDot = roundedValueString.replace(',', '.');
+		this.presentedValue = Double.valueOf(roundedValueStringWithDot);
 	}
+
 	protected DoubleToStringConvert getConverter() {
 		return converter;
 	}
 
-	public String asDouble() {
-		return ""+ presentedValue;
+	public String asDecimalString() {
+		return "" + presentedValue;
 	}
-	
-	private String asDouble(int maxNumberOfDecimals) {
-		return new DecimalFormat(getFormatString(maxNumberOfDecimals)).format(presentedValue);
+
+	public String asDecimalString(int maxNumberOfDecimals) {
+		String format = getFormatString(maxNumberOfDecimals);
+		String roundedValueString = new DecimalFormat(format).format(presentedValue);
+		String roundedValueStringWithDot = roundedValueString.replace(',', '.');
+		return roundedValueStringWithDot;
 	}
 
 	public String noDecimals() {
-		return asDouble(0);
+		return asDecimalString(0);
 	}
 
 	public double value() {
@@ -63,7 +74,7 @@ public class ValueHolder {
 	public double originalValue() {
 		return originalValue;
 	}
-	
+
 	private String getFormatString(int noOfDecimals) {
 		String decimals = "";
 		String result;

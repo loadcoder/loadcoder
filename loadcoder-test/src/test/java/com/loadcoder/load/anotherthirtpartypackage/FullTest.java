@@ -21,11 +21,6 @@ package com.loadcoder.load.anotherthirtpartypackage;
 import static com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-//import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
-//import static com.loadcoder.statics.ThrottleMode.SHARED;
-//import static com.loadcoder.statics.Time.PER_MINUTE;
-//import static com.loadcoder.statics.Time.PER_SECOND;
-//import static com.loadcoder.statics.Time.SECOND;
 import static com.loadcoder.statics.Statics.PER_MINUTE;
 import static com.loadcoder.statics.Statics.PER_SECOND;
 import static com.loadcoder.statics.Statics.PER_THREAD;
@@ -59,7 +54,6 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
-import com.loadcoder.statics.SummaryUtils;
 
 public class FullTest extends TestNGBase {
 

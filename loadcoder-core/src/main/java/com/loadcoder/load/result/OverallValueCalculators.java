@@ -41,7 +41,7 @@ public class OverallValueCalculators {
 			int sec = Summary.getDurationInSeconds(duration);
 			double throughput = (double) result.getAmountOfTransactions() / sec;
 
-			return valueBuilder.convert(context -> context.asDouble() + " tps").build("Throughput", throughput);
+			return valueBuilder.convert(context -> context.asDecimalString() + " tps").build("Throughput", throughput);
 		};
 	}
 

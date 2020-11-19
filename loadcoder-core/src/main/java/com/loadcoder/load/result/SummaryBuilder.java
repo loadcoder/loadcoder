@@ -153,7 +153,7 @@ public class SummaryBuilder {
 	public static class SummaryValueHolderBuilder {
 
 		DoubleToStringConvert converter;
-		final int maxAmountOfDecimals;
+		private final int maxAmountOfDecimals;
 
 		SummaryValueHolderBuilder(int maxAmountOfDecimals) {
 			this.maxAmountOfDecimals = maxAmountOfDecimals;

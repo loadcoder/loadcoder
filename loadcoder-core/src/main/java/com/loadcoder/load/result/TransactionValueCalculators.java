@@ -49,7 +49,7 @@ public class TransactionValueCalculators {
 				totalSum += t.getValue();
 			}
 			double result = (double) totalSum / transactionsList.size();
-			return valueBuilder.convert(context -> context.asDouble()).build("Avg", result);
+			return valueBuilder.convert(context -> context.asDecimalString()).build("Avg", result);
 		};
 	}
 

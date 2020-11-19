@@ -60,11 +60,11 @@ public class SummaryUtilsTest {
 						.use(c.minimum())
 						.use(c.percentile(90))
 						.use(c.percentile(95))
-						.use((list, valueHolder) -> valueHolder.build("made up value", 5.6))
+						.use((list, valueHolder) -> valueHolder.build("made up value", 5.65432))
 						.use("maximus", c.maximum()))
 				.roundValues(3).build();
 
-		summary.prettyPrint((builder, c) -> builder.convert("95%", d -> d.noDecimals()));
+		summary.prettyPrint((builder, c) -> builder.convert("Avg", d -> d.asDecimalString(4)).convert("made up value", d -> d.asDecimalString(3)));
 
 		assertEquals(summary.overall("Fails").intValue(), 0);
 		assertEquals(summary.overall("Throughput"), 0.922);

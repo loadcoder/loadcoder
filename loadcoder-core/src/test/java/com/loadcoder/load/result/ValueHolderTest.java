@@ -26,7 +26,7 @@ public class ValueHolderTest {
 
 	@Test
 	public void testRounding() {
-		ValueHolder v = new ValueHolder(4.39, d -> d.asDouble());
+		ValueHolder v = new ValueHolder(4.39, d -> d.asDecimalString());
 		String s = v.getConverter().convert(v);
 		assertEquals(s, "4.39");
 		
@@ -38,17 +38,17 @@ public class ValueHolderTest {
 		s = v.getConverter().convert(v);
 		assertEquals(s, "5");
 		
-		v = new ValueHolder(4.513, d -> d.asDouble());
+		v = new ValueHolder(4.513, d -> d.asDecimalString());
 		v.useRoundedValue(3);
 		s = v.getConverter().convert(v);
 		assertEquals(s, "4.513");
 
-		v = new ValueHolder(4.513, d -> d.asDouble());
+		v = new ValueHolder(4.513, d -> d.asDecimalString());
 		v.useRoundedValue(4);
 		s = v.getConverter().convert(v);
 		assertEquals(s, "4.513");
 		
-		v = new ValueHolder(4.516, d -> d.asDouble());
+		v = new ValueHolder(4.516, d -> d.asDecimalString());
 		v.useRoundedValue(2);
 		s = v.getConverter().convert(v);
 		assertEquals(s, "4.52");
