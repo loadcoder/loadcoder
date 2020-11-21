@@ -25,7 +25,6 @@ import java.util.Map;
 
 import com.loadcoder.load.result.Summary.DoubleToStringConvert;
 import com.loadcoder.result.Result;
-import com.loadcoder.result.Summarizable;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class SummaryBuilder {

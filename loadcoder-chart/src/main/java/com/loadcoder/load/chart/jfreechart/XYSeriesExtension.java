@@ -41,8 +41,6 @@ public class XYSeriesExtension extends XYSeries {
 	
 	
 	private boolean visible = true;
-	private Paint colorInTheChart;
-	
 	private final int hash;
 	
 	@Override
@@ -64,14 +62,6 @@ public class XYSeriesExtension extends XYSeries {
 	@Override
 	public int hashCode() {
 		return hash;
-	}
-	
-//	public Paint getColorInTheChart() {
-//		return colorInTheChart;
-//	}
-
-	public void setColorInTheChart(Paint paint) {
-		this.colorInTheChart = paint;
 	}
 	
 	LegendItem legend;
@@ -113,7 +103,6 @@ public class XYSeriesExtension extends XYSeries {
 		super(key, autoSort, allowDuplicateXValues);
 		hash = super.hashCode();
 		setNotify(false);
-		this.colorInTheChart = colorInTheChart;
 	}
 
 	public List<XYDataItemExtension> getXYDataItems() {

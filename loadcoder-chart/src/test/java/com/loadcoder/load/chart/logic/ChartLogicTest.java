@@ -18,10 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

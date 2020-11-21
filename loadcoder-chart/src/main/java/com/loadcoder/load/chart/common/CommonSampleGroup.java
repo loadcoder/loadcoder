@@ -30,7 +30,6 @@ import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ChartLogic;
 import com.loadcoder.load.chart.sampling.Group;
 import com.loadcoder.load.chart.sampling.SampleConcaternator;
-import com.loadcoder.load.chart.utilities.SampleStatics;
 
 public class CommonSampleGroup extends Group {
 
@@ -82,7 +81,7 @@ public class CommonSampleGroup extends Group {
 
 		Range newRange = concater.getNewRange();
 		long newSampleLength = newRange.getSampleLength();
-		CommonSample newSample = createCommonSampleAndPutInMap(start, newSampleLength);
+		createCommonSampleAndPutInMap(start, newSampleLength);
 	}
 
 	public void putCommonSample(Long key, CommonSample commonSample) {

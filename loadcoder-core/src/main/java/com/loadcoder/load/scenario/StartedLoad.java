@@ -20,9 +20,6 @@ package com.loadcoder.load.scenario;
 
 import java.lang.Thread.State;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class StartedLoad {
 
 	private Load load;

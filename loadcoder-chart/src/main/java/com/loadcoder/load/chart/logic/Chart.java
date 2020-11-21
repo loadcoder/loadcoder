@@ -35,17 +35,13 @@ import javax.swing.JMenu;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
-import org.jfree.chart.util.ParamChecks;
 
-import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.jfreechart.ChartFrame;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
-import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.menu.AboutPopup;
 import com.loadcoder.load.chart.menu.MouseClickedListener;
 import com.loadcoder.load.chart.menu.settings.SettingsWindow;
-import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public abstract class Chart {
 

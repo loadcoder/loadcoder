@@ -27,7 +27,7 @@ import com.loadcoder.statics.Formatter;
 public class ExecutionBuilder {
 
 	protected ResultFormatter resultFormatter = Formatter.SIMPLE_RESULT_FORMATTER;
-	protected RuntimeResultUser user;
+	protected RuntimeResultConsumer user;
 	protected TransactionExecutionResultBuffer transactionExecutionResultBuffer = null;
 	protected final Load[] loads;
 
@@ -67,7 +67,7 @@ public class ExecutionBuilder {
 	 * 
 	 * @return the builder instance
 	 */
-	public ExecutionBuilder storeAndConsumeResultRuntime(RuntimeResultUser runtimeResultUser) {
+	public ExecutionBuilder storeAndConsumeResultRuntime(RuntimeResultConsumer runtimeResultUser) {
 		transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
 		this.user = runtimeResultUser;
 		return this;

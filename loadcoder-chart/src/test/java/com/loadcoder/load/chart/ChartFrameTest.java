@@ -132,7 +132,6 @@ public class ChartFrameTest {
 		logic.getSeriesCollection().fireChange();
 
 		LoadUtility.sleep(5_000);
-		series.setColorInTheChart(Color.BLUE);
 		logic.getSeriesCollection().fireChange();
 
 		LoadUtility.sleep(600_000);

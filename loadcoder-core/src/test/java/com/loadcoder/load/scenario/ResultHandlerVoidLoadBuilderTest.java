@@ -42,7 +42,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		Execution e = new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
+		new ExecutionBuilder(l).resultFormatter(null).storeResultRuntime().build();
 
 		RateLimiter rl = RateLimiter.create(1);
 		ResultHandlerVoidLoadBuilder resultHandlerVoidBuilder = new ResultHandlerVoidLoadBuilder("t1", () -> {

@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.loadcoder.load.chart.logic.ResultChartTest.YGiver;
-import com.loadcoder.load.scenario.RuntimeResultUser;
+import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.result.TransactionExecutionResult;
 
 public class ResultChartTestUtility {
 
-	public class RuntimeResultUserExtension implements RuntimeResultUser{
+	public class RuntimeResultUserExtension implements RuntimeResultConsumer{
 		Map<String, List<TransactionExecutionResult>> transactionsMap = new HashMap<String, List<TransactionExecutionResult>>();
 
 		public Map<String, List<TransactionExecutionResult>> getTransactionsMap() {

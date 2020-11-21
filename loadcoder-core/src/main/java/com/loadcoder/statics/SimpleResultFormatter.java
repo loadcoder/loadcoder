@@ -67,7 +67,7 @@ public class SimpleResultFormatter extends ResultFormatter{
 		}catch(RuntimeException rte){
 			//message is optional. OK with silent rte
 		}
-		return new TransactionExecutionResult(name, new Long(ts), new Long(rt), new Boolean(status), message, threadId);
+		return new TransactionExecutionResult(name, Long.valueOf(ts), Long.valueOf(rt), Boolean.valueOf(status), message, threadId);
 	}
 
 	@Override

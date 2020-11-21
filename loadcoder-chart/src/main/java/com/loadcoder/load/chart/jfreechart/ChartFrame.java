@@ -23,50 +23,18 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartTheme;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.LegendItem;
-import org.jfree.chart.StandardChartTheme;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.entity.LegendItemEntity;
-import org.jfree.chart.entity.PlotEntity;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.urls.StandardXYURLGenerator;
-import org.jfree.chart.util.ParamChecks;
 import org.jfree.data.xy.XYDataItem;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.data.DataSet;
 import com.loadcoder.load.chart.logic.ChartLogic;
-import com.loadcoder.load.chart.logic.RuntimeChartLogic;
-import com.loadcoder.load.jfreechartfixes.DateAxisExtension;
-import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 
 public class ChartFrame extends ApplicationFrame {
 

@@ -223,35 +223,6 @@ public class Summary {
 		return name;
 	}
 
-	private Summarizable getResultTemplate() {
-		return new Summarizable() {
-
-			@Override
-			public long getDuration() {
-				return 60_000;
-			}
-
-			@Override
-			public int getAmountOfTransactions() {
-				return 2;
-			}
-
-			@Override
-			public int getAmountOfFails() {
-				return 0;
-			}
-
-			@Override
-			public Map<String, List<TransactionExecutionResult>> getResultLists() {
-				Map<String, List<TransactionExecutionResult>> map = new HashMap<String, List<TransactionExecutionResult>>();
-				map.put("templateTransaction", new ArrayList<TransactionExecutionResult>());
-				map.get("templateTransaction").add(new TransactionExecutionResult(0, 0, true, "message"));
-				return map;
-			}
-
-		};
-	}
-
 	public Double allTransactions(String string) {
 		Double d = allTransactionsSummary.get(string).value();
 		return d;

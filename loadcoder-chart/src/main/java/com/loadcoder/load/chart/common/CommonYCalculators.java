@@ -18,9 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.common;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 

@@ -18,7 +18,9 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Statics.*;
+import static com.loadcoder.statics.Statics.DAY;
+import static com.loadcoder.statics.Statics.HOUR;
+import static com.loadcoder.statics.Statics.MINUTE;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -46,10 +48,10 @@ import com.loadcoder.load.chart.sampling.SampleConcaternatorSpec;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
 import com.loadcoder.load.chart.utilities.Utilities;
-import com.loadcoder.load.scenario.RuntimeResultUser;
+import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
+public class RuntimeChartLogic extends ChartLogic implements RuntimeResultConsumer {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -127,7 +129,9 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 		oldRange.setStart(newStart);
 		newRange.setEnd(newStart - 1);
-		if (false) {
+		
+		boolean drawDebugLines = false;
+		if (drawDebugLines) {
 			drawRangeDebugStartLines(oldRange, newStart);
 		}
 	}

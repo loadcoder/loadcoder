@@ -26,13 +26,12 @@ import java.util.List;
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.result.ResultFormatter;
-import com.loadcoder.statics.Formatter;
 
 public class Execution {
 
 	private Thread runtimeResultUpdaterThread;
 
-	private final RuntimeResultUser user;
+	private final RuntimeResultConsumer user;
 	private final ResultFormatter resultFormatter;
 
 	private StartedExecution startedExecution;
@@ -59,7 +58,7 @@ public class Execution {
 	}
 
 	protected Execution(ResultFormatter resultFormatter,
-			TransactionExecutionResultBuffer transactionExecutionResultBuffer, RuntimeResultUser resultUser,
+			TransactionExecutionResultBuffer transactionExecutionResultBuffer, RuntimeResultConsumer resultUser,
 			List<Load> loads) {
 		this.resultFormatter = resultFormatter;
 		this.transactionExecutionResultBuffer = transactionExecutionResultBuffer;

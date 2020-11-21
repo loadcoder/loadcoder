@@ -18,7 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.anotherthirtpartypackage;
 
-import static com.loadcoder.statics.Formatter.SIMPLE_RESULT_FORMATTER;
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.Statics.PER_MINUTE;
@@ -30,7 +29,6 @@ import static com.loadcoder.statics.Statics.duration;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,14 +65,13 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 
-				ThreadLocal<Exception> tl = new ThreadLocal<Exception>();
 				load("t1", () -> {
 					return new NullPointerException();
 				}).handleResult((a) -> {
 					// getters
-					Exception e = a.getException();
-					long rt = a.getResponseTime();
-					NullPointerException npe = a.getResponse();
+					a.getException();
+					a.getResponseTime();
+					a.getResponse();
 
 					// setters
 					a.changeTransactionName("newTransactionName");
@@ -86,8 +83,7 @@ public class FullTest extends TestNGBase {
 				load("t1", () -> {
 					/* nothing to return */}).handleResult((a) -> {
 						// getters
-						Exception e = a.getException();
-						long rt = a.getResponseTime();
+						a.getException();
 
 						// setters
 						a.changeTransactionName("newTransactionName");
@@ -107,7 +103,6 @@ public class FullTest extends TestNGBase {
 	public void createLoadScenarioPreAndPost(Method method) {
 
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-		List<?> list = new ArrayList<Exception>();
 
 		LoadScenario s = new LoadScenario() {
 
@@ -118,9 +113,8 @@ public class FullTest extends TestNGBase {
 					return new NullPointerException();
 				}).handleResult((a) -> {
 					// getters
-					Exception e = a.getException();
-					long rt = a.getResponseTime();
-					NullPointerException npe = a.getResponse();
+					a.getException();
+					a.getResponse();
 
 					// setters
 					a.changeTransactionName("newTransactionName");
@@ -132,8 +126,7 @@ public class FullTest extends TestNGBase {
 				load("t1", () -> {
 					/* nothing to return */}).handleResult((a) -> {
 						// getters
-						Exception e = a.getException();
-						long rt = a.getResponseTime();
+						a.getException();
 
 						// setters
 						a.changeTransactionName("newTransactionName");
@@ -185,7 +178,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
 				.throttle(2, PER_SECOND, SHARED).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
 
 		chart.waitUntilClosed();
@@ -209,7 +202,6 @@ public class FullTest extends TestNGBase {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
 		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
 
 			@Override
 			public void loadScenario() {
@@ -237,7 +229,6 @@ public class FullTest extends TestNGBase {
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
 		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
 
 			@Override
 			public void loadScenario() {
@@ -264,7 +255,6 @@ public class FullTest extends TestNGBase {
 	public void twoLoads(Method method) {
 		RuntimeChart chart = new RuntimeChart();
 		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
 
 			@Override
 			public void loadScenario() {
@@ -275,7 +265,6 @@ public class FullTest extends TestNGBase {
 		};
 
 		LoadScenario ls2 = new LoadScenario() {
-			SUT sut = new SUT();
 
 			@Override
 			public void loadScenario() {
@@ -289,7 +278,7 @@ public class FullTest extends TestNGBase {
 
 		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
+		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
 		chart.waitUntilClosed();
 
@@ -304,14 +293,14 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
-					LoadUtility.sleep(LoadUtility.random(300, 400));
+					sut.methodThatTakesBetweenTheseResponseTimes(300, 400);
 				}).perform();
 			}
 		};
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
 
 		chart.waitUntilClosed();
@@ -322,8 +311,6 @@ public class FullTest extends TestNGBase {
 	public void testSurrounding(Method method) {
 		RuntimeChart chart = new RuntimeChart();
 		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
-
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
@@ -334,7 +321,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000)).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
 
 		chart.waitUntilClosed();
@@ -343,9 +330,9 @@ public class FullTest extends TestNGBase {
 
 	@Test(groups = "manual")
 	public void testLowIntensity(Method method) {
-		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
 
+		LoadScenario ls = new LoadScenario() {
+			
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
@@ -357,7 +344,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
 				.build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
 				.execute().andWait();
 
 	}
@@ -377,7 +364,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).amountOfThreads(2).build();
 
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
 				.execute().andWait();
 
 	}
@@ -399,14 +386,15 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
-					LoadUtility.sleep(20);
+					LoadUtility.sleep(30);
 				}).perform();
 			}
 		};
 
-		Load l = new LoadBuilder(ls).throttle(2, PER_MINUTE, SHARED).stopDecision(duration(60_000)).build();
+		Load l = new LoadBuilder(ls).throttle(2, PER_SECOND, SHARED).rampup(300).stopDecision(duration(20_000)).build();
+		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000)).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
+		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -459,7 +447,7 @@ public class FullTest extends TestNGBase {
 				.execute().andWait();
 
 		Result result = finished.getReportedResultFromResultFile();
-		ResultChart resultChart = new ResultChart(result);
+		new ResultChart(result);
 
 		Summary summary = result.summaryStandard().build();
 		summary.prettyPrint();
@@ -507,7 +495,7 @@ public class FullTest extends TestNGBase {
 		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
 				.execute().andWait();
 
-		Execution execution = new ExecutionBuilder(l).storeResultRuntime().resultFormatter(null).build();
+		new ExecutionBuilder(l).storeResultRuntime().resultFormatter(null).build();
 
 		Result result = finished.getReportedResultFromResultFile();
 		result.summaryBuilder().build().prettyPrint();
@@ -542,7 +530,7 @@ public class FullTest extends TestNGBase {
 
 		Result result = finished.getReportedResultFromResultFile();
 
-		Result r = new Result(new File("src/test/resources/testresults/2min.log"));
+		new Result(new File("src/test/resources/testresults/2min.log"));
 
 		Chart c = new ResultChart(result);
 		c.waitUntilClosed();
@@ -566,7 +554,7 @@ public class FullTest extends TestNGBase {
 	@Test(groups = "manual")
 	public void resultChartAndRuntimeChartWithConstructedData() {
 		Result r = new Result(new File("src/test/resources/testresults/result15min.log"));
-		Chart c = new ResultChart(r);
+		new ResultChart(r);
 
 		RuntimeChart runtimeChart = new RuntimeChart();
 		runtimeChart.useData(r.getResultLists());

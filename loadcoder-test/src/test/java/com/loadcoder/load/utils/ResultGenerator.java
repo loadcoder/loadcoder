@@ -21,7 +21,6 @@ package com.loadcoder.load.utils;
 import org.slf4j.Logger;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.TestUtility;
 import com.loadcoder.result.ResultFormatter;
 import com.loadcoder.result.ResultLogger;
 import com.loadcoder.result.TransactionExecutionResult;

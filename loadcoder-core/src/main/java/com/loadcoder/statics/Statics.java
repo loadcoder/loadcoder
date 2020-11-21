@@ -21,18 +21,11 @@ package com.loadcoder.statics;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.scenario.StopDecision;
 import com.loadcoder.result.Result;
 
 public class Statics {
-
-	private static Logger log = LoggerFactory.getLogger(Statics.class);
 
 	public String getConfig(String key) {
 		return getConfiguration(key);

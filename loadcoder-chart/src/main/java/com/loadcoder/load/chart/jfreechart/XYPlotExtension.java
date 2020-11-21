@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 public class XYPlotExtension extends XYPlot {
 
+	private static final long serialVersionUID = 1L;
+
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	XYDataset dataset;

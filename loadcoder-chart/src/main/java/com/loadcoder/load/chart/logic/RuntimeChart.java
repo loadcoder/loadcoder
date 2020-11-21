@@ -27,12 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.loadcoder.load.chart.common.CommonSeries;
-import com.loadcoder.load.scenario.RuntimeResultUser;
+import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.load.scenario.StartedLoad;
 import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChart extends Chart implements RuntimeResultUser {
+public class RuntimeChart extends Chart implements RuntimeResultConsumer {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 

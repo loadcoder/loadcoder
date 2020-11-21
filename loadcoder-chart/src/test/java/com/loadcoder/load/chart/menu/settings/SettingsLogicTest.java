@@ -82,7 +82,6 @@ public class SettingsLogicTest {
 		ChartSettingsActionsModel chartSettingsActionsModel = new ChartSettingsActionsModel();
 		logic.apply(chartSettingsActionsModel);
 
-		verify(series).setColorInTheChart(Color.PINK);
 		verify(legend).setFillPaint(Color.PINK);
 		verify(legend).setOutlinePaint(Color.PINK);
 		assertEquals(existingColors.size(), 1);

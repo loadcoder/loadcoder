@@ -18,9 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.cluster.clients.influxdb;
 
-//import static com.loadcoder.statics.Statics.getConfiguration;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,14 +27,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.loadcoder.cluster.clients.HttpClient;
 import com.loadcoder.cluster.clients.HttpResponse;
 import com.loadcoder.cluster.clients.docker.LoadcoderCluster;
-import com.loadcoder.cluster.clients.docker.MasterContainers;
-import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.result.TransactionExecutionResult;

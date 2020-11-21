@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.Statics.*;
+import static com.loadcoder.statics.Statics.iterations;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -29,11 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.TestUtility;
-import com.loadcoder.load.scenario.ExecutionBuilder;
-import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.LoadBuilder;
-import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.load.testng.TestNGBase;
 
 public class TypedLoadScenarioTest extends TestNGBase {
@@ -150,8 +145,6 @@ public class TypedLoadScenarioTest extends TestNGBase {
 
 	void testLogic(ThreadInstanceStopper threadInstanceStopper) {
 
-		if (1 == 1) {
-			threadInstanceStopper.getCustomStopDecision().stop();
-		}
+		threadInstanceStopper.getCustomStopDecision().stop();
 	}
 }

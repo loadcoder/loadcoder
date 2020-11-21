@@ -28,7 +28,6 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.loadcoder.cluster.clients.HttpResponse;
-import com.loadcoder.cluster.clients.influxdb.InfluxDBClient;
 import com.loadcoder.cluster.clients.influxdb.InfluxDBClient.InfluxDBTestExecution;
 import com.loadcoder.result.TransactionExecutionResult;
 
@@ -38,7 +37,6 @@ public class InfluxDBClientTest {
 	public void createEntry() {
 		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 		InfluxDBTestExecution exe = cli.createTestExecution("foo" +System.currentTimeMillis());
-		int responseCode = -1;
 		Map<String, List<TransactionExecutionResult>> transactions = new HashMap<String, List<TransactionExecutionResult>>();
 		transactions.put("hello",
 				Arrays.asList(new TransactionExecutionResult(System.currentTimeMillis(), 0L, true, "")));
@@ -57,12 +55,12 @@ public class InfluxDBClientTest {
 	@Test(groups = "manual")
 	public void testShowMeasurements() {
 		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
-		List<String> measurements = cli.showMeasurements();
+		cli.showMeasurements();
 	}
 	
 	@Test(groups = "manual")
 	public void testDistinctTransactions() {
-		InfluxDBClient cli = new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
+		new InfluxDBClient("localhost", 8086, false, "grupp", "namn");
 	}
 	
 }

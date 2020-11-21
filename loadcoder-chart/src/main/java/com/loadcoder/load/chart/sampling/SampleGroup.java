@@ -31,7 +31,6 @@ import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.data.Range;
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
-import com.loadcoder.load.chart.utilities.SampleStatics;
 
 public class SampleGroup extends Group {
 

@@ -18,18 +18,17 @@
  ******************************************************************************/
 package com.loadcoder.result;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.result.Result;
-import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.statics.Formatter;
 
 public class ResultTest extends TestNGBase {
@@ -39,22 +38,11 @@ public class ResultTest extends TestNGBase {
 
 		Result r = new Result(new File("src/test/resources/testresults/default_formatter_test.log"));
 
-		Result result_long_names = new Result(
-				new File("src/test/resources/testresults/default_formatter_long_names_test.log"),
-				Formatter.RESULT_FORMATTER_LONG_VARIABLE_NAMES);
-
 		assertEquals(r.getAmountOfTransactions(), 4);
 		assertEquals(r.getAmountOfFails(), 1);
 		assertEquals(r.getResultLists().get("a0").size(), 2);
 		assertEquals(r.getResultLists().get("a1").get(0).isStatus(), false,
 				"1st a1 transaction did not have status false");
-
-		assertEquals(result_long_names.getAmountOfTransactions(), 4);
-		assertEquals(result_long_names.getAmountOfFails(), 1);
-		assertEquals(result_long_names.getResultLists().get("a0").size(), 2);
-		assertEquals(result_long_names.getResultLists().get("a1").get(0).isStatus(), false,
-				"1st a1 transaction did not have status false");
-
 	}
 
 	@Test

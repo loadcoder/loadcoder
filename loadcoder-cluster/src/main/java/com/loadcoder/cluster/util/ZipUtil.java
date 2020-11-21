@@ -30,8 +30,12 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ZipUtil {
 
+	Logger log = LoggerFactory.getLogger(this.getClass());
 	protected static class FileCounter {
 		int count;
 		int MAX_EXPECTED_FILES_TO_FIND_DEFAULT = 500;
@@ -171,14 +175,7 @@ public class ZipUtil {
 				continue;
 			}
 			zos.putNextEntry(new ZipEntry(parentFolder + "/" + file.getName()));
-			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-			long bytesRead = 0;
-			byte[] bytesIn = new byte[BUFFER_SIZE];
-			int read = 0;
-			while ((read = bis.read(bytesIn)) != -1) {
-				zos.write(bytesIn, 0, read);
-				bytesRead += read;
-			}
+			writeFileToZipOutput(file, zos);
 			zos.closeEntry();
 		}
 	}
@@ -193,6 +190,11 @@ public class ZipUtil {
 	 */
 	private void zipFile(File file, ZipOutputStream zos) throws FileNotFoundException, IOException {
 		zos.putNextEntry(new ZipEntry(file.getName()));
+		writeFileToZipOutput(file, zos);
+		zos.closeEntry();
+	}
+
+	private void writeFileToZipOutput(File file, ZipOutputStream zos) throws FileNotFoundException, IOException {
 		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
 		long bytesRead = 0;
 		byte[] bytesIn = new byte[BUFFER_SIZE];
@@ -201,6 +203,7 @@ public class ZipUtil {
 			zos.write(bytesIn, 0, read);
 			bytesRead += read;
 		}
-		zos.closeEntry();
+		log.debug("bytes read:{}", bytesRead);
+		bis.close();
 	}
 }

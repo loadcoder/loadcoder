@@ -20,6 +20,7 @@ package com.loadcoder.load.scenario.design;
 
 import static com.loadcoder.statics.Statics.PER_SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
+import static com.loadcoder.statics.Statics.iterations;
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
@@ -32,7 +33,6 @@ import com.loadcoder.load.scenario.LoadScenario;
 import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
-import com.loadcoder.statics.StopDecisions;
 
 public class LoadTestDesignExamples {
 
@@ -131,7 +131,7 @@ public class LoadTestDesignExamples {
 				// modify the type instance
 				t.setI(5);
 				// get the values
-				int i = t.getI();
+				t.getI();
 				// call the logic implemented in other classes
 				t.getLogic().loadLogic();
 
@@ -226,7 +226,7 @@ public class LoadTestDesignExamples {
 		};
 
 		Load l = new LoadBuilder(ls).throttle(10, PER_SECOND, SHARED)
-				.stopDecision(StopDecisions.iterations(5)).build();
+				.stopDecision(iterations(5)).build();
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l).storeResultRuntime().build().execute().andWait();
 

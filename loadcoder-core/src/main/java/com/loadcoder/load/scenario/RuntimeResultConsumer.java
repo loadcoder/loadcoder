@@ -24,6 +24,6 @@ import java.util.Map;
 import com.loadcoder.result.TransactionExecutionResult;
 
 @FunctionalInterface
-public interface RuntimeResultConsumer extends RuntimeResultUser {
+public interface RuntimeResultConsumer {
 	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);
 }

@@ -233,13 +233,6 @@ public class LoadcoderCluster {
 		});
 	}
 
-	private void addAdditionalEnvs(Map<String, String> envs) {
-		String timezone = config.getConfiguration("cluster.timezone");
-		if (timezone != null && !timezone.isEmpty()) {
-			envs.put("TZ", timezone);
-		}
-	}
-
 	private void setupMasterContainer(String image, String containerName, String portToExpose,
 			Map<String, String> envs) {
 		setupMasterContainer(image, containerName, Integer.parseInt(portToExpose), envs);

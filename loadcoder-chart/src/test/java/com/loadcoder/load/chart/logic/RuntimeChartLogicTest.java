@@ -191,9 +191,8 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		logic.setIncomingData(listOfListOfList);
 		logic.performUpdate();
 
-		Sample first2 = sampleGroup.getExistingSample(0, 1000);
-		Sample minusSample = sampleGroup.getExistingSample(-1, 1000);
-		System.out.println("done");
+		sampleGroup.getExistingSample(0, 1000);
+		sampleGroup.getExistingSample(-1, 1000);
 
 		listOfListOfList = getNewListsOfLists();
 
@@ -292,7 +291,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 		logic.useData(map);
 		XYSeries throughput = logic.getSeriesCollection().getSeries(0);
-		XYSeries fails = logic.getSeriesCollection().getSeries(1);
+		logic.getSeriesCollection().getSeries(1);
 		XYSeriesExtension c = (XYSeriesExtension) logic.getSeriesCollection().getSeries(2);
 		XYDataItem firstPoint = c.getDataItem(0);
 		assertEquals(firstPoint.getY().longValue(), 15L);

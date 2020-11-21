@@ -19,8 +19,6 @@
 package com.loadcoder.load.scenario;
 
 import java.lang.Thread.State;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +33,9 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	private final Execution execution;
 
-	private final RuntimeResultUser runtimeDataUser;
+	private final RuntimeResultConsumer runtimeDataUser;
 
-	protected RuntimeResultUpdaterRunner(Execution execution, RuntimeResultUser runtimeDataUser) {
+	protected RuntimeResultUpdaterRunner(Execution execution, RuntimeResultConsumer runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}

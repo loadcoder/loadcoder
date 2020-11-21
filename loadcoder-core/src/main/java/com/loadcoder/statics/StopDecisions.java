@@ -32,8 +32,7 @@ public class StopDecisions {
 	 *            it the target total amount of
 	 * @return ContinueDecision
 	 */
-	@Deprecated
-	public static final StopDecision iterations(int targetIterationsToBeMade) {
+	protected static final StopDecision iterations(int targetIterationsToBeMade) {
 		StopDecision s2 = (startTime, madeIterations) -> {
 			if (madeIterations < targetIterationsToBeMade)
 				return false;
@@ -51,8 +50,7 @@ public class StopDecisions {
 	 *            is the target duration for the test in milliseconds
 	 * @return ContinueDecision
 	 */
-	@Deprecated
-	public static final StopDecision duration(long executionTimeMillis) {
+	protected static final StopDecision duration(long executionTimeMillis) {
 		StopDecision s2 = (startTime, madeIterations) -> {
 			long now = System.currentTimeMillis();
 			long endTime = (startTime + executionTimeMillis);

@@ -60,7 +60,6 @@ public class LoadcoderRenderer extends XYLineAndShapeRendererExtention {
 
 	@Override
 	public Paint getLinePaint(int seriesIndex) {
-		Paint result = null;
 		XYSeries serie = seriesCollection.getSeries(seriesIndex);
 		Color c = existingColors.get(serie.getKey());
 		return c;

@@ -18,9 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
-@Deprecated
 public enum ThrottleMode {
-	
 	
 	/**
 	 * If using PER_THREAD, the intensity will be per thread.

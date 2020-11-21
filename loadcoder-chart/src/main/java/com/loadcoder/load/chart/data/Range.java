@@ -18,8 +18,6 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.data;
 
-import java.util.List;
-
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 

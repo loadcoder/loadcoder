@@ -18,11 +18,12 @@
  ******************************************************************************/
 package com.loadcoder.network;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-import static org.testng.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 
 public class FinishedLoadTest {

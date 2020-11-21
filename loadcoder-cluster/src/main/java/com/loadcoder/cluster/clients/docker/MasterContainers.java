@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.loadcoder.statics.Configuration;
-import com.loadcoder.statics.Statics;
-
-import static com.loadcoder.statics.Statics.*;
 
 public enum MasterContainers {
 

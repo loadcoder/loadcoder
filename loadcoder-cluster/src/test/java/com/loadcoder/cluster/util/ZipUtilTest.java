@@ -55,7 +55,6 @@ public class ZipUtilTest {
 	public void testZipDirectoryWhiteListToByte() {
 		ZipUtil zip  = new ZipUtil();
 		File directory = new File(".");
-		File zipFile = new File("target/testZipDirectory.zip");
 		byte[] bytes = zip.zipToBytes(directory, "src", "pom.xml");
 	
 		try {
@@ -83,7 +82,7 @@ public class ZipUtilTest {
 		File f = new File("src/test/resources/countertest");
 		try{
 			int oneLessThanActualNumberOfFiles = 4;
-			int files = counter.getNumberOfFilesInDir(f, oneLessThanActualNumberOfFiles);
+			counter.getNumberOfFilesInDir(f, oneLessThanActualNumberOfFiles);
 			fail("TooManyFilesFoundException wasn't thrown");
 		}catch(TooManyFilesFoundException tmffe) {
 

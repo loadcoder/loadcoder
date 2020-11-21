@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.CommonDataSource;
-
 import org.jfree.data.xy.XYDataItem;
 import org.testng.annotations.Test;
 

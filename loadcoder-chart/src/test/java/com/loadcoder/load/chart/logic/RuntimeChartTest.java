@@ -41,7 +41,7 @@ public class RuntimeChartTest extends TestNGBase {
 	Logger log = LoggerFactory.getLogger(RuntimeChartTest.class);
 
 	@Test(groups = "manual")
-	public void testManyTransactions(Method method) {
+	public void testToMoveASeriesPoint(Method method) {
 		long start = System.currentTimeMillis();
 		List<TransactionExecutionResult> list = new ArrayList<TransactionExecutionResult>();
 		list.add(new TransactionExecutionResult(start, 1050, true, null));
@@ -53,8 +53,6 @@ public class RuntimeChartTest extends TestNGBase {
 		Map<String, List<TransactionExecutionResult>> testdata = new HashMap<String, List<TransactionExecutionResult>>();
 		testdata.put("a0", list);
 
-		Result result = new ResultExtension(testdata);
-
 		RuntimeChart chart = new RuntimeChart();
 		chart.useData(testdata);
 		List<XYDataItem> items = chart.getLogic().getSeriesCollection().getSeries(2).getItems();
@@ -65,7 +63,6 @@ public class RuntimeChartTest extends TestNGBase {
 
 		assertEquals(items.get(0).getY().longValue(), 1000L);
 
-		chart.waitUntilClosed();
 	}
 
 }

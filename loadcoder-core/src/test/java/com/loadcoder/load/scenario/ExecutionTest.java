@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.StopDesisions.iterations;
+import static com.loadcoder.statics.Statics.iterations;
 
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;

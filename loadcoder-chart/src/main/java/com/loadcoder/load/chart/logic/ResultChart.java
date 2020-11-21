@@ -18,13 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
-import java.util.Map;
 
-import javax.crypto.ExemptionMechanismSpi;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;

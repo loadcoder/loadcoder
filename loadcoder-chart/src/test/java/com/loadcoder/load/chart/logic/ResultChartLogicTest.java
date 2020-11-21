@@ -18,15 +18,15 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
+import static org.testng.Assert.assertTrue;
+
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -36,14 +36,8 @@ import org.testng.annotations.Test;
 import com.loadcoder.load.chart.ResultExtension;
 import com.loadcoder.load.chart.common.CommonSeries;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
-import com.loadcoder.load.chart.menu.SteppingSlider;
-import com.loadcoder.load.chart.menu.settings.DetailsSettings;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.assertTrue;
 
 public class ResultChartLogicTest extends TestNGBase {
 
@@ -56,10 +50,6 @@ public class ResultChartLogicTest extends TestNGBase {
 	@BeforeMethod
 	public void setup() {
 		map = new HashMap<String, Boolean>();
-	}
-
-	private void printArray(Integer[] ints) {
-		log.info(Arrays.asList(ints).toString());
 	}
 
 	@Test

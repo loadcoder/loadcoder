@@ -18,9 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.result;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.loadcoder.load.LoadUtility;
@@ -35,7 +33,6 @@ public class SummaryPrinter {
 
 		valueMap.entrySet().stream().forEach(entry -> {
 
-			Map<String, ValueHolder> vv = entry.getValue();
 			Map<String, String> res = new HashMap<String, String>();
 			result.put(entry.getKey(), res);
 			entry.getValue().entrySet().stream().forEach(entry2 -> {
@@ -150,7 +147,6 @@ public class SummaryPrinter {
 			stringBuilderHead.append(paddedValueTransaction);
 		});
 		resultBuilder.append(stringBuilderHead.toString() + "\n");
-		List<String> tableLines = new ArrayList<>();
 
 		valueMap.entrySet().stream().forEach(entry -> {
 			StringBuilder stringBuilder = new StringBuilder();

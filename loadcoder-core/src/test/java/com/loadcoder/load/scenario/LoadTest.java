@@ -19,6 +19,7 @@
 package com.loadcoder.load.scenario;
 
 import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.duration;
 import static com.loadcoder.statics.Statics.iterations;
@@ -42,9 +43,6 @@ import com.loadcoder.load.exceptions.NoResultOrFormatterException;
 import com.loadcoder.load.exceptions.RuntimeResultStorageNotActivatedException;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
-import com.loadcoder.statics.StopDecisions;
-
-import static com.loadcoder.statics.Statics.*;
 
 public class LoadTest extends TestNGBase {
 
@@ -82,10 +80,9 @@ public class LoadTest extends TestNGBase {
 		Load l2 = new LoadBuilder(ls2).stopDecision(iterations(3)).build();
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l2).build().execute().andWait();
-		Result resultFromFile = finishedExecution.getReportedResultFromResultFile();
 
 		try {
-			Result result = finishedExecution.getResultFromMemory();
+			finishedExecution.getResultFromMemory();
 			fail("Expected an exception here, since in memory storage was not activated");
 		} catch (RuntimeResultStorageNotActivatedException imsnae) {
 
@@ -103,7 +100,7 @@ public class LoadTest extends TestNGBase {
 		Assert.assertEquals(result.getAmountOfTransactions(), 4);
 
 		try {
-			Result resultFromFile2 = finishedExecution2.getReportedResultFromResultFile();
+			finishedExecution2.getReportedResultFromResultFile();
 			fail("Expected an exception here, since resultFormatter is null for this execution");
 		} catch (NoResultOrFormatterException nrofe) {
 		} catch (Exception e) {

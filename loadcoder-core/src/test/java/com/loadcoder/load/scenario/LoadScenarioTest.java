@@ -202,19 +202,4 @@ public class LoadScenarioTest extends TestNGBase {
 		return l;
 	}
 
-	@Test
-	public void testFailedTransactionException() {
-
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("foo", () -> {
-				}).handleResult(resultModel -> {
-					resultModel.setStatus(false);
-				}).throwIfFailed().perform();
-			}
-		};
-	}
-
 }

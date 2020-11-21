@@ -18,17 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.menu.settings;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.loadcoder.load.chart.logic.ResultChartLogic;
-import com.loadcoder.load.chart.menu.SteppingSlider;
 
 public class DetailsSettingsTest {
 

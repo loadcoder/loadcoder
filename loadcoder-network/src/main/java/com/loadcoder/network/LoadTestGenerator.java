@@ -22,8 +22,6 @@ import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -258,7 +256,7 @@ public class LoadTestGenerator {
 		List<HarEntry> filteredEntries = new ArrayList<>();
 		for (HarEntry entry : entries) {
 			String url = entry.getRequest().getUrl();
-			String responseText = entry.getResponse().getContent().getText();
+			entry.getResponse().getContent().getText();
 			boolean result = matcher.keep(url);
 
 			if (result) {

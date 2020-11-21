@@ -21,7 +21,6 @@ package com.loadcoder.load.scenario;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
@@ -39,7 +38,7 @@ public class RuntimeResultUpdaterRunnerTest {
 		buffer.getBufferForTesting().add(new TransactionExecutionResult("a1", System.currentTimeMillis(), 10, true, null));
 		when(e.getTransactionExecutionResultBuffer()).thenReturn(buffer);
 		
-		RuntimeResultUser user = (a)->{
+		RuntimeResultConsumer user = (a)->{
 			assertNotNull(a.get("a1"));
 			assertEquals(a.get("a1").size(), 1);
 		};

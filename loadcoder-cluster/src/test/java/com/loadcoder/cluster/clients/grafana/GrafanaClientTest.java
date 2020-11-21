@@ -66,12 +66,10 @@ public class GrafanaClientTest extends TestNGBase {
 	public void listAndCreateDataSource(Method method) {
 
 		LoadcoderCluster dockerClusterClient = new LoadcoderCluster();
-		// base64 encoded default grafana user:password
-		String authorizationValue = "Basic YWRtaW46YWRtaW4=";
 		InfluxDBClient influxDB = Mockito.mock(InfluxDBClient.class);
 		GrafanaClient grafanaClient = dockerClusterClient.getGrafanaClient(influxDB);
 
-		List<String> responseBody = grafanaClient.listDataSources();
+		grafanaClient.listDataSources();
 		String dataSourceName = "GrafanaClientTest" + System.currentTimeMillis();
 		HttpResponse responseCode = grafanaClient.createDataSource(dataSourceName);
 		assertEquals(responseCode.getStatusCode(), 200);

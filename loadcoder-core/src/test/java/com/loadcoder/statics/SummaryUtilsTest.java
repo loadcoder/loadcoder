@@ -18,9 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.statics;
 
-import static org.mockito.Matchers.contains;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,12 +29,8 @@ import org.testng.annotations.Test;
 
 import com.loadcoder.load.result.ResultExtension;
 import com.loadcoder.load.result.Summary;
-import com.loadcoder.load.result.TransactionValueCalculators;
-import com.loadcoder.load.result.Summary.ResultSummarizer;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
-
-import static com.loadcoder.load.result.SummaryBuilder.*;
 
 public class SummaryUtilsTest {
 
@@ -160,7 +154,6 @@ public class SummaryUtilsTest {
 		for (int i = 100; i < 200; i++)
 			map.get("bar").add(new TransactionExecutionResult(i * 1100, i, true, null));
 		map.get("bar").add(new TransactionExecutionResult(0, 395, true, null));
-		Result r = new ResultExtension(map);
 		return map;
 	}
 }
