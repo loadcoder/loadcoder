@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -27,33 +27,9 @@ import com.loadcoder.statics.Formatter;
 public class ExecutionBuilder {
 
 	protected ResultFormatter resultFormatter = Formatter.SIMPLE_RESULT_FORMATTER;
-	protected RuntimeResultUser user;
+	protected RuntimeResultConsumer user;
 	protected TransactionExecutionResultBuffer transactionExecutionResultBuffer = null;
 	protected final Load[] loads;
-
-	/**
-	 * This method is deprecated and will be removed in coming versions. It is
-	 * replaced by the method storeAndConsumeRuntimeResult.
-	 * <p>
-	 * Sets a RuntimeResultUser
-	 * 
-	 * @param runtimeResultUser is a functional interface that if provided, will be
-	 *                          invoked every 3 seconds during the entire execution.
-	 *                          It will be provided with the stored result in a Map,
-	 *                          that will be cleared after provided to the
-	 *                          RuntimeResultUser.
-	 *                          {@code com.loadcoder.load.chart.logic.RuntimeChart}
-	 *                          implements RuntimeResultUser and will use the stored
-	 *                          runtime result as a graph, where response times,
-	 *                          throughput and amount of fails can be monitored
-	 *                          during the test execution
-	 * 
-	 * @return the builder instance
-	 */
-	@Deprecated
-	public ExecutionBuilder runtimeResultUser(RuntimeResultUser runtimeResultUser) {
-		return storeAndConsumeResultRuntime(runtimeResultUser);
-	}
 
 	/**
 	 * The use case for this method is for shorter performance tests and for unit
@@ -91,7 +67,7 @@ public class ExecutionBuilder {
 	 * 
 	 * @return the builder instance
 	 */
-	public ExecutionBuilder storeAndConsumeResultRuntime(RuntimeResultUser runtimeResultUser) {
+	public ExecutionBuilder storeAndConsumeResultRuntime(RuntimeResultConsumer runtimeResultUser) {
 		transactionExecutionResultBuffer = new TransactionExecutionResultBuffer();
 		this.user = runtimeResultUser;
 		return this;

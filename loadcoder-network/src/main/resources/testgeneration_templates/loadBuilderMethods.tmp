@@ -1,0 +1,3 @@
+				.amountOfThreads(${threads})
+				.stopDecision(duration(${duration} * SECOND))
+				.throttle(${throttle}, PER_SECOND, SHARED)

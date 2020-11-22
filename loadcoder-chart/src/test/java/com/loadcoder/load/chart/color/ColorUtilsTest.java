@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,16 +18,18 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.color;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import static org.testng.Assert.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class ColorUtilsTest extends TestNGBase {
 		List<Color> colors = new ArrayList<Color>();
 		List<Color> blacklisted = Arrays.asList(colorToBeBlacklisted);
 		Set<Color> set = new HashSet<Color>(colors);
-		Color c = ColorUtils.getNewContrastfulColor(set, blacklisted);
+		ColorUtils.getNewContrastfulColor(set, blacklisted);
 
 		boolean whiteExists = colors.stream().anyMatch((color) -> {
 			return color.equals(extremeColorToTheBlacklisted);

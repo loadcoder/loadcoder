@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -28,41 +28,20 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import com.loadcoder.utils.FileUtil;
+
 public class AboutPopup extends JDialog implements ActionListener {
-	
+
 	private static final long serialVersionUID = 1L;
 
-	private static final String LOADCODER_COPYRIGHT_NOTICE = 
-	"Loadcoder. A loadtesting tool for javacoders\n"
-	+ "Copyright (C) 2018 Stefan Vahlgren at Loadcoder\n"
-	+ "Loadcoder is licensed under the GNU GENERAL PUBLIC LICENSE Version 3 or later.\n"
-	+ "You can find a copy of this license at https://www.gnu.org/licenses/gpl-3.0.txt\n"
-	+ "For more informaiton about Loadcoder, visit http://loadcoder.com";
-
-	
-	private static final String JFREECHART_PROMINENT_NOTICE = 
-	"This software uses the JFreeChart library.\n"
-	+ "(C) Copyright 2000-2016, by Object Refinery Limited and Contributors.\n"
-	+ "The JFreeChart Library is licensed under the GNU Lesser General Public Library, version 2.1.\n"
-	+ "You can find a copy of this license at https://www.gnu.org/licenses/lgpl-2.1.en.html\n"
-	+ "For more information about JFreeChart, visit http://www.jfree.org/jfreechart/";
-	
-	private static final String GUAVA_PROMINENT_NOTICE = 
-	"This software uses the Guava library.\n"
-	+ "Copyright (C) 2011 The Guava Authors.\n"
-	+ "The Guava Library is licensed under the Apache License, Version 2.0.\n"
-	+ "You can find a copy of this license at http://www.apache.org/licenses/LICENSE-2.0\n"
-	+ "For more information about Guava, visit https://github.com/google/guava/";
-	
 	public static void showAboutPopup(JFrame parent) {
-		String message = 
-				LOADCODER_COPYRIGHT_NOTICE
-				+"\n\n\n" + JFREECHART_PROMINENT_NOTICE
-				+"\n\n\n" + GUAVA_PROMINENT_NOTICE;
+		String message = FileUtil.getResourceAsString("/LOADCODER_NOTICE");
 		new AboutPopup(parent, "About", message);
 	}
+
 	public AboutPopup(JFrame parent, String title, String message) {
 		super(parent, title, true);
 		if (parent != null) {
@@ -70,13 +49,15 @@ public class AboutPopup extends JDialog implements ActionListener {
 			Point p = parent.getLocation();
 			setLocation(p.x + parentSize.width / 4, p.y + parentSize.height / 4);
 		}
-		JPanel messagePane = new JPanel();
 		JTextArea jTextArea = new JTextArea(message);
+
 		jTextArea.setEditable(false);
-		messagePane.add(jTextArea);
-		getContentPane().add(messagePane);
+		JScrollPane scroll = new JScrollPane(jTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		add(scroll);
+
 		JPanel buttonPane = new JPanel();
-		JButton button = new JButton("OK");
+		JButton button = new JButton("Close");
 		buttonPane.add(button);
 		button.addActionListener(this);
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);

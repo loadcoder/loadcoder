@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -79,7 +79,7 @@ public class LoadScenarioTest extends TestNGBase {
 					// setters
 					a.changeTransactionName("newTransactionName");
 					a.setStatus(false);
-					a.reportTransaction(true);
+					a.setReportTransaction(true);
 					a.setMessage("message for the report");
 				}).perform();
 			}
@@ -181,7 +181,7 @@ public class LoadScenarioTest extends TestNGBase {
 				load("t1", () -> {
 					throw toBeThrown;
 				}).handleResult((a) -> {
-					a.reportTransaction(false);
+					a.setReportTransaction(false);
 				}).perform();
 			}
 		};
@@ -200,21 +200,6 @@ public class LoadScenarioTest extends TestNGBase {
 		when(e.getTransactionExecutionResultBuffer()).thenReturn(buff);
 		s.loadScenario();
 		return l;
-	}
-
-	@Test
-	public void testFailedTransactionException() {
-
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("foo", () -> {
-				}).handleResult(resultModel -> {
-					resultModel.setStatus(false);
-				}).throwIfFailed().perform();
-			}
-		};
 	}
 
 }

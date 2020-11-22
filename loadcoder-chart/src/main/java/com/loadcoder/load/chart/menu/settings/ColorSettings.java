@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -24,7 +24,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,7 +46,6 @@ import org.jfree.data.xy.XYSeries;
 import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.logic.ChartLogic;
-import com.loadcoder.load.chart.logic.ResultChartLogic;
 import com.loadcoder.load.chart.menu.MouseClickedListener;
 
 public class ColorSettings extends Settings {
@@ -110,7 +108,7 @@ public class ColorSettings extends Settings {
 
 		AbstractColorChooserPanel[] ccPanels = colorChooser.getChooserPanels();
 		for (AbstractColorChooserPanel ccPanel : ccPanels) {
-			String name = ccPanel.getClass().getSimpleName();
+			ccPanel.getClass().getSimpleName();
 			if (!ccPanel.getDisplayName().equals("RGB"))
 				colorChooser.removeChooserPanel(ccPanel);
 		}
@@ -172,9 +170,8 @@ public class ColorSettings extends Settings {
 				Entry<XYSeriesExtension, Color> entry = i.next();
 				Color newColor = entry.getValue();
 				XYSeriesExtension series = entry.getKey();
-//				Color oldColor = (Color) series.getColorInTheChart();
 				Color oldColor = chartLogic.getExistingColors().get(series.getKey());
-				series.setColorInTheChart(newColor);
+//				series.setColorInTheChart(newColor);
 				series.getLegend().setFillPaint(newColor);
 				series.getLegend().setOutlinePaint(newColor);
 

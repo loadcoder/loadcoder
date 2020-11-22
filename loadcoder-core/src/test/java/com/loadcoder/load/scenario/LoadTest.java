@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 - 2020 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,19 +18,17 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
-import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.StopDesisions.duration;
-import static com.loadcoder.statics.StopDesisions.iterations;
-import static com.loadcoder.statics.Time.PER_SECOND;
-import static com.loadcoder.statics.Time.SECOND;
+import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.PER_THREAD;
+import static com.loadcoder.statics.Statics.SECOND;
+import static com.loadcoder.statics.Statics.duration;
+import static com.loadcoder.statics.Statics.iterations;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.fail;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,20 +39,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.exceptions.RuntimeResultStorageNotActivatedException;
 import com.loadcoder.load.exceptions.NoResultOrFormatterException;
-import com.loadcoder.load.scenario.Execution;
-import com.loadcoder.load.scenario.ExecutionBuilder;
-import com.loadcoder.load.scenario.FinishedExecution;
-import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.LoadBuilder;
-import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.StartedExecution;
-import com.loadcoder.load.scenario.StopDecision;
+import com.loadcoder.load.exceptions.RuntimeResultStorageNotActivatedException;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
-import com.loadcoder.statics.StopDesisions;
-import com.loadcoder.statics.ThrottleMode;
 
 public class LoadTest extends TestNGBase {
 
@@ -73,7 +61,6 @@ public class LoadTest extends TestNGBase {
 	@Test
 	public void testInMemoryResultStorage(Method m) {
 
-		setResultDestination(getNewLogDir(rootResultDir, m.getName()));
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
 				load("t1", () -> {
@@ -90,14 +77,12 @@ public class LoadTest extends TestNGBase {
 			}
 		};
 
-		Load l2 = new LoadBuilder(ls2).stopDecision(StopDesisions.iterations(3)).build();
+		Load l2 = new LoadBuilder(ls2).stopDecision(iterations(3)).build();
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l2).build().execute().andWait();
-		Result resultFromFile = finishedExecution.getReportedResultFromResultFile();
-		Assert.assertEquals(resultFromFile.getAmountOfTransactions(), 3);
 
 		try {
-			Result result = finishedExecution.getResultFromMemory();
+			finishedExecution.getResultFromMemory();
 			fail("Expected an exception here, since in memory storage was not activated");
 		} catch (RuntimeResultStorageNotActivatedException imsnae) {
 
@@ -105,11 +90,8 @@ public class LoadTest extends TestNGBase {
 			fail("Caught an unexpected exception. Expected a InMemoryStorageNotActivatedException", e);
 		}
 
-		File newLogDir = new File(getNewLogDir(rootResultDir, m.getName()).getAbsolutePath() + "_inMemory");
-		setResultDestination(newLogDir);
-
 		Load l3 = new LoadBuilder(ls).build();
-		Load l4 = new LoadBuilder(ls2).stopDecision(StopDesisions.iterations(3)).build();
+		Load l4 = new LoadBuilder(ls2).stopDecision(iterations(3)).build();
 
 		FinishedExecution finishedExecution2 = new ExecutionBuilder(l3, l4).resultFormatter(null).storeResultRuntime()
 				.build().execute().andWait();
@@ -118,7 +100,7 @@ public class LoadTest extends TestNGBase {
 		Assert.assertEquals(result.getAmountOfTransactions(), 4);
 
 		try {
-			Result resultFromFile2 = finishedExecution2.getReportedResultFromResultFile();
+			finishedExecution2.getReportedResultFromResultFile();
 			fail("Expected an exception here, since resultFormatter is null for this execution");
 		} catch (NoResultOrFormatterException nrofe) {
 		} catch (Exception e) {
@@ -130,7 +112,6 @@ public class LoadTest extends TestNGBase {
 	@Test
 	public void twoLoads(Method m) {
 
-		setResultDestination(getNewLogDir(rootResultDir, m.getName()));
 		LoadScenario ls = new LoadScenario() {
 			public void loadScenario() {
 				load("t1", () -> {
@@ -148,7 +129,7 @@ public class LoadTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).build();
-		Load l2 = new LoadBuilder(ls2).stopDecision(StopDesisions.iterations(3)).build();
+		Load l2 = new LoadBuilder(ls2).stopDecision(iterations(3)).build();
 
 		FinishedExecution finishedExecution = new ExecutionBuilder(l, l2).resultFormatter(null).storeResultRuntime()
 				.build().execute().andWait();
@@ -274,7 +255,7 @@ public class LoadTest extends TestNGBase {
 			}
 		};
 
-		Load l = new LoadBuilder(ls).throttle(1, PER_SECOND, ThrottleMode.PER_THREAD).stopDecision(iterations(1))
+		Load l = new LoadBuilder(ls).throttle(1, PER_SECOND, PER_THREAD).stopDecision(iterations(1))
 				.build();
 
 		Execution e = new ExecutionBuilder(l).resultFormatter(null).build();
@@ -317,7 +298,7 @@ public class LoadTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).stopDecision(iterations(threads * iterationsPerThread))
-				.throttle(1, PER_SECOND, ThrottleMode.PER_THREAD).amountOfThreads(threads).build();
+				.throttle(1, PER_SECOND, PER_THREAD).amountOfThreads(threads).build();
 
 		Execution e = new ExecutionBuilder(l).resultFormatter(null).build();
 		long start = System.currentTimeMillis();

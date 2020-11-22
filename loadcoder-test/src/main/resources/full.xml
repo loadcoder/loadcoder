@@ -8,7 +8,7 @@
 			</run>
 		</groups>
 		<packages>
-			<package name=".*"></package>
+			<package name="com.loadcoder.*"></package>
 		</packages>
 	</test>
 </suite>

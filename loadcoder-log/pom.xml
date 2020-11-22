@@ -17,7 +17,6 @@
 	</parent>
 
 	<modules>
-		<module>loadcoder-result</module>
 		<module>loadcoder-logback</module>
 	</modules>
 

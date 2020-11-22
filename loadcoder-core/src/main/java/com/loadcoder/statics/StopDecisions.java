@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -32,7 +32,7 @@ public class StopDecisions {
 	 *            it the target total amount of
 	 * @return ContinueDecision
 	 */
-	public static final StopDecision iterations(int targetIterationsToBeMade) {
+	protected static final StopDecision iterations(int targetIterationsToBeMade) {
 		StopDecision s2 = (startTime, madeIterations) -> {
 			if (madeIterations < targetIterationsToBeMade)
 				return false;
@@ -50,7 +50,7 @@ public class StopDecisions {
 	 *            is the target duration for the test in milliseconds
 	 * @return ContinueDecision
 	 */
-	public static final StopDecision duration(long executionTimeMillis) {
+	protected static final StopDecision duration(long executionTimeMillis) {
 		StopDecision s2 = (startTime, madeIterations) -> {
 			long now = System.currentTimeMillis();
 			long endTime = (startTime + executionTimeMillis);

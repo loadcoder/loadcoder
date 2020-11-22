@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,13 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
-import java.util.Map;
 
-import javax.crypto.ExemptionMechanismSpi;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;
@@ -80,6 +77,7 @@ public class ResultChart extends Chart {
 		resultChartLogic.setFilteredData(null);
 		resultChartLogic.setDottedSeries(null);
 		resultChartLogic.clearChart();
+		resultChartLogic.getCommonSeriesMap().clear();
 		logic.createCommons();
 		logic.addAllCommonSeriesToTheChart();
 		if (selected) {

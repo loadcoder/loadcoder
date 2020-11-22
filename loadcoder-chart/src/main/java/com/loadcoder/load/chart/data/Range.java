@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -17,8 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.loadcoder.load.chart.data;
-
-import java.util.List;
 
 import com.loadcoder.load.chart.jfreechart.XYDataItemExtension;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
@@ -98,15 +96,6 @@ public class Range {
 
 	public void setLow(XYDataItemExtension low) {
 		this.low = low;
-	}
-
-	public static long findSampleLength(long timeStamp, List<Range> ranges) {
-		for (Range range : ranges) {
-			if (range.getStart() <= timeStamp && range.getEnd() >= timeStamp) {
-				return range.getSampleLength();
-			}
-		}
-		throw new RuntimeException("no matching range found. This should never happend!");
 	}
 
 }

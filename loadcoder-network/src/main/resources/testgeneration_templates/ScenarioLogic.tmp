@@ -1,0 +1,36 @@
+package ${package};
+
+import com.loadcoder.load.scenario.design.ScenarioLogicTyped;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
+import static com.loadcoder.network.okhttp.OKHttpUtils.*;
+import static com.loadcoder.load.LoadUtility.*;
+import static com.loadcoder.utils.FileUtil.*;
+
+import com.loadcoder.network.BuilderAddable;
+import com.loadcoder.network.OKHttpRequestBuilder;
+
+public class ScenarioLogic extends ScenarioLogicTyped<ThreadInstance> {
+
+	public ScenarioLogic(ThreadInstance threadInstance) {
+		super(threadInstance);
+	}
+	
+	void performScenario() {
+	
+		${logic_start}
+		${logic_end}
+		
+	}
+	
+${common_header_method}
+
+}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -82,7 +82,6 @@ public class SettingsLogicTest {
 		ChartSettingsActionsModel chartSettingsActionsModel = new ChartSettingsActionsModel();
 		logic.apply(chartSettingsActionsModel);
 
-		verify(series).setColorInTheChart(Color.PINK);
 		verify(legend).setFillPaint(Color.PINK);
 		verify(legend).setOutlinePaint(Color.PINK);
 		assertEquals(existingColors.size(), 1);

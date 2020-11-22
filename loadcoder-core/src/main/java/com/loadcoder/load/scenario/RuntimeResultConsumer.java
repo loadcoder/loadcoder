@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -24,6 +24,6 @@ import java.util.Map;
 import com.loadcoder.result.TransactionExecutionResult;
 
 @FunctionalInterface
-public interface RuntimeResultConsumer extends RuntimeResultUser {
+public interface RuntimeResultConsumer {
 	void useData(Map<String, List<TransactionExecutionResult>> transactionsMap);
 }

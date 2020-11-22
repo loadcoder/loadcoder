@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -81,7 +81,11 @@ public class SUT {
 	}
 
 	public void methodWhereResponseTimeFollowSomeKindOfPattern(Object o) {
-		sleepWithDeviationFromLast(o, 0, 1000);
+		sleepWithDeviationFromLast(o, 300, 600);
+	}
+
+	public void methodWhereResponseTimeFollowSomeKindOfPattern2(Object o) {
+		sleepWithDeviationFromLast(o, 100, 300);
 	}
 
 	public void methodWhereResponseTimeFollowSomeKindOfPattern(Object o, long min, long max) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -107,10 +107,6 @@ public class Sample extends SampleBase{
 
 	public void setFirst(XYDataItemExtension first) {
 		this.first = first;
-	}
-	
-	public void setLast(XYDataItemExtension last) {
-		this.last = last;
 	}
 
 	public long getPointsSum() {

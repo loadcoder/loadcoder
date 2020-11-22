@@ -1,0 +1,6 @@
+			String expectedBodyContent = "${expected_body_part}";
+			if( ! responseBody.contains(expectedBodyContent)) {
+				resultHandler.setStatus(false);
+				resultHandler.setMessage("Body content not found:" + expectedBodyContent );
+				return;
+			}

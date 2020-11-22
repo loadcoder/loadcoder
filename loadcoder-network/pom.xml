@@ -1,0 +1,80 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>loadcoder-network</artifactId>
+	<packaging>jar</packaging>
+	<name>LoadCoder Network</name>
+	<url>http://loadcoder.com</url>
+
+	<description>This project contains the core features in Loadcoder</description>
+
+	<parent>
+		<groupId>com.loadcoder</groupId>
+		<artifactId>loadcoder-base</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>de.sstoehr</groupId>
+			<artifactId>har-reader</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-chart</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-logback</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<suiteXmlFiles>
+						<suiteXmlFile>src/test/resources/${testng}.xml</suiteXmlFile>
+					</suiteXmlFiles>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

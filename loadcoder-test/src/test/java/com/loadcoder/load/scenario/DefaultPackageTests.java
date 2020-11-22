@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -20,7 +20,7 @@ package com.loadcoder.load.scenario;
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.StopDesisions.duration;
+import static com.loadcoder.statics.Statics.*;
 
 import java.lang.reflect.Method;
 
@@ -51,7 +51,7 @@ public class DefaultPackageTests extends TestNGBase {
 		};
 		Load l = new LoadBuilder(s).stopDecision(duration(500_000)).build();
 
-		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
+		Execution execution = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build();
 		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBufferForTesting(), 500_000, 1);
 
 		execution.execute().andWait();
@@ -73,7 +73,7 @@ public class DefaultPackageTests extends TestNGBase {
 			}
 		};
 		Load l = new LoadBuilder(s).stopDecision(duration(300_000)).build();
-		Execution execution = new ExecutionBuilder(l).runtimeResultUser(new RuntimeChart()).build();
+		Execution execution = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build();
 
 		TestUtils.add(execution.getTransactionExecutionResultBuffer().getBufferForTesting(), 20000_000, 2);
 

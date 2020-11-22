@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -17,9 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.loadcoder.load.chart.common;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.chart.sampling.SampleGroup;

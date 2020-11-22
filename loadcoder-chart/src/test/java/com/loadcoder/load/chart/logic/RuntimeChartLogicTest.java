@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,7 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Time.MINUTE;
+import static com.loadcoder.statics.Statics.*;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -105,7 +106,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range = logic.lookupCorrectRange(0);
+		Range range = logic.getRanges().lookupCorrectRange(0);
 		assertEquals(2000, range.getSampleLength());
 		Sample a = sampleGroup.getExistingSample(0, 2000);
 		Sample b = sampleGroup.getExistingSample(1999, 2000);
@@ -149,8 +150,8 @@ public class RuntimeChartLogicTest extends TestNGBase {
 				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
 		logic.update(listOfListOfList, new HashSet<Long>());
 
-		logic.lookupCorrectRange(-1);
-		logic.lookupCorrectRange(1);
+		logic.getRanges().lookupCorrectRange(-1);
+		logic.getRanges().lookupCorrectRange(1);
 
 		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
 
@@ -160,7 +161,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range3 = logic.lookupCorrectRange(-1);
+		Range range3 = logic.getRanges().lookupCorrectRange(-1);
 		assertEquals(1000, range3.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 2000);
@@ -168,6 +169,42 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 		assertEquals(a, b); // assert concaternation
 		assertEquals(10, b.getY());
+	}
+
+	@Test
+	public void testMinusXValue() {
+		long startTs = System.currentTimeMillis();
+		String transactionKey = "foo";
+
+		Map<String, List<TransactionExecutionResult>> listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs, 10, true, null));
+		logic.setIncomingData(listOfListOfList);
+		logic.performUpdate();
+
+		SampleGroup sampleGroup = logic.getSampleGroups().get(transactionKey);
+
+		listOfListOfList = getNewListsOfLists(
+				new TransactionExecutionResult(transactionKey, startTs - 1, 8, true, null),
+				new TransactionExecutionResult(transactionKey, startTs + 10 * SECOND, 15, true, null),
+				new TransactionExecutionResult(transactionKey, startTs + 3 * MINUTE, 8, true, null));
+
+		logic.setIncomingData(listOfListOfList);
+		logic.performUpdate();
+
+		sampleGroup.getExistingSample(0, 1000);
+		sampleGroup.getExistingSample(-1, 1000);
+
+		listOfListOfList = getNewListsOfLists();
+
+		logic.setIncomingData(listOfListOfList);
+		logic.performUpdate();
+
+		Range r = logic.getRanges().lookupCorrectRange(10000);
+		long concatenatedSampleLength = r.getSampleLength();
+		assertEquals(concatenatedSampleLength, 4 * SECOND);
+		Sample concatenatedSample = sampleGroup.getExistingSample(10000, concatenatedSampleLength);
+		long concatenatedYValue = concatenatedSample.getY();
+		assertEquals(concatenatedYValue, 15);
 	}
 
 	/**
@@ -218,7 +255,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 		SampleConcaternator concatter = logic.sampleConcaternatorList.get(0);
 		logic.concatAndAdjustRanges(concatter, new HashSet<Long>());
 
-		Range range = logic.lookupCorrectRange(-1);
+		Range range = logic.getRanges().lookupCorrectRange(-1);
 		assertEquals(1000, range.getSampleLength());
 
 		Sample a = sampleGroup.getExistingSample(0, 1000);
@@ -254,7 +291,7 @@ public class RuntimeChartLogicTest extends TestNGBase {
 
 		logic.useData(map);
 		XYSeries throughput = logic.getSeriesCollection().getSeries(0);
-		XYSeries fails = logic.getSeriesCollection().getSeries(1);
+		logic.getSeriesCollection().getSeries(1);
 		XYSeriesExtension c = (XYSeriesExtension) logic.getSeriesCollection().getSeries(2);
 		XYDataItem firstPoint = c.getDataItem(0);
 		assertEquals(firstPoint.getY().longValue(), 15L);
