@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,11 +18,10 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Time.DAY;
-import static com.loadcoder.statics.Time.HOUR;
-import static com.loadcoder.statics.Time.MINUTE;
+import static com.loadcoder.statics.Statics.DAY;
+import static com.loadcoder.statics.Statics.HOUR;
+import static com.loadcoder.statics.Statics.MINUTE;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Paint;
 import java.util.ArrayList;
@@ -47,15 +46,12 @@ import com.loadcoder.load.chart.data.FilteredData;
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.jfreechart.ChartFrame.DataSetUser;
 import com.loadcoder.load.chart.jfreechart.XYDottedSeriesExtension;
-import com.loadcoder.load.chart.jfreechart.XYPlotExtension;
-import com.loadcoder.load.chart.jfreechart.XYSeriesCollectionExtention;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.chart.menu.DataSetUserType;
 import com.loadcoder.load.chart.menu.SteppingSlider;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.utilities.ChartUtils;
 import com.loadcoder.load.chart.utilities.Utilities;
-import com.loadcoder.load.jfreechartfixes.XYLineAndShapeRendererExtention;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
@@ -379,7 +375,7 @@ public class ResultChartLogic extends ChartLogic {
 			XYSeriesExtension dottedSeries = entry.getValue();
 			String dataSetName = dottedSeries.getKey();
 			Paint seriesColor = getSeriesColor(dataSetName);
-			dottedSeries.setColorInTheChart(seriesColor);
+//			dottedSeries.setColorInTheChart(seriesColor);
 		});
 	}
 

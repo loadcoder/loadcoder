@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -27,11 +27,11 @@ import com.loadcoder.load.scenario.Scenario;
 public class ScenarioLogic {
 
 	Scenario theActualScenario;
-	
+
 	public ScenarioLogic(Scenario scenario) {
 		this.theActualScenario = scenario;
 	}
-	
+
 	protected <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		return theActualScenario.load(defaultName, transaction);
 	}

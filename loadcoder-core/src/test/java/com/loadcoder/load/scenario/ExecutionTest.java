@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,7 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.statics.StopDesisions.iterations;
+import static com.loadcoder.statics.Statics.iterations;
 
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;

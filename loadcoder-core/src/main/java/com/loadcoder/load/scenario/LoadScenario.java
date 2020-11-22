@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -23,6 +23,7 @@ import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.load.measure.TransactionExecutionResultBuffer;
 import com.loadcoder.load.scenario.Load.Transaction;
 import com.loadcoder.load.scenario.Load.TransactionVoid;
+import com.loadcoder.result.Result;
 import com.loadcoder.statics.TimeUnit;
 
 public abstract class LoadScenario extends Scenario {
@@ -173,5 +174,12 @@ public abstract class LoadScenario extends Scenario {
 		 *                    Transaction
 		 */
 		public void handle(ResultModelVoid resultModel);
+	}
+	
+	public Result test() {
+		Load l = new LoadBuilder(this).build();
+		Execution e = new ExecutionBuilder(l).storeResultRuntime().build();
+		Result r = e.execute().andWait().getResultFromMemory();
+		return r;
 	}
 }

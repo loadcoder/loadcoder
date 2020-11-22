@@ -1,17 +1,21 @@
 		${request_body}
-		final Request ${request_variable} = new Request.Builder().url("${transaction_url}")
-		${request_building}.build();
+		final Request ${request_variable} = new OKHttpRequestBuilder().url("${transaction_url}")
+${request_building}		.build();
 		
 		load("${transaction_name}", ()->{	
 			return getTypeInstance().getHttpClient().newCall(${request_variable}).execute();	
 		})
 		.handleResult(resultHandler->{
-			resultHandler.getResponse().close();
-			if(resultHandler.getResponse() != null && (resultHandler.getResponse().code() == ${expected_http_code})) {
-				resultHandler.setStatus(true);
-			}else {
-				resultHandler.setStatus(false);
+
+			try {
+				if(resultHandler.getResponse() == null || (resultHandler.getResponse().code() != ${expected_http_code})) {
+					resultHandler.setStatus(false);
+					return;
+				}${handleResultReadResponse}				${result_asserts}
+			}finally {
+				resultHandler.getResponse().close();
 			}
+			
 		})
 		.perform();
 		

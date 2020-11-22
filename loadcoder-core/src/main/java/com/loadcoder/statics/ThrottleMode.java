@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -19,7 +19,6 @@
 package com.loadcoder.statics;
 
 public enum ThrottleMode {
-	
 	
 	/**
 	 * If using PER_THREAD, the intensity will be per thread.

@@ -21,19 +21,16 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.9</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
-			<version>3.14.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>de.sstoehr</groupId>
 			<artifactId>har-reader</artifactId>
-			<version>2.1.7</version>
 		</dependency>
 
 		<dependency>
@@ -56,6 +53,12 @@
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.loadcoder</groupId>
+			<artifactId>loadcoder-testutilities</artifactId>
+			<scope>test</scope>
 		</dependency>
 		
 	</dependencies>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -60,7 +60,6 @@ public class LoadcoderRenderer extends XYLineAndShapeRendererExtention {
 
 	@Override
 	public Paint getLinePaint(int seriesIndex) {
-		Paint result = null;
 		XYSeries serie = seriesCollection.getSeries(seriesIndex);
 		Color c = existingColors.get(serie.getKey());
 		return c;

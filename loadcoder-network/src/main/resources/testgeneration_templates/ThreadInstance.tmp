@@ -4,6 +4,7 @@ import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.load.scenario.design.TypeInstanceBase;
 
 import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
 
 public class ThreadInstance extends TypeInstanceBase {
 
@@ -11,7 +12,7 @@ public class ThreadInstance extends TypeInstanceBase {
 	final OkHttpClient client;
 	public ThreadInstance(Scenario theActualScenario) {
 		super(theActualScenario);
-		client = new OkHttpClient();
+		client = new Builder().followRedirects(false).followSslRedirects(false).build();
 		scenarioLogic = new ScenarioLogic(this);
 	}
 

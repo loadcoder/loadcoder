@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.network;
 
+@FunctionalInterface
 public interface Matcher {
 	boolean keep(String url);
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 

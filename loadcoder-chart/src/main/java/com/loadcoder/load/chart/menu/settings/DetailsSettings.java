@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -33,15 +33,12 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.loadcoder.load.chart.logic.ResultChartLogic;
 import com.loadcoder.load.chart.menu.DoubleSteppingSlider;
-import com.loadcoder.load.chart.menu.SteppingSlider;
-import com.loadcoder.load.chart.utilities.ChartUtils;
 
 public class DetailsSettings extends Settings {
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,10 +18,9 @@
  ******************************************************************************/
 package com.loadcoder.load.chart.logic;
 
-import static com.loadcoder.statics.Time.DAY;
-import static com.loadcoder.statics.Time.HOUR;
-import static com.loadcoder.statics.Time.MINUTE;
-import static com.loadcoder.statics.Time.SECOND;
+import static com.loadcoder.statics.Statics.DAY;
+import static com.loadcoder.statics.Statics.HOUR;
+import static com.loadcoder.statics.Statics.MINUTE;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -49,10 +48,10 @@ import com.loadcoder.load.chart.sampling.SampleConcaternatorSpec;
 import com.loadcoder.load.chart.sampling.SampleGroup;
 import com.loadcoder.load.chart.sampling.SampleGroup.ConcaternationResult;
 import com.loadcoder.load.chart.utilities.Utilities;
-import com.loadcoder.load.scenario.RuntimeResultUser;
+import com.loadcoder.load.scenario.RuntimeResultConsumer;
 import com.loadcoder.result.TransactionExecutionResult;
 
-public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
+public class RuntimeChartLogic extends ChartLogic implements RuntimeResultConsumer {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -130,7 +129,9 @@ public class RuntimeChartLogic extends ChartLogic implements RuntimeResultUser {
 
 		oldRange.setStart(newStart);
 		newRange.setEnd(newStart - 1);
-		if (false) {
+		
+		boolean drawDebugLines = false;
+		if (drawDebugLines) {
 			drawRangeDebugStartLines(oldRange, newStart);
 		}
 	}

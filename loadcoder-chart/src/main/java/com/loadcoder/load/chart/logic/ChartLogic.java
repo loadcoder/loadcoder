@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -20,8 +20,7 @@ package com.loadcoder.load.chart.logic;
 
 import static com.loadcoder.load.chart.common.YCalculator.avg;
 import static com.loadcoder.load.chart.common.YCalculator.max;
-import static com.loadcoder.statics.Time.HOUR;
-
+import static com.loadcoder.statics.Statics.*;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.event.MouseWheelEvent;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2019 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -20,12 +20,12 @@ package com.loadcoder.utils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.testng.annotations.Test;
+import static org.testng.Assert.fail;
 
 import com.loadcoder.utils.distribution.Distribution;
 import com.loadcoder.utils.distribution.Item;

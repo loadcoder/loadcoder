@@ -2,9 +2,7 @@ package ${package};
 
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.StopDecisions.*;
-
-import org.testng.annotations.Test;
+import static com.loadcoder.statics.Statics.*;
 
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.scenario.ExecutionBuilder;
@@ -15,55 +13,49 @@ import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
 import com.loadcoder.statics.SummaryUtils;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+
+${importList}
+
 public class GeneratedLoadTest {
 
-	/**
-	 * This test exemplifies a best practice of how to structure a loadcoder test
-	 * 
-	 * This test requires that the rest service is already started and available at
-	 * 7060 To start the spring boot server, execute the following command inside
-	 * the directory loadcoder-examples/rest-loadtest/server: mvn spring-boot:run
-	 */
+
+	LoadScenarioTyped<ThreadInstance> loadScenario = new LoadScenarioTyped<ThreadInstance>() {
+
+		@Override
+		public void loadScenario(ThreadInstance t) {
+			t.getScenarioLogic().performScenario();
+		}
+
+		@Override
+		public ThreadInstance createInstance() {
+			/*
+			 * The ThreadInstance created here for each thread will be a container for
+			 * everything uniquely to each specific thead, and will in this case also hold
+			 * separate instances for the load test logic.
+			 */
+			return new ThreadInstance(this);
+		}
+	};
+
 	@Test
 	public void bestPractiseLoadTestDesign() {
 
 		// Giving the test a unique directory for the result logs
 		setResultDestination(getNewLogDir("target", "bestPracticeLoadTest"));
 
-		LoadScenarioTyped<ThreadInstance> loadScenario = new LoadScenarioTyped<ThreadInstance>() {
+		Load load = new LoadBuilder(loadScenario)
+		${loadBuilder}
+		.build();
 
-			@Override
-			public void loadScenario(ThreadInstance t) {
-				/*
-				 * Instead of implementing one giant method, the load test logic is broken out
-				 * into separate classes that each can be tested separately, see the test
-				 * testGreetingsLogicAlone
-				 */
-				t.getScenarioLogic().performScenario();
-			}
-
-			@Override
-			public ThreadInstance createInstance() {
-				/*
-				 * The ThreadInstance created here for each thread will be a container for
-				 * everything uniquely to each specific thead, and will in this case also hold
-				 * separate instances for the load test logic.
-				 */
-				return new ThreadInstance(this);
-			}
-		};
-
-		Load load = new LoadBuilder(loadScenario).amountOfThreads(1)
-				.stopDecision(iterations(1)).build();
-
-		RuntimeChart runtimeChart = new RuntimeChart();
-
-		Result result = new ExecutionBuilder(load).storeAndConsumeResultRuntime(runtimeChart).build().execute()
-				.andWait().getReportedResultFromResultFile();
+		Result result = new ExecutionBuilder(load)
+		${storeAndConsumeResultRuntime}
+		.build().execute()
+		.andWait().getReportedResultFromResultFile();
 
 		SummaryUtils.printSimpleSummary(result, "Greetings loadtest");
-
-		runtimeChart.waitUntilClosed();
 
 	}
 
@@ -74,7 +66,8 @@ public class GeneratedLoadTest {
 	 */
 	@Test
 	public void testGreetingsLogicAlone() {
-		ThreadInstance threadInstance = new ThreadInstance(new Scenario());
-		threadInstance.getScenarioLogic().performScenario();
+		Result result = loadScenario.test();
+		SummaryUtils.printSimpleSummary(result, "LoadScenario Test");
+		assertEquals(result.getAmountOfFails(), 0);
 	}
 }

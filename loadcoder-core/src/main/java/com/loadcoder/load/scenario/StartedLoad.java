@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -19,9 +19,6 @@
 package com.loadcoder.load.scenario;
 
 import java.lang.Thread.State;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StartedLoad {
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Stefan Vahlgren at Loadcoder
+ * Copyright (C) 2018 Team Loadcoder
  * 
  * This file is part of Loadcoder.
  * 
@@ -18,10 +18,7 @@
  ******************************************************************************/
 package com.loadcoder.load.intensity;
 
-import static com.loadcoder.statics.StopDecisions.iterations;
-import static com.loadcoder.statics.ThrottleMode.PER_THREAD;
-import static com.loadcoder.statics.ThrottleMode.SHARED;
-import static com.loadcoder.statics.Time.PER_SECOND;
+import static com.loadcoder.statics.Statics.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;

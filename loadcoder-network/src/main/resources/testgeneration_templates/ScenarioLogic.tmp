@@ -11,26 +11,26 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import static com.loadcoder.network.okhttp.OKHttpUtils.*;
+import static com.loadcoder.load.LoadUtility.*;
+import static com.loadcoder.utils.FileUtil.*;
+
+import com.loadcoder.network.BuilderAddable;
+import com.loadcoder.network.OKHttpRequestBuilder;
+
 public class ScenarioLogic extends ScenarioLogicTyped<ThreadInstance> {
 
 	public ScenarioLogic(ThreadInstance threadInstance) {
 		super(threadInstance);
 	}
 	
-	private byte[] getFileContent(String filePath){
-		try {
-			return Files.readAllBytes(Paths.get(filePath));
-		} catch (IOException e) {
-			throw new RuntimeException("Could not the file content", e);
-		}
-	}
-	
 	void performScenario() {
-		Request request = null;
 	
 		${logic_start}
 		${logic_end}
 		
 	}
+	
+${common_header_method}
 
 }
