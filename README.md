@@ -2,7 +2,7 @@
 
 Loadcoder is a tool for javacoders to create and run load towards application/code to be performance tested.
 
-Visit [loadcoder.com](http://loadcoder.com) for further information
+Visit [loadcoder.com](http://loadcoder.com) for further information.
 
 
 ## 2. Version Control
