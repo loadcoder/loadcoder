@@ -40,14 +40,15 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 	protected Transaction<R> trans;
 	protected ResultHandler<R> resultHandler;
 	protected final ResultModel<R> resultModel;// = new ResultModel<R>(transactionName);
+	protected StopOnErrorLimit stopOnErrorLimit;
 
 	protected ResultHandlerBuilder(Transaction<R> trans,
 			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
-			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName) {
+			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName, StopOnErrorLimit stopOnErrorLimit) {
 		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
 		this.resultModel = new ResultModel<R>(defaultName);
-
+		this.stopOnErrorLimit = stopOnErrorLimit;
 	}
 
 	public ResultHandlerBuilder<R> handleResult(ResultHandler<R> resultHandler) {
@@ -107,6 +108,9 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
 
+			if (stopOnErrorLimit != null && !resultModel.getStatus()) {
+				stopOnErrorLimit.errorCounter(resultModel.getStatus());
+			}
 		}
 		resultModel.setResponseTimeAndValue(rt);
 		try {

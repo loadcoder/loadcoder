@@ -68,11 +68,22 @@ public class ThreadRunner implements Runnable {
 	private boolean decideIfContinue() {
 		boolean continueExecution = false;
 		synchronized (load) {
-			continueExecution = !load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted());
+			continueExecution = (
+					!load.getStopDecision().stopLoad(loadStartTime, load.getTimesExecuted())
+					&& !stopOnErrorLimit());
 			if (continueExecution)
 				load.increaseTimesExecuted();
 		}
 		return continueExecution;
+	}
+
+	private boolean stopOnErrorLimit() {
+		if (load.getStopOnErrorLimit() == null) {
+			return false;
+		}
+		int errorLimit = load.getStopOnErrorLimit().getErrorLimit();
+		int numberOfErrors = load.getStopOnErrorLimit().getNumberOfErrors();
+		return load.getStopOnErrorLimit().stopExecution(errorLimit, numberOfErrors);
 	}
 
 }

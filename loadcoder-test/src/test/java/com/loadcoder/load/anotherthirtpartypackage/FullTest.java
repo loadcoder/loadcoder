@@ -18,6 +18,34 @@
  ******************************************************************************/
 package com.loadcoder.load.anotherthirtpartypackage;
 
+import com.loadcoder.load.LoadUtility;
+import com.loadcoder.load.chart.logic.Chart;
+import com.loadcoder.load.chart.logic.ResultChart;
+import com.loadcoder.load.chart.logic.RuntimeChart;
+import com.loadcoder.load.result.Summary;
+import com.loadcoder.load.scenario.ExecutionBuilder;
+import com.loadcoder.load.scenario.FinishedExecution;
+import com.loadcoder.load.scenario.Load;
+import com.loadcoder.load.scenario.LoadBuilder;
+import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.load.scenario.LoadScenarioTyped;
+import com.loadcoder.load.scenario.StopOnErrorLimit;
+import com.loadcoder.load.sut.SUT;
+import com.loadcoder.load.testng.TestNGBase;
+import com.loadcoder.result.Logs;
+import com.loadcoder.result.Result;
+import com.loadcoder.result.TransactionExecutionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+
 import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
 import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 import static com.loadcoder.statics.Statics.PER_MINUTE;
@@ -26,32 +54,6 @@ import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
 import static com.loadcoder.statics.Statics.duration;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
-
-import com.loadcoder.load.LoadUtility;
-import com.loadcoder.load.chart.logic.Chart;
-import com.loadcoder.load.chart.logic.ResultChart;
-import com.loadcoder.load.chart.logic.RuntimeChart;
-import com.loadcoder.load.result.Summary;
-import com.loadcoder.load.scenario.Execution;
-import com.loadcoder.load.scenario.ExecutionBuilder;
-import com.loadcoder.load.scenario.FinishedExecution;
-import com.loadcoder.load.scenario.Load;
-import com.loadcoder.load.scenario.LoadBuilder;
-import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.sut.SUT;
-import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.result.Logs;
-import com.loadcoder.result.Result;
-import com.loadcoder.result.TransactionExecutionResult;
 
 public class FullTest extends TestNGBase {
 
@@ -563,4 +565,86 @@ public class FullTest extends TestNGBase {
 
 		runtimeChart.waitUntilClosed();
 	}
+
+	@Test(groups = "manual")
+	public void stopExecutionOnErrorLimit_resultHandler_test() {
+		String URL_STRING = "http://localhost:7060/api/greeting?name=ErrorLimit";
+		int ERROR_LIMIT = 20;
+
+		LoadScenarioTyped<RestTemplate> loadScenario = new LoadScenarioTyped<RestTemplate>() {
+			@Override
+			public void loadScenario(RestTemplate restTemplate) {
+				load("Result handler", () -> {
+					LoadUtility.sleep(20);
+
+					return restTemplate.getForEntity(URL_STRING, String.class);
+				}).handleResult(resultHandler -> {
+					if (resultHandler.getException() != null) {
+						resultHandler.setStatus(false);
+					}
+				}).performAndGetModel();
+			}
+			@Override
+			public RestTemplate createInstance() {
+				return new RestTemplate();
+			}
+		};
+
+		Load load = new LoadBuilder(loadScenario)
+				.amountOfThreads(1)
+				.stopOnErrorLimit(new StopOnErrorLimit(ERROR_LIMIT))
+				.stopDecision(duration(20 * SECOND))
+				.build();
+
+		RuntimeChart runtimeChart = new RuntimeChart();
+		FinishedExecution finished = new ExecutionBuilder(load)
+				.storeAndConsumeResultRuntime(runtimeChart)
+				.build().execute().andWait();
+
+		Assert.assertEquals(
+				finished.getReportedResultFromResultFile().getAmountOfFails(),
+				ERROR_LIMIT,
+				"Number of errors did not match"
+		);
+	}
+
+	@Test(groups = "manual")
+	public void stopExecutionOnErrorLimit_voidResultHandler_test() {
+		String URL_STRING = "http://localhost:7060/api/greeting?name=ErrorLimit";
+		int ERROR_LIMIT = 20;
+		RestTemplate restTemplate = new RestTemplate();
+
+		LoadScenario loadScenario = new LoadScenario() {
+			@Override
+			public void loadScenario() {
+				load("Result handler void", () -> {
+					LoadUtility.sleep(20);
+					restTemplate.getForEntity(URL_STRING, String.class);
+
+				}).handleResult(resultHandler -> {
+					if (resultHandler.getException() != null) {
+						resultHandler.setStatus(false);
+					}
+				}).perform();
+			}
+		};
+		Load load = new LoadBuilder(loadScenario)
+				.amountOfThreads(1)
+				.stopOnErrorLimit(new StopOnErrorLimit(ERROR_LIMIT))
+				.stopDecision(duration(20 * SECOND))
+				.build();
+
+		RuntimeChart runtimeChart = new RuntimeChart();
+		FinishedExecution finished = new ExecutionBuilder(load)
+				.storeAndConsumeResultRuntime(runtimeChart)
+				.build().execute().andWait();
+
+		Assert.assertEquals(
+				finished.getReportedResultFromResultFile().getAmountOfFails(),
+				ERROR_LIMIT,
+				"Number of errors did not match"
+		);
+	}
+
+
 }

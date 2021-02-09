@@ -18,16 +18,17 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STILL_RUNNING;
-
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
+import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STILL_RUNNING;
+
 public class LoadBuilder {
 	final LoadScenario ls;
 	private StopDecision stopDecision;
+	private StopOnErrorLimit stopOnErrorLimit;
 	private int amountOfthreads = 1;
 	private long rampupMillis;
 	private Intensity intensity;
@@ -62,7 +63,7 @@ public class LoadBuilder {
 	 */
 	public Load build() {
 
-		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, intensity, intensityIterations);
+		Load l = new Load(ls, stopDecision, stopOnErrorLimit, amountOfthreads, rampupMillis, intensity, intensityIterations);
 		return l;
 	}
 
@@ -84,6 +85,11 @@ public class LoadBuilder {
 	 */
 	public LoadBuilder amountOfThreads(int amountOfthreads) {
 		this.amountOfthreads = amountOfthreads;
+		return this;
+	}
+
+	public LoadBuilder stopOnErrorLimit(StopOnErrorLimit stopOnErrorLimit) {
+		this.stopOnErrorLimit = stopOnErrorLimit;
 		return this;
 	}
 

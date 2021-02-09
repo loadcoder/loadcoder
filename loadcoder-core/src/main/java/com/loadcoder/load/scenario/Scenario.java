@@ -25,13 +25,13 @@ public class Scenario {
 
 	public <T> ResultHandlerVoidBuilder load(String defaultName, TransactionVoid transaction) {
 		ResultHandlerVoidBuilder resultHandlerBuilder = new ResultHandlerVoidBuilder(transaction, null, null, null,
-				null, defaultName);
+				null, defaultName, null);
 		return resultHandlerBuilder;
 	}
 
 	public <T> ResultHandlerBuilder<T> load(String defaultName, Transaction<T> transaction) {
 		ResultHandlerBuilder<T> resultHandlerBuilder = new ResultHandlerBuilder<T>(transaction, null, null, null, null,
-				defaultName);
+				defaultName, null);
 		return resultHandlerBuilder;
 	}
 }
