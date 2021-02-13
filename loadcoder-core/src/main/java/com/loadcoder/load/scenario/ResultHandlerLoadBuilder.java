@@ -27,7 +27,7 @@ public class ResultHandlerLoadBuilder<R> extends ResultHandlerBuilder<R> {
 
 	protected ResultHandlerLoadBuilder(String defaultName, Transaction<R> trans, LoadScenario ls, RateLimiter limiter) {
 		super(trans, ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(),
-				limiter, ls.getLoad().getLoadThreadsSynchronizer(), defaultName, ls.getLoad().getStopOnErrorLimit());
+				limiter, ls.getLoad().getLoadThreadsSynchronizer(), defaultName);
 	}
 
 	/**

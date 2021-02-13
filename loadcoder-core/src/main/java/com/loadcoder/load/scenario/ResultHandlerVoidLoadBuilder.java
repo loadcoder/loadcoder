@@ -28,7 +28,7 @@ public class ResultHandlerVoidLoadBuilder extends ResultHandlerVoidBuilder {
 	protected ResultHandlerVoidLoadBuilder(String defaultName, TransactionVoid trans, LoadScenario ls,
 			RateLimiter limiter) {
 		super(trans, ls.getTransactionExecutionResultBuffer(), ls.getLoad().getExecution().getResultFormatter(),
-				limiter, ls.getLoad().getLoadThreadsSynchronizer(), defaultName, ls.getLoad().getStopOnErrorLimit());
+				limiter, ls.getLoad().getLoadThreadsSynchronizer(), defaultName);
 	}
 
 	/**

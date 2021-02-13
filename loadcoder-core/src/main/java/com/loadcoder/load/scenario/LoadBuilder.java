@@ -27,8 +27,7 @@ import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STIL
 
 public class LoadBuilder {
 	final LoadScenario ls;
-	private StopDecision stopDecision;
-	private StopOnErrorLimit stopOnErrorLimit;
+	private StopDecision[] stopDecision;
 	private int amountOfthreads = 1;
 	private long rampupMillis;
 	private Intensity intensity;
@@ -63,7 +62,7 @@ public class LoadBuilder {
 	 */
 	public Load build() {
 
-		Load l = new Load(ls, stopDecision, stopOnErrorLimit, amountOfthreads, rampupMillis, intensity, intensityIterations);
+		Load l = new Load(ls, stopDecision, amountOfthreads, rampupMillis, intensity, intensityIterations);
 		return l;
 	}
 
@@ -88,16 +87,11 @@ public class LoadBuilder {
 		return this;
 	}
 
-	public LoadBuilder stopOnErrorLimit(StopOnErrorLimit stopOnErrorLimit) {
-		this.stopOnErrorLimit = stopOnErrorLimit;
-		return this;
-	}
-
 	protected Intensity getIntensity() {
 		return intensity;
 	}
 
-	protected StopDecision getStopDecision() {
+	protected StopDecision[] getStopDecision() {
 		return stopDecision;
 	}
 
@@ -111,7 +105,7 @@ public class LoadBuilder {
 	 *                     and run the load
 	 * @return The builder instance
 	 */
-	public LoadBuilder stopDecision(StopDecision stopDecision) {
+	public LoadBuilder stopDecision(StopDecision... stopDecision) {
 		this.stopDecision = stopDecision;
 		return this;
 	}

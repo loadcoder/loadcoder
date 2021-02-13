@@ -33,15 +33,13 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 	protected final TransactionVoid trans;
 	protected ResultModelVoid resultModel;
 	protected ResultHandlerVoid resultHandler;
-	protected StopOnErrorLimit stopOnErrorLimit;
 
 	protected ResultHandlerVoidBuilder(TransactionVoid trans,
 			TransactionExecutionResultBuffer transactionExecutionResultBuffer, ResultFormatter resultFormatter,
-			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName, StopOnErrorLimit stopOnErrorLimit) {
+			RateLimiter limiter, LoadThreadsSynchronizer loadThreadsSynchronizer, String defaultName) {
 		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
 		this.resultModel = new ResultModelVoid(defaultName);
-		this.stopOnErrorLimit = stopOnErrorLimit;
 	}
 
 	public ResultHandlerVoidBuilder handleResult(ResultHandlerVoid resultHandler) {
@@ -97,10 +95,6 @@ public class ResultHandlerVoidBuilder extends ResultHandlerBuilderBase {
 			resultModel.setException(e);
 			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
-
-			if (stopOnErrorLimit != null && !resultModel.getStatus()) {
-				stopOnErrorLimit.errorCounter(resultModel.getStatus());
-			}
 		}
 
 		resultModel.setResponseTimeAndValue(rt);
