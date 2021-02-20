@@ -26,7 +26,7 @@ import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
 import static com.loadcoder.statics.Statics.duration;
-import static com.loadcoder.statics.Statics.failsOrFailRate;
+import static com.loadcoder.statics.Statics.*;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -435,7 +435,7 @@ public class FullTest extends TestNGBase {
 		RuntimeChart runtimeChart = new RuntimeChart();
 		Load l = new LoadBuilder(s).stopDecision(duration(20_000))
 
-				.amountOfThreads(2000).throttle(10, PER_MINUTE, PER_THREAD)
+				.amountOfThreads(2).throttle(10, PER_MINUTE, PER_THREAD)
 
 				.rampup(10 * SECOND).build();
 
@@ -559,39 +559,4 @@ public class FullTest extends TestNGBase {
 
 		runtimeChart.waitUntilClosed();
 	}
-
-	@Test(groups = "manual")
-	public void stopDueToAmountOfFailsOrFailRate(Method method) {
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-		LoadScenario s = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				SUT sut = new SUT();
-				load("t1", () -> {
-					return "";
-				}).handleResult((a) -> {
-				}).perform();
-
-				load("t2", () -> {
-					throw new RuntimeException("fel");
-				}).handleResult((a) -> {
-				}).perform();
-			}
-		};
-
-		RuntimeStatistics runtimeStats = new RuntimeStatistics();
-		Load l = new LoadBuilder(s).throttle(2, PER_SECOND, PER_THREAD)
-				.stopDecision(duration(10_000), failsOrFailRate(runtimeStats, 0.1, 20)).build();
-
-		FinishedExecution finished = new ExecutionBuilder(l)
-
-				.storeAndConsumeResultRuntime(runtimeStats).build().execute().andWait();
-
-		Result result = finished.getReportedResultFromResultFile();
-		result.summaryStandard().build().prettyPrint();
-		Chart c = new ResultChart(result);
-		c.waitUntilClosed();
-
-	}
-
 }

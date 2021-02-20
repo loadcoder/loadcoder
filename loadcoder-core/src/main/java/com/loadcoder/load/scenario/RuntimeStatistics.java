@@ -60,7 +60,7 @@ public class RuntimeStatistics implements RuntimeResultConsumer {
 
 	public int getAmountOfFails() {
 		synchronized (this) {
-			return amountOfRequests;
+			return fails;
 		}
 	}
 

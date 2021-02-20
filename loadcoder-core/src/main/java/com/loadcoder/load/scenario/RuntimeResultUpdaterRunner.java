@@ -33,9 +33,9 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 
 	private final Execution execution;
 
-	private final RuntimeResultConsumer runtimeDataUser;
+	private final RuntimeResultConsumer[] runtimeDataUser;
 
-	protected RuntimeResultUpdaterRunner(Execution execution, RuntimeResultConsumer runtimeDataUser) {
+	protected RuntimeResultUpdaterRunner(Execution execution, RuntimeResultConsumer... runtimeDataUser) {
 		this.execution = execution;
 		this.runtimeDataUser = runtimeDataUser;
 	}
@@ -77,7 +77,9 @@ public class RuntimeResultUpdaterRunner implements Runnable {
 		Map<String, List<TransactionExecutionResult>> map = TransactionExecutionResult.getResultListAsMap(filledBucket);
 
 		try {
-			runtimeDataUser.useData(map);
+			for(RuntimeResultConsumer r : runtimeDataUser) {
+				r.useData(map);
+			}
 		} catch (RuntimeException rte) {
 			logger.error("An exception occured when trying to use the runtime result data", rte);
 		}
