@@ -20,7 +20,6 @@
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>

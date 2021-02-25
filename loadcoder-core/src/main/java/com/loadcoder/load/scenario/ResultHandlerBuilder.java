@@ -47,7 +47,6 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 		super(transactionExecutionResultBuffer, resultFormatter, limiter, loadThreadsSynchronizer);
 		this.trans = trans;
 		this.resultModel = new ResultModel<R>(defaultName);
-
 	}
 
 	public ResultHandlerBuilder<R> handleResult(ResultHandler<R> resultHandler) {
@@ -106,7 +105,6 @@ public class ResultHandlerBuilder<R> extends ResultHandlerBuilderBase {
 			resultModel.setException(e);
 			// status will be default false if an exception is thrown
 			resultModel.setStatus(false);
-
 		}
 		resultModel.setResponseTimeAndValue(rt);
 		try {

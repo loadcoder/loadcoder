@@ -26,6 +26,7 @@ import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
 import static com.loadcoder.statics.Statics.duration;
+import static com.loadcoder.statics.Statics.*;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -41,12 +42,12 @@ import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.result.Summary;
-import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.load.scenario.RuntimeStatistics;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
@@ -178,8 +179,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
 				.throttle(2, PER_SECOND, SHARED).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 	}
@@ -278,8 +278,7 @@ public class FullTest extends TestNGBase {
 
 		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED).build();
 
-		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 		chart.waitUntilClosed();
 
 	}
@@ -300,8 +299,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 
@@ -321,8 +319,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000)).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 
@@ -332,7 +329,7 @@ public class FullTest extends TestNGBase {
 	public void testLowIntensity(Method method) {
 
 		LoadScenario ls = new LoadScenario() {
-			
+
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
@@ -344,8 +341,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
 				.build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -364,8 +360,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).amountOfThreads(2).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -392,7 +387,8 @@ public class FullTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).throttle(2, PER_SECOND, SHARED).rampup(300).stopDecision(duration(20_000)).build();
-		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000)).build();
+		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000))
+				.build();
 
 		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
@@ -439,7 +435,7 @@ public class FullTest extends TestNGBase {
 		RuntimeChart runtimeChart = new RuntimeChart();
 		Load l = new LoadBuilder(s).stopDecision(duration(20_000))
 
-				.amountOfThreads(2000).throttle(10, PER_MINUTE, PER_THREAD)
+				.amountOfThreads(2).throttle(10, PER_MINUTE, PER_THREAD)
 
 				.rampup(10 * SECOND).build();
 
