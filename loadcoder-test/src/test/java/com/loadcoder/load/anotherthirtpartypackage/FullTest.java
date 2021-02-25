@@ -18,6 +18,25 @@
  ******************************************************************************/
 package com.loadcoder.load.anotherthirtpartypackage;
 
+import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
+import static com.loadcoder.statics.LogbackLogging.setResultDestination;
+import static com.loadcoder.statics.Statics.PER_MINUTE;
+import static com.loadcoder.statics.Statics.PER_SECOND;
+import static com.loadcoder.statics.Statics.PER_THREAD;
+import static com.loadcoder.statics.Statics.SECOND;
+import static com.loadcoder.statics.Statics.SHARED;
+import static com.loadcoder.statics.Statics.duration;
+import static com.loadcoder.statics.Statics.*;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
+
 import com.loadcoder.load.LoadUtility;
 import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
@@ -28,32 +47,12 @@ import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
-import com.loadcoder.load.scenario.LoadScenarioTyped;
-import com.loadcoder.load.scenario.StopOnErrorLimit;
+import com.loadcoder.load.scenario.RuntimeStatistics;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-
-import static com.loadcoder.statics.LogbackLogging.getNewLogDir;
-import static com.loadcoder.statics.LogbackLogging.setResultDestination;
-import static com.loadcoder.statics.Statics.PER_MINUTE;
-import static com.loadcoder.statics.Statics.PER_SECOND;
-import static com.loadcoder.statics.Statics.PER_THREAD;
-import static com.loadcoder.statics.Statics.SECOND;
-import static com.loadcoder.statics.Statics.SHARED;
-import static com.loadcoder.statics.Statics.duration;
 
 public class FullTest extends TestNGBase {
 
@@ -180,8 +179,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
 				.throttle(2, PER_SECOND, SHARED).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 	}
@@ -280,8 +278,7 @@ public class FullTest extends TestNGBase {
 
 		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED).build();
 
-		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 		chart.waitUntilClosed();
 
 	}
@@ -302,8 +299,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 
@@ -323,8 +319,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000)).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute().andWait();
 
 		chart.waitUntilClosed();
 
@@ -334,7 +329,7 @@ public class FullTest extends TestNGBase {
 	public void testLowIntensity(Method method) {
 
 		LoadScenario ls = new LoadScenario() {
-			
+
 			@Override
 			public void loadScenario() {
 				load("t2", () -> {
@@ -346,8 +341,7 @@ public class FullTest extends TestNGBase {
 		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
 				.build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -366,8 +360,7 @@ public class FullTest extends TestNGBase {
 
 		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).amountOfThreads(2).build();
 
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
+		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
 	}
 
@@ -394,7 +387,8 @@ public class FullTest extends TestNGBase {
 		};
 
 		Load l = new LoadBuilder(ls).throttle(2, PER_SECOND, SHARED).rampup(300).stopDecision(duration(20_000)).build();
-		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000)).build();
+		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000))
+				.build();
 
 		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
 
@@ -441,7 +435,7 @@ public class FullTest extends TestNGBase {
 		RuntimeChart runtimeChart = new RuntimeChart();
 		Load l = new LoadBuilder(s).stopDecision(duration(20_000))
 
-				.amountOfThreads(2000).throttle(10, PER_MINUTE, PER_THREAD)
+				.amountOfThreads(2).throttle(10, PER_MINUTE, PER_THREAD)
 
 				.rampup(10 * SECOND).build();
 
@@ -565,86 +559,4 @@ public class FullTest extends TestNGBase {
 
 		runtimeChart.waitUntilClosed();
 	}
-
-	@Test(groups = "manual")
-	public void stopExecutionOnErrorLimit_resultHandler_test() {
-		String URL_STRING = "http://localhost:7060/api/greeting?name=ErrorLimit";
-		int ERROR_LIMIT = 20;
-
-		LoadScenarioTyped<RestTemplate> loadScenario = new LoadScenarioTyped<RestTemplate>() {
-			@Override
-			public void loadScenario(RestTemplate restTemplate) {
-				load("Result handler", () -> {
-					LoadUtility.sleep(20);
-
-					return restTemplate.getForEntity(URL_STRING, String.class);
-				}).handleResult(resultHandler -> {
-					if (resultHandler.getException() != null) {
-						resultHandler.setStatus(false);
-					}
-				}).performAndGetModel();
-			}
-			@Override
-			public RestTemplate createInstance() {
-				return new RestTemplate();
-			}
-		};
-
-		Load load = new LoadBuilder(loadScenario)
-				.amountOfThreads(1)
-				.stopOnErrorLimit(new StopOnErrorLimit(ERROR_LIMIT))
-				.stopDecision(duration(20 * SECOND))
-				.build();
-
-		RuntimeChart runtimeChart = new RuntimeChart();
-		FinishedExecution finished = new ExecutionBuilder(load)
-				.storeAndConsumeResultRuntime(runtimeChart)
-				.build().execute().andWait();
-
-		Assert.assertEquals(
-				finished.getReportedResultFromResultFile().getAmountOfFails(),
-				ERROR_LIMIT,
-				"Number of errors did not match"
-		);
-	}
-
-	@Test(groups = "manual")
-	public void stopExecutionOnErrorLimit_voidResultHandler_test() {
-		String URL_STRING = "http://localhost:7060/api/greeting?name=ErrorLimit";
-		int ERROR_LIMIT = 20;
-		RestTemplate restTemplate = new RestTemplate();
-
-		LoadScenario loadScenario = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				load("Result handler void", () -> {
-					LoadUtility.sleep(20);
-					restTemplate.getForEntity(URL_STRING, String.class);
-
-				}).handleResult(resultHandler -> {
-					if (resultHandler.getException() != null) {
-						resultHandler.setStatus(false);
-					}
-				}).perform();
-			}
-		};
-		Load load = new LoadBuilder(loadScenario)
-				.amountOfThreads(1)
-				.stopOnErrorLimit(new StopOnErrorLimit(ERROR_LIMIT))
-				.stopDecision(duration(20 * SECOND))
-				.build();
-
-		RuntimeChart runtimeChart = new RuntimeChart();
-		FinishedExecution finished = new ExecutionBuilder(load)
-				.storeAndConsumeResultRuntime(runtimeChart)
-				.build().execute().andWait();
-
-		Assert.assertEquals(
-				finished.getReportedResultFromResultFile().getAmountOfFails(),
-				ERROR_LIMIT,
-				"Number of errors did not match"
-		);
-	}
-
-
 }

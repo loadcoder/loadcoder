@@ -31,7 +31,7 @@ public class Execution {
 
 	private Thread runtimeResultUpdaterThread;
 
-	private final RuntimeResultConsumer user;
+	private final RuntimeResultConsumer[] user;
 	private final ResultFormatter resultFormatter;
 
 	private StartedExecution startedExecution;
@@ -58,7 +58,7 @@ public class Execution {
 	}
 
 	protected Execution(ResultFormatter resultFormatter,
-			TransactionExecutionResultBuffer transactionExecutionResultBuffer, RuntimeResultConsumer resultUser,
+			TransactionExecutionResultBuffer transactionExecutionResultBuffer, RuntimeResultConsumer[] resultUser,
 			List<Load> loads) {
 		this.resultFormatter = resultFormatter;
 		this.transactionExecutionResultBuffer = transactionExecutionResultBuffer;
