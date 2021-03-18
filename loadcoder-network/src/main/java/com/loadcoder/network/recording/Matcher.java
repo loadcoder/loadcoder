@@ -16,25 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network;
+package com.loadcoder.network.recording;
 
-import okhttp3.Request;
-
-public class OKHttpRequestBuilder extends Request.Builder {
-	public OKHttpRequestBuilder add(BuilderAddable builderAddable) {
-		builderAddable.add(this);
-		return this;
-	}
-	
-	@Override
-	public OKHttpRequestBuilder header(String header, String value) {
-		super.header(header, value);
-		return this;
-	}
-	
-	@Override
-	public OKHttpRequestBuilder url(String url) {
-		super.url(url);
-		return this;
-	}
+@FunctionalInterface
+public interface Matcher {
+	boolean keep(String url);
 }

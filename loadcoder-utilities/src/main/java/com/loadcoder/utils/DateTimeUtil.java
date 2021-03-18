@@ -86,20 +86,25 @@ public class DateTimeUtil {
 	}
 
 	public static String getMillisAsHoursMinutesSecondsString(long millis) {
+		
+		if(millis < 1000) {
+			return "1sec";
+		}
+		
 		String result = String.format("%dh %dmin %dsec", TimeUnit.MILLISECONDS.toHours(millis),
 				TimeUnit.MILLISECONDS.toMinutes(millis)
 						- TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
 				TimeUnit.MILLISECONDS.toSeconds(millis)
 						- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-		if (result.startsWith("0h ")) {
-			result = result.replace("0h ", "");
+		String[] splitted = result.split(" ");
+		result = "";
+		
+		for(String s : splitted) {
+			if(!s.startsWith("0")) {
+				result += s + " ";
+			}
 		}
-		if (result.contains("0min ")) {
-			result = result.replace("0min ", "");
-		}
-		if (result.contains(" 0sec")) {
-			result = result.replace(" 0sec", "");
-		}
+		result = result.substring(0, result.length() -1);
 		return result;
 	}
 }

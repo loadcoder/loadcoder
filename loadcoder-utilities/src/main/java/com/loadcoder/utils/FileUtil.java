@@ -25,13 +25,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,39 +76,25 @@ public class FileUtil {
 		}
 	}
 
-	public static URL getURLFromResources(String fileName) {
-
-		ClassLoader classLoader = FileUtil.class.getClassLoader();
-
-		URL resource = classLoader.getResource(fileName);
-		if (resource == null) {
-			throw new IllegalArgumentException("file is not found!");
-		} else {
-			return resource;
-		}
-	}
-
 	private static BufferedReader getResourceAsBufferedReader(String resourcePath) {
 		InputStream in = FileUtil.class.getResourceAsStream(resourcePath);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		return reader;
 	}
 
-	public static String getResourceAsString(String resourcePath) {
-		try (BufferedReader reader = getResourceAsBufferedReader(resourcePath)) {
-
-			String result = bufferedReaderToString(reader);
+	private static String bufferedReaderToString(BufferedReader reader) {
+		try {
+			char[] charArray = new char[8 * 1024];
+			StringBuilder builder = new StringBuilder();
+			int numCharsRead;
+			while ((numCharsRead = reader.read(charArray, 0, charArray.length)) != -1) {
+				builder.append(charArray, 0, numCharsRead);
+			}
+			String result = builder.toString();
 			return result;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private static String bufferedReaderToString(BufferedReader reader) {
-		StringBuffer buffer = new StringBuffer();
-		reader.lines().collect(Collectors.toList()).forEach(line -> buffer.append(line + "\n"));
-		String result = buffer.toString();
-		return result;
 	}
 
 	public static void writeFile(byte[] bytes, File destination) {
@@ -133,5 +128,54 @@ public class FileUtil {
 		}
 		FileTime fileTime = attr.creationTime();
 		return fileTime;
+	}
+
+	public static Map<String, String> readAllResourceFilesInResourceDir(String resourcePath) {
+		List<String> allResourcesInResourceDir = listAllResourcesInResourceDir(resourcePath);
+		Map<String, String> result = new HashMap<String, String>();
+		allResourcesInResourceDir.stream().forEach(filePath -> {
+			String content = readResourceAsString(filePath);
+			result.put(filePath, content);
+		});
+		return result;
+	}
+
+	public static String readResourceAsString(String resursFilSokvag) {
+		BufferedReader reader = getResourceAsBufferedReader(resursFilSokvag);
+		String results = bufferedReaderToString(reader);
+		return results;
+	}
+
+	public static List<String> readResourceAsLines(String resursFilSokvag) {
+		BufferedReader reader = getResourceAsBufferedReader(resursFilSokvag);
+		return reader.lines().collect(Collectors.toList());
+	}
+
+	public static List<String> listAllResourcesInResourceDir(String resourcePathDir) {
+		try {
+			URI uri = FileUtil.class.getResource(resourcePathDir).toURI();
+			Path searchPath;
+			if (uri.getScheme().equals("jar")) {
+				FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+				searchPath = fileSystem.getPath(resourcePathDir);
+			} else {
+				searchPath = Paths.get(uri);
+			}
+			List<String> result = new ArrayList<>();
+			Stream<Path> walk = Files.walk(searchPath, 1);
+			for (Iterator<Path> pathIterator = walk.iterator(); pathIterator.hasNext();) {
+				Path path = pathIterator.next();
+				String pathString = path.toString();
+				String fileNameResource = pathString.replace(searchPath.toString(), "");
+				if (fileNameResource.isEmpty()) {
+					continue;
+				}
+				String resourcePathInDir = resourcePathDir + fileNameResource;
+				result.add(resourcePathInDir);
+			}
+			return result;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

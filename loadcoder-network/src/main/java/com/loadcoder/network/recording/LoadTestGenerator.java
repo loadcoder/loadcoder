@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network;
+package com.loadcoder.network.recording;
 
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.loadcoder.network.CodeGeneratable;
 import com.loadcoder.utils.FileUtil;
 
 import de.sstoehr.harreader.HarReader;
@@ -301,7 +302,7 @@ public class LoadTestGenerator {
 	}
 
 	public void generateScenario(List<HarEntry> entries, File javaDstDir, File resourceDstDir) {
-		String scenarioLogic = FileUtil.getResourceAsString("/testgeneration_templates/ScenarioLogic.tmp");
+		String scenarioLogic = FileUtil.readResourceAsString("/testgeneration_templates/ScenarioLogic.tmp");
 		scenarioLogic = scenarioLogic.replace("${package}", javaPackage);
 
 		Map<String, Map<String, List<HarEntry>>> commmonHeaders = findCommonHeaders(entries);
@@ -319,9 +320,9 @@ public class LoadTestGenerator {
 				h.setValue(e.getValue().getKey());
 				headers.add(h);
 			}
-			String commonHeader = FileUtil.getResourceAsString("/testgeneration_templates/commonHeader.tmp");
-			commonHeader = addHeaders(headers, commonHeader);
-			commonHeader = commonHeader.replace("${request_building}", ".build();");
+			String commonHeader = FileUtil.readResourceAsString("/testgeneration_templates/commonHeader.tmp");
+			commonHeader = addHeaders(headers, commonHeader, "headers");
+			commonHeader = commonHeader.replace("${request_building}", "");
 			scenarioLogic = scenarioLogic.replace("${common_header_method}", commonHeader);
 
 		}
@@ -341,13 +342,18 @@ public class LoadTestGenerator {
 				heads = entry.getRequest().getHeaders();
 			}
 
-			String loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir,
+			LoadMethod loadMethod = generateLoadMethod(entry, transactionNameGenerator, requestIterator, resourceDstDir,
 					heads);
-			scenarioLogic = scenarioLogic.replace("${logic_end}", loadMethod + "\n" + "${logic_end}");
+
+			scenarioLogic = scenarioLogic.replace("${logic_end}",
+					"\t\t" + loadMethod.getMethodName() + "();\n" + "${logic_end}");
+
+			scenarioLogic = scenarioLogic.replace("${scenario_logic_methods}",
+					loadMethod.getMethod() + "\n" + "${scenario_logic_methods}");
 			requestIterator++;
 		}
 
-		scenarioLogic = scenarioLogic.replace("${logic_start}", "");
+		scenarioLogic = scenarioLogic.replace("${scenario_logic_methods}", "");
 		scenarioLogic = scenarioLogic.replace("${logic_end}", "");
 
 		FileUtil.writeFile(scenarioLogic.getBytes(), scenarioDstFile);
@@ -428,6 +434,27 @@ public class LoadTestGenerator {
 					valueHarEntry = new HashMap<String, List<HarEntry>>();
 					map.put(header.getName(), valueHarEntry);
 				}
+				List<HarEntry> list = valueHarEntry.get(header.getValue());
+				if (list == null) {
+					list = new ArrayList<HarEntry>();
+					valueHarEntry.put(header.getValue(), list);
+				}
+				list.add(entry);
+			});
+		});
+		return map;
+	}
+
+	private Map<String, Map<String, List<HarEntry>>> findCommonHeaders_old(List<HarEntry> entries) {
+		Map<String, Map<String, List<HarEntry>>> map = new HashMap<String, Map<String, List<HarEntry>>>();
+
+		entries.stream().forEach(entry -> {
+			entry.getRequest().getHeaders().stream().forEach(header -> {
+				Map<String, List<HarEntry>> valueHarEntry = map.get(header.getName());
+				if (valueHarEntry == null) {
+					valueHarEntry = new HashMap<String, List<HarEntry>>();
+					map.put(header.getName(), valueHarEntry);
+				}
 				Map<String, List<HarEntry>> harMap = map.get(header.getName());
 				List<HarEntry> list = harMap.get(header.getValue());
 				if (list == null) {
@@ -441,7 +468,7 @@ public class LoadTestGenerator {
 	}
 
 	public void generateTest(File dstDir) {
-		String testContent = FileUtil.getResourceAsString("/testgeneration_templates/GeneratedLoadTest.tmp");
+		String testContent = FileUtil.readResourceAsString("/testgeneration_templates/GeneratedLoadTest.tmp");
 
 		testContent = testContent.replace("${package}", javaPackage);
 
@@ -449,7 +476,7 @@ public class LoadTestGenerator {
 			testContent = reporting.generateCode(testContent);
 		} else {
 			String storeResultsRuntime = FileUtil
-					.getResourceAsString("/testgeneration_templates/storeResultsRuntime.tmp");
+					.readResourceAsString("/testgeneration_templates/storeResultsRuntime.tmp");
 			testContent = testContent.replace("${storeAndConsumeResultRuntime}", storeResultsRuntime);
 
 		}
@@ -461,7 +488,7 @@ public class LoadTestGenerator {
 
 	public void generateThreadInstance(File dstDir) {
 
-		String threadInstanceContent = FileUtil.getResourceAsString("/testgeneration_templates/ThreadInstance.tmp");
+		String threadInstanceContent = FileUtil.readResourceAsString("/testgeneration_templates/ThreadInstance.tmp");
 
 		threadInstanceContent = threadInstanceContent.replace("${package}", javaPackage);
 
@@ -477,24 +504,45 @@ public class LoadTestGenerator {
 		return null;
 	}
 
-	public String generateLoadMethod(HarEntry entry, TransactionNameGenerator transactionNameGenerator,
+	List<String> uniqueLoadMethodNames = new ArrayList<>();
+
+	private String createUniqueMethodName(String transactionName) {
+
+		String suggestedMethodName = transactionName;
+		int uniqueModifier = 1;
+		while (uniqueLoadMethodNames.contains(suggestedMethodName)) {
+			suggestedMethodName = transactionName + "_" + uniqueModifier++;
+		}
+		uniqueLoadMethodNames.add(suggestedMethodName);
+		return suggestedMethodName;
+	}
+
+	public LoadMethod generateLoadMethod(HarEntry entry, TransactionNameGenerator transactionNameGenerator,
 			int transactionIterator, File resourceDstDir, List<HarHeader> heads) {
-		String loadMethodTemplate = FileUtil.getResourceAsString("/testgeneration_templates/loadmethod.tmp");
+		String loadMethodTemplate = FileUtil.readResourceAsString("/testgeneration_templates/loadmethod.tmp");
 
 		String transactionName = transactionNameGenerator.generateTransactionName(entry, 1, 20);
+		String methodName = createUniqueMethodName(transactionName);
 		String loadMethod = loadMethodTemplate;
 		loadMethod = loadMethod.replace("${transaction_name}", transactionName);
+		loadMethod = loadMethod.replace("${method_name}", methodName);
+
 		HarRequest req = entry.getRequest();
 
 		loadMethod = loadMethod.replace("${transaction_url}", req.getUrl());
 
 		loadMethod = loadMethod.replace("${request_variable}", "request" + transactionIterator);
 
+		String headerVariable = "headers" + transactionIterator;
+		loadMethod = loadMethod.replace("${header_variable}", headerVariable);
+
 		HarHeader contentType = getContentTypeHeader(heads);
 
-		loadMethod = addHeaders(heads, loadMethod);
+		loadMethod = addHeaders(heads, loadMethod, headerVariable);
 		if (entry.getRequest().getHeaders().size() != heads.size()) {
-			loadMethod = loadMethod.replace("${request_building}", "		.add(commonHeaders)" + "${request_building}");
+			loadMethod = loadMethod.replace("${request_building}",
+					"		addCommonHeaders(" + headerVariable + ");" + "${request_building}");
+
 		}
 
 		String requestBodyTemplate = "";
@@ -502,41 +550,24 @@ public class LoadTestGenerator {
 		boolean methodIsGET = entry.getRequest().getMethod().equals(HttpMethod.GET);
 		boolean hasBody = body != null && !body.isEmpty();
 		String requestBodyVariable = "reqBody" + transactionIterator;
-		;
 		if (hasBody) {
 			String fileName = "body" + transactionIterator + ".txt";
 			File bodyFile = new File(resourceDstDir, fileName);
 			FileUtil.writeFile(body.getBytes(), bodyFile);
-
-			requestBodyTemplate = FileUtil.getResourceAsString("/testgeneration_templates/requestBody.tmp");
-
 			requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
-			requestBodyTemplate = requestBodyTemplate.replace("${body_file}", destinationResourceDir + "/" + fileName);
-
-			String mediaType = contentType.getValue();
-			requestBodyTemplate = requestBodyTemplate.replace("${mediatype}", mediaType);
-
+			loadMethod = loadMethod.replace("${body}",
+					"getFileContent(\"" + destinationResourceDir + "/" + fileName + "\")");
 		} else {
-
+			loadMethod = loadMethod.replace("${body}", "\"\"");
 			if (!methodIsGET) {
-				requestBodyTemplate = FileUtil.getResourceAsString("/testgeneration_templates/getEmptyRequestBody.tmp");
-
+				requestBodyTemplate = FileUtil
+						.readResourceAsString("/testgeneration_templates/getEmptyRequestBody.tmp");
 				requestBodyTemplate = requestBodyTemplate.replace("${requestbody_variable}", requestBodyVariable);
 			}
 		}
 
-		if (hasBody || !methodIsGET) {
-			String requestMethodBodyTemplate = FileUtil
-					.getResourceAsString("/testgeneration_templates/requestMethodBody.tmp");
-
-			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_http_verb}",
-					entry.getRequest().getMethod().name());
-			requestMethodBodyTemplate = requestMethodBodyTemplate.replace("${request_body_file}", requestBodyVariable);
-
-			loadMethod = loadMethod.replace("${request_building}", requestMethodBodyTemplate + "\n${request_building}");
-		}
-
 		loadMethod = loadMethod.replace("${request_body}", requestBodyTemplate);
+		loadMethod = loadMethod.replace("${request_http_verb}", entry.getRequest().getMethod().name());
 
 		loadMethod = loadMethod.replace("${request_building}", "");
 
@@ -546,13 +577,8 @@ public class LoadTestGenerator {
 		String responseBody = entry.getResponse().getContent().getText();
 		if (responseBody != null && !responseBody.isEmpty()) {
 
-			String getResponseBodyTemplate = FileUtil
-					.getResourceAsString("/testgeneration_templates/getResponseBody.tmp");
-
-			loadMethod = loadMethod.replace("${handleResultReadResponse}", "\n" + getResponseBodyTemplate);
-
 			String resultHandlerAssertionTemplate = FileUtil
-					.getResourceAsString("/testgeneration_templates/resulthandler_assert.tmp");
+					.readResourceAsString("/testgeneration_templates/resulthandler_assert.tmp");
 
 			if (bodyMatchers != null) {
 				for (String matcher : bodyMatchers) {
@@ -571,11 +597,13 @@ public class LoadTestGenerator {
 		}
 		loadMethod = loadMethod.replace("${result_asserts}", "");
 
-		return loadMethod;
+		LoadMethod method = new LoadMethod(methodName, loadMethod);
+		return method;
 	}
 
-	private String addHeaders(List<HarHeader> headers, String loadMethod) {
-		String headerTemplate = FileUtil.getResourceAsString("/testgeneration_templates/addheader.tmp");
+	private String addHeaders(List<HarHeader> headers, String loadMethod, String headerVariable) {
+		String headerTemplate = FileUtil.readResourceAsString("/testgeneration_templates/addheader.tmp");
+		headerTemplate = headerTemplate.replace("${header_variable}", headerVariable);
 
 		for (HarHeader header : headers) {
 
@@ -586,7 +614,7 @@ public class LoadTestGenerator {
 			headerValue = headerValue.replaceAll("[\"]", "\\\\\"");
 			String h = headerTemplate.replace("${header_key}", header.getName()).replace("${header_value}",
 					headerValue);
-			loadMethod = loadMethod.replace("${request_building}", "		" +h + "${request_building}");
+			loadMethod = loadMethod.replace("${request_building}", "		" + h + "${request_building}");
 
 		}
 		return loadMethod;
@@ -730,7 +758,7 @@ public class LoadTestGenerator {
 	public static String generateCodeLoadBuilder(String originalCode, long durationMilliseconds, int amountOfThreads,
 			int callsPerSecond) {
 		String result = originalCode;
-		String loadBuilderMethods = FileUtil.getResourceAsString("/testgeneration_templates/loadBuilderMethods.tmp");
+		String loadBuilderMethods = FileUtil.readResourceAsString("/testgeneration_templates/loadBuilderMethods.tmp");
 
 		if (amountOfThreads != -1) {
 			int durationSeconds = (int) (durationMilliseconds / 1000);

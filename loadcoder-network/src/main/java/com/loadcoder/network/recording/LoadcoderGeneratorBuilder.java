@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network;
+package com.loadcoder.network.recording;
 
 import java.util.List;
+
+import com.loadcoder.network.CodeGeneratable;
 
 public class LoadcoderGeneratorBuilder {
 

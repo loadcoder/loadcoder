@@ -259,7 +259,7 @@ public class InfluxDBClient extends HttpClient {
 	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode, String groupName,
 			String testName) {
 		String result = originalCode;
-		String testContent = FileUtil.getResourceAsString("/cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
+		String testContent = FileUtil.readResourceAsString("/cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
 		testContent = testContent.replace("${groupName}", groupName);
 		testContent = testContent.replace("${testName}", testName);
 

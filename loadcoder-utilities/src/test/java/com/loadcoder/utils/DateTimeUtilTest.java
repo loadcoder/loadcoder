@@ -25,24 +25,35 @@ import org.testng.annotations.Test;
 public class DateTimeUtilTest {
 
 	@Test
-	public void hejsdf() {
-		String result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 12*60_000 + 13*1000);
+	public void willDurationBeFormatedCorrectlyAsTime() {
+		String result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 12 * 60_000 + 13 * 1000);
 		assertEquals(result, "11h 12min 13sec");
-		
-		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12*60_000 + 13*1000);
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12 * 60_000 + 13 * 1000);
 		assertEquals(result, "12min 13sec");
-		
-		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 0*60_000 + 13*1000);
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 0 * 60_000 + 13 * 1000);
 		assertEquals(result, "13sec");
-		
-		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0*60_000 + 0*1000);
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0 * 60_000 + 0 * 1000);
 		assertEquals(result, "11h");
-		
-		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12*60_000 + 0*1000);
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 12 * 60_000 + 0 * 1000);
 		assertEquals(result, "12min");
-		
-		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0*60_000 + 13*1000);
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(11 * 3600_000 + 0 * 60_000 + 13 * 1000);
 		assertEquals(result, "11h 13sec");
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(24 * 3600_000 + 0 * 60_000 + 0 * 1000);
+		assertEquals(result, "24h");
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(1 * 3600_000 + 59 * 60_000 + 59 * 1000);
+		assertEquals(result, "1h 59min 59sec");
 		
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0 * 3600_000 + 20 * 60_000 + 0 * 1000);
+		assertEquals(result, "20min");
+
+		result = DateTimeUtil.getMillisAsHoursMinutesSecondsString(0);
+		assertEquals(result, "1sec");
 	}
 }

@@ -24,8 +24,14 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 
 		<dependency>
@@ -49,18 +55,18 @@
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-chart</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-logback</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
 			<artifactId>loadcoder-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>

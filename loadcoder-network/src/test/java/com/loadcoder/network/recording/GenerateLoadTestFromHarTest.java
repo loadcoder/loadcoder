@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network;
+package com.loadcoder.network.recording;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -28,7 +28,9 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.network.LoadTestGenerator.TransactionNameGenerator;
+import com.loadcoder.network.recording.LoadTestGenerator;
+import com.loadcoder.network.recording.Matcher;
+import com.loadcoder.network.recording.LoadTestGenerator.TransactionNameGenerator;
 
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarQueryParam;

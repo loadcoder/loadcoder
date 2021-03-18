@@ -1,22 +1,14 @@
-		${request_body}
-		final Request ${request_variable} = new OKHttpRequestBuilder().url("${transaction_url}")
-${request_building}		.build();
+	private void ${method_name}(){
+
+		HttpHeaders ${header_variable} = new HttpHeaders();
+${request_building}	
 		
 		load("${transaction_name}", ()->{	
-			return getTypeInstance().getHttpClient().newCall(${request_variable}).execute();	
+			return http("${transaction_url}", HttpMethod.${request_http_verb}, ${header_variable}, ${body});
 		})
 		.handleResult(resultHandler->{
+			assertResponse(resultHandler, ${expected_http_code});${result_asserts}
 
-			try {
-				if(resultHandler.getResponse() == null || (resultHandler.getResponse().code() != ${expected_http_code})) {
-					resultHandler.setStatus(false);
-					return;
-				}${handleResultReadResponse}				${result_asserts}
-			}finally {
-				resultHandler.getResponse().close();
-			}
-			
 		})
 		.perform();
-		
-		
+	}
