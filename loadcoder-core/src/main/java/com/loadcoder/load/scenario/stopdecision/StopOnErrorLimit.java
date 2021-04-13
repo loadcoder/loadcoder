@@ -47,7 +47,7 @@ public class StopOnErrorLimit implements StopDecision {
 		}
 		double failRate = runtimeStatistics.getFailRate();
 		if (failRate > maxFailRate) {
-			System.out.println("Fail rate too high:" + failRate);
+			log.warn("Fail rate too high:" + failRate);
 			return true;
 		}
 		return false;

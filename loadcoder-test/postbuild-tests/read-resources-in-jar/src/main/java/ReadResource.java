@@ -1,3 +1,4 @@
+
 /*******************************************************************************
  * Copyright (C) 2021 Team Loadcoder
  * 
@@ -24,6 +25,10 @@ import com.loadcoder.utils.FileUtil;
 public class ReadResource {
 	public static void main(String[] args) {
 		checkThatAssertIsEnabled();
+
+		Map<String, String> map3 = FileUtil.readAllResourceFilesInResourceDir("/utilities");
+		assert map3.get("/resourcedir/testfile.txt") != null;
+		assert map3.get("/resourcedir/testdata.txt").contains("1\n2\n3");
 
 		Map<String, String> map = FileUtil.readAllResourceFilesInResourceDir("/resourcedir");
 		assert map.get("/resourcedir/testdata.txt") != null;

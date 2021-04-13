@@ -18,20 +18,18 @@
  ******************************************************************************/
 package com.loadcoder.network.recording;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
 
-import com.loadcoder.load.testng.TestNGBase;
-import com.loadcoder.network.recording.LoadTestGenerator;
-import com.loadcoder.network.recording.Matcher;
 import com.loadcoder.network.recording.LoadTestGenerator.TransactionNameGenerator;
 
 import de.sstoehr.harreader.model.HarEntry;
@@ -39,7 +37,7 @@ import de.sstoehr.harreader.model.HarQueryParam;
 import de.sstoehr.harreader.model.HarRequest;
 import de.sstoehr.harreader.model.HttpMethod;
 
-public class LoadTestGeneratorTest extends TestNGBase {
+public class LoadTestGeneratorTest {
 
 	Logger log = LoggerFactory.getLogger(LoadTestGeneratorTest.class);
 	@Test

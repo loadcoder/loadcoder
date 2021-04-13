@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,6 +46,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileUtil {
+
+	private static Map<String, FileSystem> FILESYSTEM = new HashMap<>();
 
 	public static byte[] getFileContent(String path) {
 		Path p = Paths.get(path);
@@ -140,14 +143,14 @@ public class FileUtil {
 		return result;
 	}
 
-	public static String readResourceAsString(String resursFilSokvag) {
-		BufferedReader reader = getResourceAsBufferedReader(resursFilSokvag);
+	public static String readResourceAsString(String resourcePath) {
+		BufferedReader reader = getResourceAsBufferedReader(resourcePath);
 		String results = bufferedReaderToString(reader);
 		return results;
 	}
 
-	public static List<String> readResourceAsLines(String resursFilSokvag) {
-		BufferedReader reader = getResourceAsBufferedReader(resursFilSokvag);
+	public static List<String> readResourceAsLines(String resourcePath) {
+		BufferedReader reader = getResourceAsBufferedReader(resourcePath);
 		return reader.lines().collect(Collectors.toList());
 	}
 
@@ -156,8 +159,14 @@ public class FileUtil {
 			URI uri = FileUtil.class.getResource(resourcePathDir).toURI();
 			Path searchPath;
 			if (uri.getScheme().equals("jar")) {
-				FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-				searchPath = fileSystem.getPath(resourcePathDir);
+
+				String jarURIWithoutResourcePath = uri.toString().replace(resourcePathDir, "");
+				FileSystem f = FILESYSTEM.get(jarURIWithoutResourcePath);
+				if (f == null) {
+					f = FileSystems.newFileSystem(uri, Collections.emptyMap());
+					FILESYSTEM.put(jarURIWithoutResourcePath, f);
+				}
+				searchPath = f.getPath(resourcePathDir);
 			} else {
 				searchPath = Paths.get(uri);
 			}

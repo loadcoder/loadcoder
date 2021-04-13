@@ -6,3 +6,5 @@
 #maven
 target
 test-output
+**/*.log
+**/.attach_pid*
