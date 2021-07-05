@@ -96,7 +96,8 @@ public class RestTemplateBuilder {
 				if (trustStore.getFilePath() != null) {
 					builder.loadTrustMaterial(trustStore.getFilePath(), trustStore.getPwd().toCharArray());
 				} else {
-					URL trustStoreUrl = RestTemplateBuilder.class.getClassLoader().getResource(trustStore.getResourcePath());
+					URL trustStoreUrl = RestTemplateBuilder.class.getClassLoader()
+							.getResource(trustStore.getResourcePath());
 					builder.loadTrustMaterial(trustStoreUrl, trustStore.getPwd().toCharArray());
 				}
 			} else {
@@ -110,7 +111,8 @@ public class RestTemplateBuilder {
 					builder.loadKeyMaterial(keyStore.getFilePath(), keyStore.getPwd().toCharArray(),
 							keyStore.getPwd().toCharArray());
 				} else {
-					URL keyStoreUrl = RestTemplateBuilder.class.getClassLoader().getResource(keyStore.getResourcePath());
+					URL keyStoreUrl = RestTemplateBuilder.class.getClassLoader()
+							.getResource(keyStore.getResourcePath());
 					builder.loadKeyMaterial(keyStoreUrl, keyStore.getPwd().toCharArray(),
 							keyStore.getPwd().toCharArray());
 				}

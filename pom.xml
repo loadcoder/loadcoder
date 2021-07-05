@@ -36,12 +36,12 @@
 		<guava.version>29.0-jre</guava.version>
 		<har-reader.version>2.1.7</har-reader.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jackson-databind.version>2.9.9</jackson-databind.version>
+		<jackson-databind.version>2.11.4</jackson-databind.version>
 		<docker-java.version>3.1.5</docker-java.version>
 		<json-path.version>2.4.0</json-path.version>
 		<activation.version>1.1.1</activation.version>
-		<springframework.version>5.3.4</springframework.version>
-		<spring-boot.version>2.2.1.RELEASE</spring-boot.version>
+		<springframework.version>5.0.7.RELEASE</springframework.version>
+		<spring-boot.version>2.0.3.RELEASE</spring-boot.version>
 		<httpclient.version>4.5.6</httpclient.version>
 	</properties>
 
@@ -58,13 +58,12 @@
 				<artifactId>spring-boot-starter-test</artifactId>
 				<version>${spring-boot.version}</version>
 			</dependency>
-
-			<!-- https://mvnrepository.com/artifact/org.springframework/spring-web -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
 				<version>${springframework.version}</version>
 			</dependency>
+
 
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -197,6 +196,7 @@
 				<artifactId>hamcrest-all</artifactId>
 				<version>${hamcrest.version}</version>
 			</dependency>
+
 
 		</dependencies>
 	</dependencyManagement>

@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.loadcoder.utils;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -25,7 +27,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class DateTimeUtil {
 
@@ -39,6 +43,11 @@ public class DateTimeUtil {
 		LocalDateTime timePoint = LocalDateTime.now();
 		String dateTime = timePoint.format(dateTimeFormatterDefault);
 		return dateTime;
+	}
+
+	public static LocalDateTime getStringToLocalDateTime(String dateTime) {
+		LocalDateTime timePoint = LocalDateTime.parse(dateTime, dateTimeFormatterDefault);
+		return timePoint;
 	}
 
 	public static String getDefaultDateTimeFormat() {
@@ -86,11 +95,11 @@ public class DateTimeUtil {
 	}
 
 	public static String getMillisAsHoursMinutesSecondsString(long millis) {
-		
-		if(millis < 1000) {
+
+		if (millis < 1000) {
 			return "1sec";
 		}
-		
+
 		String result = String.format("%dh %dmin %dsec", TimeUnit.MILLISECONDS.toHours(millis),
 				TimeUnit.MILLISECONDS.toMinutes(millis)
 						- TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
@@ -98,13 +107,54 @@ public class DateTimeUtil {
 						- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
 		String[] splitted = result.split(" ");
 		result = "";
-		
-		for(String s : splitted) {
-			if(!s.startsWith("0")) {
+
+		for (String s : splitted) {
+			if (!s.startsWith("0")) {
 				result += s + " ";
 			}
 		}
-		result = result.substring(0, result.length() -1);
+		result = result.substring(0, result.length() - 1);
 		return result;
+	}
+
+	private static class FileLocalDateTime {
+		File f;
+		LocalDateTime t;
+	}
+
+	public static File getLatestResultDir(String path) {
+		List<Path> paths = FileUtil.listDirectory(path);
+		List<File> files = FileUtil.getPathsAsFileList(paths);
+		List<FileLocalDateTime> fileLocalDateTimes = files.stream().filter(a -> a.isDirectory()).map(a -> {
+			FileLocalDateTime f = new FileLocalDateTime();
+			f.f = a;
+			try {
+				String aName = a.getName();
+				LocalDateTime aDate = DateTimeUtil.getStringToLocalDateTime(aName);
+				f.t = aDate;
+			} catch (RuntimeException r) {
+			}
+			return f;
+		}).filter(a -> a.t != null).collect(Collectors.toList());
+		fileLocalDateTimes.sort((a, b) -> {
+			if (a.t.isAfter(b.t)) {
+				return -1;
+			} else {
+				return 1;
+			}
+		});
+		return fileLocalDateTimes.get(0).f;
+	}
+
+	public static File latestResultFile(String testResultBaseDir) {
+		File latestExeuctionDir = getLatestResultDir(testResultBaseDir);
+		List<Path> paths = FileUtil.listDirectory(latestExeuctionDir.getAbsolutePath());
+		List<File> files = FileUtil.getPathsAsFileList(paths);
+		for (File logFile : files) {
+			if (logFile.getName().equals("result.log")) {
+				return logFile;
+			}
+		}
+		throw new RuntimeException("Could not find result.log in directory" + latestExeuctionDir.getAbsolutePath());
 	}
 }

@@ -38,7 +38,7 @@ public class RuntimeStatistics implements RuntimeResultConsumer {
 				Entry<String, List<TransactionExecutionResult>> entry = it.next();
 				List<TransactionExecutionResult> list = entry.getValue();
 				for (TransactionExecutionResult trans : list) {
-					if (!trans.isStatus()) {
+					if (!trans.getStatus()) {
 						fails++;
 					}
 				}

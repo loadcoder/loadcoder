@@ -21,17 +21,27 @@ package com.loadcoder.result;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.loadcoder.load.result.Summary;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.statics.Formatter;
+import com.loadcoder.utils.DateTimeUtil;
+import com.loadcoder.utils.FileUtil;
 
 public class ResultTest extends TestNGBase {
+
+	Logger log = LoggerFactory.getLogger(ResultTest.class);
 
 	@Test
 	public void testResultFromFileWithDefaulFormatter() {
@@ -41,8 +51,17 @@ public class ResultTest extends TestNGBase {
 		assertEquals(r.getAmountOfTransactions(), 4);
 		assertEquals(r.getAmountOfFails(), 1);
 		assertEquals(r.getResultLists().get("a0").size(), 2);
-		assertEquals(r.getResultLists().get("a1").get(0).isStatus(), false,
+		assertEquals(r.getResultLists().get("a1").get(0).getStatus(), false,
 				"1st a1 transaction did not have status false");
+	}
+
+	@Test
+	public void loadLatestResult() {
+
+		Result r = new Result(DateTimeUtil.latestResultFile("src/test/resources/testresults/ResultTest"));
+		Summary s = r.summaryStandard().build();
+		s.prettyPrint();
+		assertEquals(s.allTransactions("Amount").intValue(), 4);
 	}
 
 	@Test

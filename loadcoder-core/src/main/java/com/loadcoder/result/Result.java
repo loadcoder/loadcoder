@@ -94,7 +94,7 @@ public class Result implements Summarizable{
 				if (ts > end)
 					end = ts;
 
-				if (!transactionExecutionResult.isStatus())
+				if (!transactionExecutionResult.getStatus())
 					fails++;
 			}
 		}

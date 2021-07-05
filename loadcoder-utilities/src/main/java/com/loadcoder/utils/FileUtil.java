@@ -187,4 +187,16 @@ public class FileUtil {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static void createDir(File file) {
+		if (file.exists()) {
+			if (file.isDirectory()) {
+				return;
+			} else {
+				throw new RuntimeException("Tried to create a dir, but the path is a file:" + file.getAbsolutePath());
+			}
+		} else {
+			file.mkdir();
+		}
+	}
 }

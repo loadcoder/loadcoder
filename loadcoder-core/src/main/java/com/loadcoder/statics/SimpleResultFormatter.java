@@ -76,7 +76,7 @@ public class SimpleResultFormatter extends ResultFormatter{
 		String thread = transactionExecutionResult.getThreadId() == null ? "" : String.format("th=\"%s\"", transactionExecutionResult.getThreadId()) + " ";
 		String asString = String.format("<t id=\"%s\" ts=\"%s\" vl=\"%s\" st=\"%s\" " + msg + thread + "/>",
 				transactionExecutionResult.getName(), transactionExecutionResult.getTs(),
-				transactionExecutionResult.getValue(), transactionExecutionResult.isStatus());
+				transactionExecutionResult.getValue(), transactionExecutionResult.getStatus());
 
 		return asString;
 	}

@@ -18,36 +18,28 @@
  ******************************************************************************/
 package com.loadcoder.network.spring;
 
-import java.io.File;
+import static org.assertj.core.api.Assertions.fail;
 
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.io.File;
+
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.loadcoder.network.spring.springboot.TestServer;
+import org.springframework.web.client.ResourceAccessException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestServer.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
 		"server.ssl.trust-store=classpath:truststore.jks", "server.ssl.trust-store-password=changeit",
-		"server.ssl.key-store=classpath:clientkeystore.jks", "server.ssl.key-store-password=changeit" })
-public class HttpsTest {
-
+		"server.ssl.key-store=classpath:clientkeystore.jks", "server.ssl.key-store-password=changeit",
+		"server.ssl.client-auth=need" })
+public class MTLSTest {
 	@LocalServerPort
 	private int port;
-
-	@Test
-	public void mtlsClientWorks() {
-
-		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit")
-				.keyStore("clientkeystore.jks", "changeit").build());
-
-		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
-		assertEquals("Hello foo", resp.getBody());
-	}
 
 	@Test
 	public void readingCrytpgraphyFromFilesWorks() {
@@ -56,7 +48,32 @@ public class HttpsTest {
 				SpringUtil.clientBuilder().trustStore(new File("src/test/resources/truststore.jks"), "changeit")
 						.keyStore(new File("src/test/resources/clientkeystore.jks"), "changeit").build());
 		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
-		assertEquals("Hello foo", resp.getBody());
+		assertEquals("hello foo", resp.getBody());
+	}
+
+	@Test
+	public void mtlsClientWorks() {
+
+		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit")
+				.keyStore("clientkeystore.jks", "changeit").build());
+
+		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+		assertEquals("hello foo", resp.getBody());
+	}
+
+	@Test
+	public void httpLeadsToSSLError() {
+
+		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
+
+		try {
+			SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+			fail("Did not expect to come here since no client cert is used");
+		} catch (ResourceAccessException e) {
+			// silent catch OK
+		} catch (RuntimeException e) {
+			fail("Caught wrong kind of exception:", e.getClass().getSimpleName());
+		}
 	}
 
 }

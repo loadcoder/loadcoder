@@ -233,7 +233,7 @@ public class InfluxDBClient extends HttpClient {
 						nanoIterator = 1000;
 					}
 					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE + (nanoIterator++), executionId, key,
-							t.isStatus(), t.getValue(), t.getTs());
+							t.getStatus(), t.getValue(), t.getTs());
 
 					builder2.append(urlParameters);
 					builder2.append("\n");

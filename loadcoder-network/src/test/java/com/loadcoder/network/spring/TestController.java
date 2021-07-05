@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network.spring.springboot;
+package com.loadcoder.network.spring;
+
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,13 +30,17 @@ import com.loadcoder.load.LoadUtility;
 @RequestMapping(value = "/test")
 public class TestController {
 
-	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public String getCustomer(@RequestParam String email) {
-		return "Hello " + email;
+	public TestController() {
 	}
-
-	@RequestMapping(value = "/delay", method = RequestMethod.GET)
-	public void getCustomer(@RequestParam int delay) {
-		LoadUtility.sleep(delay);
-	}
+    
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public String getCustomer(@RequestParam String email) {
+    	return "hello " + email;
+    }
+    
+    @RequestMapping(value = "/delay", method = RequestMethod.GET)
+    public void delay(@RequestParam int delay) {
+    	LoadUtility.sleep(delay);
+    }
+    
 }

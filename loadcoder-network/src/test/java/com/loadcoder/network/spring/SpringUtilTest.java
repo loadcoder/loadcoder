@@ -18,49 +18,39 @@
  ******************************************************************************/
 package com.loadcoder.network.spring;
 
-import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
-import com.loadcoder.network.spring.springboot.TestServer;
+import com.loadcoder.load.scenario.ResultModel;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestServer.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SpringUtilTest {
 
-	@LocalServerPort
-	private int port;
+	public class ResultModelExtension <R> extends ResultModel<R>{
 
-	@Test
-	public void willDefaultHttpCallWork() {
-
-		SpringUtil.setClient(new RestTemplate());
-
-		ResponseEntity<String> resp = SpringUtil.http("http://localhost:" + port + "/test/get?email=foo");
-		assertEquals("Hello foo", resp.getBody());
-	}
-
-	@Test
-	public void clientTimesOut() {
-		RestTemplate client = SpringUtil.clientBuilder().handleRequestFactory(a -> {
-			a.setReadTimeout(1000);
-		}).build();
-		try {
-			client.getForEntity("http://localhost:" + port + "/test/delay?delay=1500", Void.class);
-			fail("Expected timeout");
-		} catch (RuntimeException rte) {
+		public ResultModelExtension(String transactionName) {
+			super(transactionName);
 		}
-
-		client = SpringUtil.clientBuilder().handleRequestFactory(a -> {
-			a.setReadTimeout(2000);
-		}).build();
-
-		client.getForEntity("http://localhost:" + port + "/test/delay?delay=1500", Void.class);
+		
+		public void setResp(R r) {
+			super.setResp(r);
+		}
 	}
+	
+	@Test
+	public void handleResult() {
+		
+		ResponseEntity<String> resp = mock(ResponseEntity.class);
+		
+		when(resp.getStatusCodeValue()).thenReturn(201);
+		
+		ResultModelExtension<ResponseEntity<String>> r = new ResultModelExtension<>("foo");
+		r.setResp(resp);
+		SpringUtil.check(r, 100);
+	}
+	
 }

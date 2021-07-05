@@ -25,7 +25,6 @@ import static com.loadcoder.statics.Statics.PER_SECOND;
 import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
-import static com.loadcoder.statics.Statics.duration;
 import static com.loadcoder.statics.Statics.*;
 
 import java.io.File;
@@ -90,6 +89,35 @@ public class FullTest extends TestNGBase {
 
 		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
 				.andWait();
+
+		Summary summary = finished.getResultFromMemory().summaryStandard().build();
+		summary.prettyPrint();
+
+		chart.waitUntilClosed();
+	}
+
+	@Test(groups = "manual")
+	public void testFail(Method method) {
+
+		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
+
+		LoadScenario ls = new LoadScenario() {
+
+			@Override
+			public void loadScenario() {
+				load("fast", () -> {
+					throw new Exception("checked exception from test");
+				}).handleResult(resultHandler -> {
+					throw new RuntimeException("checked exception resultHandler");
+
+				}).perform();
+			}
+		};
+
+		RuntimeChart chart = new RuntimeChart();
+		Load l = new LoadBuilder(ls).stopDecision(iterations(2)).amountOfThreads(1).build();
+
+		FinishedExecution finished = new ExecutionBuilder(l).storeResultRuntime().build().execute().andWait();
 
 		Summary summary = finished.getResultFromMemory().summaryStandard().build();
 		summary.prettyPrint();

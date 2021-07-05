@@ -1,5 +1,3 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
 <suite name="Test Tests Suite" verbose="1">
 	<test name="Test Test">
 		<groups>
@@ -8,7 +6,7 @@
 			</run>
 		</groups>
 		<packages>
-			<package name=".*"></package>
+			<package name="com.loadcoder.*"></package>
 		</packages>
 	</test>
 </suite>

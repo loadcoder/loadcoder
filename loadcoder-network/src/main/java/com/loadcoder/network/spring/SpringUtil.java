@@ -18,23 +18,21 @@
  ******************************************************************************/
 package com.loadcoder.network.spring;
 
-import java.net.URL;
-
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
+import com.loadcoder.load.scenario.ResultModel;
 
 public class SpringUtil {
 
-	private static RestTemplate CLIENT;
+	private Logger log = LoggerFactory.getLogger(SpringUtil.class);
+
+	private static RestTemplate CLIENT = new RestTemplate();
 	private static HttpHeaders DEFAULT_HEADERS = new HttpHeaders();
 
 	public static ResponseEntity<String> http(String url) {
@@ -59,8 +57,14 @@ public class SpringUtil {
 	public static void setClient(RestTemplate client) {
 		CLIENT = client;
 	}
-	
+
 	public static RestTemplateBuilder clientBuilder() {
 		return new RestTemplateBuilder();
+	}
+
+	public static void check(ResultModel<ResponseEntity<String>> r, int expectedHttpCode) {
+		if (r.getResponse() != null && r.getResponse().getStatusCodeValue() != expectedHttpCode) {
+			r.setStatus(false);
+		}
 	}
 }
