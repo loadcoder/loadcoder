@@ -19,16 +19,20 @@
 package com.loadcoder.network.spring;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -125,16 +129,25 @@ public class RestTemplateBuilder {
 				httpClientBuilderHandler.handle(httpClientBuilder);
 			}
 			HttpClient client = httpClientBuilder.build();
-			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+			HttpComponentsClientHttpRequestFactory requestFactory = new UserTokenHttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(client);
 
 			if (httpRequestFactoryHandler != null) {
 				httpRequestFactoryHandler.handle(requestFactory);
 			}
-
 			return new RestTemplate(requestFactory);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public class UserTokenHttpComponentsClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory {
+
+		@Override
+		protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+			HttpClientContext context = HttpClientContext.create();
+			context.setUserToken("thisCanBeAnything");
+			return context;
 		}
 	}
 }

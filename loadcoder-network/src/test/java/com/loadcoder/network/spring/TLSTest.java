@@ -43,32 +43,32 @@ public class TLSTest {
 
 	@Test
 	public void readingCrytpgraphyFromFilesWorks() {
-
-		SpringUtil.setClient(SpringUtil.clientBuilder()
+		SpringHttpClient client = new SpringHttpClient(SpringUtil.clientBuilder()
 				.trustStore(new File("src/test/resources/truststore.jks"), "changeit").build());
-		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+		ResponseEntity<String> resp = client.http("https://localhost:" + port + "/test/get?email=foo");
 		assertEquals("hello foo", resp.getBody());
 	}
 
 	@Test
 	public void tlsClientWorks() {
 
-		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
+		SpringHttpClient client = new SpringHttpClient(
+				SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
 
-		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+		ResponseEntity<String> resp = client.http("https://localhost:" + port + "/test/get?email=foo");
 		assertEquals("hello foo", resp.getBody());
 	}
 
 	@Test
 	public void httpLeadsToSSLError() {
 
-		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
+		SpringHttpClient client = new SpringHttpClient(
+				SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
 
 		try {
-			SpringUtil.http("http://localhost:" + port + "/test/get?email=foo");
+			client.http("http://localhost:" + port + "/test/get?email=foo");
 			fail("Did not expect to come here since no client cert is used");
 		} catch (HttpClientErrorException e) {
-			System.out.println("e");
 		} catch (RuntimeException e) {
 			fail("Caught wrong kind of exception:", e.getClass().getSimpleName());
 		}

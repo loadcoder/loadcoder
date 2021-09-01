@@ -16,30 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.loadcoder.network.spring;
+package com.loadcoder.loadship;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.loadcoder.load.scenario.ResultModel;
+@SpringBootApplication
+public class Loadship {
 
-public class SpringUtil {
-
-
-	private static RestTemplate CLIENT = new RestTemplate();
-
-
-	public static void setClient(RestTemplate client) {
-		CLIENT = client;
-	}
-
-	public static RestTemplateBuilder clientBuilder() {
-		return new RestTemplateBuilder();
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(Loadship.class, args);
+    }
 }

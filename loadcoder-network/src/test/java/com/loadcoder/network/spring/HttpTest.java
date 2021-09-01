@@ -39,12 +39,11 @@ public class HttpTest {
 	@LocalServerPort
 	private int port;
 
+	SpringHttpClient client = new SpringHttpClient();
+
 	@Test
 	public void willDefaultHttpCallWork() {
-
-		SpringUtil.setClient(new RestTemplate());
-
-		ResponseEntity<String> resp = SpringUtil.http("http://localhost:" + port + "/test/get?email=foo");
+		ResponseEntity<String> resp = client.http("http://localhost:" + port + "/test/get?email=foo");
 		assertEquals("hello foo", resp.getBody());
 	}
 
@@ -83,15 +82,13 @@ public class HttpTest {
 
 			@Override
 			public void loadScenario() {
-				load("foo", () -> SpringUtil.http("http://localhost:" + port + "/test/get?email=foo"))
-						.handleResult(r -> {
-							SpringUtil.check(r, 200);
-						}).perform();
+				load("foo", () -> client.http("http://localhost:" + port + "/test/get?email=foo")).handleResult(r -> {
+					client.check(r, 200);
+				}).perform();
 
-				load("foo2", () -> SpringUtil.http("http://localhost:" + port + "/test/get?email=foo"))
-						.handleResult(r -> {
-							SpringUtil.check(r, 201);
-						}).perform();
+				load("foo2", () -> client.http("http://localhost:" + port + "/test/get?email=foo")).handleResult(r -> {
+					client.check(r, 201);
+				}).perform();
 
 			}
 		};

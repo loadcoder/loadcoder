@@ -143,6 +143,14 @@ public class FileUtil {
 		return result;
 	}
 
+	/**
+	 * Read a file as a resource. Useful when the file is stored within a jar file
+	 * 
+	 * @param resourcePath If the searched file is file.txt and located in the root
+	 *                     of the resource directory, the resourcePath would be
+	 *                     /file.txt
+	 * @return the content of the resource file
+	 */
 	public static String readResourceAsString(String resourcePath) {
 		BufferedReader reader = getResourceAsBufferedReader(resourcePath);
 		String results = bufferedReaderToString(reader);
@@ -188,6 +196,10 @@ public class FileUtil {
 		}
 	}
 
+	public static void main(String[] args) {
+		createDir(new File("/tmp/ccc/ddd"));
+	}
+
 	public static void createDir(File file) {
 		if (file.exists()) {
 			if (file.isDirectory()) {
@@ -196,6 +208,10 @@ public class FileUtil {
 				throw new RuntimeException("Tried to create a dir, but the path is a file:" + file.getAbsolutePath());
 			}
 		} else {
+			File parent = file.getAbsoluteFile().getParentFile();
+			if (!parent.exists()) {
+				createDir(parent);
+			}
 			file.mkdir();
 		}
 	}

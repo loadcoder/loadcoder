@@ -44,30 +44,32 @@ public class MTLSTest {
 	@Test
 	public void readingCrytpgraphyFromFilesWorks() {
 
-		SpringUtil.setClient(
+		SpringHttpClient client = new SpringHttpClient(
 				SpringUtil.clientBuilder().trustStore(new File("src/test/resources/truststore.jks"), "changeit")
 						.keyStore(new File("src/test/resources/clientkeystore.jks"), "changeit").build());
-		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+
+		ResponseEntity<String> resp = client.http("https://localhost:" + port + "/test/get?email=foo");
 		assertEquals("hello foo", resp.getBody());
 	}
 
 	@Test
 	public void mtlsClientWorks() {
 
-		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit")
-				.keyStore("clientkeystore.jks", "changeit").build());
+		SpringHttpClient client = new SpringHttpClient(SpringUtil.clientBuilder()
+				.trustStore("truststore.jks", "changeit").keyStore("clientkeystore.jks", "changeit").build());
 
-		ResponseEntity<String> resp = SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+		ResponseEntity<String> resp = client.http("https://localhost:" + port + "/test/get?email=foo");
 		assertEquals("hello foo", resp.getBody());
 	}
 
 	@Test
 	public void httpLeadsToSSLError() {
 
-		SpringUtil.setClient(SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
+		SpringHttpClient client = new SpringHttpClient(
+				SpringUtil.clientBuilder().trustStore("truststore.jks", "changeit").build());
 
 		try {
-			SpringUtil.http("https://localhost:" + port + "/test/get?email=foo");
+			client.http("https://localhost:" + port + "/test/get?email=foo");
 			fail("Did not expect to come here since no client cert is used");
 		} catch (ResourceAccessException e) {
 			// silent catch OK

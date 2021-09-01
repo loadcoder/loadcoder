@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.loadcoder.load.scenario.ResultModel;
 
-@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SpringUtilTest {
 
 	public class ResultModelExtension <R> extends ResultModel<R>{
@@ -50,7 +50,7 @@ public class SpringUtilTest {
 		
 		ResultModelExtension<ResponseEntity<String>> r = new ResultModelExtension<>("foo");
 		r.setResp(resp);
-		SpringUtil.check(r, 100);
+		SpringHttpClient.check(r, 100);
 	}
 	
 }

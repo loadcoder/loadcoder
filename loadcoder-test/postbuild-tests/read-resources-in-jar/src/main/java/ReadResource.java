@@ -27,8 +27,8 @@ public class ReadResource {
 		checkThatAssertIsEnabled();
 
 		Map<String, String> map3 = FileUtil.readAllResourceFilesInResourceDir("/utilities");
-		assert map3.get("/resourcedir/testfile.txt") != null;
-		assert map3.get("/resourcedir/testdata.txt").contains("1\n2\n3");
+		assert map3.get("/utilities/testfile.txt") != null;
+		assert map3.get("/utilities/testfile.txt").contains("10\n11\n12");
 
 		Map<String, String> map = FileUtil.readAllResourceFilesInResourceDir("/resourcedir");
 		assert map.get("/resourcedir/testdata.txt") != null;
@@ -48,7 +48,6 @@ public class ReadResource {
 		List<String> content4 = FileUtil.readResourceAsLines("/resourcedir2/testdata2.txt");
 		assert content4.size() == 3;
 		assert content4.get(0).equals("4");
-
 	}
 
 	static void checkThatAssertIsEnabled() {

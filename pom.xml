@@ -1,4 +1,3 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -18,10 +17,11 @@
 		<module>loadcoder-core</module>
 		<module>loadcoder-test</module>
 		<module>loadcoder-chart</module>
-		<module>loadcoder-log</module>
+		<module>loadcoder-logback</module>
 		<module>loadcoder-cluster</module>
 		<module>loadcoder-network</module>
 		<module>loadcoder-all</module>
+		<module>loadship</module>
 	</modules>
 
 	<properties>
@@ -43,9 +43,11 @@
 		<springframework.version>5.0.7.RELEASE</springframework.version>
 		<spring-boot.version>2.0.3.RELEASE</spring-boot.version>
 		<httpclient.version>4.5.6</httpclient.version>
+		<mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+		<maven.compiler.release>8</maven.compiler.release>
 	</properties>
 
-	<dependencyManagement>
+<dependencyManagement>
 		<dependencies>
 
 			<dependency>
@@ -197,6 +199,11 @@
 				<version>${hamcrest.version}</version>
 			</dependency>
 
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql-connector-java.version}</version>
+		</dependency>
 
 		</dependencies>
 	</dependencyManagement>
