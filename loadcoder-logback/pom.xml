@@ -12,7 +12,7 @@
 
 	<parent>
 		<groupId>com.loadcoder</groupId>
-		<artifactId>loadcoder-log</artifactId>
+		<artifactId>loadcoder-base</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 

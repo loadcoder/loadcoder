@@ -34,7 +34,9 @@ import static com.loadcoder.statics.LogbackLogging.*;
 
 
 public class LoadTest {
+	
 	public static void main(String[] args){
+		
 		File logDir = getNewLogDir("target", "loadTest");
 		
 		setResultDestination(logDir);

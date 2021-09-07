@@ -1,4 +1,4 @@
-FROM loadship.base:1.0.0
+FROM loadcoder.base:1.0.0
 
 WORKDIR /root/
 

@@ -6,5 +6,5 @@ sudo docker image rm loadship:1.0.0
 
 cp ../target/loadship-1.0.0-SNAPSHOT.jar loadship.jar
 
-sudo docker build -t loadship:1.0.0 .
+sudo docker build -t loadcoder:1.0.0 .
 

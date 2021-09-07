@@ -7,17 +7,8 @@ mvn install:install-file -Dfile=loadcoder-network-1.0.0-SNAPSHOT.jar -DgroupId=c
 mvn install:install-file -Dfile=loadcoder-logback-1.0.0-SNAPSHOT.jar -DgroupId=com.loadcoder -DartifactId=loadcoder-logback -Dversion=1.0.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true
 
 cd ..
-
+mvn clean package
 mvn exec:java -Dexec.mainClass=LoadTest -Dexec.args=""
-
-#java -ea -cp target/read-resource-test-1.0.0-SNAPSHOT.jar:../../../loadcoder-utilities/target/loadcoder-utilities-1.0.0-SNAPSHOT.jar ReadResource
-#ls -la hello
-
-
-#cd ../../../loadship/
-#mvn clean package
-#cd docker
-#./automate.sh
 
 exit $?
 
