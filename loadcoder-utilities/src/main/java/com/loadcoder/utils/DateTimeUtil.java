@@ -146,15 +146,19 @@ public class DateTimeUtil {
 		return fileLocalDateTimes.get(0).f;
 	}
 
-	public static File latestResultFile(String testResultBaseDir) {
+	public static File latestResultFile(String testResultBaseDir, String resultFileName) {
 		File latestExeuctionDir = getLatestResultDir(testResultBaseDir);
 		List<Path> paths = FileUtil.listDirectory(latestExeuctionDir.getAbsolutePath());
 		List<File> files = FileUtil.getPathsAsFileList(paths);
 		for (File logFile : files) {
-			if (logFile.getName().equals("result.log")) {
+			if (logFile.getName().equals(resultFileName)) {
 				return logFile;
 			}
 		}
 		throw new RuntimeException("Could not find result.log in directory" + latestExeuctionDir.getAbsolutePath());
+	}
+	
+	public static File latestResultFile(String testResultBaseDir) {
+		return latestResultFile(testResultBaseDir, "result.log");
 	}
 }

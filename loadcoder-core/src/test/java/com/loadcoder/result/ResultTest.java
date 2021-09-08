@@ -58,7 +58,7 @@ public class ResultTest extends TestNGBase {
 	@Test
 	public void loadLatestResult() {
 
-		Result r = new Result(DateTimeUtil.latestResultFile("src/test/resources/testresults/ResultTest"));
+		Result r = new Result(DateTimeUtil.latestResultFile("src/test/resources/testresults/ResultTest", "result.txt"));
 		Summary s = r.summaryStandard().build();
 		s.prettyPrint();
 		assertEquals(s.allTransactions("Amount").intValue(), 4);
