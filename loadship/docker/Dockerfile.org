@@ -1,0 +1,27 @@
+FROM maven:3.6.3-jdk-11-openj9
+
+WORKDIR /root/
+
+#ADD content_script.sh .
+#ADD mvn_profile.txt .
+#ADD mvn_servers.txt .
+#ADD mvn_local_repository.txt .
+#ADD mvn_activationprofiles.txt .
+ADD script.sh .
+RUN chmod 755 content_script.sh
+RUN chmod 755 script.sh
+#RUN ./content_script.sh /usr/share/maven/conf/settings.xml mvn_local_repository.txt "<\!-- localRepository"
+#RUN ./content_script.sh /usr/share/maven/conf/settings.xml mvn_profile.txt "</profiles>"
+#RUN ./content_script.sh /usr/share/maven/conf/settings.xml mvn_servers.txt "</servers>"
+#RUN ./content_script.sh /usr/share/maven/conf/settings.xml mvn_activationprofiles.txt "<\!-- activeProfiles"
+RUN apt-get update ; 
+RUN apt-get install zip -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+
+ADD loadship.jar .
+ADD NOTICE .
+ADD modechooser.sh .
+RUN chmod 755 modechooser.sh
+
+CMD ["/root/modechooser.sh"]
+

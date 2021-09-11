@@ -65,9 +65,9 @@ public class Utilities {
 			for (TransactionExecutionResult result : resultList) {
 				if (convertToRelativeTime) {
 					dataSet.getPoints()
-							.add(new Point(result.getTs() - earliestTs, result.getValue(), result.isStatus()));
+							.add(new Point(result.getTs() - earliestTs, result.getValue(), result.getStatus()));
 				} else {
-					dataSet.getPoints().add(new Point(result.getTs(), result.getValue(), result.isStatus()));
+					dataSet.getPoints().add(new Point(result.getTs(), result.getValue(), result.getStatus()));
 				}
 			}
 		}

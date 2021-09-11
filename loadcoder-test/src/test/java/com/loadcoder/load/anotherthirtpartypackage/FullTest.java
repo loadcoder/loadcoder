@@ -25,7 +25,7 @@ import static com.loadcoder.statics.Statics.PER_SECOND;
 import static com.loadcoder.statics.Statics.PER_THREAD;
 import static com.loadcoder.statics.Statics.SECOND;
 import static com.loadcoder.statics.Statics.SHARED;
-import static com.loadcoder.statics.Statics.duration;
+import static com.loadcoder.statics.Statics.*;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -41,12 +41,12 @@ import com.loadcoder.load.chart.logic.Chart;
 import com.loadcoder.load.chart.logic.ResultChart;
 import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.result.Summary;
-import com.loadcoder.load.scenario.Execution;
 import com.loadcoder.load.scenario.ExecutionBuilder;
 import com.loadcoder.load.scenario.FinishedExecution;
 import com.loadcoder.load.scenario.Load;
 import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenario;
+import com.loadcoder.load.scenario.RuntimeStatistics;
 import com.loadcoder.load.sut.SUT;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
@@ -56,133 +56,6 @@ import com.loadcoder.result.TransactionExecutionResult;
 public class FullTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(FullTest.class);
-
-	@Test(groups = "manual")
-	public void create(Method method) {
-
-		LoadScenario s = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-
-				load("t1", () -> {
-					return new NullPointerException();
-				}).handleResult((a) -> {
-					// getters
-					a.getException();
-					a.getResponseTime();
-					a.getResponse();
-
-					// setters
-					a.changeTransactionName("newTransactionName");
-					a.setStatus(false);
-					a.setReportTransaction(true);
-					a.setMessage("message for the report");
-				}).perform();
-
-				load("t1", () -> {
-					/* nothing to return */}).handleResult((a) -> {
-						// getters
-						a.getException();
-
-						// setters
-						a.changeTransactionName("newTransactionName");
-						a.setStatus(false);
-						a.setReportTransaction(true);
-						a.setMessage("message for the report");
-					}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(s).throttle(1, PER_SECOND, PER_THREAD).build();
-		new ExecutionBuilder(l).build().execute().andWait();
-
-	}
-
-	@Test(groups = "manual")
-	public void createLoadScenarioPreAndPost(Method method) {
-
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-
-		LoadScenario s = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-
-				load("t1", () -> {
-					return new NullPointerException();
-				}).handleResult((a) -> {
-					// getters
-					a.getException();
-					a.getResponse();
-
-					// setters
-					a.changeTransactionName("newTransactionName");
-					a.setStatus(false);
-					a.setReportTransaction(true);
-					a.setMessage("message for the report");
-				}).perform();
-
-				load("t1", () -> {
-					/* nothing to return */}).handleResult((a) -> {
-						// getters
-						a.getException();
-
-						// setters
-						a.changeTransactionName("newTransactionName");
-						a.setStatus(false);
-						a.setReportTransaction(true);
-						a.setMessage("message for the report");
-					}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(s).throttle(1, PER_SECOND, PER_THREAD).build();
-		new ExecutionBuilder(l).build().execute().andWait();
-	}
-
-	@Test(groups = "manual")
-	public void oneTransaction(Method method) {
-		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					sut.sleepCos();
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
-	}
-
-	@Test(groups = "manual")
-	public void testPeakMethod(Method method) {
-
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-
-		RuntimeChart chart = new RuntimeChart();
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					LoadUtility.sleep(LoadUtility.random(50, 70));
-				}).peak(15, 0.03).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).amountOfThreads(20).rampup(2 * SECOND)
-				.throttle(2, PER_SECOND, SHARED).build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
-
-		chart.waitUntilClosed();
-	}
 
 	@Test(groups = "manual")
 	public void benchmarkOnlyLog(Method method) {
@@ -224,7 +97,7 @@ public class FullTest extends TestNGBase {
 	}
 
 	@Test(groups = "manual")
-	public void highestPossibleLoad2(Method method) {
+	public void testFail(Method method) {
 
 		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
 
@@ -233,15 +106,16 @@ public class FullTest extends TestNGBase {
 			@Override
 			public void loadScenario() {
 				load("fast", () -> {
-					LoadUtility.sleep(5);
+					throw new Exception("checked exception from test");
+				}).handleResult(resultHandler -> {
+					throw new RuntimeException("checked exception resultHandler");
 
 				}).perform();
 			}
 		};
 
 		RuntimeChart chart = new RuntimeChart();
-		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, PER_THREAD).stopDecision(duration(5 * SECOND))
-				.amountOfThreads(10).build();
+		Load l = new LoadBuilder(ls).stopDecision(iterations(2)).amountOfThreads(1).build();
 
 		FinishedExecution finished = new ExecutionBuilder(l).storeResultRuntime().build().execute().andWait();
 
@@ -249,153 +123,6 @@ public class FullTest extends TestNGBase {
 		summary.prettyPrint();
 
 		chart.waitUntilClosed();
-	}
-
-	@Test(groups = "manual")
-	public void twoLoads(Method method) {
-		RuntimeChart chart = new RuntimeChart();
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("t1", () -> {
-					LoadUtility.sleep(LoadUtility.random(10, 20));
-				}).perform();
-			}
-		};
-
-		LoadScenario ls2 = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					LoadUtility.sleep(LoadUtility.random(30, 40));
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).stopDecision(duration(60 * SECOND)).throttle(10, PER_SECOND, SHARED).build();
-
-		Load l2 = new LoadBuilder(ls2).stopDecision(duration(40 * SECOND)).throttle(15, PER_SECOND, SHARED).build();
-
-		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
-		chart.waitUntilClosed();
-
-	}
-
-	@Test(groups = "manual")
-	public void testRuntimeChart2(Method method) {
-		RuntimeChart chart = new RuntimeChart();
-		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					sut.methodThatTakesBetweenTheseResponseTimes(300, 400);
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).throttle(23, PER_MINUTE, SHARED).build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
-
-		chart.waitUntilClosed();
-
-	}
-
-	@Test(groups = "manual")
-	public void testSurrounding(Method method) {
-		RuntimeChart chart = new RuntimeChart();
-		LoadScenario ls = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					LoadUtility.sleep(LoadUtility.random(2, 10));
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).throttle(20, PER_MINUTE, SHARED).stopDecision(duration(300_000)).build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(chart).build().execute()
-				.andWait();
-
-		chart.waitUntilClosed();
-
-	}
-
-	@Test(groups = "manual")
-	public void testLowIntensity(Method method) {
-
-		LoadScenario ls = new LoadScenario() {
-			
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					LoadUtility.sleep(LoadUtility.random(1000, 15_000));
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).stopDecision(duration(900_000)).throttle(20, PER_MINUTE, SHARED).amountOfThreads(2)
-				.build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
-
-	}
-
-	@Test(groups = "manual")
-	public void testRuntimeChart(Method method) {
-		LoadScenario ls = new LoadScenario() {
-			SUT sut = new SUT();
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					sut.sleepCos(130);
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).stopDecision(duration(300_000)).amountOfThreads(2).build();
-
-		new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
-
-	}
-
-	@Test(groups = "manual")
-	public void twoScenariosTest(Method method) {
-
-		LoadScenario ls = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("t1", () -> {
-					LoadUtility.sleep(20);
-				}).perform();
-			}
-		};
-		LoadScenario ls2 = new LoadScenario() {
-
-			@Override
-			public void loadScenario() {
-				load("t2", () -> {
-					LoadUtility.sleep(30);
-				}).perform();
-			}
-		};
-
-		Load l = new LoadBuilder(ls).throttle(2, PER_SECOND, SHARED).rampup(300).stopDecision(duration(20_000)).build();
-		Load l2 = new LoadBuilder(ls2).throttle(3, PER_SECOND, SHARED).rampup(400).stopDecision(duration(20_000)).build();
-
-		new ExecutionBuilder(l, l2).storeAndConsumeResultRuntime(new RuntimeChart()).build().execute().andWait();
-
 	}
 
 	@Test(groups = "manual")
@@ -439,7 +166,7 @@ public class FullTest extends TestNGBase {
 		RuntimeChart runtimeChart = new RuntimeChart();
 		Load l = new LoadBuilder(s).stopDecision(duration(20_000))
 
-				.amountOfThreads(2000).throttle(10, PER_MINUTE, PER_THREAD)
+				.amountOfThreads(2).throttle(10, PER_MINUTE, PER_THREAD)
 
 				.rampup(10 * SECOND).build();
 
@@ -454,113 +181,4 @@ public class FullTest extends TestNGBase {
 		runtimeChart.waitUntilClosed();
 	}
 
-	@Test(groups = "manual")
-	public void peaks(Method method) {
-
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-
-		LoadScenario s = new LoadScenario() {
-
-			int rt = 50;
-			boolean modder = false;
-
-			@Override
-			public void loadScenario() {
-
-				long mod = 0;
-
-				if (LoadUtility.random(0, 100) == 1) {
-					modder = true;
-				}
-				if (LoadUtility.random(0, 40) == 1) {
-					modder = false;
-				}
-
-				if (modder)
-					while (LoadUtility.random(1, 2) == 1)
-						mod = mod + LoadUtility.random(rt, rt * 2);
-
-				long modifier = mod;
-
-				load("t1", () -> {
-					LoadUtility.sleep(LoadUtility.random(rt, rt + 4) + modifier);
-				}).handleResult((a) -> {
-				}).perform();
-			}
-		};
-
-		RuntimeChart runtimeChart = new RuntimeChart();
-		Load l = new LoadBuilder(s).stopDecision(duration(12 * SECOND)).amountOfThreads(10).rampup(5 * SECOND).build();
-
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(runtimeChart).build()
-				.execute().andWait();
-
-		new ExecutionBuilder(l).storeResultRuntime().resultFormatter(null).build();
-
-		Result result = finished.getReportedResultFromResultFile();
-		result.summaryBuilder().build().prettyPrint();
-
-		runtimeChart.waitUntilClosed();
-	}
-
-	@Test(groups = "manual")
-	public void testResultChart(Method method) {
-		setResultDestination(getNewLogDir(rootResultDir, method.getName()));
-		LoadScenario s = new LoadScenario() {
-			@Override
-			public void loadScenario() {
-				SUT sut = new SUT();
-				load("t1", () -> {
-					sut.methodThatTakesBetweenTheseResponseTimes(100, 120);
-					return "";
-				}).handleResult((a) -> {
-				}).perform();
-
-				load("t2", () -> {
-					sut.methodThatTakesBetweenTheseResponseTimes(200, 250);
-					return "";
-				}).handleResult((a) -> {
-				}).perform();
-			}
-		};
-		Load l = new LoadBuilder(s).stopDecision(duration(30_000)).build();
-
-		FinishedExecution finished = new ExecutionBuilder(l).storeAndConsumeResultRuntime(new RuntimeChart()).build()
-				.execute().andWait();
-
-		Result result = finished.getReportedResultFromResultFile();
-
-		new Result(new File("src/test/resources/testresults/2min.log"));
-
-		Chart c = new ResultChart(result);
-		c.waitUntilClosed();
-
-	}
-
-	@Test(groups = "manual")
-	public void readResultForResultChartTest_2min() {
-		Result r = new Result(new File("src/test/resources/testresults/2min.log"));
-		Chart c = new ResultChart(r);
-		c.waitUntilClosed();
-	}
-
-	@Test(groups = "manual")
-	public void readResult8HBeforeGMTForResultChartTest() {
-		Result r = new Result(new File("src/test/resources/testresults/result_8H_before_GMT.log"));
-		Chart c = new ResultChart(r);
-		c.waitUntilClosed();
-	}
-
-	@Test(groups = "manual")
-	public void resultChartAndRuntimeChartWithConstructedData() {
-		Result r = new Result(new File("src/test/resources/testresults/result15min.log"));
-		new ResultChart(r);
-
-		RuntimeChart runtimeChart = new RuntimeChart();
-		runtimeChart.useData(r.getResultLists());
-		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
-		runtimeChart.useData(new HashMap<String, List<TransactionExecutionResult>>());
-
-		runtimeChart.waitUntilClosed();
-	}
 }

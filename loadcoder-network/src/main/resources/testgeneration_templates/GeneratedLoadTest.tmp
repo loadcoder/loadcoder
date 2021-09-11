@@ -11,7 +11,6 @@ import com.loadcoder.load.scenario.LoadBuilder;
 import com.loadcoder.load.scenario.LoadScenarioTyped;
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.result.Result;
-import com.loadcoder.statics.SummaryUtils;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -55,7 +54,7 @@ public class GeneratedLoadTest {
 		.build().execute()
 		.andWait().getReportedResultFromResultFile();
 
-		SummaryUtils.printSimpleSummary(result, "Greetings loadtest");
+		result.summaryStandard().build().prettyPrint();
 
 	}
 
@@ -67,7 +66,7 @@ public class GeneratedLoadTest {
 	@Test
 	public void testGreetingsLogicAlone() {
 		Result result = loadScenario.test();
-		SummaryUtils.printSimpleSummary(result, "LoadScenario Test");
+		result.summaryStandard().build().prettyPrint();
 		assertEquals(result.getAmountOfFails(), 0);
 	}
 }

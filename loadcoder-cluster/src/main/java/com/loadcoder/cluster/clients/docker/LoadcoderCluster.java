@@ -480,12 +480,7 @@ public class LoadcoderCluster {
 		node.getDockerClient().startContainerCmd(resp.getId()).exec();
 	}
 
-	public void uploadTest(File directory) {
-		uploadTest(directory, MAVEN_FILE_AND_DIR_NAME_WHITELIST_DEFAULT);
-	}
-
-	public void uploadTest(File directory, String... fileAndDirNamesWhitelist) {
-		byte[] bytes = zip.zipToBytes(new File("."), fileAndDirNamesWhitelist);
+	public void uploadTest(byte[] bytes) {
 		String md5 = md5Bytes(bytes);
 		FileUtil.writeFile(md5.getBytes(), new File("test-md5sum.txt"));
 		String url = "http://" + masterNode.getHost() + ":" + MasterContainers.LOADSHIP.getPort(config)
@@ -613,7 +608,8 @@ public class LoadcoderCluster {
 
 		String configuredBasicAuth = config.getConfiguration("grafana.basic.auth");
 		String defaultAdminBasicAuth = "YWRtaW46YWRtaW4=";
-		String authenticationValue = "Basic " + (configuredBasicAuth != null ? configuredBasicAuth : defaultAdminBasicAuth);
+		String authenticationValue = "Basic "
+				+ (configuredBasicAuth != null ? configuredBasicAuth : defaultAdminBasicAuth);
 
 		if (this.grafana == null) {
 			this.grafana = new GrafanaClient(getHost(MasterContainers.GRAFANA),

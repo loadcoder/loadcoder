@@ -1,4 +1,3 @@
-	public static BuilderAddable commonHeaders = (builder) -> {
-		builder
+	public static void addCommonHeaders(HttpHeaders headers) {
 ${request_building}
 	};

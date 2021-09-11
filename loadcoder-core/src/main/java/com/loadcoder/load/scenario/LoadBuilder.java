@@ -18,16 +18,16 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STILL_RUNNING;
-
 import com.loadcoder.load.exceptions.InvalidLoadStateException;
 import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.statics.ThrottleMode;
 import com.loadcoder.statics.TimeUnit;
 
+import static com.loadcoder.load.exceptions.ExceptionMessages.PREVIOUS_LOAD_STILL_RUNNING;
+
 public class LoadBuilder {
 	final LoadScenario ls;
-	private StopDecision stopDecision;
+	private StopDecision[] stopDecision;
 	private int amountOfthreads = 1;
 	private long rampupMillis;
 	private Intensity intensity;
@@ -91,7 +91,7 @@ public class LoadBuilder {
 		return intensity;
 	}
 
-	protected StopDecision getStopDecision() {
+	protected StopDecision[] getStopDecision() {
 		return stopDecision;
 	}
 
@@ -105,7 +105,7 @@ public class LoadBuilder {
 	 *                     and run the load
 	 * @return The builder instance
 	 */
-	public LoadBuilder stopDecision(StopDecision stopDecision) {
+	public LoadBuilder stopDecision(StopDecision... stopDecision) {
 		this.stopDecision = stopDecision;
 		return this;
 	}

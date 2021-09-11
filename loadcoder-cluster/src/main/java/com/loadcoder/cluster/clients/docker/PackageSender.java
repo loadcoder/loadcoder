@@ -22,14 +22,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
 
 public class PackageSender {
 
-	static OkHttpClient client = new OkHttpClient();
+	static RestTemplate restTemplate = new RestTemplate();
 
 	public static byte[] readFileAsPackage(File file) {
 
@@ -42,15 +42,11 @@ public class PackageSender {
 	}
 
 	public static void performPOSTRequest(String urlString, byte[] body) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-type", "application/octet-stream; charset=utf-8");
+		HttpEntity<byte[]> fsdf = new HttpEntity<>(body, headers);
+		restTemplate.exchange(urlString, HttpMethod.POST, fsdf, String.class);
 
-		final RequestBody reqBody19 = RequestBody.create(MediaType.get("application/octet-stream; charset=utf-8"),
-				body);
-		final Request request19 = new Request.Builder().url(urlString).method("POST", reqBody19).build();
-		try {
-			client.newCall(request19).execute();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public static File findFile(String directory, String fileNameRegExpMatcher) {

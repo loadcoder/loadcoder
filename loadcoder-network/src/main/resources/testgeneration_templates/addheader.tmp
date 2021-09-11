@@ -1,1 +1,1 @@
-.header("${header_key}", "${header_value}")
+${header_variable}.add("${header_key}", "${header_value}");

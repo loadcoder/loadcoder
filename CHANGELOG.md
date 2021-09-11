@@ -1,6 +1,18 @@
 ## Changelog
 This changelog will give you an overview of the changes in each release. Please view the git log for further details.
 
+
+
+#### 3.0.0
+
+Recording (beta)
+
+Cluster through docker (beta)
+
+#### 2.0.0
+
+Added support for typed scenarios
+
 #### 1.0.1
 
 Added this CHANGELOG.md.

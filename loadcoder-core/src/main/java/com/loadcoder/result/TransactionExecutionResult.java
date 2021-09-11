@@ -79,7 +79,7 @@ public class TransactionExecutionResult {
 	/**
 	 * @return the status of the executed transaction
 	 */
-	public boolean isStatus() {
+	public boolean getStatus() {
 		return status;
 	}
 

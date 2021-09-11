@@ -56,7 +56,7 @@ public class LoadScenarioTest extends TestNGBase {
 		Assert.assertEquals(l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
 		TransactionExecutionResult res = l.getExecution().getTransactionExecutionResultBuffer().getBufferForTesting()
 				.get(0);
-		Assert.assertEquals(res.isStatus(), true);
+		Assert.assertEquals(res.getStatus(), true);
 		Assert.assertNull(res.getMessage());
 		Assert.assertEquals(res.getName(), "t1");
 		Assert.assertTrue((res.getTs() < startOfTest + 5_000) && (res.getTs() > startOfTest - 5_000));
@@ -90,7 +90,7 @@ public class LoadScenarioTest extends TestNGBase {
 				.get(0);
 
 		Assert.assertEquals(res.getName(), "newTransactionName");
-		Assert.assertEquals(res.isStatus(), false);
+		Assert.assertEquals(res.getStatus(), false);
 		Assert.assertEquals(res.getMessage(), "message for the report");
 	}
 
@@ -121,7 +121,7 @@ public class LoadScenarioTest extends TestNGBase {
 				.get(0);
 
 		Assert.assertEquals(res.getMessage(), toBeThrown.getClass().getSimpleName());
-		Assert.assertEquals(res.isStatus(), false);
+		Assert.assertEquals(res.getStatus(), false);
 	}
 
 	@Test
@@ -167,8 +167,8 @@ public class LoadScenarioTest extends TestNGBase {
 				.get(0);
 		TransactionExecutionResult result2 = l.getExecution().getTransactionExecutionResultBuffer()
 				.getBufferForTesting().get(1);
-		assertEquals(result.isStatus(), false);
-		assertEquals(result2.isStatus(), false);
+		assertEquals(result.getStatus(), false);
+		assertEquals(result2.getStatus(), false);
 		assertEquals(exceptions.size(), 2);
 	}
 

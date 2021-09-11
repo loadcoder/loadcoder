@@ -56,7 +56,7 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(result.getName(), "t2");
-		Assert.assertTrue(result.isStatus());
+		Assert.assertTrue(result.getStatus());
 		Assert.assertTrue(result.getValue() >= 100);
 	}
 
@@ -90,6 +90,6 @@ public class ResultHandlerVoidLoadBuilderTest extends TestNGBase {
 		Assert.assertEquals(ls.getTransactionExecutionResultBuffer().getBufferForTesting().size(), 1);
 		TransactionExecutionResult result = ls.getTransactionExecutionResultBuffer().getBufferForTesting().get(0);
 		Assert.assertEquals(result.getName(), "t2");
-		Assert.assertFalse(result.isStatus());
+		Assert.assertFalse(result.getStatus());
 	}
 }

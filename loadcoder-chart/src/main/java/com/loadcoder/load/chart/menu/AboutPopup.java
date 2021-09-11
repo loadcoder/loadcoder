@@ -38,7 +38,8 @@ public class AboutPopup extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	public static void showAboutPopup(JFrame parent) {
-		String message = FileUtil.getResourceAsString("/LOADCODER_NOTICE");
+		String message = FileUtil.readResourceAsString("/LOADCODER_NOTICE");
+
 		new AboutPopup(parent, "About", message);
 	}
 

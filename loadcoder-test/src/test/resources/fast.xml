@@ -1,0 +1,12 @@
+<suite name="Test Tests Suite" verbose="1">
+	<test name="Test Test">
+		<groups>
+			<run>
+				<exclude name="manual"></exclude>
+			</run>
+		</groups>
+		<packages>
+			<package name=".*"></package>
+		</packages>
+	</test>
+</suite>

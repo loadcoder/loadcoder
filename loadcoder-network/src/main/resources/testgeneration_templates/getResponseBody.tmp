@@ -1,1 +1,1 @@
-			String responseBody = getResponseBodyAsString(resultHandler.getResponse());
+//			String responseBody = getResponseBodyAsString(resultHandler.getResponse());
