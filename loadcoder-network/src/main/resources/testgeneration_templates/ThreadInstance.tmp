@@ -3,16 +3,15 @@ package ${package};
 import com.loadcoder.load.scenario.Scenario;
 import com.loadcoder.load.scenario.design.TypeInstanceBase;
 
-import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
+import org.springframework.web.client.RestTemplate;
 
 public class ThreadInstance extends TypeInstanceBase {
 
 	final ScenarioLogic scenarioLogic;
-	final OkHttpClient client;
+	final RestTemplate client;
 	public ThreadInstance(Scenario theActualScenario) {
 		super(theActualScenario);
-		client = new Builder().followRedirects(false).followSslRedirects(false).build();
+		client = new RestTemplate();
 		scenarioLogic = new ScenarioLogic(this);
 	}
 
@@ -20,7 +19,7 @@ public class ThreadInstance extends TypeInstanceBase {
 		return scenarioLogic;
 	}
 	
-	public OkHttpClient getHttpClient() {
+	public RestTemplate getHttpClient() {
 		return client;
 	}
 }

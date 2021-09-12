@@ -1,0 +1,9 @@
+FROM maven:3.6.3-jdk-11-openj9
+
+WORKDIR /root/
+
+RUN apt-get update ; 
+RUN apt-get install zip -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+
+CMD ["date"]

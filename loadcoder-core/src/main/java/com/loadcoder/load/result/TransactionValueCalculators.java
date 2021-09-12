@@ -34,7 +34,7 @@ public class TransactionValueCalculators {
 		return (transactionsList, valueBuilder) -> {
 			int fails = 0;
 			for (TransactionExecutionResult t : transactionsList) {
-				if (!t.isStatus()) {
+				if (!t.getStatus()) {
 					fails++;
 				}
 			}

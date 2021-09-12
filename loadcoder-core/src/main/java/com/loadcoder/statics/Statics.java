@@ -22,7 +22,9 @@ import java.awt.Desktop;
 import java.net.URI;
 import java.util.Map;
 
+import com.loadcoder.load.scenario.RuntimeStatistics;
 import com.loadcoder.load.scenario.StopDecision;
+import com.loadcoder.load.scenario.stopdecision.StopOnErrorLimit;
 import com.loadcoder.result.Result;
 
 public class Statics {
@@ -74,6 +76,19 @@ public class Statics {
 
 	public static void printSimpleSummary(Result result, String resultName) {
 		result.summaryBuilder().build().prettyPrint();
+	}
+
+	public static StopDecision failRate(RuntimeStatistics runtimeStatistics, double maxFailRate) {
+		return new StopOnErrorLimit(runtimeStatistics).maxFailRate(maxFailRate);
+	}
+
+	public static StopDecision fails(RuntimeStatistics runtimeStatistics, int maxAmountOfFails) {
+		return new StopOnErrorLimit(runtimeStatistics).maxAmountOfFails(maxAmountOfFails);
+	}
+
+	public static StopDecision failsOrFailRate(RuntimeStatistics runtimeStatistics, double maxFailRate,
+			int maxAmountOfFails) {
+		return new StopOnErrorLimit(runtimeStatistics).maxAmountOfFails(maxAmountOfFails).maxFailRate(maxFailRate);
 	}
 
 	/*

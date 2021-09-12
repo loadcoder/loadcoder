@@ -18,20 +18,21 @@
  ******************************************************************************/
 package com.loadcoder.load.scenario;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.loadcoder.load.intensity.Intensity;
 import com.loadcoder.load.intensity.LoadThreadsSynchronizer;
 import com.loadcoder.load.intensity.Throttler;
+import com.loadcoder.load.scenario.stopdecision.StopOnErrorLimit;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Load {
 
 	private final LoadScenario ls;
 
 	private StartedLoad startedLoad;
-	private StopDecision stopDecision;
+	private StopDecision[] stopDecision;
 	private int amountOfthreads;
 	private long rampup;
 
@@ -78,6 +79,7 @@ public class Load {
 		return false;
 	};
 
+	StopDecision[] defaultStopDecisions = {defaultStopDecision};
 	protected StartedLoad getStartedLoad() {
 		return startedLoad;
 	}
@@ -106,7 +108,7 @@ public class Load {
 		return rampup;
 	}
 
-	protected StopDecision getStopDecision() {
+	protected StopDecision[] getStopDecision() {
 		return stopDecision;
 	}
 
@@ -157,11 +159,11 @@ public class Load {
 		void transaction() throws Exception;
 	}
 
-	protected Load(LoadScenario ls, StopDecision stopDecision, int amountOfthreads, long rampup, Intensity intensity,
-			Intensity intensityIterations) {
+	protected Load(LoadScenario ls, StopDecision[] stopDecision, int amountOfthreads, long rampup, Intensity intensity,
+				   Intensity intensityIterations) {
 		this.ls = ls;
 		this.ls.setLoad(this);
-		this.stopDecision = stopDecision == null ? defaultStopDecision : stopDecision;
+		this.stopDecision = stopDecision == null ? defaultStopDecisions : stopDecision;
 		this.amountOfthreads = amountOfthreads;
 		this.rampup = rampup;
 

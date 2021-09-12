@@ -63,13 +63,6 @@
 			<artifactId>loadcoder-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!--dependency>
-			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-logback</artifactId>
-			<scope>test</scope>
-		</dependency-->
-
 	</dependencies>
 
 	<build>

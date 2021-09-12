@@ -1,4 +1,3 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -18,10 +17,11 @@
 		<module>loadcoder-core</module>
 		<module>loadcoder-test</module>
 		<module>loadcoder-chart</module>
-		<module>loadcoder-log</module>
+		<module>loadcoder-logback</module>
 		<module>loadcoder-cluster</module>
 		<module>loadcoder-network</module>
 		<module>loadcoder-all</module>
+		<module>loadship</module>
 	</modules>
 
 	<properties>
@@ -29,27 +29,163 @@
 		<sonar.jacoco.reportPath>${basedir}/target/coverage-reports/jacoco-unit.exec</sonar.jacoco.reportPath>
 		<logback.version>1.2.3</logback.version>
 		<slf4j.version>1.7.26</slf4j.version>
-		<testng.version>6.14.3</testng.version>
+		<testng.version>7.4.0</testng.version>
+		<junit.version>4.13.2</junit.version>
 		<mockito.version>1.10.19</mockito.version>
 		<hamcrest.version>1.3</hamcrest.version>
 		<chart-extensions.version>1.0.19.1</chart-extensions.version>
-		<guava.version>28.0-jre</guava.version>
+		<guava.version>30.0-jre</guava.version>
 		<har-reader.version>2.1.7</har-reader.version>
-		<okhttp.version>3.14.2</okhttp.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jackson-databind.version>2.9.9</jackson-databind.version>
-		<docker-java.version>3.1.5</docker-java.version>
-		<json-path.version>2.4.0</json-path.version>
+		<jackson-databind.version>2.11.4</jackson-databind.version>
+		<docker-java.version>3.2.11</docker-java.version>
+		<json-path.version>2.6.0</json-path.version>
 		<activation.version>1.1.1</activation.version>
+		<springframework.version>5.3.9</springframework.version>
+		<spring-boot.version>2.5.4</spring-boot.version>
+		<httpclient.version>4.5.13</httpclient.version>
+		<mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+		<maven.compiler.release>8</maven.compiler.release>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 
 			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${spring-boot.version}</version>
+				<exclusions>
+					<exclusion>
+						<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring-boot.version}</version>
+				<exclusions>
+					<exclusion>
+						<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>org.mockito</groupId>
+						<artifactId>mockito-core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-security</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${springframework.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version> ${httpclient.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>com.github.docker-java</groupId>
 				<artifactId>docker-java</artifactId>
 				<version>${docker-java.version}</version>
+				<exclusions>
+					<exclusion>
+						<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
+
+					</exclusion>
+
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+
+					</exclusion>
+
+
+					<exclusion>
+						<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-transport</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-transport-native-unix-common</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-transport-native-kqueue</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-transport-native-epoll</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-codec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-codec-http</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-handler</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-handler</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-buffer</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-common</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-codec-socks</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty-handler-proxy</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -131,12 +267,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.squareup.okhttp3</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>${okhttp.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>de.sstoehr</groupId>
 				<artifactId>har-reader</artifactId>
 				<version>${har-reader.version}</version>
@@ -178,6 +308,40 @@
 				<version>${hamcrest.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector-java.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>1.69</version>
+			</dependency>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.21</version>
+			</dependency>
+
+			<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.11.0</version>
+			</dependency>
+
+			<!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>4.1.68.Final</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -193,6 +357,21 @@
 
 	<build>
 		<plugins>
+
+
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>6.3.1</version>
+
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -289,6 +468,16 @@
 		</plugins>
 
 	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>6.3.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<licenses>
 		<license>

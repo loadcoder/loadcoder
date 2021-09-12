@@ -220,6 +220,23 @@ public class ScenarioTest extends TestNGBase {
 
 	}
 
+	@Test
+	public void testResultHandler() {
+	
+		LoadScenario s = new LoadScenario() {
+			
+			@Override
+			public void loadScenario() {
+				// TODO Auto-generated method stub
+				load("a", ()->{}).handleResult(resultHandler ->{
+					resultHandler.getStatus();
+					resultHandler.getMessage();
+					
+				}).perform();
+			}
+		};
+	}
+	
 	public void testLogic(Scenario scenario) {
 
 		List<String> verifier = new ArrayList<String>();

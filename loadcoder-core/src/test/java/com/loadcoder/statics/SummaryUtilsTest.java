@@ -61,7 +61,7 @@ public class SummaryUtilsTest {
 		summary.prettyPrint((builder, c) -> builder.convert("Avg", d -> d.asDecimalString(4)).convert("made up value", d -> d.asDecimalString(3)));
 
 		assertEquals(summary.overall("Fails").intValue(), 0);
-		assertEquals(summary.overall("Throughput"), 0.922);
+		assertEquals((double)summary.overall("Throughput"), 0.922);
 		assertEquals(summary.transaction("Min", "foo").intValue(), 0);
 		assertEquals(summary.transaction("Max", "foo").intValue(), 99);
 		assertEquals(summary.transaction("95%", "foo").intValue(), 95);
@@ -94,7 +94,7 @@ public class SummaryUtilsTest {
 		summary.prettyPrint();
 
 		assertEquals(summary.overall("Fails").intValue(), 0);
-		assertEquals(summary.overall("Throughput"), 0.922);
+		assertEquals((double)summary.overall("Throughput"), 0.922);
 
 	}
 

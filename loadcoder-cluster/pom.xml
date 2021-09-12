@@ -18,7 +18,6 @@
 
 	<dependencies>
 
-		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
 		<!-- Needed for loadcoder-cluster from Java 11 -->
 		<dependency>
 			<groupId>javax.activation</groupId>
@@ -26,14 +25,30 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
 		<dependency>
 			<groupId>com.github.docker-java</groupId>
 			<artifactId>docker-java</artifactId>
+
 		</dependency>
 
 		<dependency>
@@ -41,9 +56,10 @@
 			<artifactId>json-path</artifactId>
 		</dependency>
 
+
 		<dependency>
 			<groupId>com.loadcoder</groupId>
-			<artifactId>loadcoder-core</artifactId>
+			<artifactId>loadcoder-network</artifactId>
 		</dependency>
 
 		<dependency>

@@ -38,7 +38,7 @@ public class ResultModelBase {
 		this.message = message;
 	}
 
-	protected String getMessage() {
+	public String getMessage() {
 		return message;
 	}
 
@@ -83,7 +83,7 @@ public class ResultModelBase {
 		this.status = status;
 	}
 
-	protected boolean getStatus() {
+	public boolean getStatus() {
 		return status;
 	}
 
@@ -129,7 +129,7 @@ public class ResultModelBase {
 		this.reportTransaction = reportTransaction;
 	}
 
-	protected boolean reportTransaction() {
+	public boolean reportTransaction() {
 		return reportTransaction;
 	}
 
@@ -143,7 +143,7 @@ public class ResultModelBase {
 		this.transactionName = transactionName;
 	}
 
-	protected void setException(Exception e) {
+	public void setException(Exception e) {
 		this.e = e;
 	}
 }

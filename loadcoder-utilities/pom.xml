@@ -17,9 +17,23 @@
 
 	<properties>
 		<testng>full</testng>
+		<maven.compiler.release>8</maven.compiler.release>
 	</properties>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.hamcrest</groupId>

@@ -233,7 +233,7 @@ public class InfluxDBClient extends HttpClient {
 						nanoIterator = 1000;
 					}
 					String urlParameters = String.format(WRITE_ENTRY_BODY_TEMPLATE + (nanoIterator++), executionId, key,
-							t.isStatus(), t.getValue(), t.getTs());
+							t.getStatus(), t.getValue(), t.getTs());
 
 					builder2.append(urlParameters);
 					builder2.append("\n");
@@ -259,7 +259,7 @@ public class InfluxDBClient extends HttpClient {
 	public static String generateCodeCallStoreAndConsumeResultRuntime(String originalCode, String groupName,
 			String testName) {
 		String result = originalCode;
-		String testContent = FileUtil.getResourceAsString("/cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
+		String testContent = FileUtil.readResourceAsString("/cluster-codeTemplate/storeAndConsumeResultRuntime.tmp");
 		testContent = testContent.replace("${groupName}", groupName);
 		testContent = testContent.replace("${testName}", testName);
 

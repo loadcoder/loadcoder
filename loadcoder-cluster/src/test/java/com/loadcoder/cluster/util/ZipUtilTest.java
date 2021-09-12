@@ -24,69 +24,97 @@ import static org.testng.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.loadcoder.cluster.util.ZipUtil.FileCounter;
+import com.loadcoder.cluster.util.ZipUtil.ZipBuilderFileAdder.ZipDefinition;
 
 public class ZipUtilTest {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Test
-	public void testZipDsirectory() {
-		ZipUtil zip  = new ZipUtil();
+	public void zipDefault() {
+
 		File directory = new File("src/test/resources/countertest");
-		File zipFile = new File("target/testZipDirectory.zip");
-		zip.zip(directory, zipFile);
+
+		ZipDefinition de = ZipUtil.zipBuilder(directory.getAbsolutePath()).build();
+
+		List<File> filesToBeZiped = de.getFilesToBeZiped();
+		assertEquals(3, filesToBeZiped.size());
 	}
-	
+
 	@Test
-	public void testZipDirectoryWhiteList() {
-		ZipUtil zip  = new ZipUtil();
-		File directory = new File(".");
-		File zipFile = new File("target/testZipDirectory.zip");
-		zip.zip(directory, zipFile, "src", "pom.xml");
+	public void emptyWhiteList() {
+
+		File directory = new File("src/test/resources/countertest");
+
+		ZipDefinition de = ZipUtil.zipBuilder(directory.getAbsolutePath()).whitelist().build();
+
+		List<File> filesToBeZiped = de.getFilesToBeZiped();
+		assertEquals(0, filesToBeZiped.size());
 	}
-	
+
 	@Test
-	public void testZipDirectoryWhiteListToByte() {
-		ZipUtil zip  = new ZipUtil();
-		File directory = new File(".");
-		byte[] bytes = zip.zipToBytes(directory, "src", "pom.xml");
-	
-		try {
-			Files.write(new File("target/bytes.zip").toPath(), bytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	public void whiteList() {
+
+		File directory = new File("src/test/resources/countertest");
+
+		ZipDefinition de = ZipUtil.zipBuilder(directory.getAbsolutePath()).whitelist("a").build();
+
+		List<File> filesToBeZiped = de.getFilesToBeZiped();
+		assertEquals(2, filesToBeZiped.size());
 	}
-	
+
+	@Test
+	public void emptyBlackList() {
+
+		File directory = new File("src/test/resources/countertest");
+
+		ZipDefinition de = ZipUtil.zipBuilder(directory.getAbsolutePath()).blacklist().build();
+
+		List<File> filesToBeZiped = de.getFilesToBeZiped();
+		assertEquals(3, filesToBeZiped.size());
+	}
+
+	@Test
+	public void blackList() {
+
+		File directory = new File("src/test/resources/countertest");
+
+		ZipDefinition de = ZipUtil.zipBuilder(directory.getAbsolutePath()).blacklist("a").build();
+
+		List<File> filesToBeZiped = de.getFilesToBeZiped();
+		assertEquals(1, filesToBeZiped.size());
+	}
+
 	@Test
 	public void testCountFilesInDirectory() {
 		FileCounter counter = new FileCounter();
 		File f = new File("src/test/resources/countertest");
-		try{
+		try {
 			int files = counter.getNumberOfFilesInDir(f);
 			assertEquals(files, 6);
-		}catch(TooManyFilesFoundException tmffe) {
+		} catch (TooManyFilesFoundException tmffe) {
 			fail("Unexpected TooManyFilesFoundException was caught", tmffe);
 		}
 	}
-	
+
 	@Test
 	public void testCountTooManyFilesInDirectory() {
 		FileCounter counter = new FileCounter();
 		File f = new File("src/test/resources/countertest");
-		try{
+		try {
 			int oneLessThanActualNumberOfFiles = 4;
 			counter.getNumberOfFilesInDir(f, oneLessThanActualNumberOfFiles);
 			fail("TooManyFilesFoundException wasn't thrown");
-		}catch(TooManyFilesFoundException tmffe) {
+		} catch (TooManyFilesFoundException tmffe) {
 
 		}
 	}
-	
+
 }
