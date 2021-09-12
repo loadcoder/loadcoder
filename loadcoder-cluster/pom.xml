@@ -40,7 +40,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>	</groupId>
+			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 		</dependency>
 
