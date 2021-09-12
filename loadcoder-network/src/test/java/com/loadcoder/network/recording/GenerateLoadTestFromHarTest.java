@@ -33,59 +33,9 @@ import de.sstoehr.harreader.model.HttpMethod;
 
 public class GenerateLoadTestFromHarTest {
 
-	@Test
-	public void printAllUrlsTest() {
-		LoadTestGenerator.printAllURLs("src/test/resources/loadcoder.har");
-	}
+	
 
-	@Test
-	public void testMakeTransactionFriendlyString() {
-		TransactionNameGenerator gen = new TransactionNameGenerator();
-
-		assertEquals(gen.makeTransactionFriendlyString("a%b"), "ab");
-		assertEquals(gen.makeTransactionFriendlyString("a% b.c@d}e"), "abcde");
-		assertEquals(gen.makeTransactionFriendlyString("a b+c"), "abc");
-	}
-
-	HarEntry getTestHarEntry(String url) {
-
-		String[] queries = url.split("[?]");
-		List<HarQueryParam> params = new ArrayList<>();
-		if (queries.length > 1) {
-			queries = queries[1].split("&");
-			for (String query : queries) {
-				HarQueryParam param = new HarQueryParam();
-				String[] p = query.split("=");
-				param.setName(p[0]);
-				param.setValue(p[1]);
-				params.add(param);
-			}
-
-		}
-		HarEntry entry = new HarEntry();
-		entry.setRequest(new HarRequest());
-		entry.getRequest().setMethod(HttpMethod.GET);
-		entry.getRequest().setUrl(url);
-		entry.getRequest().setQueryString(params);
-		return entry;
-	}
-
-	@Test
-	public void testGenerateTransactionName() {
-
-		TransactionNameGenerator generator = new TransactionNameGenerator();
-		HarEntry entry = getTestHarEntry("https://a.com/b_1/c_2?foo=bar");
-		assertEquals(generator.generateTransactionName(entry, 1, 20), "GET_c2_foo");
-		assertEquals(generator.generateTransactionName(entry, 1, 20), "GET_c2_foo");
-
-		entry = getTestHarEntry("https://b.com/b_1/c_2?foo=bar");
-		assertEquals(generator.generateTransactionName(entry, 1, 20), "GET_c2_foo_1");
-
-		entry = getTestHarEntry("https://b.com/b_1/c_2?hello=bar");
-		assertEquals(generator.generateTransactionName(entry, 1, 20), "GET_c2_hello");
-
-	}
-
+	
 	@Test
 	public void defaultBlackListTest() {
 		Matcher m = LoadTestGenerator.getDefaultMatcher(null);

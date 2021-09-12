@@ -19,8 +19,6 @@
 package com.loadcoder.loadship;
 
 
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

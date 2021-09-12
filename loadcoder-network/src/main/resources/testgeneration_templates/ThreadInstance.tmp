@@ -11,7 +11,6 @@ public class ThreadInstance extends TypeInstanceBase {
 	final RestTemplate client;
 	public ThreadInstance(Scenario theActualScenario) {
 		super(theActualScenario);
-		//client = new Builder().followRedirects(false).followSslRedirects(false).build();
 		client = new RestTemplate();
 		scenarioLogic = new ScenarioLogic(this);
 	}

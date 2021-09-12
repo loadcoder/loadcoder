@@ -2,7 +2,7 @@ LOADCODER USES THE FOLLOWING DEPENDENCIES BELOW. THANKS TO ALL THE PROJECTS FOR 
 
 ------------------------------------------------------------------------
 
-docker-java 3.1.5
+docker-java
 https://github.com/docker-java/docker-java
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ limitations under the License.
 
 ------------------------------------------------------------------------
 
-json-path 2.4.0
+json-path
 https://github.com/json-path/JsonPath
 
 Copyright 2011 the original author or authors.
@@ -36,7 +36,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ------------------------------------------------------------------------
-har-reader 2.1.7
+har-reader
 https://github.com/sdstoehr/har-reader
 
 The MIT License (MIT)
@@ -51,7 +51,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ------------------------------------------------------------------------
 
-spring-framework 5.3.4
+spring-framework
 https://github.com/spring-projects/spring-framework
 
 Copyright 2012-2019 the original author or authors.
@@ -70,7 +70,7 @@ limitations under the License.
 
 ------------------------------------------------------------------------
 
-spring-boot 2.2.1.RELEASE
+spring-boot
 https://github.com/spring-projects/spring-boot
 
 Copyright 2012-2019 the original author or authors.
@@ -89,7 +89,7 @@ limitations under the License.
 
 ------------------------------------------------------------------------
 
-jackson-databind 2.9.9
+jackson-databind
 https://github.com/FasterXML/jackson-databind
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,7 +107,7 @@ limitations under the License.
 
 ------------------------------------------------------------------------
 
-JFreeChart, version 1.0.19
+JFreeChart, version
 http://www.jfree.org/jfreechart/index.html
 
 This library is free software; you can redistribute it and/or modify it
@@ -127,7 +127,7 @@ USA.
 
 ------------------------------------------------------------------------
 
-Guava, version 29.0-jre
+Guava, version
 
 Copyright (C) 2007 The Guava Authors
 
@@ -145,8 +145,17 @@ limitations under the License.
 
 ------------------------------------------------------------------------
 
-javax.activation 1.1.1
+javax.activation
 https://github.com/javaee/activation
-
 License: https://oss.oracle.com/licenses/CDDL+GPL-1.1
+
 ------------------------------------------------------------------------
+Netty
+https://github.com/netty/netty
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+------------------------------------------------------------------------
+
+Hamcrest
+https://github.com/hamcrest/JavaHamcrest
+License https://github.com/hamcrest/JavaHamcrest/blob/master/LICENSE.txt

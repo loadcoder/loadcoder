@@ -11,7 +11,7 @@ sudo docker rm loadship loadcoder-0
 
 cd ../../../loadship/docker
 
-sudo ./automate.sh
+sudo ./buildBaseAndLoadcoderImage.sh
 
 cd -
 mvn clean install
