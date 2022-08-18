@@ -44,11 +44,20 @@
 			<artifactId>netty-all</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
+		<dependency>
+			<groupId>org.glassfish.jersey.connectors</groupId>
+			<artifactId>jersey-apache-connector</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.github.docker-java</groupId>
 			<artifactId>docker-java</artifactId>
-
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish.jersey.connectors</groupId>
+					<artifactId>jersey-apache-connector</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
