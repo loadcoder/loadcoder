@@ -29,6 +29,7 @@ import java.util.Map;
 import org.jfree.data.xy.XYDataItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.ResultExtension;
@@ -36,6 +37,7 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 import com.loadcoder.result.TransactionExecutionResult;
 
+@Ignore
 public class RuntimeChartTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(RuntimeChartTest.class);

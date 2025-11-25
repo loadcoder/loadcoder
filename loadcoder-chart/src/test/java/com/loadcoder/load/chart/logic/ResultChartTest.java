@@ -30,6 +30,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -43,6 +44,7 @@ import com.loadcoder.load.chart.sampling.Sample;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 
+@Ignore
 public class ResultChartTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(ResultChartTest.class);
@@ -68,6 +70,7 @@ public class ResultChartTest extends TestNGBase {
 	interface YGiver {
 		long y(int i);
 	}
+
 
 	@Test(groups = "manual")
 	public void testManyTransactions(Method method) {

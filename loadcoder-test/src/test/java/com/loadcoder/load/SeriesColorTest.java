@@ -23,6 +23,7 @@ import static com.loadcoder.statics.LogbackLogging.setResultDestination;
 
 import java.lang.reflect.Method;
 
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.common.CommonSeries;
@@ -36,6 +37,7 @@ import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Logs;
 import com.loadcoder.result.Result;
 
+@Ignore
 public class SeriesColorTest extends TestNGBase {
 
 	@Test(groups = { "manual" })

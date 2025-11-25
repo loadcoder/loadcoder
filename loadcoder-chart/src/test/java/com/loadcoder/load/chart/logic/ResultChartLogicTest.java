@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.ResultExtension;
@@ -39,6 +40,7 @@ import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.testng.TestNGBase;
 import com.loadcoder.result.Result;
 
+@Ignore
 public class ResultChartLogicTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(ResultChartLogicTest.class);

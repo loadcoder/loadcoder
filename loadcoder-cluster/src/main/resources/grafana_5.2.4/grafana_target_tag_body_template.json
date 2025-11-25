@@ -1,5 +1,0 @@
-            {
-              "key": "execution",
-              "operator": "=",
-              "value": "${executionid}"
-            }

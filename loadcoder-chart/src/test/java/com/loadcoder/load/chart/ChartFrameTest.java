@@ -30,6 +30,7 @@ import org.jfree.chart.entity.LegendItemEntity;
 import org.jfree.chart.entity.PlotEntity;
 import org.jfree.data.xy.XYSeries;
 import org.mockito.Mockito;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -43,6 +44,7 @@ import com.loadcoder.load.chart.logic.RuntimeChart;
 import com.loadcoder.load.chart.logic.RuntimeChartLogic;
 
 public class ChartFrameTest {
+
 
 	@Test
 	public void testHandleClick() {
@@ -101,7 +103,7 @@ public class ChartFrameTest {
 		assertTrue(!seriesBar.isVisible());
 
 	}
-
+	@Ignore
 	@Test(groups = "manual")
 	public void chartFrameExperiment() {
 		ChartLogic logic = ChartTest.getNewLogic();

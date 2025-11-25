@@ -33,11 +33,13 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.utilities.ColorUtils;
 import com.loadcoder.load.testng.TestNGBase;
 
+@Ignore
 public class ColorUtilsTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());

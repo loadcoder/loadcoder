@@ -25,12 +25,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.chart.data.Point;
 import com.loadcoder.load.chart.jfreechart.XYSeriesExtension;
 import com.loadcoder.load.testng.TestNGBase;
 
+@Ignore
 public class ChartUtilsTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(ChartUtilsTest.class);

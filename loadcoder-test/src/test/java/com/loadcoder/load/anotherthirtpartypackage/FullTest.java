@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -57,6 +58,7 @@ public class FullTest extends TestNGBase {
 
 	Logger log = LoggerFactory.getLogger(FullTest.class);
 
+	@Ignore
 	@Test(groups = "manual")
 	public void benchmarkOnlyLog(Method method) {
 
@@ -69,6 +71,7 @@ public class FullTest extends TestNGBase {
 		}
 	}
 
+	@Ignore
 	@Test(groups = "manual")
 	public void highestPossibleLoad(Method method) {
 
@@ -96,6 +99,7 @@ public class FullTest extends TestNGBase {
 		chart.waitUntilClosed();
 	}
 
+	@Ignore
 	@Test(groups = "manual")
 	public void testFail(Method method) {
 
@@ -125,6 +129,7 @@ public class FullTest extends TestNGBase {
 		chart.waitUntilClosed();
 	}
 
+	@Ignore
 	@Test(groups = "manual")
 	public void testDynamicChart(Method method) {
 

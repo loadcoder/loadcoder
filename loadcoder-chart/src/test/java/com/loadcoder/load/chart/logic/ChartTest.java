@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataItem;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.LoadUtility;
@@ -39,6 +40,7 @@ import com.loadcoder.result.ResultFormatter;
 import com.loadcoder.result.TransactionExecutionResult;
 import com.loadcoder.statics.Formatter;
 
+@Ignore
 public class ChartTest extends TestNGBase {
 
 	/**

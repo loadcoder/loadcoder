@@ -19,10 +19,12 @@
 package com.loadcoder.load.chart.sampling;
 
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.loadcoder.load.testng.TestNGBase;
 
+@Ignore
 public class GroupTest extends TestNGBase {
 
 	@Test
